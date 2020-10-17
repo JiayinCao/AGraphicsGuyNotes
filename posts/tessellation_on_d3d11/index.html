@@ -157,7 +157,7 @@
             </span>
             <span class="reading-time">
               <i class="fa fa-clock-o" aria-hidden="true"></i>
-              10-minute read
+              11-minute read
             </span>
           </div>
           
@@ -182,17 +182,67 @@
 <p>Tessellator is a fixed function stage. It can&rsquo;t be programmed in a direct way and neither can it be setup through API interfaces, it is affected by tessellation factors, the output of hull shader (or TCS in OpenGL). It generate those tessellated triangles under the hood and feed them with the constant data to the next stage, domain shader. One thing to be noted is that the vertices generated in tessellator are located in barycentric coordinate. It is programmer&rsquo;s job to decide what to do with those coordinates.</p>
 <p>Domain shader is the place for calculating the positions of generated vertices. Whether it is phong tessellation, PN or flat tessellation is decided here. And it is also responsible for generating vertices in clip space, like VS does without tessellation enabled. Of course it can just pass the vertices to the next stage if GS is enabled.</p>
 <p>Here is a comparison between tessellation, POM and normal map, those captures come from the detail tessellation demo from D3D SDK. The left one is normal map, the quality quickly breaks down when viewed at a wide angle. POM solves the problem by a ray marching method, however it still shows artifacts at the silhouette of objects. SPOM can solve the problem, however it is far beyond the topic of this blog. Tessellation gives the perfect result, the rocks look really bumpy here.</p>
-<p><figure><a href="/img/posts/tessellation_on_d3d11/normalmap.jpg">
-    <img src="/img/posts/tessellation_on_d3d11/normalmap.jpg" width="300" height="300"/> </a>
-</figure>
 
-<figure><a href="/img/posts/tessellation_on_d3d11/pom.jpg">
-    <img src="/img/posts/tessellation_on_d3d11/pom.jpg" width="300" height="300"/> </a>
-</figure>
-<figure><a href="/img/posts/tessellation_on_d3d11/tessellation.jpg">
-    <img src="/img/posts/tessellation_on_d3d11/tessellation.jpg" width="300" height="300"/> </a>
-</figure>
-</p>
+
+<style>
+    .row {
+        display: -ms-flexbox;  
+        display: flex;
+        -ms-flex-wrap: wrap;  
+        flex-wrap: wrap;
+        padding: 0 4px;
+    }
+    
+     
+    .column {
+        -ms-flex: 33%;  
+        flex: 33%;
+        padding: 0 4px;
+    }
+</style>
+<div class="row">
+
+  
+  
+  
+  <div class="column">
+        <a href="/img/posts/tessellation_on_d3d11/normalmap.jpg">
+        <img
+            src="/img/posts/tessellation_on_d3d11/normalmap.jpg"
+            style="width:100%"
+            alt="">
+        </a>
+  </div>
+  
+
+  
+  
+  
+  <div class="column">
+        <a href="/img/posts/tessellation_on_d3d11/pom.jpg">
+        <img
+            src="/img/posts/tessellation_on_d3d11/pom.jpg"
+            style="width:100%"
+            alt="">
+        </a>
+  </div>
+  
+
+  
+  
+  
+  <div class="column">
+        <a href="/img/posts/tessellation_on_d3d11/tessellation.jpg">
+        <img
+            src="/img/posts/tessellation_on_d3d11/tessellation.jpg"
+            style="width:100%"
+            alt="">
+        </a>
+  </div>
+  
+
+</div>
+
 <h1 id="more-detail">More Detail:</h1>
 <p>Before diving into the details, let&rsquo;s see how to enable tessellation through the API. There is no specific functions to enable tessellation. To enable it, you need to create a valid hull shader and domain shader. By binding those shaders in the context, tessellation will be enabled. Of course it is necessary to tune your shader code in VS. Without tessellation, vertex shader normally outputs a position value marked by &ldquo;SV_POSITION&rdquo;. The value should be in clip space for further hardware processing. With tessellation, VS only passes the data to hull shader most of the time.</p>
 <p>Besides, the primitive topology needs to be changed accordingly. If you use a low level of detail modal as control point set, it should be &ldquo;D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST&rdquo;. Another typical scene is to use &ldquo;D3D11_PRIMITIVE_TOPOLOGY_POINTLIST&rdquo; for landscape rendering, each point will be tessellated to a quad after tessellator. Anyway, as long as the information fits your algorithm, any type of primitive topology is fine.</p>
