@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+
+    <meta name="author" content="Jiayin Cao">
+    <meta name="description" content="One of the most important changes that DX11 has made is the brand new feature called tessellation. By introducing three more stages, graphics programmer can tessellate their triangles on the fly. There are some benefits they will get through it:
+ Models with more geometry detail. With phong tessellation, it smoothes the silhouette so that no sharp edge corner will be visible. Combined with displacement map, tessellation can produce bump surfaces in a much more realistic way than normal map or POM.">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Tessellation on DX11"/>
+<meta name="twitter:description" content="One of the most important changes that DX11 has made is the brand new feature called tessellation. By introducing three more stages, graphics programmer can tessellate their triangles on the fly. There are some benefits they will get through it:
+ Models with more geometry detail. With phong tessellation, it smoothes the silhouette so that no sharp edge corner will be visible. Combined with displacement map, tessellation can produce bump surfaces in a much more realistic way than normal map or POM."/>
+
+    <meta property="og:title" content="Tessellation on DX11" />
+<meta property="og:description" content="One of the most important changes that DX11 has made is the brand new feature called tessellation. By introducing three more stages, graphics programmer can tessellate their triangles on the fly. There are some benefits they will get through it:
+ Models with more geometry detail. With phong tessellation, it smoothes the silhouette so that no sharp edge corner will be visible. Combined with displacement map, tessellation can produce bump surfaces in a much more realistic way than normal map or POM." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://agraphicsguynotes.com/posts/tessellation_on_d3d11/" />
+<meta property="article:published_time" content="2015-06-16T13:23:06-07:00" />
+<meta property="article:modified_time" content="2015-06-16T13:23:06-07:00" />
+
+
+    <title>
+  Tessellation on DX11 · A Graphics Guy&#39;s Note
+</title>
+
+    
+      <link rel="canonical" href="https://agraphicsguynotes.com/posts/tessellation_on_d3d11/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.1.7/css/fork-awesome.min.css" integrity="sha256-gsmEoJAws/Kd3CjuOQzLie5Q3yshhvmo7YNtBG7aaEY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.9836c03fe5c87d102278a33e86d0591ef36c89b1e17e8e547ebf84c05cee010e.css" integrity="sha256-mDbAP&#43;XIfRAieKM&#43;htBZHvNsibHhfo5Ufr&#43;EwFzuAQ4=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="/css/coder-dark.min.717236c74e0a5208ef73964a9f44c6b443b689a95b270d8b2a40d0c012460dac.css" integrity="sha256-cXI2x04KUgjvc5ZKn0TGtEO2ialbJw2LKkDQwBJGDaw=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+      <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+    
+
+    <meta name="generator" content="Hugo 0.76.5" />
+  </head>
+
+  
+  
+    
+  
+  <body class="colorscheme-auto"
+        onload=" twemoji.parse(document.body); "
+  >
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      A Graphics Guy&#39;s Note
+    </a>
+    
+      
+        <span id="dark-mode-toggle" class="float-right">
+          <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+        </span>
+      
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/contact/">Contact me</a>
+            </li>
+          
+        
+        
+          
+          
+          
+            
+          
+            
+              
+                <li class="navigation-item menu-separator">
+                  <span>|</span>
+                </li>
+                
+              
+              <li class="navigation-item">
+                <a href="https://agraphicsguynotes.com/cn/">中文</a>
+              </li>
+            
+          
+        
+        
+          <li class="navigation-item separator">
+            <span>|</span>
+          </li>
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Tessellation on DX11</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2015-06-16T13:23:06-07:00'>
+                June 16, 2015
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              10-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div>
+        
+        <p>One of the most important changes that DX11 has made is the brand new feature called tessellation. By introducing three more stages, graphics programmer can tessellate their triangles on the fly. There are some benefits they will get through it:</p>
+<ul>
+<li>Models with more geometry detail. With phong tessellation, it smoothes the silhouette so that no sharp edge corner will be visible.  Combined with displacement map, tessellation can produce bump surfaces in a much more realistic way than normal map or POM.</li>
+<li>Less calculation on full detailed model. It saves a lot of time by placing intense computation, like bone matrix multiplication, in vertex shader which only processes control points of the model.</li>
+<li>Dynamic LOD. Since tessellation factors, which determines how to tessellate the object, are calculated on the fly during rendering, level of detail can be decided according to factors like distance, angle, etc.</li>
+</ul>
+<p>In this article, I&rsquo;d like to mention some detail that I knew about tessellation. Hopefully it is helpful, :smile: .</p>
+<h1 id="introduction">Introduction:</h1>
+<p>What is tessellation? That should be a question to be addressed first before everything.</p>
+<p>Tessellation is a new feature that enables graphics programmer to tessellate their triangles on the fly so that the geometry detail will be enriched. There are three stages right after vertex shader, hull shader, tessellator and domain shader with each stage performing separate functionality.</p>
+<p>There are two different functions in Hull Shader, one is the hull shader itself and the other is the constant function which runs on a per-patch basis. In OpenGL 4, it is called tessellation control shader and there is no extra per-patch constant function. Anyway, they are still pretty similar to each other. And they both take in control points and generate some tessellation factors and per-patch constant data.</p>
+<p>Tessellator is a fixed function stage. It can&rsquo;t be programmed in a direct way and neither can it be setup through API interfaces, it is affected by tessellation factors, the output of hull shader (or TCS in OpenGL). It generate those tessellated triangles under the hood and feed them with the constant data to the next stage, domain shader. One thing to be noted is that the vertices generated in tessellator are located in barycentric coordinate. It is programmer&rsquo;s job to decide what to do with those coordinates.</p>
+<p>Domain shader is the place for calculating the positions of generated vertices. Whether it is phong tessellation, PN or flat tessellation is decided here. And it is also responsible for generating vertices in clip space, like VS does without tessellation enabled. Of course it can just pass the vertices to the next stage if GS is enabled.</p>
+<p>Here is a comparison between tessellation, POM and normal map, those captures come from the detail tessellation demo from D3D SDK. The left one is normal map, the quality quickly breaks down when viewed at a wide angle. POM solves the problem by a ray marching method, however it still shows artifacts at the silhouette of objects. SPOM can solve the problem, however it is far beyond the topic of this blog. Tessellation gives the perfect result, the rocks look really bumpy here.</p>
+<p><figure><a href="/img/posts/tessellation_on_d3d11/normalmap.jpg">
+    <img src="/img/posts/tessellation_on_d3d11/normalmap.jpg" width="300" height="300"/> </a>
+</figure>
+
+<figure><a href="/img/posts/tessellation_on_d3d11/pom.jpg">
+    <img src="/img/posts/tessellation_on_d3d11/pom.jpg" width="300" height="300"/> </a>
+</figure>
+<figure><a href="/img/posts/tessellation_on_d3d11/tessellation.jpg">
+    <img src="/img/posts/tessellation_on_d3d11/tessellation.jpg" width="300" height="300"/> </a>
+</figure>
+</p>
+<h1 id="more-detail">More Detail:</h1>
+<p>Before diving into the details, let&rsquo;s see how to enable tessellation through the API. There is no specific functions to enable tessellation. To enable it, you need to create a valid hull shader and domain shader. By binding those shaders in the context, tessellation will be enabled. Of course it is necessary to tune your shader code in VS. Without tessellation, vertex shader normally outputs a position value marked by &ldquo;SV_POSITION&rdquo;. The value should be in clip space for further hardware processing. With tessellation, VS only passes the data to hull shader most of the time.</p>
+<p>Besides, the primitive topology needs to be changed accordingly. If you use a low level of detail modal as control point set, it should be &ldquo;D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST&rdquo;. Another typical scene is to use &ldquo;D3D11_PRIMITIVE_TOPOLOGY_POINTLIST&rdquo; for landscape rendering, each point will be tessellated to a quad after tessellator. Anyway, as long as the information fits your algorithm, any type of primitive topology is fine.</p>
+<h2 id="hull-shader">Hull Shader:</h2>
+<p>Let&rsquo;s talk about hull shader then. A hull shader is the first of the three new stages to implement tessellation. There are two functions, constant function and hull shader.</p>
+<p>A constant function runs on a per-batch basis, it outputs some constant data for tessellator and domain shader. &ldquo;SV_TessFactor&rdquo; and &ldquo;SV_InsideTessFactor&rdquo; are needed by tessellator. And each different topology may need different number of these factors. For example, there should be one inner tess-factor and three outer tess-factors in the constant data. A constant function is also free to generate more data, tessellator will ignore them, however they could be consumed by domain shader. Here is a simple constant function that tessellates all of the triangles:</p>
+<div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp"><span style="color:#fff;font-weight:bold">struct</span> HS_CONSTANT_DATA_OUTPUT
+{
+    <span style="color:#fff;font-weight:bold">float</span> Edges[<span style="color:#ff0;font-weight:bold">3</span>] : SV_TessFactor;
+    <span style="color:#fff;font-weight:bold">float</span> Inside : SV_InsideTessFactor;
+};
+HS_CONSTANT_DATA_OUTPUT ConstantsHS( <span style="color:#fff;font-weight:bold">const</span> OutputPatch , HS_CONTROL_POINT_OUTPUT I , uint PatchID : SV_PrimitiveID )
+{
+    HS_CONSTANT_DATA_OUTPUT output  = (HS_CONSTANT_DATA_OUTPUT)<span style="color:#ff0;font-weight:bold">0</span>;
+	<span style="color:#fff;font-weight:bold">float</span> density = <span style="color:#ff0;font-weight:bold">64.0f</span>;
+	output.Edges[<span style="color:#ff0;font-weight:bold">0</span>] = density;
+	output.Edges[<span style="color:#ff0;font-weight:bold">1</span>] = density;
+	output.Edges[<span style="color:#ff0;font-weight:bold">2</span>] = density;
+	output.Inside = density;
+    <span style="color:#fff;font-weight:bold">return</span> output;
+}
+</code></pre></div><p>In a real scenario, you may want to adjust your tessellation factor based on certain information. Dynamic LOD could be done here through calculating the tessellation factors based on distance between eye point and patch. Apart from all, one can also set up 0 as a factor, it is a valid number for tessellation factor. And tessellator will automatically drop the patch with a zero tessellation factor. Since SV_POSITION is not determined yet, it is impossible for the hardware to do clipping. However it is totally valid to do some culling during hull shader. If you are certain that the patch won&rsquo;t be visible at all, you can set 0 as its tessellation factor to prevent it from further processing. Just be very careful when you try hull culling, because you may reject patches that could be visible after displacement.</p>
+<p>A Hull shader is the per-control point function. Most of the time, it just passes the data through. Here is some piece of code of a hull shader:</p>
+<div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp">[domain(<span style="color:#0ff;font-weight:bold">&#34;tri&#34;</span>)]
+[partitioning(<span style="color:#0ff;font-weight:bold">&#34;pow2&#34;</span>)]
+[outputtopology(<span style="color:#0ff;font-weight:bold">&#34;triangle_cw&#34;</span>)]
+[outputcontrolpoints(<span style="color:#ff0;font-weight:bold">3</span>)]
+[patchconstantfunc(<span style="color:#0ff;font-weight:bold">&#34;ConstantsHS&#34;</span>)]
+[maxtessfactor(<span style="color:#ff0;font-weight:bold">64.0</span>)]
+HS_CONTROL_POINT_OUTPUT HS( uint uCPID : SV_OutputControlPointID , InputPatch&amp;amp;lt;VS_OUTPUT, <span style="color:#ff0;font-weight:bold">3</span>&amp;amp;gt; inputPatch )
+{
+    HS_CONTROL_POINT_OUTPUT output = (HS_CONTROL_POINT_OUTPUT)<span style="color:#ff0;font-weight:bold">0</span>;
+
+    <span style="color:#007f7f">// Copy inputs to outputs
+</span><span style="color:#007f7f"></span>    output.Pos = inputPatch[uCPID].Pos;
+    output.Tex = inputPatch[uCPID].Tex;
+    output.Light = inputPatch[uCPID].Light;
+    output.View = inputPatch[uCPID].View;
+    output.Nor = inputPatch[uCPID].Nor;
+
+    <span style="color:#fff;font-weight:bold">return</span> output;
+}
+</code></pre></div><p>Different from the constant function or other c functions, there are some parameters setup before the functions. Most of them are self-explanatory. Refer to here if you are confused with any of them. In Unreal Engine 4, more information will be generated in hull shader instead of just passing through the native ones. Some of information will be used to fix some crack issues introduced in tessellation. Other information will be used to generate curved surface from control points.</p>
+<h2 id="tessellator">Tessellator:</h2>
+<p>There is not much to say about tessellator since it is non-programmable. However understanding the exact way of tessellating primitives will help even if you are not in control of every thing.</p>
+<p>A triangle is taken as an example here. Other primitives like quad behave in a similar way. There are five steps:</p>
+<ul>
+<li>The three edges are tessellated first.</li>
+<li>The triangle is divided into concentric triangles according to the inner tessellation factor.</li>
+<li>The connection between the largest inner triangle and the original one is dropped.</li>
+<li>The outer edges are then subdivided according to the three outer tessellation factor.</li>
+<li>The outer ring is filled with triangles by connecting the points from step 2 with the points from step 4.</li>
+</ul>
+<figure><a href="/img/posts/tessellation_on_d3d11/tess_step.png">
+    <img src="/img/posts/tessellation_on_d3d11/tess_step.png" width="500"/> </a>
+</figure>
+
+<p>The graph is taken from &ldquo;An Introduction to Tessellation Shaders&rdquo; in OpenGL Insights. For this very case, the outer tessellation factors are 3,3,2, and the inner one is 5.</p>
+<p>Another detail deserves our attention is how to divide a specific edge given a tess-factor.</p>
+<figure><a href="/img/posts/tessellation_on_d3d11/divide.png">
+    <img src="/img/posts/tessellation_on_d3d11/divide.png" width="500"/> </a>
+</figure>
+
+<p>The above graph reveals some detail here. I am not gonna dig into it because it is not mentioned in DX SDK doc and may be different on different platforms. However one important thing to be noticed here is that we have a sudden change as tess factor goes from 2.0 to 2.5 in the first column. &ldquo;Equal&rdquo;, &ldquo;Even&rdquo; and &ldquo;Odd&rdquo; are actually the partitioning parameter setup in hull shader. With &ldquo;equal&rdquo; as partitioning method, you may have a sudden change even if you tess factor changes smoothly, that means you may have a similar sudden change in the shape of the geometry. In order to avoid it, choose the other two if possible.</p>
+<h2 id="domain-shader">Domain Shader:</h2>
+<p>Domain shader is like another vertex shader. However they are not exactly the same. Here are some differences:</p>
+<ul>
+<li>Domain Shader is right behind tessellator.</li>
+<li>There will be per-patch constant data available, while only vertex data is available in VS unless you pass it through constant data.</li>
+<li>The vertices taking in are located in barycentric coordinate. You have to interpolate all attributes in a way you desire.</li>
+</ul>
+<p>The other should be similiar. If GS is disabled, both of VS and DS needs to output clip space position. If you want to implement your tessellation with displacement map, here is the place to go. You can read a texture here and adjust the height of the vertex according to some value, which is usually displacement in displacement map.</p>
+<p>The way position attributes are interpolated matters here. It defines what kind of tessellation you are using, whether it is flat tessellation, phone tessellation and pn tessellation. Cry Engine 3 provides all three methods by default. Unreal Engine 4 has flat tessellation and pn tessellation. Of course if you want a phone tessellation in UE4, it is quite easy to implement one.</p>
+<h3 id="flat-tessellation">Flat tessellation:</h3>
+<p>As it implies by its name, flat tessellation just interpolate position values linearly, which will be totally flat. It doesn&rsquo;t make much sense to use the method alone. Usually it is combined with displacement map to create a bumpy surface.</p>
+<h3 id="pn-tessellation">PN tessellation:</h3>
+<p>PN tessellation treats the control points as bezier control points of a curved surface. Different from flat tessellation, PN tessellation will change the shape of the silhouette even if there is no displacement map attached. Its goal is to smooth the silhouette of objects to avoid edge corners. For a further detailed explanation, please check it here. And since UE4 is open-sourced, you can also get its implementation from github.</p>
+<figure><a href="/img/posts/tessellation_on_d3d11/pn.png">
+    <img src="/img/posts/tessellation_on_d3d11/pn.png" width="300"/> </a>
+</figure>
+
+<p>As we can see from the above image, the silhouette will be smoother with PN tessellation.</p>
+<h3 id="phong-tessellation">Phong tessellation:</h3>
+<p>Targeting the same goal with PN triangle, phong tessellation requires less computation to generate similar effects. Here are the steps for phong tessellation:</p>
+<ul>
+<li>Generate tangent plane for each vertex in the triangle.</li>
+<li>Interpolate the position values linearly.</li>
+<li>Project the interpolated vertex position to three tangent planes, you will have three new projected vertices.</li>
+<li>Interpolate the three vertices again to get the final position.</li>
+</ul>
+<h1 id="issues">Issues:</h1>
+<p>Tessellation also has some issues if not done well. A well known one is the crack issue. A crack is born if vertices that share the same world position have different attribute which have some influence on the final position. The general rule to fix these issues is to unify all attributes that matter.</p>
+<p>Here are some common issues:</p>
+<ul>
+<li>Cracks in PN/Phong tessellation hard edges. By hard edge, it means that an edge is shared by two connected triangle, each has a different geometric normal. Both of PN and Phong tessellation will depend on geometric normal to smooth the surface. Differences between normals will cause displacement along different directions, a crack is born here.</li>
+<li>Cracks can also be caused by texture coordinate difference. Under the circumstance that displacement map is used, texture coordinate is a deciding factor for displacement. If two vertices sharing the same world position have different texture coordinate, there will be cracks.</li>
+</ul>
+<p>Generally, those cracks could be eliminated by well defined 3d model. However that puts too much burden on artists. A more practical way of doing this is to fix it through some dedicated algorithm.</p>
+<p>There are several algorithms available. Here are some by NVIDIA. Some of them tried to unify the attributes during pre-processing, like Dominate Data Algorithm. Others aims at generating unified attributes on the run, such as AEN(Average Edge Normal).</p>
+<h1 id="conclusion">Conclusion:</h1>
+<p>Tessellation is a brand new feature available on DX11. It offers developers a whole new way to deliver geometry detail to gamers.  It is already widely used in PC games, like Metro 2033. Both of Unreal Engine and Cry Engine have internal integration of tessellation. And it is already well supported on the majority of the market products.  Try it in your game.</p>
+<h1 id="references">References:</h1>
+<p>[1] OpenGL Insight. <a href="http://openglinsights.com/">http://openglinsights.com/</a><br>
+[2] PN triangle tessellation. <a href="http://ogldev.atspace.co.uk/www/tutorial31/tutorial31.html">http://ogldev.atspace.co.uk/www/tutorial31/tutorial31.html</a><br>
+[3] Microsoft DirectX SDK. <a href="https://www.microsoft.com/en-us/download/details.aspx?id=6812">https://www.microsoft.com/en-us/download/details.aspx?id=6812</a></p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "yourdiscussshortname" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+        2020
+         Jiayin Cao 
+      
+      
+         · 
+        Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+      
+      
+        
+      
+    </section>
+  </footer>
+
+    </main>
+
+    
+      
+      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>

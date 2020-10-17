@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>一个图形学爱好者的笔记</title>
+    <link>https://agraphicsguynotes.com/cn/</link>
+    <description>Recent content on 一个图形学爱好者的笔记</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language><atom:link href="https://agraphicsguynotes.com/cn/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>关于我</title>
+      <link>https://agraphicsguynotes.com/cn/about/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://agraphicsguynotes.com/cn/about/</guid>
+      <description>我叫曹家音，现任顽皮狗图形工程师，拥有十年行业工作经验。曾经任职于育碧，NVIDIA，AMD以及微软等公司。
+这个网站是我用来记录一些关于图形学的知识的博客。由于我不是很确认是否可以公开发布我在公司的工作，所以这里大部分的博客都是我在业余时间自己学习的内容。博客中的内容仅代表个人观点，与我的雇主（顽皮狗）没有任何关联。</description>
+    </item>
+    
+  </channel>
+</rss>

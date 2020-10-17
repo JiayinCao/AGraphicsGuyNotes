@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>A Graphics Guy&#39;s Note</title>
-    <link>https://agraphicsguynotes.com/</link>
-    <description>Recent content on A Graphics Guy&#39;s Note</description>
+    <title>Posts on A Graphics Guy&#39;s Note</title>
+    <link>https://agraphicsguynotes.com/posts/</link>
+    <description>Recent content in Posts on A Graphics Guy&#39;s Note</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 16 Jun 2015 13:23:06 -0700</lastBuildDate><atom:link href="https://agraphicsguynotes.com/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 16 Jun 2015 13:23:06 -0700</lastBuildDate><atom:link href="https://agraphicsguynotes.com/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Tessellation on DX11</title>
       <link>https://agraphicsguynotes.com/posts/tessellation_on_d3d11/</link>
@@ -15,16 +15,6 @@
       <guid>https://agraphicsguynotes.com/posts/tessellation_on_d3d11/</guid>
       <description>One of the most important changes that DX11 has made is the brand new feature called tessellation. By introducing three more stages, graphics programmer can tessellate their triangles on the fly. There are some benefits they will get through it:
  Models with more geometry detail. With phong tessellation, it smoothes the silhouette so that no sharp edge corner will be visible. Combined with displacement map, tessellation can produce bump surfaces in a much more realistic way than normal map or POM.</description>
-    </item>
-    
-    <item>
-      <title>About Myself</title>
-      <link>https://agraphicsguynotes.com/about/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://agraphicsguynotes.com/about/</guid>
-      <description>My name is Jiayin Cao. With more than 10 years working experiences in game industry, I’m currently working at Naughty Dog as a graphics programmer. Prior to joining Naughty Dog, I worked at Ubisoft, NVIDIA, AMD, and Microsoft before.
-This is the place for me to take some notes that I regard as useful. Since I’m not sure about whether I can post about my work, most of these blogs here are the stuff that I learned in my own time.</description>
     </item>
     
   </channel>
