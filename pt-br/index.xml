@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>João Ninguém</title>
-    <link>http://www.example.com/pt-br/</link>
-    <description>Recent content on João Ninguém</description>
+    <title>一个图形学爱好者的笔记</title>
+    <link>https://jiayincao.github.io/AGraphicsGuy/pt-br/</link>
+    <description>Recent content on 一个图形学爱好者的笔记</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en</language><atom:link href="http://www.example.com/pt-br/index.xml" rel="self" type="application/rss+xml" />
+    <language>en</language><atom:link href="https://jiayincao.github.io/AGraphicsGuy/pt-br/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>
