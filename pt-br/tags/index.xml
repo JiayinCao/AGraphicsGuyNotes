@@ -2,9 +2,9 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on 一个图形学爱好者的笔记</title>
-    <link>https://jiayincao.github.io/AGraphicsGuyNotes/pt-br/tags/</link>
+    <link>https://agraphicsguynotes.com/pt-br/tags/</link>
     <description>Recent content in Tags on 一个图形学爱好者的笔记</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en</language><atom:link href="https://jiayincao.github.io/AGraphicsGuyNotes/pt-br/tags/index.xml" rel="self" type="application/rss+xml" />
+    <language>en</language><atom:link href="https://agraphicsguynotes.com/pt-br/tags/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>
