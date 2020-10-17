@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>http://www.example.com/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="pt-br"
+                href="http://www.example.com/pt-br/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="http://www.example.com/"
+                />
+  </url>
+  
+  <url>
+    <loc>http://www.example.com/authors/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="pt-br"
+                href="http://www.example.com/pt-br/authors/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="http://www.example.com/authors/"
+                />
+  </url>
+  
+  <url>
+    <loc>http://www.example.com/categories/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="pt-br"
+                href="http://www.example.com/pt-br/categories/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="http://www.example.com/categories/"
+                />
+  </url>
+  
+  <url>
+    <loc>http://www.example.com/series/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="pt-br"
+                href="http://www.example.com/pt-br/series/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="http://www.example.com/series/"
+                />
+  </url>
+  
+  <url>
+    <loc>http://www.example.com/tags/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="pt-br"
+                href="http://www.example.com/pt-br/tags/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="http://www.example.com/tags/"
+                />
+  </url>
+  
+</urlset>
