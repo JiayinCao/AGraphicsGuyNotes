@@ -13,8 +13,8 @@
       <pubDate>Tue, 16 Jun 2015 13:23:06 -0700</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/tessellation_on_d3d11/</guid>
-      <description>One of the most important changes that DX11 has made is the brand new feature called tessellation. By introducing three more stages, graphics programmer can tessellate their triangles on the fly. There are some benefits they will get through it:
- Models with more geometry detail. With phong tessellation, it smoothes the silhouette so that no sharp edge corner will be visible. Combined with displacement map, tessellation can produce bump surfaces in a much more realistic way than normal map or POM.</description>
+      <description>One of the most important changes that DX11 has made is the brand new feature called tessellation. By introducing three more stages, graphics programmer can tessellate their triangles on the fly. There are some benefits:
+ Models with more geometry detail. With phong tessellation, it smoothes the silhouette so that no sharp edge corner will be visible. Combined with displacement map, tessellation can produce bump surfaces in a much more realistic way than what can be achieved with normal map or POM.</description>
     </item>
     
     <item>
