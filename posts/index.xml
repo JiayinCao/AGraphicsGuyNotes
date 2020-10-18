@@ -54,6 +54,15 @@
     </item>
     
     <item>
+      <title>Instant Radiosity in my Renderer</title>
+      <link>https://agraphicsguynotes.com/posts/instant_radiosity_in_my_renderer/</link>
+      <pubDate>Mon, 08 Feb 2016 00:00:00 -0800</pubDate>
+      
+      <guid>https://agraphicsguynotes.com/posts/instant_radiosity_in_my_renderer/</guid>
+      <description>I read about this instant radiosity algorithm in the book physically based rendering 3rd these days. It is mentioned as instant global illumination though, they are actually the same thing. I thought it should be a good algorithm until I have implemented in renderer, I&amp;rsquo;m afraid that it is not quite an efficient one. Although it is also unbiased like path tracing and bidirectional path tracing, the convergence speed is just terribly low comparing with the others.</description>
+    </item>
+    
+    <item>
       <title>Sampling Microfacet BRDF</title>
       <link>https://agraphicsguynotes.com/posts/sample_microfacet_brdf/</link>
       <pubDate>Sun, 01 Nov 2015 00:00:00 -0700</pubDate>

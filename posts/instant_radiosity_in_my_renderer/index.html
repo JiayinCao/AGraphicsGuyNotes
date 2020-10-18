@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+
+    <meta name="author" content="Jiayin Cao">
+    <meta name="description" content="I read about this instant radiosity algorithm in the book physically based rendering 3rd these days. It is mentioned as instant global illumination though, they are actually the same thing. I thought it should be a good algorithm until I have implemented in renderer, I&rsquo;m afraid that it is not quite an efficient one. Although it is also unbiased like path tracing and bidirectional path tracing, the convergence speed is just terribly low comparing with the others.">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Instant Radiosity in my Renderer"/>
+<meta name="twitter:description" content="I read about this instant radiosity algorithm in the book physically based rendering 3rd these days. It is mentioned as instant global illumination though, they are actually the same thing. I thought it should be a good algorithm until I have implemented in renderer, I&rsquo;m afraid that it is not quite an efficient one. Although it is also unbiased like path tracing and bidirectional path tracing, the convergence speed is just terribly low comparing with the others."/>
+
+    <meta property="og:title" content="Instant Radiosity in my Renderer" />
+<meta property="og:description" content="I read about this instant radiosity algorithm in the book physically based rendering 3rd these days. It is mentioned as instant global illumination though, they are actually the same thing. I thought it should be a good algorithm until I have implemented in renderer, I&rsquo;m afraid that it is not quite an efficient one. Although it is also unbiased like path tracing and bidirectional path tracing, the convergence speed is just terribly low comparing with the others." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://agraphicsguynotes.com/posts/instant_radiosity_in_my_renderer/" />
+<meta property="article:published_time" content="2016-02-08T00:00:00-08:00" />
+<meta property="article:modified_time" content="2016-02-08T00:00:00-08:00" />
+
+
+    <title>
+  Instant Radiosity in my Renderer · A Graphics Guy&#39;s Note
+</title>
+
+    
+      <link rel="canonical" href="https://agraphicsguynotes.com/posts/instant_radiosity_in_my_renderer/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.1.7/css/fork-awesome.min.css" integrity="sha256-gsmEoJAws/Kd3CjuOQzLie5Q3yshhvmo7YNtBG7aaEY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.9836c03fe5c87d102278a33e86d0591ef36c89b1e17e8e547ebf84c05cee010e.css" integrity="sha256-mDbAP&#43;XIfRAieKM&#43;htBZHvNsibHhfo5Ufr&#43;EwFzuAQ4=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="/css/coder-dark.min.717236c74e0a5208ef73964a9f44c6b443b689a95b270d8b2a40d0c012460dac.css" integrity="sha256-cXI2x04KUgjvc5ZKn0TGtEO2ialbJw2LKkDQwBJGDaw=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+      <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+    
+
+    <meta name="generator" content="Hugo 0.76.5" />
+  </head>
+
+  
+  
+    
+  
+  <body class="colorscheme-auto"
+        onload=" twemoji.parse(document.body); "
+  >
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      A Graphics Guy&#39;s Note
+    </a>
+    
+      
+        <span id="dark-mode-toggle" class="float-right">
+          <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+        </span>
+      
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+        
+        
+          
+          
+          
+            
+          
+            
+              
+                <li class="navigation-item menu-separator">
+                  <span>|</span>
+                </li>
+                
+              
+              <li class="navigation-item">
+                <a href="https://agraphicsguynotes.com/cn/">中文</a>
+              </li>
+            
+          
+        
+        
+          <li class="navigation-item separator">
+            <span>|</span>
+          </li>
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Instant Radiosity in my Renderer</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2016-02-08T00:00:00-08:00'>
+                February 8, 2016
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              9-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div>
+        
+        <p>I read about this instant radiosity algorithm in the book physically based rendering 3rd these days. It is mentioned as instant global illumination though, they are actually the same thing. I thought it should be a good algorithm until I have implemented in renderer, I&rsquo;m afraid that it is not quite an efficient one. Although it is also unbiased like path tracing and bidirectional path tracing, the convergence speed is just terribly low comparing with the others. It can barely show pure specular materials objects, it definitely needs special handling on delta bsdf. Since it is already implemented, I&rsquo;ll put some notes on it.</p>
+<h1 id="basic-idea">Basic Idea</h1>
+<p>Instant Radiosity is pretty close to light tracing. Both of the algorithms trace rays from light sources instead of camera. The only difference between the two algorithm is where they connect vertices. In a light tracing algorithm, vertices along the light path are connected to camera directly. However in an instant radiosity algorithm, primary rays are still generated. Light path vertices are connected to the primary ray intersections then. The two algorithms are subset of bidirectional path tracing. Light tracing counts the path with only one vertex (eye vertex) in the eye path and instant radiosity only takes two-vertices length eye path into account.</p>
+<p>The other big difference is that the light path is not for per-sample any more. With vertices in a number of light paths pre-calculated, all of the pixel samples use the same set of vertices instead of generating them during their radiance evaluation. I think that is where it differs most from other algorithms. In some senses, it can be explained this way, many virtual point light sources are distributed in the scene before evaluating each pixel value. After these virtual lights are well distributed, further evaluation of radiance can only consider &lsquo;direct illumination&rsquo; w.r.t to both of real light sources and virtual light sources.</p>
+<p>An interesting fact of this algorithm is that it converges to the correct result in a quite different way comparing with other algorithms, like path tracing. In a path tracer, if you have less number of samples, you usually get noisy results. While the results with less number of light paths in instant radiosity look more likely to be smoothly illuminated with a couple of light sources, just matches the above explanation. See the following images generated with roughly same amount of time by instant radiosity and path tracing, the left one calculated by instant radiosity gets quite smoother shading, while the right one is pretty noisy. I can&rsquo;t say smoother is better, we definitely have some noticeable artifacts on the left result. First, the virtual shadows easily catch our attention even if there is only one real point light in the cornell box. Second, it is totally black on this right mirror like box. Third, we have some hotspot around the corner inside this cornell box.</p>
+
+
+<style>
+    .row {
+        display: -ms-flexbox;  
+        display: flex;
+        -ms-flex-wrap: wrap;  
+        flex-wrap: wrap;
+        padding: 0 4px;
+    }
+    
+     
+    .column {
+        -ms-flex: 33%;  
+        flex: 33%;
+        padding: 0 4px;
+    }
+</style>
+<div class="row">
+
+  
+  
+  
+  <div class="column">
+        <a href="/img/posts/instant_radiosity_in_my_renderer/ir.png">
+        <img
+            src="/img/posts/instant_radiosity_in_my_renderer/ir.png"
+            style="width:100%"
+            alt="">
+        </a>
+  </div>
+  
+
+  
+  
+  
+  <div class="column">
+        <a href="/img/posts/instant_radiosity_in_my_renderer/pt.png">
+        <img
+            src="/img/posts/instant_radiosity_in_my_renderer/pt.png"
+            style="width:100%"
+            alt="">
+        </a>
+  </div>
+  
+
+</div>
+
+<p>Of course, that is not to say it is a biased algorithm, it is just because we have only limited number of light paths generated in preprocess stage. With more light paths generated, those artifacts should be gone eventually. However, only the first issue can be hidden in a reasonable speed. The second issue usually needs explicit handling, like the way we handle it in a whitted ray tracer. We&rsquo;ll talk about how to handle the last one later.</p>
+<h1 id="math-behind-it">Math Behind It</h1>
+<p>The math behind it is much less complex than MIS bidirectional path tracer mentioned on my previous post. And since it is necessary to trace primary rays too, we don&rsquo;t need to consider primary ray pdf because it is cancelled with importance function. It leaves us really simple mathematics behind the algorithm. We just need to evaluate the following equation correctly:</p>
+<p>$ L(p,w_i) = {\int&hellip;\int} \prod_{i=1}^{k-1}(f_r(x_{i+1} \rightarrow x_i \rightarrow x_{i-1} )G(x_i\longleftrightarrow x_{i+1})) L_e(x_k\rightarrow x_{k-1}) d(x_2) d(x_3) &hellip; d(x_k) $</p>
+<p>This is not the whole rendering equation, it just stands for radiance value contributed by k+1 vertices length path, including both camera vertex and light vertex. For an unbiased renderer, it needs to evaluate the above equation for every possible k value, where k usually starts from 2 in the case of direct visible light. For a Monte Carlo estimator, it uses the following equation to approach the integral:</p>
+<p>$ L(p,w_i) = \dfrac{1}{N}\Sigma_{i=1}^N(\dfrac{\prod_{i=1}^{k-1}(f_r(x_{i+1}\rightarrow x_i\rightarrow x_{i-1})G(x_i\longleftrightarrow x_{i+1}))L_e(x_k\rightarrow x_{k-1})}{\prod_{i=2}^{k} p_a(x_i)}) $</p>
+<p>Since there are two stages in this algorithm, we can only evaluate part of the equation in the first stage, it is the part that doesn&rsquo;t involve the x1 and x0, they should be two bsdf evaluation and a gterm.</p>
+<p>$ \begin{array} {lcl} L(p,w_i) &amp;=&amp; \dfrac{1}{N}\Sigma_{i=1}^N(\underbrace{f_r(x_2\rightarrow x_1 \rightarrow x_0)G(x_1\longleftrightarrow x_2)f_r(x_3\rightarrow x_2 \rightarrow x_1)}_{sample, radiance, evaluation, in, stage2} \\\ &amp; &amp; \prod_{i=3}^{k-1}(\underbrace{\dfrac{f_r(x_{i+1}\rightarrow x_i\rightarrow x_{i-1})G(x_i\longleftrightarrow x_{i-1})}{p_a(x_{i-1})}}_{stored,in,vertex, during, light, path, tracing, in, stage1})\dfrac{G(x_k\longleftrightarrow x_{k-1})L_e(x_k\rightarrow x_{k-1})}{p_a(x_{k-1})p_a(x_k)}) \end{array} $</p>
+<p>Although it may look more complex by a first look, however it is actually more clear for implementing the algorithm. As we can see from the above equation, the first two brdf and g-term are to be evaluated in radiance sampling in the second stage. While the rest of the equation should be done in the pre-process stage 1, which distributes virtual point lights around the whole scene. And it can be done in an incremental way, just like we trace rays in a path tracer. To be simpler, the above equation can be further simplified since we don&rsquo;t actually pick samples w.r.t area, we sample new vertex by bsdf pdf w.r.t to the solid angle.</p>
+<p>$ \begin{array} {lcl} L(p,w_i) &amp;=&amp; \dfrac{1}{N}\Sigma_{i=1}^N(\underbrace{f_r(x_2\rightarrow x_1 \rightarrow x_0)G(x_1\longleftrightarrow x_2)f_r(x_3\rightarrow x_2 \rightarrow x_1)}_{sample, radiance, evaluation, in, stage2} \\\ &amp; &amp; \prod_{i=3}^{k-1}(\underbrace{\dfrac{f_r(x_{i+1}\rightarrow x_i\rightarrow x_{i-1})cos\theta_{i\rightarrow i-1}}{p_w(x_i\rightarrow x_{i-1})}}_{stored,in,vertex, during, light, path, tracing, in, stage1})\dfrac{cos\theta_{k\rightarrow k-1}L_e(x_k\rightarrow x_{k-1})}{p_w(x_k \rightarrow x_{k-1})p_a(x_k)}) \end{array} $</p>
+<p>This is pretty clear for implementing the algorithm. After the first stage is done, we only need to trace one ray segment for evaluate each virtual point light&rsquo;s contribution, no matter how long the path actually is.</p>
+<h1 id="handling-the-artifacts">Handling the Artifacts</h1>
+<p>As we can see from the above comparison, we can&rsquo;t get anything from the mirror like box because it is almost delta function. In a practical ray tracer, it definitely needs special treatment for delta bsdf. Sadly, there is no delta bsdf support in my renderer, the mirror like material is actually a microfacet bsdf with 0 as roughness value. I&rsquo;m not sure if there is a practical way to handle materials like this.</p>
+<p>The other artifact that we can handle is those hot spots at the corner of the Cornell box. Those high lighted area is caused by connecting quite near vertices, resulting in a very large g-term value. According to the book, advanced global illumination, we can add a very small bias in the denominator of gterm to avoid those large values so that we can remove the hot spots by introducing bias into the method, which is unnoticeable. I can&rsquo;t say that I agree with the idea, it is totally visible to me. Pbrt book introduces a great way of removing those ugly hot spot, it works pretty well to me. However I made a tiny change in the original method. My method is to clamp the inverse of the squared distance in the gterm when connecting vertices. Clamping it will definitely introduce a bias which is not something that I&rsquo;d like to see, in order to get our unbiased feature back, we&rsquo;ll add more code to handle it.</p>
+<p>$ \begin{array} {lcl} G(x_1,x_2) &amp;=&amp; \dfrac{cos\theta_{1\rightarrow 2} cos\theta_{2\rightarrow 1}}{|x_1 - x_2|} \\\ &amp;=&amp; cos\theta_{1\rightarrow 2} cos\theta_{2\rightarrow 1} ( min( \dfrac{1}{|x_1-x_2|} , g_{clamp} ) + max( \dfrac{1}{|x_1-x_2|} - g_{clamp} , 0 ) ) \\\ &amp;=&amp; \underbrace{cos\theta_{1\rightarrow 2} cos\theta_{2\rightarrow 1} min( \dfrac{1}{|x_1-x_2|} , g_{clamp} )}_{evaluate, the, same, way} \\\ &amp; &amp; + \underbrace{cos\theta_{1\rightarrow 2} cos\theta_{2\rightarrow 1} max( \dfrac{1}{|x_1-x_2|} - g_{clamp} , 0 )}_{evaluate, recursively} \end{array} $</p>
+<p>$ G_0(x_1,x_2)=cos\theta_{1\rightarrow 2} cos\theta_{2\rightarrow 1} min(\dfrac{1}{|x_1-x_2|},g_{clamp}) $</p>
+<p>$ G_1(x_1,x_2)=cos\theta_{1\rightarrow 2} cos\theta_{2\rightarrow 1} max(\dfrac{1}{|x_1-x_2|}-g_{clamp},0) $</p>
+<p>$ G(x_1,x_2)=G_0(x_1,x_2)+G_1(x_1,x_2) $</p>
+<p>Now we&rsquo;ve split the equation into two different parts and it equals to the original equation. We can them divide the extended rendering equation into two respectively.</p>
+<p>$ L(p,w_i) = L_0(p,w_i) + L_1(p,w_i) $</p>
+<p>$ L_0(p,w_i) = {\int&hellip;\int} G_0(x_1,x_2) f_r(x_2 \rightarrow x_1 \rightarrow x_0) \prod_{i=2}^{k-1}(f_r(x_{i+1} \rightarrow x_i \rightarrow x_{i-1} )G(x_i\longleftrightarrow x_{i+1})) L_e(x_k\rightarrow x_{k-1}) d(x_2) d(x_3) … d(x_k) $</p>
+<p>$ L_1(p,w_i) = {\int&hellip;\int} G_1(x_1,x_2) f_r(x_2 \rightarrow x_1 \rightarrow x_0) \prod_{i=2}^{k-1}(f_r(x_{i+1} \rightarrow x_i \rightarrow x_{i-1} )G(x_i\longleftrightarrow x_{i+1})) L_e(x_k\rightarrow x_{k-1}) d(x_2) d(x_3) &hellip; d(x_k) $</p>
+<p>The first part clamps the value to a maximum limit in order to avoid high radiance value by connecting two near vertices. Really simple, there is nothing to say about it.</p>
+<p>The second part is where the trick is. It would make no difference if we evaluate the equation the same way, because there is no upper limit on the inverse squared distance term. Instead of connecting the primary ray intersection with light path vertices, we sample a new ray based on the bsdf pdf, exactly like the way we do in a path tracer and then evaluate the radiance value recursively so that we can skip the super near vertex connection. Here is the math proof why it eliminates the near connection, only relative parts are shown:</p>
+<p>$ max( \dfrac{1}{|x_1-x_2|} - g_{clamp} , 0 ) dA(x_2) = max( 1 - \dfrac{g_{clamp} | x_2 - x_1 |}{cos\theta_{1 \rightarrow 2}}) dW(x_2) $</p>
+<p>The squared distance switches from denominator to the numerator, that&rsquo;s why we won&rsquo;t be affected by short distance vertices connection. A detail here is that during the recursive radiance evaluation, we treat the secondary ray as fake primary ray and the virtual light source which is very near to it won&rsquo;t connect to it again because virtual light sources don&rsquo;t affect directly illumination in the algorithm. A interesting fact here is that if g_clamp is 0, it switches from instant radiosity to path tracing.</p>
+<h1 id="limitation-of-thealgorithm">Limitation of the Algorithm</h1>
+<p>To tell the truth, I can&rsquo;t justify many reasons to use the algorithm comparing with others, it converges quite slowly for mirror like materials and shows high light at corners. Even with the above trick, it is still hard to get similar result with other methods with only limited number of light paths, by limited number of light paths, I am talking about thousands. I tried 1024 light paths generated in the preprocess, it still can&rsquo;t eliminate those artifacts. See the below images, left result is from instant radiosity, right one uses MIS bidirectional path tracing. The first one uses almost double time than the bdpt result. And that already gives me enough reason to switch to other more robuse algorithms like path tracing, bidirectional path tracing.</p>
+
+
+<style>
+    .row {
+        display: -ms-flexbox;  
+        display: flex;
+        -ms-flex-wrap: wrap;  
+        flex-wrap: wrap;
+        padding: 0 4px;
+    }
+    
+     
+    .column {
+        -ms-flex: 33%;  
+        flex: 33%;
+        padding: 0 4px;
+    }
+</style>
+<div class="row">
+
+  
+  
+  
+  <div class="column">
+        <a href="/img/posts/instant_radiosity_in_my_renderer/ir_1024.png">
+        <img
+            src="/img/posts/instant_radiosity_in_my_renderer/ir_1024.png"
+            style="width:100%"
+            alt="">
+        </a>
+  </div>
+  
+
+  
+  
+  
+  <div class="column">
+        <a href="/img/posts/instant_radiosity_in_my_renderer/bdpt_64.png">
+        <img
+            src="/img/posts/instant_radiosity_in_my_renderer/bdpt_64.png"
+            style="width:100%"
+            alt="">
+        </a>
+  </div>
+  
+
+</div>
+
+<h1 id="reference">Reference</h1>
+<p>[1] <a href="http://pbrt.org/">Physically Based Rendering, 3rd</a><br>
+[2] <a href="http://www.advancedglobalillumination.com/">Advanced Global Illumination</a><br>
+[3] <a href="http://www.cs.cornell.edu/courses/cs6630/2012sp/slides/Boyadzhiev-Matzen-InstantRadiosity.pdf">Instant Radiosity</a></p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "yourdiscussshortname" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );">
+  </script>
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+        2020
+         Jiayin Cao 
+      
+      
+         · 
+        Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+      
+      
+        
+      
+    </section>
+  </footer>
+
+    </main>
+
+    
+      
+      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>
