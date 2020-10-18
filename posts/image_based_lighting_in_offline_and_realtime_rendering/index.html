@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+
+    <meta name="author" content="Jiayin Cao">
+    <meta name="description" content="Image-based lighting is a practical way to enhance the visual quality of computer graphics. I used to be confused by it until I read the book &ldquo;High Dynamic Range Imaging&rdquo;, which provides a very clear explanation about IBL. And I actually have implemented the algorithm in my offline renderer before, it was just that I didn&rsquo;t know it is IBL. The book PBRT has some materials talking about it without explicitly mentioning the term.">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Image Based Lighting in Offline and Real-time Rendering"/>
+<meta name="twitter:description" content="Image-based lighting is a practical way to enhance the visual quality of computer graphics. I used to be confused by it until I read the book &ldquo;High Dynamic Range Imaging&rdquo;, which provides a very clear explanation about IBL. And I actually have implemented the algorithm in my offline renderer before, it was just that I didn&rsquo;t know it is IBL. The book PBRT has some materials talking about it without explicitly mentioning the term."/>
+
+    <meta property="og:title" content="Image Based Lighting in Offline and Real-time Rendering" />
+<meta property="og:description" content="Image-based lighting is a practical way to enhance the visual quality of computer graphics. I used to be confused by it until I read the book &ldquo;High Dynamic Range Imaging&rdquo;, which provides a very clear explanation about IBL. And I actually have implemented the algorithm in my offline renderer before, it was just that I didn&rsquo;t know it is IBL. The book PBRT has some materials talking about it without explicitly mentioning the term." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://agraphicsguynotes.com/posts/image_based_lighting_in_offline_and_realtime_rendering/" />
+<meta property="article:published_time" content="2016-09-07T00:00:00-07:00" />
+<meta property="article:modified_time" content="2016-09-07T00:00:00-07:00" />
+
+
+    <title>
+  Image Based Lighting in Offline and Real-time Rendering · A Graphics Guy&#39;s Note
+</title>
+
+    
+      <link rel="canonical" href="https://agraphicsguynotes.com/posts/image_based_lighting_in_offline_and_realtime_rendering/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.1.7/css/fork-awesome.min.css" integrity="sha256-gsmEoJAws/Kd3CjuOQzLie5Q3yshhvmo7YNtBG7aaEY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.9836c03fe5c87d102278a33e86d0591ef36c89b1e17e8e547ebf84c05cee010e.css" integrity="sha256-mDbAP&#43;XIfRAieKM&#43;htBZHvNsibHhfo5Ufr&#43;EwFzuAQ4=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="/css/coder-dark.min.717236c74e0a5208ef73964a9f44c6b443b689a95b270d8b2a40d0c012460dac.css" integrity="sha256-cXI2x04KUgjvc5ZKn0TGtEO2ialbJw2LKkDQwBJGDaw=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+      <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+    
+
+    <meta name="generator" content="Hugo 0.76.5" />
+  </head>
+
+  
+  
+    
+  
+  <body class="colorscheme-auto"
+        onload=" twemoji.parse(document.body); "
+  >
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      A Graphics Guy&#39;s Note
+    </a>
+    
+      
+        <span id="dark-mode-toggle" class="float-right">
+          <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+        </span>
+      
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+        
+        
+          
+          
+          
+            
+          
+            
+              
+                <li class="navigation-item menu-separator">
+                  <span>|</span>
+                </li>
+                
+              
+              <li class="navigation-item">
+                <a href="https://agraphicsguynotes.com/cn/">中文</a>
+              </li>
+            
+          
+        
+        
+          <li class="navigation-item separator">
+            <span>|</span>
+          </li>
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Image Based Lighting in Offline and Real-time Rendering</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2016-09-07T00:00:00-07:00'>
+                September 7, 2016
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              8-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div>
+        
+        <p>Image-based lighting is a practical way to enhance the visual quality of computer graphics. I used to be confused by it until I read the book &ldquo;<a href="https://books.google.com/books?hl=zh-CN&amp;lr=&amp;id=w1i_1kejoYcC&amp;oi=fnd&amp;pg=PP2&amp;dq=high+dynamic+range+imaging+2nd+edition&amp;ots=4i3Y3AMLtz&amp;sig=qsyJ3UxHv4XuxRKGFauG2G-kOXY#v=onepage&amp;q=high%20dynamic%20range%20imaging%202nd%20edition&amp;f=false">High Dynamic Range Imaging</a>&rdquo;, which provides a very clear explanation about IBL. And I actually have implemented the algorithm in my offline renderer before, it was just that I didn&rsquo;t know it is IBL. The book <a href="https://pbrt.org/">PBRT</a> has some materials talking about it without explicitly mentioning the term. Following images are generated with IBL in my renderer, except that the last one uses a single directional light.</p>
+<p>
+
+<style>
+    .row {
+        display: -ms-flexbox;  
+        display: flex;
+        -ms-flex-wrap: wrap;  
+        flex-wrap: wrap;
+        padding: 0 4px;
+    }
+    
+     
+    .column {
+        -ms-flex: 33%;  
+        flex: 33%;
+        padding: 0 4px;
+    }
+</style>
+<div class="row">
+
+  
+  
+  
+  <div class="column">
+        <a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/ibl1.png">
+        <img
+            src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/ibl1.png"
+            style="width:100%"
+            alt="">
+        </a>
+  </div>
+  
+
+  
+  
+  
+  <div class="column">
+        <a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/ibl3.png">
+        <img
+            src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/ibl3.png"
+            style="width:100%"
+            alt="">
+        </a>
+  </div>
+  
+
+</div>
+
+
+
+<style>
+    .row {
+        display: -ms-flexbox;  
+        display: flex;
+        -ms-flex-wrap: wrap;  
+        flex-wrap: wrap;
+        padding: 0 4px;
+    }
+    
+     
+    .column {
+        -ms-flex: 33%;  
+        flex: 33%;
+        padding: 0 4px;
+    }
+</style>
+<div class="row">
+
+  
+  
+  
+  <div class="column">
+        <a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/ibl2.png">
+        <img
+            src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/ibl2.png"
+            style="width:100%"
+            alt="">
+        </a>
+  </div>
+  
+
+  
+  
+  
+  <div class="column">
+        <a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/non_ibl.png">
+        <img
+            src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/non_ibl.png"
+            style="width:100%"
+            alt="">
+        </a>
+  </div>
+  
+
+</div>
+</p>
+<p>As we can see from the above images, IBL generated images looks way more promising than the one with a directional light. The real beauty of it is that with physically based shading everything looks great in different lighting environments without the need to change material parameters at all.</p>
+<h1 id="ibl-in-offline-rendering">IBL in Offline Rendering</h1>
+<p>Unlike IBL in real-time rendering, offline ray tracers can easily achieve unbiased result with IBL without compromising anything. The techs involved in generating the above images are introduced in my previous blogs, like <a href="link_todo">path tracing</a>, <a href="link_todo">Monte-Carlo integration</a>, <a href="https://agraphicsguynotes.com/posts/sample_microfacet_brdf/">importance sampling for microfacet BRDF</a>. I won&rsquo;t repeat them again in this blog.</p>
+<p>First thing first, what is image based lighting. My take on it is that IBL uses a special HDR map recording all incoming radiance from different solid angles to simulate complex lighting environment. It is pretty much like the spherical reflection map we used to render reflective materials in the old days. For old-school reflective materials in real time rendering, only one texture sampling is necessary, which makes the algorithm feasible even in fixed function pipe. Since not all materials need only one texture sampling, using the HDR image to render other materials is a challenging task. The essential difference between the two lies in the fact that pure reflective BRDF is actually delta function, which will reduce the dimension of the integral. In offline rendering, since speed is not the most sensitive thing, one can always use Monte-Carlo method to evaluate the integral of rendering equation. So, in a nut-shell, IBL is a technique that uses HDR environment light to light 3d objects in the scene.</p>
+<p>Below is an HDR image used in the first images shown above. Of course, it has been converted into LDR since majority displays on the market doesn&rsquo;t support HDR.</p>
+<figure><a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/glacier_latlong.png">
+    <img src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/glacier_latlong.png" width="700"/> </a>
+</figure>
+
+<p>The only important thing that is not mentioned in my previous blog is how to do importance sampling with the HDR image. It is actually quite simple, just a discretized inversion method. Please refer to the book <a href="https://pbrt.org/">PBRT</a> for further detail implementation of it.</p>
+<h1 id="ibl-in-real-time-rending-ue4-implementation">IBL in Real Time Rending (UE4 implementation)</h1>
+<p>UE4&rsquo;s implementation of IBL is really impressive. Usually, 1024 samples may be needed to generate a noise-free image. However, 1024 times sampling is nothing practical in a real-time rendering engine, it will make the rendering application heavily bandwidth bounded. UE4 uses a tricky way to resolve the issue of the excessive number of samplings, reducing it from a thousand to two samplings and making IBL a practical algorithm in it. Of course, it is an estimation of the rendering equation. That said it is far from unbiased. However, truth is there are biases everywhere in real time rendering, one extra source of bias doesn&rsquo;t even hurt at all.</p>
+<p>The slide is here. However, one can easily get lost like I did during the introduction of IBL in this slide. Luckily, the note explains everything in a very clear manner.</p>
+<h1 id="split-sum-approximation">Split Sum Approximation</h1>
+<p>I will skip the original rendering equation and its Monte Carlo integration. We need to evaluate the following equation in a very efficient manner.</p>
+<p>$ \dfrac{1}{N} \sum_{k=1}^{N} \dfrac{L_i(l_k) f(l_k,v) cos\theta_{l_k}}{p(l_k,v)} \approx (\dfrac{1}{N} \sum_{k=1}^{N} L_i(l_k) ) (\dfrac{1}{N} \sum_{k=1}^{N} \dfrac{f(l_k,v) cos\theta_{l_k}}{p(l_k,v)} ) $</p>
+<p>The approximation is not exactly 100% accurate. However, the bias introduced in a real rendering scene can be barely noticed.</p>
+<figure><a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/s2013_pbs_epic_slides-17-dragged.png">
+    <img src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/s2013_pbs_epic_slides-17-dragged.png" width="700"/> </a>
+</figure>
+
+<p>The above slide comes from UE4&rsquo;s presentation in Siggraph 2013, I can barely tell the difference between the balls in the first two rows. Clearly, the split sum is an acceptable approximation in real time rendering. However, the goal here is to reduce the number of sampling in IBL tech, splitting the equation is only the beginning, it doesn&rsquo;t reduce anything yet at all. The golden idea here is to pre-compute some computation heavy task first before real-time rendering happens.</p>
+<h1 id="pre-filter-environment-map">Pre-Filter Environment Map</h1>
+<p>Following is the first part of the split sum, it is relatively easy to pre-compute an estimation.</p>
+<p>$ \dfrac{1}{N} \sum_{k=1}^{N} L_i(l_k) $</p>
+<p>Averaging the radiance for different roughness will yield a good result and we can actually store textures for each roughness value into different mipmap levels. However, UE4 convolves the environment map with the GGX distribution of their shading model using importance sampling. One minor detail is that since microfacet BRDF is also a function of incoming angle, they actually made an assumption that the incoming angle is actually zero, in other words, the incoming direction is exactly the opposite of the surface normal. Of course, it introduces another source of bias here.</p>
+<h1 id="environment-brdf">Environment BRDF</h1>
+<p>This is actually where the most magic happens. Let&rsquo;s first look at the original integral form of the equation.</p>
+<p>$ \int_H f(w_i,w_o) cos\theta_{w_i} dw_i $</p>
+<p>By assuming the BRDF is actually microfacet model, we have the form of BRDF like this:</p>
+<p>$ f(\omega_i,\omega_o,x) = \dfrac{F(\omega_i , h) G(\omega_i,\omega_o,h) D(h)}{4 cos(\theta_i) cos(\theta_o)} $</p>
+<p>Schlick&rsquo;s approximation of Fresnel is used in it:</p>
+<p>$ F(w_i,h) = F_0 + ( 1 - F_0 ) ( 1 - w_i h )^5 $</p>
+<p>In order to pre-compute what we need in shading, we need to know how many parameters there are in the BRDF. The obvious ones are the incoming direction, outgoing direction, roughness, albedo (or direction-hemisphere reflectance). Since what we care is how to compute the integral efficiently, the incoming direction is not our concern at all, leaving us five dimensions, out going direction, roughness and albedo ( three dimensions here because it is a color ). One may wonder here that isn&rsquo;t outgoing direction two-dimensional? The truth is only the cosine factor of the angle between it and the normal is relevant in a D-term, thus reducing it to one single dimension. Sadly a five dimensional data is really hard to pre-computed before-hand.</p>
+<p>As a matter of fact, a simple math trick will factor albedo out of the equation:</p>
+<p>$ \int_H f(w_i,w_o) cos\theta_{w_i} dw_i = F_0 \int_H \frac{f(w_i,w_o) cos\theta_{w_i}}{F( w_i, h )} ( 1 - ( 1 - w_i h )^5 ) d w_i +\int_H \frac{f(w_i,w_o) cos\theta_{w_i}}{F( w_i, h )} ( 1 - w_i h )^5 d w_i $</p>
+<p>Don&rsquo;t be scared by the complex equation, it is actually clearer than it used to be before. Now, we only need to evaluate the first and second integral on the right side before-hand, leaving the F0 or albedo evaluation in the real time rendering.</p>
+<figure>
+    <img src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/env_brdf.png" width="300"/> 
+</figure>
+
+<p>With only two dimensions in the equation, we can save the pre-computed information in one single texture. And the above texture is one example of it. During pixel shading, one can simply estimate the integral with the following calculation:</p>
+<p>$ EnvBRDF = Color * tex2d( cos\theta_o , roughness ).x + tex2d( cos\theta_o , roughness ).y $</p>
+<p>It looks simpler enough to me. Only one texture sampling to evaluate the second integral of the split sum!</p>
+
+
+
+
+
+
+
+
+
+
+    
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+
+
+    
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" crossorigin="anonymous"></script>
+
+
+
+<style>
+#slide-window {
+    position: relative;
+    width: 750px;
+    height: 421px;
+    overflow: hidden;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#slides-list {
+    width: 750px;
+    height: 421px;
+    position: absolute;
+    margin: 0px;
+    padding: 0px;
+    -webkit-transform: translate3d(0px, 0px, 0px);
+    transform: translate3d(0px, 0px, 0px);
+    transition: all 0.66s ease;
+    -webkit-transition: all 0.66s ease;
+}
+
+.slide {
+    list-style: none;
+    position: relative;
+    float: left;
+    margin: 0;
+    padding: 0;
+    width: 750px;
+    height: 421px;
+    background: #ccc;
+    text-align: center;
+    line-height: 100%;
+    background-size: cover;
+    background-position: 50% 50%;
+    color: #fff;
+    -webkit-transform: translate3d(0px, 0px, 0px);
+    -webkit-transform-style: preserve-3d;
+}
+
+.nav {
+    position: relative;
+    z-index: 9;
+    top: 45%;
+    cursor: pointer;
+    color: #fff;
+    opacity: 0.7;
+    transition: all 0.66s ease;
+    -webkit-transition: all 0.66s ease;
+}
+
+.nav:hover {
+    opacity: 1.0;
+}
+
+#left {
+    left: 3%;
+    float: left;
+}
+
+#right {
+    right: 3%;
+    float: right;
+}
+</style>
+
+
+<div id="slide-window">
+    <ol id="slides-list">
+                <li class="slide" style="background-image:url(https://agraphicsguynotes.com/img/posts/image_based_lighting_in_offline_and_realtime_rendering/comparision/s2013_pbs_epic_slides-14-dragged.png);"></li>
+                <li class="slide" style="background-image:url(https://agraphicsguynotes.com/img/posts/image_based_lighting_in_offline_and_realtime_rendering/comparision/s2013_pbs_epic_slides-15-dragged.png);"></li>
+                <li class="slide" style="background-image:url(https://agraphicsguynotes.com/img/posts/image_based_lighting_in_offline_and_realtime_rendering/comparision/s2013_pbs_epic_slides-16-dragged.png);"></li>
+    </ol>
+    <span class="nav fa fa-chevron-left fa-3x" id="left"></span>
+    <span class="nav fa fa-chevron-right fa-3x" id="right"></span>
+</div>
+
+<script>
+sliderJQuery = jQuery.noConflict();
+sliderJQuery(function( $ ) {
+    $.global = new Object();
+    $.global.total = 0;
+
+    $(document).ready(function () {
+        var slideWindowWidth = $('#slide-window').width();
+        var slideCount = $('#slides-list li').length;
+        var totalSlidesWidth = slideCount * slideWindowWidth;
+
+        $.global.item = 0;
+        $.global.total = slideCount;
+
+        $('.slide').css('width', slideWindowWidth + 'px');
+        $('#slides-list').css('width', totalSlidesWidth + 'px');
+
+        $('#left').click(function () {
+            resetAutoSlide();
+            performSlide('back');
+        });
+
+        $('#right').click(function () {
+            resetAutoSlide();
+            performSlide('forward');
+        });
+
+    });
+
+    function performSlide(direction) {
+        if (direction == 'back') {
+            var nextSlideId = $.global.item - 1;
+        }
+        if (direction == 'forward') {
+            var nextSlideId = $.global.item + 1;
+        }
+
+        if (nextSlideId == -1) {
+             
+            moveCss($.global.total - 1);
+        } else if (nextSlideId == $.global.total) {
+             
+            moveCss(0);
+        } else {
+             
+            moveCss(nextSlideId);
+        }
+    }
+
+    function moveCss(nextSlideId) {
+        var slideWindowWidth = $('#slide-window').width();
+        var margin = slideWindowWidth * nextSlideId;
+
+        $('#slides-list').css('transform', 'translate3d(-' + margin + 'px,0px,0px)');
+
+        $.global.item = nextSlideId;
+    }
+
+    
+      var autoSlide = parseInt("0", 10);
+      var autoSlideInterval;
+      function resetAutoSlide(){
+        if(autoSlide) {
+          if(autoSlideInterval) {
+            clearInterval(autoSlideInterval);
+          }
+          autoSlideInterval = setInterval(function(){
+            performSlide('forward');
+          }, autoSlide)
+        }
+      }
+      resetAutoSlide();
+});
+</script>
+<p>Above is a comparison between the reference, split sum and the simplified method in real time rendering. Pretty cool approximation.</p>
+<h1 id="reference">Reference</h1>
+<p>[1] High Dynamic Range Imaging<br>
+[2] <a href="http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_slides.pdf">Real Shading in UE4</a><br>
+[3] <a href="http://pbrt.org/">Physically Based Shading</a></p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "yourdiscussshortname" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );">
+  </script>
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+        2020
+         Jiayin Cao 
+      
+      
+         · 
+        Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+      
+      
+        
+      
+    </section>
+  </footer>
+
+    </main>
+
+    
+      
+      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>

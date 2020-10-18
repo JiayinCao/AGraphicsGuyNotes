@@ -41,7 +41,16 @@
       
       <guid>https://agraphicsguynotes.com/posts/volume_rendering_in_offline_renderer/</guid>
       <description>Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.
- .row { display: -ms-flexbox; display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap; padding: 0 4px; } .</description>
+.row {display: -ms-flexbox; display: flex;-ms-flex-wrap: wrap; flex-wrap: wrap;padding: 0 4px;}.</description>
+    </item>
+    
+    <item>
+      <title>Image Based Lighting in Offline and Real-time Rendering</title>
+      <link>https://agraphicsguynotes.com/posts/image_based_lighting_in_offline_and_realtime_rendering/</link>
+      <pubDate>Wed, 07 Sep 2016 00:00:00 -0700</pubDate>
+      
+      <guid>https://agraphicsguynotes.com/posts/image_based_lighting_in_offline_and_realtime_rendering/</guid>
+      <description>Image-based lighting is a practical way to enhance the visual quality of computer graphics. I used to be confused by it until I read the book &amp;ldquo;High Dynamic Range Imaging&amp;rdquo;, which provides a very clear explanation about IBL. And I actually have implemented the algorithm in my offline renderer before, it was just that I didn&amp;rsquo;t know it is IBL. The book PBRT has some materials talking about it without explicitly mentioning the term.</description>
     </item>
     
     <item>
