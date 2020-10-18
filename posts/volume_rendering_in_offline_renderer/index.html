@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+
+    <meta name="author" content="Jiayin Cao">
+    <meta name="description" content="Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.
+ .row { display: -ms-flexbox; display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap; padding: 0 4px; } .">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Volume Rendering in Offline Renderer"/>
+<meta name="twitter:description" content="Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.
+ .row { display: -ms-flexbox; display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap; padding: 0 4px; } ."/>
+
+    <meta property="og:title" content="Volume Rendering in Offline Renderer" />
+<meta property="og:description" content="Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.
+ .row { display: -ms-flexbox; display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap; padding: 0 4px; } ." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://agraphicsguynotes.com/posts/volume_rendering_in_offline_renderer/" />
+<meta property="article:published_time" content="2016-11-10T00:00:00-08:00" />
+<meta property="article:modified_time" content="2016-11-10T00:00:00-08:00" />
+
+
+    <title>
+  Volume Rendering in Offline Renderer · A Graphics Guy&#39;s Note
+</title>
+
+    
+      <link rel="canonical" href="https://agraphicsguynotes.com/posts/volume_rendering_in_offline_renderer/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.1.7/css/fork-awesome.min.css" integrity="sha256-gsmEoJAws/Kd3CjuOQzLie5Q3yshhvmo7YNtBG7aaEY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.9836c03fe5c87d102278a33e86d0591ef36c89b1e17e8e547ebf84c05cee010e.css" integrity="sha256-mDbAP&#43;XIfRAieKM&#43;htBZHvNsibHhfo5Ufr&#43;EwFzuAQ4=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="/css/coder-dark.min.717236c74e0a5208ef73964a9f44c6b443b689a95b270d8b2a40d0c012460dac.css" integrity="sha256-cXI2x04KUgjvc5ZKn0TGtEO2ialbJw2LKkDQwBJGDaw=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+      <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+    
+
+    <meta name="generator" content="Hugo 0.76.5" />
+  </head>
+
+  
+  
+    
+  
+  <body class="colorscheme-auto"
+        onload=" twemoji.parse(document.body); "
+  >
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      A Graphics Guy&#39;s Note
+    </a>
+    
+      
+        <span id="dark-mode-toggle" class="float-right">
+          <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+        </span>
+      
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+        
+        
+          
+          
+          
+            
+          
+            
+              
+                <li class="navigation-item menu-separator">
+                  <span>|</span>
+                </li>
+                
+              
+              <li class="navigation-item">
+                <a href="https://agraphicsguynotes.com/cn/">中文</a>
+              </li>
+            
+          
+        
+        
+          <li class="navigation-item separator">
+            <span>|</span>
+          </li>
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Volume Rendering in Offline Renderer</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2016-11-10T00:00:00-08:00'>
+                November 10, 2016
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              9-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div>
+        
+        <p>Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.</p>
+
+
+<style>
+    .row {
+        display: -ms-flexbox;  
+        display: flex;
+        -ms-flex-wrap: wrap;  
+        flex-wrap: wrap;
+        padding: 0 4px;
+    }
+    
+     
+    .column {
+        -ms-flex: 33%;  
+        flex: 33%;
+        padding: 0 4px;
+    }
+</style>
+<div class="row">
+
+  
+  
+  
+  <div class="column">
+        <a href="/img/posts/volume_rendering_in_offline_renderer/no_volume.png">
+        <img
+            src="/img/posts/volume_rendering_in_offline_renderer/no_volume.png"
+            style="width:100%"
+            alt="">
+        </a>
+  </div>
+  
+
+  
+  
+  
+  <div class="column">
+        <a href="/img/posts/volume_rendering_in_offline_renderer/with_volume.png">
+        <img
+            src="/img/posts/volume_rendering_in_offline_renderer/with_volume.png"
+            style="width:100%"
+            alt="">
+        </a>
+  </div>
+  
+
+</div>
+
+<p>In case someone is not familiar with what volume rendering is, the above textures are attached for your references. One can easily notice that the fog on the right image greatly enhances the fidelity of the scene to a whole new different level. For a detailed explanation of volume rendering, it is suggested to check out this wiki page. Volume rendering is commonly used as fog, water etc. And mastering the basics behind it is of great importance because it also serves the basic theory of sub-surface scattering, which is very common even in real time 3D applications, like video games.</p>
+<h1 id="how-light-interacts-with-volume">How Light Interacts with Volume</h1>
+<p>In a nutshell, volume can change the way light propagates, which is why we care. More specifically, volume consists tons of very small particles that can interact with light rays. Some of them change the direction of light rays, others will absorb some energy from the ray, some even emits energy. There are four types of interaction that we need to consider in an offline renderer:</p>
+<ul>
+<li><strong>Absorption</strong>. Light will attenuate as it travels through a volume.</li>
+<li><strong>Emission</strong>. Some volume may emit energy making itself a &lsquo;light source&rsquo;.</li>
+<li><strong>Scattering</strong>. There are two kinds of scattering:
+<ul>
+<li><strong>Out-Scattering</strong>. This happens when the light ray changes its direction. This is why fog makes background dimmer.</li>
+<li><strong>In-Scattering</strong>. Since light can change its direction, there are chances that some light will come in due to light direction changing. A real case is why it appears grey in a foggy day, because fog bends the sun rays to your eye.</li>
+</ul>
+</li>
+</ul>
+<h1 id="real-time-solution">Real-Time Solution</h1>
+<p>Real-time solution for volume rendering is commonly biased. A quite common solution is particle system, meaning generating tons of billboards with alpha blending enabled. Most of the practical or research work aims at how to render a huge number of particles in an efficient manner. I haven&rsquo;t seen any targeting on the unbiased feature of particle rendering, because it is not from the very beginning.</p>
+<p>Of course, particle system can only deliver effects like smog, fire etc. It may not be able to reproduce some other volume like light shaft or water. Although a lot of water simulation work does use particles under the hood, we don&rsquo;t usually call them particle system. Light shaft is commonly a post-processing pass, <a href="https://developer.nvidia.com/VolumetricLighting">some work</a> generate light shaft with real geometry, but I haven&rsquo;t seen any work using particles to simulate it.</p>
+<p>As hardware is getting more and more powerful. Modern AAA games also have lots of volume rendering in them, which is actually way out of the scope of this blog. For a short description and implementation, I strongly suggest walking through the implementation in <a href="https://www.shadertoy.com/view/XlBSRz">this shadertoy demo</a>.</p>
+<h1 id="offline-solution">Offline Solution</h1>
+<p>Comparing with real-time rendering solution, I kind of like offline solution due to its consistence among all situation like fog, light shaft or even water. I am no expert of physics, my take on them is that all of them are a set of particles at a micro level. They are actually the same except that the difference is how particles interact with each other.</p>
+<h2 id="absorption">Absorption</h2>
+<p>Let&rsquo;s start from absorption. Assuming we have a volume with its particles uniformly distributed inside it, light attenuation due to absorption will be the same at all points along the ray.</p>
+<figure>
+    <img src="/img/posts/volume_rendering_in_offline_renderer/absorption.png"/> 
+</figure>
+
+<p>We have the following equation at a micro level:</p>
+<p>$ L_o(p,w) - L_i(p,-w) = dL_o(p,w) = -\sigma_a(p,w)L_i(p,-w)dt$</p>
+<p>This may look confusing the first time one sees it because of the subscripts, it adopts the commonly used term Li and Lo in it. Detail explanation is at the page of 286 of the <a href="https://pbrt.org/">book</a> (second edition). After converting all subscript into one, we get the following equation:</p>
+<p>$ dL_o(p,w) = -\sigma_a(p,w)L_o(p,w)dt $</p>
+<p>And since the subscript is just something that we use to distinguish between incoming and outgoing light, we can drop it in the above equation making it much clearer than it used to be.</p>
+<p>$ dL(p,w) = -\sigma_a(p,w)L(p,w)dt $</p>
+<p>What it says is that light will attenuate with exactly the same rate at all points along the ray. Comparing with micro level equation, what we care more is a higher level knowledge of light interaction with volume, instead of small particles that are not visible to human vision at all. So the real practical question is how much light will still remain after passing through a uniform volume like the above one.</p>
+<p>First of all, let&rsquo;s convert the equation this way:</p>
+<p>$ \dfrac{dL(p,w)}{L(p,w)} = -\sigma_a(p,w)dt $</p>
+<p>One detail that we haven&rsquo;t mentioned is the parameter of &rsquo;t'. Any point along the ray could be represented by $ p(t)=p(0) + t*w $. In other words, it is the distance between the starting point and ending point that we consider. So we can regard &lsquo;p&rsquo; as a function of t in the above equation. If we take an integral from 0 to d, we have the following equation.</p>
+<p>$ \int_0^d \dfrac{dL(p(t),w)}{L(p(t),w)} = \int_0^d -\sigma_a(p(t),w)dt $</p>
+<p>It is quite easy to derive the following equation.</p>
+<p>$ \dfrac{L(p+d*w,w)}{L(p,w)} = e^{ -\int_0^d \sigma_a(p,w)dt} $</p>
+<p>The above equation is the attenuation, which only takes absorption into account, due to the existence of the volume. And it is exactly the second equation mentioned at the page of 578 in PBRT book (second edition).</p>
+<h2 id="out-scattering">Out-Scattering</h2>
+<p>Out-scattering is quite similar with absorption. As a matter of fact, there is no difference between them in handling attenuation. So instead of saving absorption factor, we can save attenuation factor which is the summation of absorption and out-scattering. Unless we have a clear reason to save them separately, there is no need to do that.</p>
+<p>$ \sigma_t=\sigma_a+\sigma_s$</p>
+<p>For our convenience, it is better to define one term, which is commonly named &lsquo;beam transmittance&rsquo; and defines the proportion of light survives the uniform volume due to attenuation (out-scattering and absorption).</p>
+<p>$ T_r(p(0) \rightarrow p(d) ) = e^{ -\int_0^d \sigma_t(p,w)dt} $</p>
+<h2 id="emission">Emission</h2>
+<p>Emission is actually the simplest one among the four. The differential change is just the emission rate.</p>
+<p>$ dL(p,w) = L_{e}(p,w)dt $</p>
+<h2 id="in-scattering">In-Scattering</h2>
+<p>This is the most complex one among the four, it took me a while to figure out the mathematics behind it. I&rsquo;d like to start with two equations in PBRT(2nd) and explain the derivation between them. First equation is the differential changes along the ray direction due to in-scattering.</p>
+<p>$ \dfrac{dL_o(p,\omega)}{dt} = -\sigma_t(p,\omega) L_i(p,-\omega) + S( p,\omega) $</p>
+<p>At a first glance, it seems weird due to the fact that it involves both $ L_i $ and $ L_o $. As a matter of fact, we can easily convert it to uniform direction by switching $ L_i $ to $ L_o $.</p>
+<p>$ \dfrac{dL_o(p,\omega)}{dt} = -\sigma_t(p,\omega) L_o(p,\omega) + S( p,\omega) $</p>
+<p>One good feature about it is that since we only have $ L_o $, we can safely drop that subscript making the equation simpler. Although all functions in this equation are functions of both solid angle and position, which is further a function of t, the distance from the original point as mentioned above, it is also safe to drop the solid angle parameter because it doesn&rsquo;t change in the equation at all. We can further simplify the equation to the following state:</p>
+<p>$ \dfrac{dL(p)}{dt} = -\sigma_t(p) L(p) + S( p ) $</p>
+<p>What it says is really simple, it states the fact that the differential change due to in-scattering along the ray is the amount of differential in-coming scattering radiance S(p) minus the attenuation by absorption and out-scattering. For the simplicity, I won&rsquo;t include the definition of S here. One can always read PBRT(2nd) for further information.</p>
+<p>The other equation in PBRT is the following one, which according to the book can be derived from the above one.</p>
+<p>$ L_i(p,\omega) = \int_0^{\infty} T_r(p' \rightarrow p) S(p', -\omega) dt $</p>
+<p>Again, let&rsquo;s get rid of the subscript first.</p>
+<p>$ L(p,-\omega) = \int_0^{\infty} T_r(p' \rightarrow p) S(p', -\omega) dt $</p>
+<p>If you look at the picture below, you will find that this description is even better than the previous one, although both make perfect sense. What it says is that the radiance at point p along direction -w due to in-scattering is actually the accumulation of all in-scattering radiance at all points along direction -w attenuated by its corresponding beam transmittance.</p>
+<figure>
+    <img src="/img/posts/volume_rendering_in_offline_renderer/volume_rendering.png"/> 
+</figure>
+
+<p>In order to derive from the first equation to the second one, we need to handle one small issue. Notice that the first equation proceed along the direction w, while the second one goes just in the opposite way. I choose to invert the first equation in my derivation. It becomes this:</p>
+<p>$ \dfrac{dL(p,-\omega)}{d(-t)} = -\sigma_t(p,-\omega) L(p , -\omega ) + S( p , -\omega ) $</p>
+<p>One subtle difference between this equation and the original one is that the differential denominator is -t instead of t. This is by no means a typo. This is because we invert the direction of the ray along -w. If we take the negative sign out of the denominator, we get the following equation</p>
+<p>$ \dfrac{dL(p,-\omega)}{d(t)} = \sigma_t(p,-\omega) L(p , -\omega ) - S( p , -\omega ) $</p>
+<p>One can easily notice that this is quite standard first order linear differential equation. The solution is available as the following one:</p>
+<p>$ L(p(t)) = \dfrac{1}{e^{-\int \sigma (p)dt}}( -\int e^{- \int \sigma (p)dt} S(p) dt + C ) $</p>
+<p>I&rsquo;ll skip the derivation of the solution in this blog, one can find further detail here. And please also notice that the subscript of $ \sigma $ and the $ \omega $ are also dropped because they don&rsquo;t change in the equation, but please notice that the L(p) in the following equation means L(p,-w). To solve the equation, the first thing to do is to determine the constant factor C. We already know that $ L(p( \infty)) $ is zero, dropping it in the equation, we can get C.</p>
+<p>$ C = \int e^{\int \sigma (p)dt} S(p) dt |_\infty $</p>
+<p>Again, we get the following equation by dropping the value of C in it.</p>
+<p>$ \begin{array} {lcl} L(p(t)) &amp; = &amp; \dfrac{1}{e^{-\int \sigma (p)dt}} \int_t^{\infty} e^{- \int \sigma (p)dt'} S(p) dt' \\\ &amp; = &amp; \int_t^{\infty} e^{- \int_{t}^{t'} \sigma (p)dt''} S(p) dt' \end{array} $</p>
+<p>What we want is actually L(p(0)), letting t equals to zero, will give you the following equation:</p>
+<p>$  L(p(0)) = \int_0^{\infty} e^{- \int_{0}^{t} \sigma (p)dt'} S(p) = \int_0^{\infty} T_r(p(t) \rightarrow p(0)) S(p(t)) dt $</p>
+<p>And with the above equation, we finished the derivation.</p>
+<h1 id="reference">Reference</h1>
+<p>[1] <a href="http://pbrt.org/">Physically Based Rendering, second edition</a><br>
+[2] <a href="https://www.math.ucdavis.edu/~thomases/W11_16C1_lec_1_7_11.pdf">UCDavis, Mathematics. First order linear differential equation</a><br>
+[3] <a href="https://www.shadertoy.com/view/XlBSRz#">Volumetric Integration</a></p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "yourdiscussshortname" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );">
+  </script>
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+        2020
+         Jiayin Cao 
+      
+      
+         · 
+        Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+      
+      
+        
+      
+    </section>
+  </footer>
+
+    </main>
+
+    
+      
+      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>
