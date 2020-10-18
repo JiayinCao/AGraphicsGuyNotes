@@ -6,7 +6,16 @@
     <description>Recent content on A Graphics Guy&#39;s Note</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 16 Jun 2015 13:23:06 -0700</lastBuildDate><atom:link href="https://agraphicsguynotes.com/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 18 Jul 2018 13:23:06 -0700</lastBuildDate><atom:link href="https://agraphicsguynotes.com/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Sampling Anisotropic Microfacet BRDF</title>
+      <link>https://agraphicsguynotes.com/posts/sample_anisotropic_microfacet_brdf/</link>
+      <pubDate>Wed, 18 Jul 2018 13:23:06 -0700</pubDate>
+      
+      <guid>https://agraphicsguynotes.com/posts/sample_anisotropic_microfacet_brdf/</guid>
+      <description>I am working on material system in my renderer recently. My old implementation of microfacet models is all isotropic BRDF, as a result of which, I can&amp;rsquo;t render something like brushed metals in my renderer. After spending three days in my spare time to extend the system to support anisotropic microfacet BRDF, I easily noticed how much mathematics that it needs to understand all the importance sampling method. The fact that $ \theta $ and $ \phi $ are somewhat correlated makes the importance sampling a lot more complex than isotropic model.</description>
+    </item>
+    
     <item>
       <title>Tessellation on DX11</title>
       <link>https://agraphicsguynotes.com/posts/tessellation_on_d3d11/</link>
