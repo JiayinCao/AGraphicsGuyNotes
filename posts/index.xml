@@ -26,6 +26,15 @@
     </item>
     
     <item>
+      <title>How does PBRT verify BXDF</title>
+      <link>https://agraphicsguynotes.com/posts/how_does_pbrt_verify_bxdf/</link>
+      <pubDate>Fri, 09 Mar 2018 00:00:00 -0800</pubDate>
+      
+      <guid>https://agraphicsguynotes.com/posts/how_does_pbrt_verify_bxdf/</guid>
+      <description>Unit test for BXDF in offline rendering turns out to be way more important than what I thought it would be. I still remember it took me quite a long time when I debugged my bi-directional path tracing algorithm before I noticed there was a little BXDF bug, which easily led to some divergence between BDPT and path tracing. Life will be much easier if we could find any potential BXDF problem at the very beginning.</description>
+    </item>
+    
+    <item>
       <title>Sampling Microfacet BRDF</title>
       <link>https://agraphicsguynotes.com/posts/sample_microfacet_brdf/</link>
       <pubDate>Sun, 01 Nov 2015 00:00:00 -0700</pubDate>
