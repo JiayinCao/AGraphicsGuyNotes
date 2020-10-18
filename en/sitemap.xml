@@ -4,7 +4,7 @@
   
   <url>
     <loc>https://agraphicsguynotes.com/</loc>
-    <lastmod>2018-07-18T13:23:06-07:00</lastmod>
+    <lastmod>2018-11-29T00:00:00-08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="cn"
@@ -18,23 +18,28 @@
   </url>
   
   <url>
+    <loc>https://agraphicsguynotes.com/posts/basic_color_science_for_graphcis_engineer/</loc>
+    <lastmod>2018-11-29T00:00:00-08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://agraphicsguynotes.com/posts/</loc>
-    <lastmod>2018-07-18T13:23:06-07:00</lastmod>
+    <lastmod>2018-11-29T00:00:00-08:00</lastmod>
   </url>
   
   <url>
     <loc>https://agraphicsguynotes.com/posts/sample_anisotropic_microfacet_brdf/</loc>
-    <lastmod>2018-07-18T13:23:06-07:00</lastmod>
+    <lastmod>2018-07-18T00:00:00-07:00</lastmod>
   </url>
   
   <url>
     <loc>https://agraphicsguynotes.com/posts/sample_microfacet_brdf/</loc>
-    <lastmod>2015-11-01T13:23:06-07:00</lastmod>
+    <lastmod>2015-11-01T00:00:00-07:00</lastmod>
   </url>
   
   <url>
     <loc>https://agraphicsguynotes.com/posts/tessellation_on_d3d11/</loc>
-    <lastmod>2015-06-16T13:23:06-07:00</lastmod>
+    <lastmod>2015-06-16T00:00:00-07:00</lastmod>
   </url>
   
   <url>
