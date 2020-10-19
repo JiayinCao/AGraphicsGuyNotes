@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+
+    <meta name="author" content="Jiayin Cao">
+    <meta name="description" content="A couple of days ago, an artist asked me what exactly a directional light map is. I found this page talking about the solutions in Unity 3D and explained to him. And I am reading the book &ldquo;Real time rendering“ these days, it also talks about directional light map, which gives a more detailed and low-level explanation on it. Sounds like a very interesting topic, so I decided to take some notes.">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Directional Light Map from the Ground Up"/>
+<meta name="twitter:description" content="A couple of days ago, an artist asked me what exactly a directional light map is. I found this page talking about the solutions in Unity 3D and explained to him. And I am reading the book &ldquo;Real time rendering“ these days, it also talks about directional light map, which gives a more detailed and low-level explanation on it. Sounds like a very interesting topic, so I decided to take some notes."/>
+
+    <meta property="og:title" content="Directional Light Map from the Ground Up" />
+<meta property="og:description" content="A couple of days ago, an artist asked me what exactly a directional light map is. I found this page talking about the solutions in Unity 3D and explained to him. And I am reading the book &ldquo;Real time rendering“ these days, it also talks about directional light map, which gives a more detailed and low-level explanation on it. Sounds like a very interesting topic, so I decided to take some notes." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://agraphicsguynotes.com/posts/directional_light_map_from_the_groud_up/" />
+<meta property="article:published_time" content="2015-06-24T00:00:00-07:00" />
+<meta property="article:modified_time" content="2015-06-24T00:00:00-07:00" />
+
+
+    <title>
+  Directional Light Map from the Ground Up · A Graphics Guy&#39;s Note
+</title>
+
+    
+      <link rel="canonical" href="https://agraphicsguynotes.com/posts/directional_light_map_from_the_groud_up/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.1.7/css/fork-awesome.min.css" integrity="sha256-gsmEoJAws/Kd3CjuOQzLie5Q3yshhvmo7YNtBG7aaEY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.9836c03fe5c87d102278a33e86d0591ef36c89b1e17e8e547ebf84c05cee010e.css" integrity="sha256-mDbAP&#43;XIfRAieKM&#43;htBZHvNsibHhfo5Ufr&#43;EwFzuAQ4=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="/css/coder-dark.min.717236c74e0a5208ef73964a9f44c6b443b689a95b270d8b2a40d0c012460dac.css" integrity="sha256-cXI2x04KUgjvc5ZKn0TGtEO2ialbJw2LKkDQwBJGDaw=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+      <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+    
+
+    <meta name="generator" content="Hugo 0.76.5" />
+  </head>
+
+  
+  
+    
+  
+  <body class="colorscheme-auto"
+        onload=" twemoji.parse(document.body); "
+  >
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      A Graphics Guy&#39;s Note
+    </a>
+    
+      
+        <span id="dark-mode-toggle" class="float-right">
+          <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+        </span>
+      
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+        
+        
+          
+          
+          
+            
+          
+            
+              
+                <li class="navigation-item menu-separator">
+                  <span>|</span>
+                </li>
+                
+              
+              <li class="navigation-item">
+                <a href="https://agraphicsguynotes.com/cn/">中文</a>
+              </li>
+            
+          
+        
+        
+          <li class="navigation-item separator">
+            <span>|</span>
+          </li>
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Directional Light Map from the Ground Up</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2015-06-24T00:00:00-07:00'>
+                June 24, 2015
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              10-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div>
+        
+        <p>A couple of days ago, an artist asked me what exactly a directional light map is. I found this <a href="https://docs.unity3d.com/Manual/LightmappingDirectional.html">page</a> talking about the solutions in Unity 3D and explained to him. And I am reading the book &ldquo;Real time rendering“ these days, it also talks about directional light map, which gives a more detailed and low-level explanation on it. Sounds like a very interesting topic, so I decided to take some notes.</p>
+<p>Although directional light map is nothing new, it is widely used in multiple commercial game engines, like Unreal Engine, Unity 3D and Source Engine. It is an advanced version of classical light map that everyone knows about. Traditional light map won&rsquo;t consider normal map variance, which leads to very flat and diffuse look on surfaces. Directional light map tries to solve the problem by baking more information so that it will take normal map into account.</p>
+
+
+<style>
+    .row {
+        display: -ms-flexbox;  
+        display: flex;
+        -ms-flex-wrap: wrap;  
+        flex-wrap: wrap;
+        padding: 0 4px;
+    }
+    
+     
+    .column {
+        -ms-flex: 33%;  
+        flex: 33%;
+        padding: 0 4px;
+    }
+</style>
+<div class="row">
+
+  
+  
+  
+  <div class="column">
+        <a href="/img/posts/directional_light_map_from_the_ground_up/1345306920_9262.png">
+        <img
+            src="/img/posts/directional_light_map_from_the_ground_up/1345306920_9262.png"
+            style="width:100%"
+            alt="">
+        </a>
+  </div>
+  
+
+  
+  
+  
+  <div class="column">
+        <a href="/img/posts/directional_light_map_from_the_ground_up/1345309000_1629.png">
+        <img
+            src="/img/posts/directional_light_map_from_the_ground_up/1345309000_1629.png"
+            style="width:100%"
+            alt="">
+        </a>
+  </div>
+  
+
+</div>
+
+<p>Left image shows the old light map technique. Right image demonstrates how directional light map can greatly enhance visual quality. As we can see from the two, it is apparent that directional light map shows more detail than a light map does.</p>
+<p>What exactly is a light map from the perspective of mathematics. The answer is quite simple, it stores irradiance values for each sampled location on surface. Instead of talking about directional light map alone, I decided to start from the very basic, the rendering equation. Hopefully it will gives the reader a more low-level and mathematics interpretation and a deeper understanding of this method.</p>
+<h1 id="light-map">Light Map</h1>
+<h2 id="rendering-equation">Rendering Equation</h2>
+<p>Basically everything in computer graphics, whether it is offline rendering or real time rendering, tries to simulate the famous rendering equation. The only difference is that how much assumption it has to make to design the algorithm. Some places little limitation, like path tracing. Some puts more, like ambient occlusion. The less assumption it is made, it is more likely to achieve better result.</p>
+<p>$ {L_{o}(\omega_{o}) = \int L_{i}(\omega_{i}) *f( \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i}} $</p>
+<p>In certain cases, you may have a Le component in this equation, which represents emissive materials. Since it is not involved in the context of this article, it is not shown here. Li and Lo represent radiance value for the output and input angle. &ldquo;f&rdquo; is the four dimensional brdf function.  $\theta_{i}$ is the angle between $ \omega_{i} $ and normal. Don&rsquo;t be afraid of this integral, what it says is to accumulate contributions of light from all angles, nothing more.</p>
+<p>For traditional light map, there are a couple of assumptions made:</p>
+<ul>
+<li>All surfaces in the scene is purely diffuse which behaves as exactly lambertian surfaces.</li>
+<li>All objects are static.</li>
+<li>All lights are static.</li>
+</ul>
+<p>For a scene like this, no light will change if the viewing angle is different across frames. That said we can totally bake all lighting information into textures in a pre-process step and use these textures for real time rendering. Those textures are the light map. They were first used in Quake. The question is in what form the lighting information should be stored in light map. We will answer the question in the following sections.</p>
+<h2 id="radiance-and-irradiance">Radiance and irradiance</h2>
+<p>Here are a couple of basic terms in computer graphics:</p>
+<ul>
+<li>Flux. Energy that passes through a specific area per-time.</li>
+<li>Irradiance. Flux per unit-area</li>
+<li>radiance. Flux per unit-area per solid angle</li>
+</ul>
+<p>It is radiance that human can perceive and its value is not changed along a certain direction if there is only vacuum. The following equation demonstrates how to get irradiance value from radiance:</p>
+<p>$ { E = \int L_{i}(\omega_{i}) *cos(\theta_{i}) d\omega_{i}} $</p>
+<h2 id="lambertian-surface-feature">Lambertian surface feature</h2>
+<p>Lambertian surface appears equally bright from all viewing directions and reflects all incident light. It has a very nice feature, the brdf function returns a constant value regardless of the two angles for any specific position. The below equation is the directional-hemisphere reflectance equation:</p>
+<p>$ \rho_{d} = \int f( \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i} $</p>
+<p>Notice that  $ \rho_{d} $ is a function of position. Since we are focusing on a single position, it is dropped in the above equation. Because brdf is a constant value, we have the following equation after isolating this factor out of the integral:</p>
+<p>$ \rho_{d} = f( \omega_{i}, \omega_{o} ) * \int cos(\theta_{i}) d\omega_{i} $</p>
+<p>The integral component is actually $ \pi $:</p>
+<p>$ \begin{array} {lcl} \int cos(\theta_{i}) d\omega_{i} &amp; = &amp; \int_{0}^{2\pi} \int_{0}^{\frac{\pi}{2}} cos(\theta_{i}) sin(\theta_{i}) d\theta_i d\phi \\\ &amp; = &amp; \int_{0}^{2\pi} d\phi \int_{0}^{\frac{\pi}{2}} cos(\theta_{i}) sin(\theta_{i}) d\theta_i \\\ &amp; = &amp; 2\pi \int_{0}^{\frac{\pi}{2}} cos(\theta_{i}) sin(\theta_{i}) d\theta_i \\\ &amp; = &amp; 0.5 * \pi \int_{0}^{\frac{\pi}{2}} sin(2\theta_{i}) d(2\theta_i) \\\ &amp; = &amp; \pi \end{array} $</p>
+<p>So we have the final equation for our lambertian brdf, which is extremely simple:</p>
+<p>$ f(\omega_{i}, \omega_{o}) = \dfrac{\rho_{d}}{\pi} $</p>
+<p>If we substitute the brdf function in the rendering equation with this one, here is what we will get:</p>
+<p>$ {L_{o}(\omega_{o}) = \dfrac{\rho_{d}}{\pi} * \int L_{i}(\omega_{i}) *cos(\theta_{i}) d\omega_{i}} $</p>
+<p>The lucky thing is that the integral part of this equation turns out to be irradiance. And irradiance is what needs to be stored in light map. As a matter of fact, light map was also named irradiance map by some people.</p>
+<h2 id="radiosity-algorithm">Radiosity Algorithm</h2>
+<p>Radiosity is usually the algorithm for calculating those values. Basically it divides the scene into many small patches and generates form factors between each two patches and then makes some interations. During the first iteration, only emissive patches have energy, they distribute those energy to other visible patches. After the first iteration, patches directly visible to emissive patches receive some energy, however there won&rsquo;t be effects like color bleeding or multiple light bounces. Some patches will be totally black. With the second iteration, there are more patches with energy that can be distributed to other patches. Even if patches not directly visible to emissive patches, usually light sources, will be lit this time. After several rounds of iteration, it will reach equilibrium. It should give a good result. Check <a href="https://en.wikipedia.org/wiki/Radiosity_(computer_graphics)">here</a> for more detailed explanation.</p>
+<figure>
+    <img src="/img/posts/directional_light_map_from_the_ground_up/680px-radiosity_progress.png"/> 
+</figure>
+
+<p>The algorithm is not suitable for non-lambertian brdf surfaces. For example, mirrors will not be rendered correctly with this technique alone because the lambertian brdf is totally different from a highly reflective brdf. And it is extremely slow.</p>
+<h2 id="light-map-limitation">Light Map Limitation</h2>
+<p>The robustness of an algorithm depends on the assumption it makes. Since we are focusing on static objects and static lights, those two are sort of acceptable. You can totally add dynamic light contribution during rendering. However not all of the surfaces are lambertian in the real case. Some have mirror like appearance, which will cause caustic and that&rsquo;s why there won&rsquo;t be caustic in light map. Anyway, those are not serious limitation.</p>
+<p>One big advantage of light map over dynamic light computation during rendering is that there will be multiple light bounces, like color bleeding and soft shadow, although they are all static most of the time. So it usually represents low-frequency information, which is another implicit assumption made by light map algorithm. With this assumption, resolution of light map can be substantially reduced. We don&rsquo;t usually allocate large memory for light map so that there is a one on one correspondence between texels in light map and texels in diffuse map. Light map usually needs to cover the whole scene. Although diffuse map also needs to cover the whole scene, it is usually tiled or repeated when sampled. It won&rsquo;t be the same for light map, it is usually not tiled. The issue is if there is no one on one relationship between texels, there is no way to bake detailed information like variations caused by normal map. That&rsquo;s why the scene looks flat with only light map.</p>
+<p>In order to show variance brought by normal map, directional light map is introduced to solve the issue.</p>
+<h1 id="directional-light-map">Directional Light Map</h1>
+<p>The reason we don&rsquo;t have normal map variance when rendering with light map is that the irradiance value collected during pre-processing is integrated over the hemisphere around the geometry normal, not the surface normal defined through normal map or other method. It is valid to use the surface normal during preprocessing, however it will ends up in the issue of large light map memory that we tried to avoid in the first place.</p>
+<p>Another impractical solution is to generate irradiance environment map at every position sampled in the scene. During rendering, the irradiance value could be retrieved through irradiance environment map and the surface normal. Regardless of the memory usage, it is the ideal solution for the issue. An advantage over the solution mentioned above is that it will support for dynamic normal because irradiance value is available for every direction. However the huge memory requirement renders it totally useless.</p>
+<h2 id="spherical-harmonics">Spherical Harmonics</h2>
+<p>One practical solution for directional light map is using spherical harmonics to represent the irradiance environment map. Usually a couple of float numbers are needed to store the irradiance environment map and it is much more practical comparing with storing irradiance map directly.</p>
+<p>The disadvantage is that there is still a great amount of memory needs to be stored in light map and it takes some extra cost than a normal light map algorithm because it is necessary to reconstruct the irradiance value with spherical harmonics.</p>
+<h2 id="radiosity-normal-map">Radiosity Normal Map</h2>
+<p>A much more practical solution is proposed by Valve, it is called radiosity normal map by them. It is not physically correct, however it works pretty well in the real case.</p>
+<p>Instead of integrating over the hemisphere around geometry normal, three different basis are used during baking irradiance. That gives three different irradiance value for each sampled position.</p>
+<figure>
+    <img src="/img/posts/directional_light_map_from_the_ground_up/basis.png" width="300"/> 
+</figure>
+
+<p>Those three basis are not arbitrarily chosen. They are pairwise orthogonal and cover the whole hemisphere. The reconstruction process is relatively simple:</p>
+<p>$ \begin{array} {lcl} color &amp;=&amp; dot( normal , basis[0] )^2 * lightmap_color[0] \\\ &amp;+&amp; dot( normal, basis[1] )^2 * lightmap_color[1] \\\ &amp;+&amp; dot( normal , basis[2] )^2 * lightmap_color[2] \end{array} $</p>
+<p>Please note that the equation above is not exactly the same with the one mention in the paper by valve, it is the one from real time rendeing. Because the equation in the paper is incorrect. Since it is orthogonal basis that the normal projects on, there is no need to normalize the factors because the summation of the squared projected values is exactly 1.</p>
+<p>Source engine by Valve uses this method. And Unreal Engine 3 uses a simpler version of it, only one irradiance value and three intensity value (three numbers) are stored. Instead of blending among the three, intensity values are blended and then multiply the irradiance value. So varying per-pixel values in normal map can only produce different brightnesses of the lightmap texel color instead of different colors.</p>
+<p>If normal is not used for other purpose, normal map can be changed in another different form. Instead of storing normal in it, the squared projected values of the normal on the basis can be stored in it. And it can save many hardware cycles during real time calculation. <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.406.4625&amp;rep=rep1&amp;type=pdf">Here</a> is more detailed explanation.</p>
+<h2 id="other-methods">Other methods</h2>
+<p>There are also other methods targeting on directional light map. Anyway, each of them tries to add more detail through their pre-baked light map and the basic rule always stands out, taking normal into account during light calculating of each frame rendering.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>Directional light map is an extension to traditional light map algorithm, it takes surface normal intro account during rendering, which brings much more detailed information to the final generated image.</p>
+<p>Although it may introduces a couple of extra instructions comparing with the old normal map, it is quite affordable even on mobile devices, that&rsquo;s why UE3 has an internal implementation of it on mobile. Given the extra quality it brings, those cost should be considered worthy.</p>
+<h1 id="reference">Reference</h1>
+<p>[1] <a href="http://docs.unity3d.com/Manual/LightmappingDirectional.html">Directional Light Map, Unity document</a><br>
+[2] <a href="http://web.student.tuwien.ac.at/~e9907459/docs_tutorials/directionalLightmaps.pdf">Directional Lightmap</a><br>
+[3] <a href="http://pbrt.org/">Physically Based Rendering</a><br>
+[4] <a href="http://www.realtimerendering.com/">Real Time Rendering</a></p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "yourdiscussshortname" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );">
+  </script>
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+        2020
+         Jiayin Cao 
+      
+      
+         · 
+        Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+      
+      
+        
+      
+    </section>
+  </footer>
+
+    </main>
+
+    
+      
+      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>
