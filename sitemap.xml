@@ -1,16 +1,124 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
-  <sitemap>
-    <loc>https://agraphicsguynotes.com/cn/sitemap.xml</loc>
-    
-  </sitemap>
+  <url>
+    <loc>https://agraphicsguynotes.com/</loc>
+    <lastmod>2018-11-29T00:00:00-08:00</lastmod>
+  </url>
   
-  <sitemap>
-    <loc>https://agraphicsguynotes.com/en/sitemap.xml</loc>
-    
-      <lastmod>2018-11-29T00:00:00-08:00</lastmod>
-    
-  </sitemap>
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/basic_color_science_for_graphcis_engineer/</loc>
+    <lastmod>2018-11-29T00:00:00-08:00</lastmod>
+  </url>
   
-</sitemapindex>
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/</loc>
+    <lastmod>2018-11-29T00:00:00-08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/sample_anisotropic_microfacet_brdf/</loc>
+    <lastmod>2018-07-18T00:00:00-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/how_does_pbrt_verify_bxdf/</loc>
+    <lastmod>2018-03-09T00:00:00-08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/volume_rendering_in_offline_renderer/</loc>
+    <lastmod>2016-11-10T00:00:00-08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/image_based_lighting_in_offline_and_realtime_rendering/</loc>
+    <lastmod>2016-09-07T00:00:00-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/instant_radiosity_in_my_renderer/</loc>
+    <lastmod>2016-02-08T00:00:00-08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/practical_implementation_of_mis_in_bidirectional_path_tracing/</loc>
+    <lastmod>2016-01-16T00:00:00-08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/naive_bidirectional_path_tracing/</loc>
+    <lastmod>2016-01-03T00:00:00-08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/physically_based_shading_in_games/</loc>
+    <lastmod>2015-12-05T00:00:00-08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/glass_material_simulated_by_microfacet_bxdf/</loc>
+    <lastmod>2015-11-11T00:00:00-08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/sample_microfacet_brdf/</loc>
+    <lastmod>2015-11-01T00:00:00-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/derivation_of_pure_specular_reflection_brdf/</loc>
+    <lastmod>2015-10-22T00:00:00-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/monte_carlo_integral_with_multiple_importance_sampling/</loc>
+    <lastmod>2015-08-10T00:00:00-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/basics_about_path_tracing/</loc>
+    <lastmod>2015-07-20T00:00:00-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/directional_light_map_from_the_groud_up/</loc>
+    <lastmod>2015-06-24T00:00:00-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/unleash_the_power_of_direct3d_12/</loc>
+    <lastmod>2015-06-17T00:00:00-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/tessellation_on_d3d11/</loc>
+    <lastmod>2015-06-16T00:00:00-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/about/</loc>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/authors/</loc>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/categories/</loc>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/series/</loc>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/tags/</loc>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/about/</loc>
+  </url>
+  
+</urlset>
