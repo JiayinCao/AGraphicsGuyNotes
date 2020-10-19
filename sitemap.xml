@@ -102,6 +102,10 @@
   </url>
   
   <url>
+    <loc>https://agraphicsguynotes.com/about/</loc>
+  </url>
+  
+  <url>
     <loc>https://agraphicsguynotes.com/authors/</loc>
   </url>
   
@@ -115,10 +119,6 @@
   
   <url>
     <loc>https://agraphicsguynotes.com/tags/</loc>
-  </url>
-  
-  <url>
-    <loc>https://agraphicsguynotes.com/about/</loc>
   </url>
   
 </urlset>
