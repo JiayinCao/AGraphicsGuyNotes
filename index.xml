@@ -73,6 +73,16 @@
     </item>
     
     <item>
+      <title>Monte Carlo Integral with Multiple Importance Sampling</title>
+      <link>https://agraphicsguynotes.com/posts/monte_carlo_integral_with_multiple_importance_sampling/</link>
+      <pubDate>Mon, 10 Aug 2015 00:00:00 -0700</pubDate>
+      
+      <guid>https://agraphicsguynotes.com/posts/monte_carlo_integral_with_multiple_importance_sampling/</guid>
+      <description>The book physically based rendering doesn&amp;rsquo;t spend too much effort explaining MIS, however it does mention it. In order to be more familiar with MIS(Multiple Importance Sampling), I spent some time reading Veach&amp;rsquo;s thesis. The whole thesis is relatively long, however the chapter about MIS is kind of independent to the other ones. Worth taking some notes in case I forget later.
+Monte Carlo Integral Monte Carlo tries to solve integral problem by random sampling.</description>
+    </item>
+    
+    <item>
       <title>Basics about path tracing</title>
       <link>https://agraphicsguynotes.com/posts/basics_about_path_tracing/</link>
       <pubDate>Mon, 20 Jul 2015 00:00:00 -0700</pubDate>
