@@ -63,6 +63,15 @@
     </item>
     
     <item>
+      <title>Practical implementation of MIS in Bidirectional Path Tracing</title>
+      <link>https://agraphicsguynotes.com/posts/practical_implementation_of_mis_in_bidirectional_path_tracing/</link>
+      <pubDate>Sat, 16 Jan 2016 00:00:00 -0800</pubDate>
+      
+      <guid>https://agraphicsguynotes.com/posts/practical_implementation_of_mis_in_bidirectional_path_tracing/</guid>
+      <description>In my previous post, I talked some basic stuff about naive bidirectional path tracing. However it is hard to show any real value since there are always too much noise comparing with best solutions depending on the scene to be rendered. That is because the contribution of each specific path is not properly weighted. And multiple importance sampling can be the key to the issue, the following comparison shows big difference between different methods.</description>
+    </item>
+    
+    <item>
       <title>Naive Bidirectional Path Tracing</title>
       <link>https://agraphicsguynotes.com/posts/naive_bidirectional_path_tracing/</link>
       <pubDate>Sun, 03 Jan 2016 00:00:00 -0800</pubDate>

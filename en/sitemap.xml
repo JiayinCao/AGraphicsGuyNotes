@@ -53,6 +53,11 @@
   </url>
   
   <url>
+    <loc>https://agraphicsguynotes.com/posts/practical_implementation_of_mis_in_bidirectional_path_tracing/</loc>
+    <lastmod>2016-01-16T00:00:00-08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://agraphicsguynotes.com/posts/naive_bidirectional_path_tracing/</loc>
     <lastmod>2016-01-03T00:00:00-08:00</lastmod>
   </url>
