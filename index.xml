@@ -69,7 +69,7 @@
       
       <guid>https://agraphicsguynotes.com/posts/glass_material_simulated_by_microfacet_bxdf/</guid>
       <description>Microfacet model can not only be used for rough metal, it can also be used to simulate rough glass material. This blog is about rendering glass material with microfacet model. Basically all of the theory comes from this paper. Different from the pure refraction model mentioned in my previous blog, the bxdf mentioned here can also refract a single incident ray into multiple directions instead of just one.
-The above image is generated with my renderer.</description>
+  The above image is generated with my renderer.</description>
     </item>
     
     <item>
