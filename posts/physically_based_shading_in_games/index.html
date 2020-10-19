@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+
+    <meta name="author" content="Jiayin Cao">
+    <meta name="description" content="Physically based shading has been around for years, it not only eases the workflow for artist, but also delivers high quality shading with neglectable overhead, I see no reason to avoid it in today&rsquo;s game. Here is an image taken from UE4 document.
+  When the term first came out, I was totally no idea what this new stuff is. And it took me quite a while to get some basic idea on it because there are so many materials and some of them are a little confusing.">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Physically Based Shading in Games"/>
+<meta name="twitter:description" content="Physically based shading has been around for years, it not only eases the workflow for artist, but also delivers high quality shading with neglectable overhead, I see no reason to avoid it in today&rsquo;s game. Here is an image taken from UE4 document.
+  When the term first came out, I was totally no idea what this new stuff is. And it took me quite a while to get some basic idea on it because there are so many materials and some of them are a little confusing."/>
+
+    <meta property="og:title" content="Physically Based Shading in Games" />
+<meta property="og:description" content="Physically based shading has been around for years, it not only eases the workflow for artist, but also delivers high quality shading with neglectable overhead, I see no reason to avoid it in today&rsquo;s game. Here is an image taken from UE4 document.
+  When the term first came out, I was totally no idea what this new stuff is. And it took me quite a while to get some basic idea on it because there are so many materials and some of them are a little confusing." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://agraphicsguynotes.com/posts/physically_based_shading_in_games/" />
+<meta property="article:published_time" content="2015-12-05T00:00:00-08:00" />
+<meta property="article:modified_time" content="2015-12-05T00:00:00-08:00" />
+
+
+    <title>
+  Physically Based Shading in Games · A Graphics Guy&#39;s Note
+</title>
+
+    
+      <link rel="canonical" href="https://agraphicsguynotes.com/posts/physically_based_shading_in_games/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.1.7/css/fork-awesome.min.css" integrity="sha256-gsmEoJAws/Kd3CjuOQzLie5Q3yshhvmo7YNtBG7aaEY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.9836c03fe5c87d102278a33e86d0591ef36c89b1e17e8e547ebf84c05cee010e.css" integrity="sha256-mDbAP&#43;XIfRAieKM&#43;htBZHvNsibHhfo5Ufr&#43;EwFzuAQ4=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="/css/coder-dark.min.717236c74e0a5208ef73964a9f44c6b443b689a95b270d8b2a40d0c012460dac.css" integrity="sha256-cXI2x04KUgjvc5ZKn0TGtEO2ialbJw2LKkDQwBJGDaw=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+      <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+    
+
+    <meta name="generator" content="Hugo 0.76.5" />
+  </head>
+
+  
+  
+    
+  
+  <body class="colorscheme-auto"
+        onload=" twemoji.parse(document.body); "
+  >
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      A Graphics Guy&#39;s Note
+    </a>
+    
+      
+        <span id="dark-mode-toggle" class="float-right">
+          <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+        </span>
+      
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+        
+        
+          
+          
+          
+            
+          
+            
+              
+                <li class="navigation-item menu-separator">
+                  <span>|</span>
+                </li>
+                
+              
+              <li class="navigation-item">
+                <a href="https://agraphicsguynotes.com/cn/">中文</a>
+              </li>
+            
+          
+        
+        
+          <li class="navigation-item separator">
+            <span>|</span>
+          </li>
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Physically Based Shading in Games</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2015-12-05T00:00:00-08:00'>
+                December 5, 2015
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              8-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div>
+        
+        <p>Physically based shading has been around for years, it not only eases the workflow for artist, but also delivers high quality shading with neglectable overhead, I see no reason to avoid it in today&rsquo;s game. Here is an image taken from UE4 document.</p>
+<figure>
+    <img src="/img/posts/physically_based_shading_in_games/measured_materials.png" width="800"/> 
+</figure>
+
+<p>When the term first came out, I was totally no idea what this new stuff is. And it took me quite a while to get some basic idea on it because there are so many materials and some of them are a little confusing. I can&rsquo;t say that I fully understand all of the theory simply because I don&rsquo;t, however I would still like to write something that I knew and list something useful that I found in this blog. Hopefully it can be helpful for someone.</p>
+<h1 id="physically-based-shading">Physically Based Shading</h1>
+<p>Basically physically based shading performs shading operation in a more physical accurate way than the old common &lsquo;ad-hoc&rsquo; model, which is usually Phong or any modified version. Here is the basic form of Phong model (note that it is shading model listed below, not BRDF):</p>
+<p>$ I_p=\sum_{m\in lights}(k_dm_d(L_m\cdot N)+k_sm_s(R\cdot V)^\alpha)$</p>
+<p>Ambient term is dropped since it is not involved in this topic. R is the reflected vector of the incident direction around normal. It has many parameters for artist to tune and special care needs to be taken in certain aspect to avoid unnatural look. Although this model is used ever since fixed function graphics hardware, it is apparently out-dated comparing with more advanced model like &lsquo;microfacet&rsquo; model.</p>
+<h2 id="diffuse-and-specular">Diffuse and Specular</h2>
+<p>Generally there are two categories of reflection, diffuse and specular. In the following diagram, the yellow ones are specular reflection and the rest are diffuse reflection.</p>
+<figure>
+    <img src="/img/posts/physically_based_shading_in_games/ds.png" width="600"/> 
+</figure>
+
+<p>Diffuse is the kind of reflection whose distribution is totally random. It happens when the photons actually penetrate into the surface and get out after several bounces. Depending on what the material inside the surface is, it can manifest itself as diffuse reflection or subsurface scattering which is a much more complex concept. There are several brdf model available for simulating it.</p>
+<ul>
+<li>Lambert</li>
+<li>OrenNayar</li>
+<li>Burley</li>
+</ul>
+<p>UE4 uses the simplest one, lambert, as their diffuse model because little difference can be noticed between those models. Although UE4 users can enable other diffuse model with simple macro switching in the uber shader, I seriously doubt if it helps on the visual quality of the final image. See the image below, it is basically no difference to me. I can&rsquo;t justify the reason to do the switching.</p>
+<figure>
+    <img src="/img/posts/physically_based_shading_in_games/dm.png" width="400"/> 
+</figure>
+
+<p>Unlike diffuse reflection, specular happens right at the surface being shaded. And its reflected direction is highly dependent on the incident angle. Take an extreme case, mirror will reflect viewing angle into exact one direction. Microfacet model is the most commonly used bxdf for specular lighting. It assumes that the surface is composed of many small micro facets, each one among them is a pure specular surface or in other words, perfect mirror. Only micro facets with normal exactly the same with the half angle between incident and reflected direction will contribute. It is the aggregate behavior defines what the surface actually looks like. The more uniform those microfacet normals are, the smoother the surface is, vice versa. Here is the microfacet brdf:</p>
+<p>$ f(\omega_i,\omega_o,x) = \dfrac{F(\omega_i , h) G(\omega_i,\omega_o,h) D(h)}{4 cos(\theta_i) cos(\theta_o)} $</p>
+<p>F is the fresnel term which will be mentioned later. D is the distribution term defining where these microfacets face, here is more information on it. G is a shadowing factor for masking and it is usually a less dominant term in this bxdf.</p>
+<figure>
+    <img src="/img/posts/physically_based_shading_in_games/mf.png" width="600"/> 
+</figure>
+
+<p>Wait a second, phong model also takes diffuse and specular into account, what is the big deal in this new PBS model?</p>
+<p>In term of diffuse reflection, they are the same. Both use lambert bxdf. However it is microfacet bxdf model which delivers much better result than the phong model. And another subtle difference is the way pbs model blends diffuse and specular.</p>
+<h1 id="energy-conservation">Energy Conservation</h1>
+<p>Energy conservation is one of the basic rules for every physical correct bxdf to obey. It says that the total amount of reflected energy of light can&rsquo;t not be larger than received unless it is emissive material. It makes perfect sense. From a mathematics perspective, it can be expressed this way:</p>
+<p>$ \int_{\Omega}f_r(p,\omega_o,\omega_i) cos\theta_i d\omega_i \le 1$</p>
+<p>Unfortunately bxdf of phong totally ignores this rule, forwarding the responsibility to artists in their workflow, which usually costs them a lot of time.</p>
+<h2 id="specular-bxdf">Specular bxdf</h2>
+<p>Let&rsquo;s focus on the specular part first. Two things deserve our attention, reflection intensity and the high light shape. In the phong model, we have two parameters controlling each of these, which used to be defined as &ldquo;Specular Color&rdquo; and &ldquo;Specular Power&rdquo;.  Unfortunately, it is quite easy to break the rule of energy conservation because these two terms should be related to each other in order to preserve it. Simply put it, phong brdf is just not a normalized brdf.</p>
+<figure>
+    <img src="/img/posts/physically_based_shading_in_games/normalization_factor.jpg" width="600"/> 
+</figure>
+
+<p>See the above image, the top row, as the specular power becomes higher, we get narrower high light. While the ugly fact is that the specular intensity never changes. That is just not true in our real life. As we can notice from the bottom row, the reflection becomes stronger as it narrows down. In order to simulate it in the phong model, it forces artist to increase specular color, sometimes even above one. And if there are only two values to tune, it may be acceptable, not to mention it is not accurate. What if the specular power is provided by a texture? Artist will have to make sure they have a cooresponding specular color texture and what is worse is that every pair of pixels from these two textures needs to be tuned.</p>
+<p>With the microfacet brdf model, artists have only one parameter defining both of the shape and intensity of the reflection. And that is the roughness, or glossyness in some engines. So only one parameter needs to be set and the shading policy will force it to be energy conservation no matter what value is provided by the artist. In other words, artists will have little chance to make mistake.</p>
+<figure>
+    <img src="/img/posts/physically_based_shading_in_games/pbr_theory_watermud.png" width="800"/> 
+</figure>
+
+<p>Notice the mud and water have different reflection intensity. As a matter of fact their reflectivities are exactly the same, the only thing different is the gloss parameter. Here is another example from my offline renderer (I know I&rsquo;m talking about physically based shading in real time rendering, however the theory behind these are exactly the same, so it can be used as a reference too):</p>
+<figure>
+    <img src="/img/posts/physically_based_shading_in_games/ec1.png" width="800"/> 
+</figure>
+
+<p>These monkeys have different roughness values with the same base color. The reflection on the left-most one is clearly more sharp comparing with the right ones.</p>
+<p>There are also ways to make phong brdf energy conservative, check <a href="http://www.thetenthplanet.de/archives/255">here</a>.</p>
+<h2 id="blend-between-diffuse-and-specular">Blend between Diffuse and Specular</h2>
+<p>Besides the unnormalized feature of phong model, the other ugly thing that breaks energy conservation is the way it blends diffuse and specular. As a matter of fact, it doesn&rsquo;t even blend them, it just add them together which makes little sense in a physical manner. From a micro perspective, photons either reflect at the surface or penetrate into it, they can do both at the same time. That said the total energy reflected by diffuse and specular should obey the rule of energy conservation. Obviously phong fails to keep it again.</p>
+<p>The right way of blending these two is to make sure the following equation goes right:</p>
+<p>$ m_d + m_s \le 1 $</p>
+<p>UE4 uses a specific parameter called Mettalic to lerp between diffuse and specular. One minor detail in UE4 material system to be noticed is that even if metallic is zero, 8% percent specular reflection will still be present. Another paramter called specular is introduced to remove this 8% for some special materials. Here is an image showing a sphere with different metallic value. There is no diffuse reflection for surfaces with 1 as metallic parameter, that makes sense because metal doesn&rsquo;t show any diffuse reflection in our real life.</p>
+<figure>
+    <img src="/img/posts/physically_based_shading_in_games/diffusetospecular.png" width="800"/> 
+</figure>
+
+<h1 id="fresnel-effect">Fresnel Effect</h1>
+<p>The other big benefit that can&rsquo;t be ignored is the fresnel effect. That said light reflection will be much higher at grazing angle. Rim color is what we used to simulated in the old ad-hoc model. Check here for the importance of fresnel effect, the author takes many real life examples convincing readers how importance fresnel effect is in our daily life. Here is one sphere demonstrating how importance fresnel effect is, we get much more brighter reflection at grazing angle. And that is just the work of fresnel.</p>
+<figure>
+    <img src="/img/posts/physically_based_shading_in_games/fresnel01-600x600-293724547.png" width="400"/> 
+</figure>
+
+<p>For a real time solution for fresnel equation, Schlick&rsquo;s approximation is enough most of the time.</p>
+<p>$ R = R(0) + ( 1 - R(0) ) ( 1 - cos\theta)^5$</p>
+<p>It is relatively easy to see from this image that when at grazing angle, fresnel value will approach 1 no matter what value R(0) is provided in the material system. That is exactly why we are seeing bright reflection around the contour of this sphere. One can also check <a href="https://seblagarde.wordpress.com/2013/04/29/memo-on-fresnel-equations/">here</a> for further information.</p>
+<p>Valuable resources</p>
+<p>Here are the courses on pbs at each year siggraph:</p>
+<ul>
+<li><a href="http://renderwonk.com/publications/s2010-shading-course/">Siggraph 2010 pbs course</a></li>
+<li><a href="http://blog.selfshadow.com/publications/s2012-shading-course/">Siggraph 2012 pbs course</a></li>
+<li><a href="http://blog.selfshadow.com/publications/s2013-shading-course/">Siggraph 2013 pbs course</a></li>
+<li><a href="http://blog.selfshadow.com/publications/s2014-shading-course/">Siggraph 2014 pbs course</a></li>
+<li><a href="http://blog.selfshadow.com/publications/s2015-shading-course/">Siggraph 2015 pbs course</a></li>
+</ul>
+<h1 id="summary">Summary</h1>
+<p>I guess the features listed above are not all about pbs in games. However they are definitely the importance ones.</p>
+<p>And as we can see from the above images, pbs introduces quite a lot of new nice features in games. It is too good to be ignored. Of course it needs more instructions than before, however texture operations are roughly the same. Since even mobile devices can achieve very high GFLOPS, those extra instructions in physically based shading won&rsquo;t affect much performance on modern graphics hardware, which just gives us no excuses to avoid it.</p>
+<h1 id="reference">Reference</h1>
+<p>[1] <a href="http://www.rorydriscoll.com/2009/01/25/energy-conservation-in-games/">Energy Conservation in Games</a><br>
+[2] <a href="http://www.farbrausch.de/~fg/stuff/phong.pdfhttp://www.farbrausch.de/~fg/stuff/phong.pdf">Phong Normalization Factor derivation. Blinn-Phong normalization factor</a><br>
+[3] <a href="http://www.reedbeta.com/blog/2013/07/31/hows-the-ndf-really-defined/">How is the NDF really defined</a><br>
+[4] <a href="http://www.thetenthplanet.de/archives/255">The Blinn-Phong Normalization Zoo</a><br>
+[5] <a href="https://www.marmoset.co/toolbag/learn/pbr-theory">Basic Theory of Physically Based Rendering</a><br>
+[6] <a href="https://docs.unrealengine.com/latest/INT/Engine/Rendering/Materials/PhysicallyBased/index.html">Physically Based Materials</a><br>
+[7] <a href="https://www.unrealengine.com/blog/physically-based-shading-in-ue4">Physically Based Shading In UE4</a><br>
+[8] <a href="https://seblagarde.wordpress.com/2013/04/29/memo-on-fresnel-equations/">Memo on Fresnel equations</a></p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "yourdiscussshortname" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );">
+  </script>
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+        2020
+         Jiayin Cao 
+      
+      
+         · 
+        Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+      
+      
+        
+      
+    </section>
+  </footer>
+
+    </main>
+
+    
+      
+      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>

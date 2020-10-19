@@ -53,6 +53,16 @@
   </url>
   
   <url>
+    <loc>https://agraphicsguynotes.com/posts/naive_bidirectional_path_tracing/</loc>
+    <lastmod>2016-01-03T00:00:00-08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/physically_based_shading_in_games/</loc>
+    <lastmod>2015-12-05T00:00:00-08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://agraphicsguynotes.com/posts/glass_material_simulated_by_microfacet_bxdf/</loc>
     <lastmod>2015-11-11T00:00:00-08:00</lastmod>
   </url>

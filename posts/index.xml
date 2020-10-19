@@ -63,6 +63,25 @@
     </item>
     
     <item>
+      <title>Naive Bidirectional Path Tracing</title>
+      <link>https://agraphicsguynotes.com/posts/naive_bidirectional_path_tracing/</link>
+      <pubDate>Sun, 03 Jan 2016 00:00:00 -0800</pubDate>
+      
+      <guid>https://agraphicsguynotes.com/posts/naive_bidirectional_path_tracing/</guid>
+      <description>I posted a blog about path tracing some time ago, I didn&amp;rsquo;t regard it as a simple algorithm until I got my hands dirty on bidirectional path tracing. It really took me quite a while to get everything hooked up. Getting BDPT (short for bidirectional path tracing) converging to the same result with path tracing is far from a trivial task, any tiny bug hidden in the renderer will drag you into a nightmare.</description>
+    </item>
+    
+    <item>
+      <title>Physically Based Shading in Games</title>
+      <link>https://agraphicsguynotes.com/posts/physically_based_shading_in_games/</link>
+      <pubDate>Sat, 05 Dec 2015 00:00:00 -0800</pubDate>
+      
+      <guid>https://agraphicsguynotes.com/posts/physically_based_shading_in_games/</guid>
+      <description>Physically based shading has been around for years, it not only eases the workflow for artist, but also delivers high quality shading with neglectable overhead, I see no reason to avoid it in today&amp;rsquo;s game. Here is an image taken from UE4 document.
+  When the term first came out, I was totally no idea what this new stuff is. And it took me quite a while to get some basic idea on it because there are so many materials and some of them are a little confusing.</description>
+    </item>
+    
+    <item>
       <title>Glass Material Simulated by Microfacet BXDF</title>
       <link>https://agraphicsguynotes.com/posts/glass_material_simulated_by_microfacet_bxdf/</link>
       <pubDate>Wed, 11 Nov 2015 00:00:00 -0800</pubDate>
