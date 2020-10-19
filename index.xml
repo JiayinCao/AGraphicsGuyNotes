@@ -63,6 +63,15 @@
     </item>
     
     <item>
+      <title>The Missing Primary Ray PDF in Path Tracing</title>
+      <link>https://agraphicsguynotes.com/posts/the_missing_primary_ray_pdf_in_path_tracing/</link>
+      <pubDate>Thu, 04 Feb 2016 00:00:00 -0800</pubDate>
+      
+      <guid>https://agraphicsguynotes.com/posts/the_missing_primary_ray_pdf_in_path_tracing/</guid>
+      <description>I was always wondering why don&amp;rsquo;t we take the PDF of primary ray into account in a path tracer. Sadly there aren&amp;rsquo;t many resources available explaining it. I guess the book Physically based rendering 3rd will provide some explanation, however it is not released yet. After some searching on the internet, I finally got something to explain it. It actually gets cancelled with the terms in importance function and LTE. It gets cancelled in a very elegant way that we don&amp;rsquo;t need to put any resources on it at all, which is why many open-source ray tracer don&amp;rsquo;t consider it in the first place.</description>
+    </item>
+    
+    <item>
       <title>Practical implementation of MIS in Bidirectional Path Tracing</title>
       <link>https://agraphicsguynotes.com/posts/practical_implementation_of_mis_in_bidirectional_path_tracing/</link>
       <pubDate>Sat, 16 Jan 2016 00:00:00 -0800</pubDate>

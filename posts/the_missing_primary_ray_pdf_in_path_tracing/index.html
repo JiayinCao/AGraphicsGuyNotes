@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+
+    <meta name="author" content="Jiayin Cao">
+    <meta name="description" content="I was always wondering why don&rsquo;t we take the PDF of primary ray into account in a path tracer. Sadly there aren&rsquo;t many resources available explaining it. I guess the book Physically based rendering 3rd will provide some explanation, however it is not released yet. After some searching on the internet, I finally got something to explain it. It actually gets cancelled with the terms in importance function and LTE. It gets cancelled in a very elegant way that we don&rsquo;t need to put any resources on it at all, which is why many open-source ray tracer don&rsquo;t consider it in the first place.">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="The Missing Primary Ray PDF in Path Tracing"/>
+<meta name="twitter:description" content="I was always wondering why don&rsquo;t we take the PDF of primary ray into account in a path tracer. Sadly there aren&rsquo;t many resources available explaining it. I guess the book Physically based rendering 3rd will provide some explanation, however it is not released yet. After some searching on the internet, I finally got something to explain it. It actually gets cancelled with the terms in importance function and LTE. It gets cancelled in a very elegant way that we don&rsquo;t need to put any resources on it at all, which is why many open-source ray tracer don&rsquo;t consider it in the first place."/>
+
+    <meta property="og:title" content="The Missing Primary Ray PDF in Path Tracing" />
+<meta property="og:description" content="I was always wondering why don&rsquo;t we take the PDF of primary ray into account in a path tracer. Sadly there aren&rsquo;t many resources available explaining it. I guess the book Physically based rendering 3rd will provide some explanation, however it is not released yet. After some searching on the internet, I finally got something to explain it. It actually gets cancelled with the terms in importance function and LTE. It gets cancelled in a very elegant way that we don&rsquo;t need to put any resources on it at all, which is why many open-source ray tracer don&rsquo;t consider it in the first place." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://agraphicsguynotes.com/posts/the_missing_primary_ray_pdf_in_path_tracing/" />
+<meta property="article:published_time" content="2016-02-04T00:00:00-08:00" />
+<meta property="article:modified_time" content="2016-02-04T00:00:00-08:00" />
+
+
+    <title>
+  The Missing Primary Ray PDF in Path Tracing · A Graphics Guy&#39;s Note
+</title>
+
+    
+      <link rel="canonical" href="https://agraphicsguynotes.com/posts/the_missing_primary_ray_pdf_in_path_tracing/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.1.7/css/fork-awesome.min.css" integrity="sha256-gsmEoJAws/Kd3CjuOQzLie5Q3yshhvmo7YNtBG7aaEY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.9836c03fe5c87d102278a33e86d0591ef36c89b1e17e8e547ebf84c05cee010e.css" integrity="sha256-mDbAP&#43;XIfRAieKM&#43;htBZHvNsibHhfo5Ufr&#43;EwFzuAQ4=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="/css/coder-dark.min.717236c74e0a5208ef73964a9f44c6b443b689a95b270d8b2a40d0c012460dac.css" integrity="sha256-cXI2x04KUgjvc5ZKn0TGtEO2ialbJw2LKkDQwBJGDaw=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+      <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+    
+
+    <meta name="generator" content="Hugo 0.76.5" />
+  </head>
+
+  
+  
+    
+  
+  <body class="colorscheme-auto"
+        onload=" twemoji.parse(document.body); "
+  >
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      A Graphics Guy&#39;s Note
+    </a>
+    
+      
+        <span id="dark-mode-toggle" class="float-right">
+          <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+        </span>
+      
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+        
+        
+        
+          <li class="navigation-item separator">
+            <span>|</span>
+          </li>
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">The Missing Primary Ray PDF in Path Tracing</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2016-02-04T00:00:00-08:00'>
+                February 4, 2016
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              6-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div>
+        
+        <p>I was always wondering why don&rsquo;t we take the PDF of primary ray into account in a path tracer. Sadly there aren&rsquo;t many resources available explaining it. I guess the book Physically based rendering 3rd will provide some explanation, however it is not released yet. After some searching on the internet, I finally got something to explain it. It actually gets cancelled with the terms in importance function and LTE. It gets cancelled in a very elegant way that we don&rsquo;t need to put any resources on it at all, which is why many open-source ray tracer don&rsquo;t consider it in the first place. In this blog, I&rsquo;m gonna explain the detailed math behind the whole theory.</p>
+<h1 id="primary-ray-pdf">Primary Ray PDF</h1>
+<p>First thing first, what is the pdf of primary ray.
+Assuming we have an imaginary image plane placing at a specific distance from the camera point so that area of each pixel in this image plane is exactly one. Since we already know the resolution of the image, we can calculate the distance with the following equation:</p>
+<p>$ d = \dfrac{res_h}{tan(fov_y)} $</p>
+<figure>
+    <img src="/img/posts/the_missing_primary_ray_pdf_in_path_tracing/1147198.jpg"/> 
+</figure>
+
+<p>Here is a ray generating through a pixel, we can also get the distance from the eye point and the intersection between the ray and the target pixel.</p>
+<p>$ r = \dfrac{d}{cos\theta} $</p>
+<p>Since the area of the pixel is exactly one, the pdf w.r.t area of sampling a point on the pixel is also one. So the pdf w.r.t solid angle of sampling that point from eye point is:</p>
+<p>$ pdf_w = \dfrac{r^2}{cos\theta} $</p>
+<p>Putting them all together, you will get the following equation:</p>
+<p>$ pdf_w = (\dfrac{res_h}{tan(fov_y)})^2 \dfrac{1}{cos^3 \theta} $</p>
+<p>The $ (\dfrac{res_h}{tan(fov_y)})^2 $ won&rsquo;t change if image resolution is a fixed number, which is very common most of the time.</p>
+<p>Besides the pdf w.r.t solid angle, we also need to pick a single point on the virtual aperture for simulating depth of field effect. The pdf w.r.t area of sampling this point is very simple, just the inverse of the aperture area.</p>
+<p>$ pdf_a = \dfrac{1}{area_{aperture}} $</p>
+<h1 id="measurement-equation">Measurement Equation</h1>
+<p>The second thing we need to be clear with is what is stored in a pixel. In a very naive ray tracer, it is usually the generated radiance. However it is much more complex if we consider more. Here is a precise equation showing pixel information:</p>
+<p>$ I = \int_{A_{pixel}}\int_A W_e(p_0\rightarrow p_1)L(p_1\rightarrow p_0) G( p_0 \longleftrightarrow p_1 ) dA(p_0) dA(p_1) $</p>
+<p>I won&rsquo;t show derivation of the equation since it is well out of the scope of this post, I suggest the book Physically based rendering 2rd for further detail on it. However in this book, &lsquo;We&rsquo; is assumed to be a dirac delta function, which is actually not. And we are focusing on things before the first intersection, so there is no need to expend the radiance term, we&rsquo;ll just assume that it is already known. How to get the radiance value correctly is already mentioned in my previous <a href="https://agraphicsguynotes.com/posts/basics_about_path_tracing/">post</a>.</p>
+<p>Understanding this equation is very important for implementing something like path tracing and light tracing, especially when DOF is also considered. We&rsquo;ve already been familiar with the radiance, G term and primary ray pdf, figuring out what &lsquo;We&rsquo; is is all left to do.</p>
+<h2 id="importance-function">Importance Function</h2>
+<p>The &lsquo;We&rsquo; term is also called importance function. Unfortunately, I&rsquo;m not 100% sure that my derivation is a correct one. Since it works pretty well in my renderer, so I decided to go with it until I get a better understanding on it from somewhere else.</p>
+<p>First thing we should know about this importance function is that it has illumination fall off by a factor of $ cos^4 \theta $, where $ \theta $ is the angle between the primary ray and the camera forward direction. This thing usually manifest itself as Vignetting, where the corner of the image is a little bit darker than the center.</p>
+<figure>
+    <img src="/img/posts/the_missing_primary_ray_pdf_in_path_tracing/vignetting.jpg" width="800"/> 
+</figure>
+
+<p>Here is a demonstration, as we can notice from the image, pixels at corners appear much more dimmer than the center ones. For a better explanation of this fall off thing, I found it kind of helpful.</p>
+<p>And in order to avoid the vignetting effect in our offline rendering, we can change the importance function, making it proportional the inverse of this $ cos^4 \theta$ so that we can cancel it in the first place.</p>
+<p>Besides this, we also need to consider sampling a point on the virtual aperture. The larger the aperture is, the more DOF effect we will get. In a real world scene, the larger your aperture is, the more light will feed your image sensor. For example, if you aperture is 4 times larger than before, you will have 4 times flux at your image sensor. Image will be 4 times brighter if nothing is done. Usually we need to reduce the shuttering window to 25% so that the total flux at the image sensor is roughly the same, producing images with similar average brightness. When we are doing offline rendering, we are actually capturing an image at a single time point instead of a window. So we are gonna have to put the reduction at somewhere else, that is the importance function we are talking about. That said, if your aperture is 4 times larger, importance function should be 4 times smaller so that we can get results with roughly the same amount of light.</p>
+<p>$ W_e=\dfrac{c}{area_{aperture} cos^4\theta} $</p>
+<p>With the above equation, we need to figure out what c is. Let&rsquo;s hold it for a while, we&rsquo;ll just assume it is a constant so far.</p>
+<h2 id="monte-carlo-evaluation">Monte Carlo Evaluation</h2>
+<p>With Monte Carlo method, we can get the value of importance function mentioned above this way:</p>
+<p>$ \begin{array}{lcl}I&amp;=&amp;\dfrac{W_e(p_0\rightarrow p_1)L(p_1\rightarrow p_0)G(p_0\longleftrightarrow p_1)}{P_a(p_0)P_a(p_1)}\\\ &amp;=&amp; \dfrac{W_e(p_0\rightarrow p_1)L(p_1\rightarrow p_0)cos\theta_0}{P_a(p_0)P_w(p_0\rightarrow p_1)}\\\ &amp;=&amp; \dfrac{c * tan^2(fov_y)}{res_h^2}L(p_1\rightarrow p_0) \end{array} $</p>
+<p>If we let c equals to $ \dfrac{res_h^2}{tan^2(fov_y)} $, we can easily cancel the prefix in this equation, making the evaluation exactly equals to the radiance value, which is exactly what we want in the first place. And it also matches the behavior in a naive ray tracer, storing radiance value directly in the result.</p>
+<p>In a short conclusion, if we make importance function this way:</p>
+<p>$ W_e=\dfrac{res_h^2}{tan^2(fov_y) area_{aperture} cos^4\theta} $</p>
+<p>The Monte Carlo evaluation of the measurement equation is simply the radiance value:</p>
+<p>$ \begin{array}{lcl}I&amp;=&amp;\dfrac{W_e(p_0\rightarrow p_1)G(p_0\longleftrightarrow p_1)}{P_a(p_0)P_a(p_1)} L(p_1\rightarrow p_0) \\\ &amp;=&amp; L(p_1\rightarrow p_0) \end{array} $</p>
+<p>And that is why we don&rsquo;t need to consider primary ray pdf in the first place because it gets cancelled before the first intersection. In a practical path tracer or others, there is totally no need to evaluate the complex equation since we already know that the throughput equals to one before we consider the radiance.</p>
+<h1 id="why-bother-to-figure-it-out">Why Bother to Figure it Out?</h1>
+<p>We came all the way to a value equals to one, why bother? The answer is simple, to make things more transparent. We can&rsquo;t just store radiance value into images without knowing why we keep doing it. And the other very important reason is to perform correct calculation in a light tracing algorithm, which doesn&rsquo;t trace primary ray at all. Without knowing the importance function, it will quickly confuse anyone who is trying to do it in the first time.</p>
+<h1 id="reference">Reference</h1>
+<p>[1] <a href="http://dougkerr.net/Pumpkin/articles/Cosine_Fourth_Falloff.pdf">Derivation of the “Cosine Fourth” Law for Falloff of Illuminance Across a Camera Image</a><br>
+[2] <a href="http://www.pbrt.org/">Physically based Rendering, 2rd</a></p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "yourdiscussshortname" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );">
+  </script>
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+        2020
+         Jiayin Cao 
+      
+      
+         · 
+        Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+      
+      
+        
+      
+    </section>
+  </footer>
+
+    </main>
+
+    
+      
+      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>
