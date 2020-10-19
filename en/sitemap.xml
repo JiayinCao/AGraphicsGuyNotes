@@ -53,8 +53,18 @@
   </url>
   
   <url>
+    <loc>https://agraphicsguynotes.com/posts/glass_material_simulated_by_microfacet_bxdf/</loc>
+    <lastmod>2015-11-11T00:00:00-08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://agraphicsguynotes.com/posts/sample_microfacet_brdf/</loc>
     <lastmod>2015-11-01T00:00:00-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://agraphicsguynotes.com/posts/derivation_of_pure_specular_reflection_brdf/</loc>
+    <lastmod>2015-10-22T00:00:00-07:00</lastmod>
   </url>
   
   <url>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+
+    <meta name="author" content="Jiayin Cao">
+    <meta name="description" content="Microfacet model can not only be used for rough metal, it can also be used to simulate rough glass material. This blog is about rendering glass material with microfacet model. Basically all of the theory comes from this paper. Different from the pure refraction model mentioned in my previous blog, the bxdf mentioned here can also refract a single incident ray into multiple directions instead of just one.
+The above image is generated with my renderer.">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Glass Material Simulated by Microfacet BXDF"/>
+<meta name="twitter:description" content="Microfacet model can not only be used for rough metal, it can also be used to simulate rough glass material. This blog is about rendering glass material with microfacet model. Basically all of the theory comes from this paper. Different from the pure refraction model mentioned in my previous blog, the bxdf mentioned here can also refract a single incident ray into multiple directions instead of just one.
+The above image is generated with my renderer."/>
+
+    <meta property="og:title" content="Glass Material Simulated by Microfacet BXDF" />
+<meta property="og:description" content="Microfacet model can not only be used for rough metal, it can also be used to simulate rough glass material. This blog is about rendering glass material with microfacet model. Basically all of the theory comes from this paper. Different from the pure refraction model mentioned in my previous blog, the bxdf mentioned here can also refract a single incident ray into multiple directions instead of just one.
+The above image is generated with my renderer." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://agraphicsguynotes.com/posts/glass_material_simulated_by_microfacet_bxdf/" />
+<meta property="article:published_time" content="2015-11-11T00:00:00-08:00" />
+<meta property="article:modified_time" content="2015-11-11T00:00:00-08:00" />
+
+
+    <title>
+  Glass Material Simulated by Microfacet BXDF · A Graphics Guy&#39;s Note
+</title>
+
+    
+      <link rel="canonical" href="https://agraphicsguynotes.com/posts/glass_material_simulated_by_microfacet_bxdf/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.1.7/css/fork-awesome.min.css" integrity="sha256-gsmEoJAws/Kd3CjuOQzLie5Q3yshhvmo7YNtBG7aaEY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.9836c03fe5c87d102278a33e86d0591ef36c89b1e17e8e547ebf84c05cee010e.css" integrity="sha256-mDbAP&#43;XIfRAieKM&#43;htBZHvNsibHhfo5Ufr&#43;EwFzuAQ4=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="/css/coder-dark.min.717236c74e0a5208ef73964a9f44c6b443b689a95b270d8b2a40d0c012460dac.css" integrity="sha256-cXI2x04KUgjvc5ZKn0TGtEO2ialbJw2LKkDQwBJGDaw=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+      <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+    
+
+    <meta name="generator" content="Hugo 0.76.5" />
+  </head>
+
+  
+  
+    
+  
+  <body class="colorscheme-auto"
+        onload=" twemoji.parse(document.body); "
+  >
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      A Graphics Guy&#39;s Note
+    </a>
+    
+      
+        <span id="dark-mode-toggle" class="float-right">
+          <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+        </span>
+      
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+        
+        
+          
+          
+          
+            
+          
+            
+              
+                <li class="navigation-item menu-separator">
+                  <span>|</span>
+                </li>
+                
+              
+              <li class="navigation-item">
+                <a href="https://agraphicsguynotes.com/cn/">中文</a>
+              </li>
+            
+          
+        
+        
+          <li class="navigation-item separator">
+            <span>|</span>
+          </li>
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Glass Material Simulated by Microfacet BXDF</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2015-11-11T00:00:00-08:00'>
+                November 11, 2015
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              5-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div>
+        
+        <p>Microfacet model can not only be used for rough metal, it can also be used to simulate rough glass material. This blog is about rendering glass material with microfacet model. Basically all of the theory comes from this <a href="https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.html">paper</a>. Different from the pure refraction model mentioned in my previous blog, the bxdf mentioned here can also refract a single incident ray into multiple directions instead of just one.</p>
+<p>The above image is generated with <a href="https://sort-renderer.com">my renderer</a>. Each pixel takes 1024 samples and it took me an hour to finish it. As we can see from this image, this bxdf model handles both reflection and refraction. The roughness parameter for both of the objects is 0.04, which makes them look quite similar to combination of pure reflection and refraction bxdf.</p>
+<p>Snell&rsquo;s Law for Refraction Direction</p>
+<p>Comparing with reflecting an incident direction along a specific normal, refracting it is much more complicated. I won&rsquo;t mention anything about derivation of this Snell&rsquo;s law, it is more of physics than computer graphics. However an important concept that we should know is index of refraction, IOR in short, it defines how light, or any other radiation, propagates through a specific medium. In physics, it affects the speed of light and the wavelength of light. Each media may have different IOR, some of the common ones are listed below:</p>
+<p>Vacuum	1.0
+Air	1.000293
+Water	1.333
+Ice	1.309
+Crown glass	1.52
+Flint glass	1.62
+Diamond	2.42</p>
+<p>The direct reason that we care about this IOR is because it redirects incident ray through the surface between mediums with different IOR. And the way incident ray is refracted obeys this law:</p>
+<p>$ \dfrac{sin\theta_1}{sin\theta_2} = \dfrac{n_2}{n_1}$</p>
+<p>$ \theta $ is the angle between ray and the normal, n is the corresponding IOR. Some basic math shows the equation for computing refracted direction goes this way:</p>
+<p>$ V_r = -\dfrac{n_i}{n_o}V_i + N( \dfrac{n_i}{n_o} (V_i<em>N) - \sqrt{1-\dfrac{{n_i}^2}{{n_o}^2}(1-(V_i</em>N)^2) } ) $</p>
+<p>N must be in the same hemisphere with incident ray in this equation. $ 1-\dfrac{{n_i}^2}{{n_o}^2}(1-(V*N)^2) $ can also be negative for certain cases, it happens when light propagates from a medium with higher IOR to a another medium with lower IOR and the incident angle is larger than a threshold, which we call critical angle. And critical angle can be calculated this way:</p>
+<p>$ \theta_{critical} = arcsin( \dfrac{n_o}{n_i} ) $</p>
+<p>Handling total internal reflection is crucially important to achieve good result because otherwise some rays will be terminated inside the medium.</p>
+<p>Combine Refraction with Reflection</p>
+<p>Only handling refraction will never deliver convinced result because there is no such a thing that only refracts light and totally ignores reflected light, at least most stuff in our daily life don&rsquo;t. The image below is a comparison between those two, as we can notice from it, there is no reflection of area light at the surface of the left objects and some of the light is totally consumed by them. Those are the results caused by totally ignoring reflection during bxdf evaluation.</p>
+<p>In order to achieve better result like the right ones, it is necessary to evaluate both reflection and refraction. Regarding the rendering equation:</p>
+<p>$ L_{o}(\omega_{o}) = L_e(\omega_i) + \int_{\Omega} L_{i}(\omega_{i}) *f( \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i}$</p>
+<p>For certain surfaces, actually most of the time, $ \Omega $ means the hemisphere that the normal points to. However for semi-transparent surfaces, $ \Omega $ is the whole sphere instead of half one. One importance policy during this bxdf evaluation is how to generate rays around the whole sphere.</p>
+<p>Let&rsquo;s start from the simple one by assuming the material is pure-refracted. That said incident ray will only be refracted along one single direction and of course there will also be one single reflected ray, everything stays sharp. And we&rsquo;ve already knew how to generate reflected ray and refracted ray with given IORs. Since fresnel term decides how much flux is reflected, it makes sense to use this value to decide when to sample reflected or refracted ray.</p>
+<p>Pure reflection and refraction bxdf are listed here:</p>
+<p>$ f(\omega_{i}, \omega_{o} ) = \dfrac{F_r(T(\omega_o),\omega_o) \delta( \omega_i - R(\omega_o) )}{|cos(\theta_{i})|} $</p>
+<p>$ f(\omega_i , \omega_o) = ( 1 - F_r(\omega_i,\omega_o) ) \dfrac{{\eta_o}^2}{{\eta_i}^2}\dfrac{\delta( \omega_i - T(\omega_o) )}{|cos(\theta_{i})|} $</p>
+<p>Btdf for pure refraction is the same with <a href="">previous blog post</a>. However a subtle difference for pure reflection brdf definitely deserves our attention, it is the transmittance direction, instead of reflected direction, that we use to evaluate fresnel term. In special case, which total inner reflection happens, fresnel term should be exactly one. Although it makes sense, I&rsquo;ve no much idea how to prove these with mathematics, however that&rsquo;s how other renderers do it. And I&rsquo;m gonna stick to their solution.</p>
+<p>Microfacet for Rough Glass Material</p>
+<p>Microfacet model is usually used for simulating metal surfaces in realtime rendering. It assumes the macro surface composes many small micro flat surfaces, each one uses perfect mirror reflection bxdf. With a simple change in this assumption that micro surfaces are not perfect mirror reflection surfaces but perfect transmittance surfaces, the same theory can be used to simulate rough glass. Here is an image with three monkeys, each with a different value of roughness.</p>
+<p>The bxdf is the sum of microfacet reflection brdf and refraction btdf:</p>
+<p>$ f( \omega_o, \omega_i ) = f_r( \omega_o , \omega_i ) + f_t( \omega_o , \omega_i ) $</p>
+<p>Microfacet brdf is mentioned before:</p>
+<p>$ f(\omega_i,\omega_o,x) = \dfrac{F(\omega_i , h) G(\omega_i,\omega_o,h) D(h)}{4 cos(\theta_i) cos(\theta_o)}$</p>
+<p>Microfacet btdf is a little more complex:</p>
+<p>$ f(\omega_i,\omega_o,x) = \dfrac{|\omega_i \cdot h| |\omega_o \cdot h|}{|\omega_i \cdot n| | \omega_o \cdot n| }\dfrac{ {\eta_o}^2 ( 1 - F(\omega_i , h) ) G(\omega_i,\omega_o,h) D(h)}{{(\eta_i (\omega_i \cdot h) + \eta_o (\omega_o \cdot h))^2 }}$</p>
+<p>Another big difference for transmittance ray is that $ \dfrac{\omega_h}{\omega_o} $ is different.</p>
+<p>$ |\dfrac{\omega_h}{\omega_o}| = \dfrac{{\eta_o}^2 | \omega_o \cdot h |}{(\eta_i (\omega_i \cdot h) + \eta_o (\omega_o \cdot h))^2}$</p>
+<p>Sampling refracted ray direction is similar to the method method here. First a normal needs to be sampled respecting to a given pdf and then choose between reflected and refracted direction by fresnel term, finally evaluate the corresponding bxdf with the generated ray.</p>
+<h1 id="reference">Reference</h1>
+<p>[1] <a href="https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.html">Microfacet Models for Refraction through Rough Surfaces</a><br>
+[2] <a href="https://en.wikipedia.org/wiki/Snell%27s_law">Snell&rsquo;s Law</a></p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "yourdiscussshortname" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );">
+  </script>
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+        2020
+         Jiayin Cao 
+      
+      
+         · 
+        Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+      
+      
+        
+      
+    </section>
+  </footer>
+
+    </main>
+
+    
+      
+      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>
