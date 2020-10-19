@@ -73,6 +73,16 @@
     </item>
     
     <item>
+      <title>Basics about path tracing</title>
+      <link>https://agraphicsguynotes.com/posts/basics_about_path_tracing/</link>
+      <pubDate>Mon, 20 Jul 2015 00:00:00 -0700</pubDate>
+      
+      <guid>https://agraphicsguynotes.com/posts/basics_about_path_tracing/</guid>
+      <description>I tried path tracing two years ago in my ray tracer. However without taking some notes, I&amp;rsquo;ve already forgotten almost everything about it. Recently I reviewed the theory and the code, picked up something from it. I&amp;rsquo;d like to take some notes so that I can get it immediately next time I forget it. Before everything, here is a Cornell box scene rendered with path tracing:
+  I really want to render something different using my ray tracer, however it doesn&amp;rsquo;t have a GUI editor so far.</description>
+    </item>
+    
+    <item>
       <title>Directional Light Map from the Ground Up</title>
       <link>https://agraphicsguynotes.com/posts/directional_light_map_from_the_groud_up/</link>
       <pubDate>Wed, 24 Jun 2015 00:00:00 -0700</pubDate>
