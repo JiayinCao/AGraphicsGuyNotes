@@ -71,14 +71,17 @@
     
 
     
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7T6R55SCY1"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-7T6R55SCY1"></script>
+      <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
 
-        gtag('config', 'G-7T6R55SCY1');
-    </script>
+          gtag('config', 'G-7T6R55SCY1');
+      </script>
+    
 
     <meta name="generator" content="Hugo 0.76.5" />
   </head>
@@ -236,14 +239,81 @@
 <p>$ p(\theta) = p_h(\theta) \dfrac{d\omega_h}{d\omega_i} = \dfrac{p_h(\theta)}{4 (\omega_o \cdot \omega_h)} $</p>
 <h1 id="conclusion">Conclusion</h1>
 <p>Here are the images generated after and before the new sampling method.</p>
-<p><figure><a href="/img/posts/sample_microfacet_brdf/sampling_ndf.png">
-    <img src="/img/posts/sample_microfacet_brdf/sampling_ndf.png" width="750"/> </a>
-</figure>
 
-<figure><a href="/img/posts/sample_microfacet_brdf/sampling_default.png">
-    <img src="/img/posts/sample_microfacet_brdf/sampling_default.png" width="750"/> </a>
-</figure>
-</p>
+
+
+
+
+
+<style>
+    .ba-slider {
+        position: relative;
+        overflow: hidden;
+        width: 90%;
+         
+    }
+    
+    .ba-slider img {
+        width: 100%;
+        display:block;
+        max-width:none;
+    }
+    
+    .ba-slider .resize {
+        position: absolute;
+        top:0;
+        left: 0;
+        height: 100%;
+        width: 50%;
+        overflow: hidden;
+    }
+
+    .ba-slider .handle {  
+        position:absolute; 
+        left:50%;
+        top:0;
+        bottom:0;
+        width:2px;
+         
+        
+        background: rgba(0,0,0,.4);
+        cursor: ew-resize;
+    }
+    
+    .ba-slider .handle:after {   
+        position: absolute;
+        top: 50%;
+        width: 10px;
+        height: 64px;
+        margin: -32px 0 0 -4px;
+    
+        content:' ';
+        color:white;
+        font-weight:bold;
+        font-size:1px;
+        text-align:center;
+        line-height:64px;
+    
+        background: rgba(0,0,0,.6);
+        border-radius: 0%;
+    }
+</style>
+
+<div class="ba-slider" style="margin: auto;">
+    <img src=/img/posts/sample_microfacet_brdf/sampling_default.png>
+    <div class="resize">
+         <img src=/img/posts/sample_microfacet_brdf/sampling_ndf.png>
+    </div>
+    <span class="handle"></span>
+</div>
+
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script type="text/javascript" src="/js/before-after.js"></script>
+<script type="text/javascript">
+    $('.ba-slider').beforeAfter();
+</script>
+
+
 <p>There are 64 samples per pixel and GGX is chosen as NDF, the three monkeys have different roughness values(0.0,0.5,1.0). As we can see from the image that the left-most monkey gets much better result than the default sampling method. And for the other two monkeys, we have similar result with the cosine-pdf sampling method.</p>
 <p>There are already some research work improving the sampling method mentioned in this blog. I may need to try their method once I have some free cycles.</p>
 <h1 id="reference">Reference:</h1>
