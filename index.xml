@@ -184,16 +184,6 @@ The big picture Different from its predecessors, D3D12 mainly aims at reducing C
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/about/</guid>
-      <description>My name is Jiayin Cao. With more than 10 years working experiences in game industry, I’m currently working at Naughty Dog as a graphics programmer. Prior to joining Naughty Dog, I worked at Ubisoft, NVIDIA, AMD, and Microsoft before.
-This is the place for me to take some notes that I regard as useful. Since I’m not sure about whether I can post about my work, most of these blogs here are the stuff that I learned in my own time.</description>
-    </item>
-    
-    <item>
-      <title>About Myself</title>
-      <link>/about/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/about/</guid>
       <description>My name is Jiayin Cao, a graphics programmer with more than 10 years working experiences in game industry. I’m currently working at Naughty Dog as a graphics programmer. Prior to joining Naughty Dog, I worked at Ubisoft, NVIDIA, AMD, and Microsoft before.
 This is the place for me to take some notes that I regard as useful. Since I’m not sure about whether I can post about my work, most of these blogs here are the stuff that I learned in my own time.</description>
     </item>

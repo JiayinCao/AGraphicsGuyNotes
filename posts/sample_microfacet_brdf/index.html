@@ -151,7 +151,7 @@
             </span>
             <span class="reading-time">
               <i class="fa fa-clock-o" aria-hidden="true"></i>
-              8-minute read
+              9-minute read
             </span>
           </div>
           
@@ -245,21 +245,27 @@
 
 
 
+
+
+
+
+
+
 <style>
-    .ba-slider {
+    .ba-slider10b97b22b77d4af64917b9b2ab6df72b {
         position: relative;
         overflow: hidden;
         width: 90%;
          
     }
     
-    .ba-slider img {
+    .ba-slider10b97b22b77d4af64917b9b2ab6df72b img {
         width: 100%;
         display:block;
         max-width:none;
     }
     
-    .ba-slider .resize {
+    .ba-slider10b97b22b77d4af64917b9b2ab6df72b .resize {
         position: absolute;
         top:0;
         left: 0;
@@ -268,7 +274,7 @@
         overflow: hidden;
     }
 
-    .ba-slider .handle {  
+    .ba-slider10b97b22b77d4af64917b9b2ab6df72b .handle {  
         position:absolute; 
         left:50%;
         top:0;
@@ -280,7 +286,7 @@
         cursor: ew-resize;
     }
     
-    .ba-slider .handle:after {   
+    .ba-slider10b97b22b77d4af64917b9b2ab6df72b .handle:after {   
         position: absolute;
         top: 50%;
         width: 10px;
@@ -294,12 +300,12 @@
         text-align:center;
         line-height:64px;
     
-        background: rgba(0,0,0,.6);
+        background: rgb(128, 128, 128, 0.7);
         border-radius: 0%;
     }
 </style>
 
-<div class="ba-slider" style="margin: auto;">
+<div class="ba-slider10b97b22b77d4af64917b9b2ab6df72b" style="margin: auto;">
     <img src=/img/posts/sample_microfacet_brdf/sampling_default.png>
     <div class="resize">
          <img src=/img/posts/sample_microfacet_brdf/sampling_ndf.png>
@@ -307,10 +313,85 @@
     <span class="handle"></span>
 </div>
 
-<script type="text/javascript" src="/js/jquery.min.js"></script>
-<script type="text/javascript" src="/js/before-after.js"></script>
-<script type="text/javascript">
-    $('.ba-slider').beforeAfter();
+
+    
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" crossorigin="anonymous"></script>
+
+
+<script>
+(function($) {
+  function drags(dragElement, resizeElement, container) {
+    
+    
+    dragElement.on('mousedown.ba-events touchstart.ba-events', function(e) {
+      
+      dragElement.addClass('ba-draggable');
+      resizeElement.addClass('ba-resizable');
+      
+      
+      var startX = (e.pageX) ? e.pageX : e.originalEvent.touches[0].pageX;
+      
+      
+      var dragWidth = dragElement.outerWidth(),
+          posX = dragElement.offset().left + dragWidth - startX,
+          containerOffset = container.offset().left,
+          containerWidth = container.outerWidth();
+   
+      
+      minLeft = containerOffset + 10;
+      maxLeft = containerOffset + containerWidth - dragWidth - 10;
+      
+      
+      dragElement.parents().on("mousemove.ba-events touchmove.ba-events", function(e) {
+        
+        
+        var moveX = (e.pageX) ? e.pageX : e.originalEvent.touches[0].pageX;
+        
+        leftValue = moveX + posX - dragWidth;
+        
+        
+        if ( leftValue < minLeft) {
+          leftValue = minLeft;
+        } else if (leftValue > maxLeft) {
+          leftValue = maxLeft;
+        }
+        
+        
+        widthValue = (leftValue + dragWidth/2 - containerOffset)*100/containerWidth+'%';
+        
+        
+        $('.ba-draggable').css('left', widthValue);
+        $('.ba-resizable').css('width', widthValue);
+      
+      }).on('mouseup.ba-events touchend.ba-events touchcancel.ba-events', function(){
+        dragElement.removeClass('ba-draggable');
+        resizeElement.removeClass('ba-resizable');
+        
+        $(this).off('.ba-events'); 
+      });
+      e.preventDefault();
+    });
+  }
+
+  
+  $.fn.beforeAfter = function() {
+    var cur = this;
+    
+    var width = cur.width()+'px';
+    cur.find('.resize img').css('width', width);
+    
+    drags(cur.find('.handle'), cur.find('.resize'), cur);
+
+    
+    
+    $(window).resize(function(){
+      var width = cur.width()+'px';
+      cur.find('.resize img').css('width', width);
+    });
+  }
+}(jQuery));
+
+$('.ba-slider'+"10b97b22b77d4af64917b9b2ab6df72b").beforeAfter();
 </script>
 
 
