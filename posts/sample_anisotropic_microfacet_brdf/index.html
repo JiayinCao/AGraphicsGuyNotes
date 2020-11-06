@@ -227,7 +227,7 @@
 <p>$ \phi= \begin{cases} arctan\Big( \dfrac{\alpha_v}{\alpha_u} tan( 2 \pi \epsilon ) \Big) &amp;:x\in [0,0.25] \\\arctan\Big( \dfrac{\alpha_v}{\alpha_u} tan( 2 \pi \epsilon ) \Big) + \pi &amp;:x\in (0.25,0.75) \\\arctan\Big( \dfrac{\alpha_v}{\alpha_u} tan( 2 \pi \epsilon ) \Big) + 2\pi &amp;:x\in [0.75,1] \end{cases}  $</p>
 <p>$ \theta = arctan\Bigg( \dfrac{ln(\epsilon)}{{\frac{cos^2(\phi)}{\alpha_u^2 }} + {\frac {sin^2(\phi) }{\alpha_v^2 }}} \Bigg) $</p>
 <h1 id="sampling-blinn">Sampling Blinn</h1>
-<p>Here we will talk about the modified Blinn-Phong model, instead of the original one proposed in paper ( <a href="http://www.irisa.fr/prive/kadi/Lopez/ashikhmin00anisotropic.pdf">aAn Anisotropic Phong BRDF Model</a> ), because it obeys the rule of energy conservation. And the other detail that deserves mentioning is that I will use the exponent term instead of alpha term here:</p>
+<p>Here we will talk about the modified Blinn-Phong model, instead of the original one proposed in paper ( <a href="http://www.irisa.fr/prive/kadi/Lopez/ashikhmin00anisotropic.pdf">An Anisotropic Phong BRDF Model</a> ), because it obeys the rule of energy conservation. And the other detail that deserves mentioning is that I will use the exponent term instead of alpha term here:</p>
 <p>$ e = \dfrac{2.0}{\alpha^4} - 2.0 $</p>
 <p>It goes true along both directions. And the evaluation of Blinn is as following:</p>
 <p>$ D(h) = \dfrac{\sqrt{( e_u + 2 ) * ( e_v + 2 ) }}{2\pi} cos(\theta) ^ {( cos^2(\phi) * e_u + sin^2(\phi) * e_v ) } $</p>
