@@ -180,7 +180,7 @@ Assuming we have an imaginary image plane placing at a specific distance from th
 <h1 id="measurement-equation">Measurement Equation</h1>
 <p>The second thing we need to be clear with is what is stored in a pixel. In a very naive ray tracer, it is usually the generated radiance. However it is much more complex if we consider more. Here is a precise equation showing pixel information:</p>
 <p>$ I = \int_{A_{pixel}}\int_A W_e(p_0\rightarrow p_1)L(p_1\rightarrow p_0) G( p_0 \longleftrightarrow p_1 ) dA(p_0) dA(p_1) $</p>
-<p>I won&rsquo;t show derivation of the equation since it is well out of the scope of this post, I suggest the book Physically based rendering 2rd for further detail on it. However in this book, &lsquo;We&rsquo; is assumed to be a dirac delta function, which is actually not. And we are focusing on things before the first intersection, so there is no need to expend the radiance term, we&rsquo;ll just assume that it is already known. How to get the radiance value correctly is already mentioned in my previous <a href="https://agraphicsguynotes.com/posts/basics_about_path_tracing/">post</a>.</p>
+<p>I won&rsquo;t show derivation of the equation since it is well out of the scope of this post, I suggest the book Physically based rendering 2rd for further detail on it. However in this book, &lsquo;We&rsquo; is assumed to be a dirac delta function, which is actually not. And we are focusing on things before the first intersection, so there is no need to expend the radiance term, we&rsquo;ll just assume that it is already known. How to get the radiance value correctly is already mentioned in my previous <a href="/posts/basics_about_path_tracing/">post</a>.</p>
 <p>Understanding this equation is very important for implementing something like path tracing and light tracing, especially when DOF is also considered. We&rsquo;ve already been familiar with the radiance, G term and primary ray pdf, figuring out what &lsquo;We&rsquo; is is all left to do.</p>
 <h2 id="importance-function">Importance Function</h2>
 <p>The &lsquo;We&rsquo; term is also called importance function. Unfortunately, I&rsquo;m not 100% sure that my derivation is a correct one. Since it works pretty well in my renderer, so I decided to go with it until I get a better understanding on it from somewhere else.</p>
@@ -272,8 +272,6 @@ Assuming we have an imaginary image plane placing at a specific distance from th
          Jiayin Cao 
       
       
-      
-        
       
     </section>
   </footer>

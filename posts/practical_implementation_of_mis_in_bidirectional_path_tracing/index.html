@@ -159,7 +159,7 @@
 
       <div>
         
-        <p>In my previous <a href="https://agraphicsguynotes.com/posts/naive_bidirectional_path_tracing/">post</a>, I talked some basic stuff about naive bidirectional path tracing. However it is hard to show any real value since there are always too much noise comparing with best solutions depending on the scene to be rendered. That is because the contribution of each specific path is not properly weighted. And multiple importance sampling can be the key to the issue, the following comparison shows big difference between different methods. All of the images are generated with my open-source <a href="https://sort-renderer.com">renderer</a>.</p>
+        <p>In my previous <a href="/posts/naive_bidirectional_path_tracing/">post</a>, I talked some basic stuff about naive bidirectional path tracing. However it is hard to show any real value since there are always too much noise comparing with best solutions depending on the scene to be rendered. That is because the contribution of each specific path is not properly weighted. And multiple importance sampling can be the key to the issue, the following comparison shows big difference between different methods. All of the images are generated with my open-source <a href="https://sort-renderer.com">renderer</a>.</p>
 
 
 
@@ -348,7 +348,7 @@ sliderJQuery(function( $ ) {
 <p>Those images are generated with rough the same amount of time. No doubt about it, MIS BDPT dominates among all those results. It is less noisy and shows good caustics. Although light tracing can also shows good caustics, it is far from a practical algorithm due to the noise in the rest of the scene, not to mention it almost failed to show any radiance value on the glass monkey head. Traditional path tracing algorithm shows no caustics at all, not because it is a biased algorithm. It is unbiased for sure, however it just converges to the correct caustics in a unreasonable speed. Naive bidirectional path tracing also has roughly same amount of noise, however it also has dimmer monkey head because light tracing doesn&rsquo;t do a good job on it. In other words, bidirectional path tracing barely reveals any value without MIS.</p>
 <p>I searched a lot of materials about MIS in BDPT, however there are only quite limited materials on the internet. Although some open source renderers, like luxrender, give detailed implementation, most of them doesn&rsquo;t give any insight in the math behind it, without which one can be quickly confused by its code. <a href="http://www.smallvcm.com/">SmallVCM</a> expends the algorithm further, offering a better solution over MIS BDPT and it has detailed paper on the math. However it is a little complex for someone who just wants to figure out how to do MIS BDPT. Eric Veach&rsquo;s thesis gives the best explanation on MIS in BPDT,  sadly it doesn&rsquo;t go further with MIS implementation. In this blog, I&rsquo;m gonna talk something about MIS in bidirectional path tracing. Most of the theory comes from this <a href="https://www.semanticscholar.org/paper/Implementing-Vertex-Connection-and-Merging-Georgiev/383a98f474dc482b9c1427d9408cf85a22e01dc0">paper</a>.</p>
 <h1 id="pdf-of-a-specific-path">PDF of a Specific Path</h1>
-<p>To use MIS in BDPT, it is very important to evaluate pdf of a specific path accurately. In my previous <a href="https://agraphicsguynotes.com/posts/naive_bidirectional_path_tracing/">post</a>, I mentioned the path pdf in path tracing. In a bidirectional path tracing algorithm, it is more complex since the path starts from both sides. However the theory stays similar, we just need to be careful with marginal conditions.</p>
+<p>To use MIS in BDPT, it is very important to evaluate pdf of a specific path accurately. In my previous <a href="/posts/naive_bidirectional_path_tracing/">post</a>, I mentioned the path pdf in path tracing. In a bidirectional path tracing algorithm, it is more complex since the path starts from both sides. However the theory stays similar, we just need to be careful with marginal conditions.</p>
 <p>I&rsquo;m gonna use the term in the SmallVCM paper because it is more elegant and easy to read. For a path starting from one side, we define the forward pdf term:</p>
 <p>$ \overrightarrow{p_i}(\bar{y}) = \begin{cases} p_a(\bar{y})&amp;:i=0 \\\ \overrightarrow{p_{\sigma , i}}(\bar{y})\overrightarrow{g_i}(\bar{y})&amp;:otherwise \end{cases} \ \ \ \ (1)$</p>
 <p>$ \overrightarrow{p_{\sigma , i}}(\bar{y}) =\begin{cases} {p_{\sigma}}(p_0\rightarrow p_1)&amp;:i=1 \\\ {p_{\sigma}}(p_{i-2}\rightarrow p_{i-1} \rightarrow p_{i})&amp;:i\ge 2 \end{cases} \ \ \ \ (2)$</p>
@@ -502,8 +502,6 @@ sliderJQuery(function( $ ) {
          Jiayin Cao 
       
       
-      
-        
       
     </section>
   </footer>
