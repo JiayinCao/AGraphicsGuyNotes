@@ -258,9 +258,9 @@
 </p>
 <p>As we can see from the above images, IBL generated images looks way more promising than the one with a directional light. The real beauty of it is that with physically based shading everything looks great in different lighting environments without the need to change material parameters at all.</p>
 <h1 id="ibl-in-offline-rendering">IBL in Offline Rendering</h1>
-<p>Unlike IBL in real-time rendering, offline ray tracers can easily achieve unbiased result with IBL without compromising anything. The techs involved in generating the above images are introduced in my previous blogs, like
-<a href="/posts/basics_about_path_tracing/">path tracing</a>,
-<a href="/posts/monte_carlo_integral_with_multiple_importance_sampling/">Monte-Carlo Integration</a>,
+<p>Unlike IBL in real-time rendering, offline ray tracers can easily achieve unbiased result with IBL without compromising anything. The techs involved in generating the above images are introduced in my previous blogs, like 
+<a href="/posts/basics_about_path_tracing/">path tracing</a>, 
+<a href="/posts/monte_carlo_integral_with_multiple_importance_sampling/">Monte-Carlo Integration</a>, 
 <a href="/posts/sample_microfacet_brdf/">Importance sampling for microfacet BRDF</a>.
 I won&rsquo;t repeat them again in this blog.</p>
 <p>First thing first, what is image based lighting. My take on it is that IBL uses a special HDR map recording all incoming radiance from different solid angles to simulate complex lighting environment. It is pretty much like the spherical reflection map we used to render reflective materials in the old days. For old-school reflective materials in real time rendering, only one texture sampling is necessary, which makes the algorithm feasible even in fixed function pipe. Since not all materials need only one texture sampling, using the HDR image to render other materials is a challenging task. The essential difference between the two lies in the fact that pure reflective BRDF is actually delta function, which will reduce the dimension of the integral. In offline rendering, since speed is not the most sensitive thing, one can always use Monte-Carlo method to evaluate the integral of rendering equation. So, in a nut-shell, IBL is a technique that uses HDR environment light to light 3d objects in the scene.</p>
