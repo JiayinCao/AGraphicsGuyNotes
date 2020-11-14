@@ -6,7 +6,16 @@
     <description>Recent content on A Graphics Guy&#39;s Note</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 29 Nov 2018 00:00:00 -0800</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 13 Nov 2020 00:00:00 -0800</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Practical Tips for Implementing Subsurface Scattering in a Ray Tracer</title>
+      <link>/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/</link>
+      <pubDate>Fri, 13 Nov 2020 00:00:00 -0800</pubDate>
+      
+      <guid>/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/</guid>
+      <description>Subsurface scattering has always been a challenge in computer graphics. Even in offline rendering, some of the common practical solutions are nowhere near unbiased. In certain algorithms, there are some pretty aggressive assumptions made to make things under control. However, despite the complexity in subsurface scattering algorithms, it is by no means a feature that can be missing from a practical rendering engine. Major commercial renderers, like Arnold, Cinema 4D, etc, all have very sophisticated and solid implementation of SSS.</description>
+    </item>
+    
     <item>
       <title>Basic Color Science For Graphics Engineer</title>
       <link>/posts/basic_color_science_for_graphcis_engineer/</link>
@@ -41,7 +50,7 @@
       
       <guid>/posts/volume_rendering_in_offline_renderer/</guid>
       <description>Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.
-.row {display: -ms-flexbox; display: flex;-ms-flex-wrap: wrap; flex-wrap: wrap;padding: 0 4px;}.</description>
+ .row { display: -ms-flexbox; display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap; padding: 0 4px; } .</description>
     </item>
     
     <item>

@@ -303,12 +303,67 @@
         background: rgb(128, 128, 128, 0.7);
         border-radius: 0%;
     }
+
+     
+    .ba-container {
+        position: relative;
+        text-align: center;
+        color: white;
+    }
+
+     
+    .ba-bottom-left {
+        position: absolute;
+        bottom: 8px;
+        left: 16px;
+        white-space: nowrap;
+        font-weight: bold;
+    }
+
+     
+    .ba-top-left {
+        position: absolute;
+        top: 8px;
+        left: 16px;
+        white-space: nowrap;
+        font-weight: bold;
+    }
+
+     
+    .ba-top-right {
+        position: absolute;
+        top: 8px;
+        right: 16px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+     
+    .ba-bottom-right {
+        position: absolute;
+        bottom: 8px;
+        right: 16px;
+        white-space: nowrap;
+        font-weight: bold;
+    }
+
+     
+    .ba-centered {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
 </style>
 
 <div class="ba-slider10b97b22b77d4af64917b9b2ab6df72b" style="margin: auto;">
-    <img src=/img/posts/sample_microfacet_brdf/sampling_default.png>
+    <div class="ba-container">
+        <img src=/img/posts/sample_microfacet_brdf/sampling_default.png><img>
+        <div class="ba-bottom-right">Before</div>
+    </div>
     <div class="resize">
-         <img src=/img/posts/sample_microfacet_brdf/sampling_ndf.png>
+        <img src=/img/posts/sample_microfacet_brdf/sampling_ndf.png>
+        <div class="ba-bottom-left">After</div>
     </div>
     <span class="handle"></span>
 </div>
