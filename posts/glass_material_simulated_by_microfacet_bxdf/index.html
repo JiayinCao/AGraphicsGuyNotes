@@ -367,24 +367,25 @@
                     if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
 
                     active.each(function (i, e) {
-                        $(e).removeClass('active');
+                        $(e).removeClass('active').siblings('ul').hide();
                     });
 
                     var semi_active = $toc.find('a.semi_active');
                     semi_active.each(function (i, e) {
-                        $(e).removeClass('semi_active');
+                        $(e).removeClass('semi_active').siblings('ul').hide();
                     });
                     
                     $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
                         if( i == 0 )
-                            $(e).children('a').addClass('active');
+                            $(e).children('a').addClass('active').siblings('ul').show();
                         else
-                            $(e).children('a').addClass('semi_active');
+                            $(e).children('a').addClass('semi_active').siblings('ul').show();
                     });
                 }
 
                 $window.on('scroll', onScroll);
                 $(document).ready(function() {
+                    $toc.find('a').parent('li').find('ul').hide();
                     onScroll();
                     document.getElementsByClassName('toc')[0].style.display = '';
                 });
