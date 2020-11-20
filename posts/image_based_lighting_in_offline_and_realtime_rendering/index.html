@@ -156,7 +156,7 @@
           
         </div>
       </header>
-
+      
       <div>
         
         <p>Image-based lighting is a practical way to enhance the visual quality of computer graphics. I used to be confused by it until I read the book &ldquo;<a href="https://books.google.com/books?hl=zh-CN&amp;lr=&amp;id=w1i_1kejoYcC&amp;oi=fnd&amp;pg=PP2&amp;dq=high+dynamic+range+imaging+2nd+edition&amp;ots=4i3Y3AMLtz&amp;sig=qsyJ3UxHv4XuxRKGFauG2G-kOXY#v=onepage&amp;q=high%20dynamic%20range%20imaging%202nd%20edition&amp;f=false">High Dynamic Range Imaging</a>&rdquo;, which provides a very clear explanation about IBL. And I actually have implemented the algorithm in my offline renderer before, it was just that I didn&rsquo;t know it is IBL. The book <a href="https://pbrt.org/">PBRT</a> has some materials talking about it without explicitly mentioning the term. Following images are generated with IBL in my renderer, except that the last one uses a single directional light.</p>
@@ -258,9 +258,9 @@
 </p>
 <p>As we can see from the above images, IBL generated images looks way more promising than the one with a directional light. The real beauty of it is that with physically based shading everything looks great in different lighting environments without the need to change material parameters at all.</p>
 <h1 id="ibl-in-offline-rendering">IBL in Offline Rendering</h1>
-<p>Unlike IBL in real-time rendering, offline ray tracers can easily achieve unbiased result with IBL without compromising anything. The techs involved in generating the above images are introduced in my previous blogs, like
-<a href="/posts/basics_about_path_tracing/">path tracing</a>,
-<a href="/posts/monte_carlo_integral_with_multiple_importance_sampling/">Monte-Carlo Integration</a>,
+<p>Unlike IBL in real-time rendering, offline ray tracers can easily achieve unbiased result with IBL without compromising anything. The techs involved in generating the above images are introduced in my previous blogs, like 
+<a href="/posts/basics_about_path_tracing/">path tracing</a>, 
+<a href="/posts/monte_carlo_integral_with_multiple_importance_sampling/">Monte-Carlo Integration</a>, 
 <a href="/posts/sample_microfacet_brdf/">Importance sampling for microfacet BRDF</a>.
 I won&rsquo;t repeat them again in this blog.</p>
 <p>First thing first, what is image based lighting. My take on it is that IBL uses a special HDR map recording all incoming radiance from different solid angles to simulate complex lighting environment. It is pretty much like the spherical reflection map we used to render reflective materials in the old days. For old-school reflective materials in real time rendering, only one texture sampling is necessary, which makes the algorithm feasible even in fixed function pipe. Since not all materials need only one texture sampling, using the HDR image to render other materials is a challenging task. The essential difference between the two lies in the fact that pure reflective BRDF is actually delta function, which will reduce the dimension of the integral. In offline rendering, since speed is not the most sensitive thing, one can always use Monte-Carlo method to evaluate the integral of rendering equation. So, in a nut-shell, IBL is a technique that uses HDR environment light to light 3d objects in the scene.</p>
@@ -493,6 +493,139 @@ sliderJQuery(function( $ ) {
 
       </div>
 
+      <div class="">
+        <style>
+    .toc {
+        position: fixed;
+        left: 50%;
+        top: 110px;
+        font-size: 0.8em;
+        width: 320px;
+        margin-left: 480px;
+        padding-left: 20px;
+        padding-bottom: 100px;
+        padding-top: 80px;
+        overflow-y: auto;
+        line-height: 1.7em;
+        scroll-padding-top: 100px;
+        border-left: 3px solid rgba(128, 128, 128, 0.4);;
+    }
+
+    .toc label {
+        font-size: 20px;
+        font-weight: bold;
+        margin: 6.4rem 0 3.2rem 0;
+    }
+
+    .toc a {
+        filter: grayscale(70%);
+    }
+
+    .toc a:hover {
+        font-weight: bold;
+        filter: grayscale(0%);
+    }
+
+    .toc ul {
+        margin-left:1px;
+        padding-left: 20px;
+    }
+    
+     
+    .toc ul ul{
+        margin-left:1px;
+        padding-left: 20px;
+    }
+
+     
+    .toc ul ul ul{
+        margin-left:1px;
+        padding-left: 20px;
+    }
+
+    .toc li a.active {
+        font-weight: bold;
+        filter: grayscale(0%);
+    }
+
+    @media (max-width: 1640px) {
+      main {
+        max-width: 100%;
+      }
+  
+      .toc {
+        display: none;
+      }
+    }
+
+</style>
+  
+
+
+
+
+
+
+
+
+
+
+<div class="toc" style="display:none;">
+    <label>Contents</label>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#ibl-in-offline-rendering">IBL in Offline Rendering</a></li>
+    <li><a href="#ibl-in-real-time-rending-ue4-implementation">IBL in Real Time Rending (UE4 implementation)</a></li>
+    <li><a href="#split-sum-approximation">Split Sum Approximation</a></li>
+    <li><a href="#pre-filter-environment-map">Pre-Filter Environment Map</a></li>
+    <li><a href="#environment-brdf">Environment BRDF</a></li>
+    <li><a href="#reference">Reference</a></li>
+  </ul>
+</nav>
+</div>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+    <script>
+        (function() {
+            var $toc = $('#TableOfContents');
+            
+            if ($toc.length > 0) {
+                var $window = $(window);
+                
+                function onScroll(){
+                    var currentScroll = $window.scrollTop();
+                    var h = $('h1, h2, h3, h4, h5, h6');
+                    var id = "";
+                    h.each(function (i, e) {
+                        e = $(e);
+                        if (e.offset().top - 10 <= currentScroll ) {
+                            id = e.attr('id');
+                        }
+                    });
+                    var active = $toc.find('a.active');
+                    if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
+
+                    active.each(function (i, e) {
+                        $(e).removeClass('active');
+                    });
+                    
+                    $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
+                        $(e).children('a').addClass('active');
+                    });
+                }
+
+                $window.on('scroll', onScroll);
+                $(document).ready(function() {
+                    onScroll();
+                    document.getElementsByClassName('toc')[0].style.display = '';
+                });
+            }
+        })();
+    </script>
+
+      </div>
 
       <footer>
         

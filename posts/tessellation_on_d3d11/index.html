@@ -159,7 +159,7 @@
           
         </div>
       </header>
-
+      
       <div>
         
         <p>One of the most important changes that DX11 has made is the brand new feature called tessellation. By introducing three more stages, graphics programmer can tessellate their triangles on the fly. There are some benefits:</p>
@@ -370,6 +370,150 @@ HS_CONTROL_POINT_OUTPUT HS( InputPatch&lt;VS_CONTROL_POINT_OUTPUT, MAX_POINTS&gt
 
       </div>
 
+      <div class="">
+        <style>
+    .toc {
+        position: fixed;
+        left: 50%;
+        top: 110px;
+        font-size: 0.8em;
+        width: 320px;
+        margin-left: 480px;
+        padding-left: 20px;
+        padding-bottom: 100px;
+        padding-top: 80px;
+        overflow-y: auto;
+        line-height: 1.7em;
+        scroll-padding-top: 100px;
+        border-left: 3px solid rgba(128, 128, 128, 0.4);;
+    }
+
+    .toc label {
+        font-size: 20px;
+        font-weight: bold;
+        margin: 6.4rem 0 3.2rem 0;
+    }
+
+    .toc a {
+        filter: grayscale(70%);
+    }
+
+    .toc a:hover {
+        font-weight: bold;
+        filter: grayscale(0%);
+    }
+
+    .toc ul {
+        margin-left:1px;
+        padding-left: 20px;
+    }
+    
+     
+    .toc ul ul{
+        margin-left:1px;
+        padding-left: 20px;
+    }
+
+     
+    .toc ul ul ul{
+        margin-left:1px;
+        padding-left: 20px;
+    }
+
+    .toc li a.active {
+        font-weight: bold;
+        filter: grayscale(0%);
+    }
+
+    @media (max-width: 1640px) {
+      main {
+        max-width: 100%;
+      }
+  
+      .toc {
+        display: none;
+      }
+    }
+
+</style>
+  
+
+
+
+
+
+
+
+
+
+
+<div class="toc" style="display:none;">
+    <label>Contents</label>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#introduction">Introduction:</a></li>
+    <li><a href="#more-detail">More Detail:</a>
+      <ul>
+        <li><a href="#hull-shader">Hull Shader:</a></li>
+        <li><a href="#tessellator">Tessellator:</a></li>
+        <li><a href="#domain-shader">Domain Shader:</a>
+          <ul>
+            <li><a href="#flat-tessellation">Flat tessellation:</a></li>
+            <li><a href="#pn-tessellation">PN tessellation:</a></li>
+            <li><a href="#phong-tessellation">Phong tessellation:</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#issues">Issues:</a></li>
+    <li><a href="#conclusion">Conclusion:</a></li>
+    <li><a href="#references">References:</a></li>
+  </ul>
+</nav>
+</div>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+    <script>
+        (function() {
+            var $toc = $('#TableOfContents');
+            
+            if ($toc.length > 0) {
+                var $window = $(window);
+                
+                function onScroll(){
+                    var currentScroll = $window.scrollTop();
+                    var h = $('h1, h2, h3, h4, h5, h6');
+                    var id = "";
+                    h.each(function (i, e) {
+                        e = $(e);
+                        if (e.offset().top - 10 <= currentScroll ) {
+                            id = e.attr('id');
+                        }
+                    });
+                    var active = $toc.find('a.active');
+                    if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
+
+                    active.each(function (i, e) {
+                        $(e).removeClass('active');
+                    });
+                    
+                    $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
+                        $(e).children('a').addClass('active');
+                    });
+                }
+
+                $window.on('scroll', onScroll);
+                $(document).ready(function() {
+                    onScroll();
+                    document.getElementsByClassName('toc')[0].style.display = '';
+                });
+            }
+        })();
+    </script>
+
+      </div>
 
       <footer>
         

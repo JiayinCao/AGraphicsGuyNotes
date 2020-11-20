@@ -159,7 +159,7 @@ Monte Carlo Integral Monte Carlo tries to solve integral problem by random samp
           
         </div>
       </header>
-
+      
       <div>
         
         <p>The book physically based rendering doesn&rsquo;t spend too much effort explaining MIS, however it does mention it. In order to be more familiar with MIS(Multiple Importance Sampling), I spent some time reading Veach&rsquo;s thesis. The whole thesis is relatively long, however the chapter about MIS is kind of independent to the other ones. Worth taking some notes in case I forget later.</p>
@@ -266,6 +266,153 @@ Monte Carlo Integral Monte Carlo tries to solve integral problem by random samp
 
       </div>
 
+      <div class="">
+        <style>
+    .toc {
+        position: fixed;
+        left: 50%;
+        top: 110px;
+        font-size: 0.8em;
+        width: 320px;
+        margin-left: 480px;
+        padding-left: 20px;
+        padding-bottom: 100px;
+        padding-top: 80px;
+        overflow-y: auto;
+        line-height: 1.7em;
+        scroll-padding-top: 100px;
+        border-left: 3px solid rgba(128, 128, 128, 0.4);;
+    }
+
+    .toc label {
+        font-size: 20px;
+        font-weight: bold;
+        margin: 6.4rem 0 3.2rem 0;
+    }
+
+    .toc a {
+        filter: grayscale(70%);
+    }
+
+    .toc a:hover {
+        font-weight: bold;
+        filter: grayscale(0%);
+    }
+
+    .toc ul {
+        margin-left:1px;
+        padding-left: 20px;
+    }
+    
+     
+    .toc ul ul{
+        margin-left:1px;
+        padding-left: 20px;
+    }
+
+     
+    .toc ul ul ul{
+        margin-left:1px;
+        padding-left: 20px;
+    }
+
+    .toc li a.active {
+        font-weight: bold;
+        filter: grayscale(0%);
+    }
+
+    @media (max-width: 1640px) {
+      main {
+        max-width: 100%;
+      }
+  
+      .toc {
+        display: none;
+      }
+    }
+
+</style>
+  
+
+
+
+
+
+
+
+
+
+
+<div class="toc" style="display:none;">
+    <label>Contents</label>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#monte-carlo-integral">Monte Carlo Integral</a>
+      <ul>
+        <li><a href="#consistent-and-unbiased">Consistent and Unbiased</a></li>
+      </ul>
+    </li>
+    <li><a href="#importance-sampling">Importance Sampling</a></li>
+    <li><a href="#multiple-importance-sampling">Multiple Importance Sampling</a>
+      <ul>
+        <li><a href="#balance-heuristic">Balance Heuristic</a></li>
+        <li><a href="#other-heuristics">Other Heuristics</a>
+          <ul>
+            <li><a href="#the-power-heuristic">The power heuristic:</a></li>
+            <li><a href="#the-cutoff-heuristic">The cutoff heuristic:</a></li>
+            <li><a href="#the-maximum-heuristic">The maximum heuristic:</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#conclusion">Conclusion</a></li>
+    <li><a href="#references">References</a></li>
+  </ul>
+</nav>
+</div>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+    <script>
+        (function() {
+            var $toc = $('#TableOfContents');
+            
+            if ($toc.length > 0) {
+                var $window = $(window);
+                
+                function onScroll(){
+                    var currentScroll = $window.scrollTop();
+                    var h = $('h1, h2, h3, h4, h5, h6');
+                    var id = "";
+                    h.each(function (i, e) {
+                        e = $(e);
+                        if (e.offset().top - 10 <= currentScroll ) {
+                            id = e.attr('id');
+                        }
+                    });
+                    var active = $toc.find('a.active');
+                    if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
+
+                    active.each(function (i, e) {
+                        $(e).removeClass('active');
+                    });
+                    
+                    $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
+                        $(e).children('a').addClass('active');
+                    });
+                }
+
+                $window.on('scroll', onScroll);
+                $(document).ready(function() {
+                    onScroll();
+                    document.getElementsByClassName('toc')[0].style.display = '';
+                });
+            }
+        })();
+    </script>
+
+      </div>
 
       <footer>
         

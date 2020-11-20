@@ -156,7 +156,7 @@
           
         </div>
       </header>
-
+      
       <div>
         
         <p>Subsurface scattering has always been a challenge in computer graphics. Even in offline rendering, some of the common practical solutions are nowhere near unbiased. In certain algorithms, there are some pretty aggressive assumptions made to make things under control.
@@ -430,7 +430,7 @@ Mathematically, the equation below needs to hold true,</p>
 <p>$ \int_0^{2\pi} \int_0^{\infty} S_p(r) \space r \space dr \space d\theta = 1$</p>
 <h2 id="importance-sampling">Importance Sampling</h2>
 <p>Importance sampling of BSSRDF involves two things, sampling an incoming direction and sampling a position where the incoming light enters the volume of the SSS object from the surface.
-Sampling a direction is no different from sampling a direction using BRDF. As a matter of fact, PBRT uses a wrapper BXDF to hide the $ S_w $ part.
+Sampling a direction is no different from sampling a direction using BRDF. As a matter of fact, PBRT uses a wrapper BXDF to hide the $ S_w $ part. 
 And with the BRDF setup, it easily reuses existed code infrastructure to sample it.</p>
 <p>Taking a sample around the point to be shaded is a bit more complex than taking a random direction around the same point since it depends on the shape of the geometry.
 There are numerous methods that can help to take samples. For example, in PBRT 2nd edition, they construct a KD-Tree for saving randomly generated points on the surface of the geometry.
@@ -1076,7 +1076,7 @@ And considering the multi-bounces inside SSS materials don&rsquo;t have the bigg
 
 <h4 id="the-catch-of-replacing-sss-with-lambert">The Catch of Replacing SSS with Lambert</h4>
 <p>Given a specific path, depending on the direction of evaluation, the end result of rendering equation evaluation could be different.
-Imagine there is a path like this
+Imagine there is a path like this 
 $ E \rightarrow A \rightarrow B \rightarrow L $,
 where <strong>E</strong> stands for eye, <strong>A</strong> and <strong>B</strong> stand for two points on surfaces with SSS, <strong>L</strong> represents light. If the direction of evaluation is from the eye to the light, <strong>A</strong> will be evaluated with SSS model, but <strong>B</strong> will be a lambert model.
 While if the direction of the evaluation goes the other way, <strong>B</strong> will be evaluated with SSS, and <strong>A</strong> will be simplified with lambert model. This clearly introduces some bias between path evaluation from different directions.
@@ -1094,7 +1094,7 @@ It would be very hard, if not impossible, to take lights into account when takin
 But the multi-intersection nature of the algorithm does lead to some problems.
 Like we mentioned before, there is a possibility that the projection ray will hit multiple surfaces with the same objects, instead of just one.
 In these cases, PBRT will choose to uniformly pick one random intersection and divide the diffusion profile PDF by the number of intersections that the short ray hits in total.
-This essentially adds a weighting factor for the original pdf.
+This essentially adds a weighting factor for the original pdf. 
 Mathematically, the final pdf should be as below,</p>
 <p>$ P(X,R) = P_{Disney}(R) * P_{uniform}(X|R=r)$</p>
 <p>R is the distance between the sampled point on the disk to the center of the disk.
@@ -1116,7 +1116,7 @@ The truth is there is not even a number, it is a continuous domain.
 But one thing that we can do to mitigate the problem is to avoid randomly picking one intersection among all but to evaluate all of them.
 This was not possible before the first iteration since rays will grow exponentially without the above trick.
 But since I have it implemented, I can totally consider evaluating all intersections instead of just randomly picking one of them.
-Following is a comparison of the shots with and without this method, it is obvious how efficient it is after this iteration.
+Following is a comparison of the shots with and without this method, it is obvious how efficient it is after this iteration. 
 It is worth noting that instead of having the same spp this time, I choose to configure the settings differently so that the rendering time is roughly the same, which makes the comparison fairer.</p>
 
 
@@ -1855,7 +1855,7 @@ A big proportion of the image is covered by skin, which is essentially this subs
 But apart from these skin pixels, there are also other materials like metal, hair, and even a different primitive type.
 In such a scene, this optimization reduces the total intersection by 14%, eventually improves the final rendering performance by 11.5%. For a pure subsurface scattering scene like the monkey head shot, performance gain can be as high as 14%.</p>
 <h2 id="avoid-mis">Avoid MIS</h2>
-<p>Whenever we find an intersection to keep iterating, we need to evaluate how much light coming in through that exit point.
+<p>Whenever we find an intersection to keep iterating, we need to evaluate how much light coming in through that exit point. 
 Normally, we will take multiple samples from both light sources and the BRDF to avoid bad sampling, which could be caused by either a spiky shape BRDF or a tiny light source.
 But we know for a fact that the BRDF here is lambert, there is no need to take samples from BRDF at all.
 The <a href="http://cseweb.ucsd.edu/~viscomp/classes/cse274/wi18/readings/veach_thesis.pdf">thesis</a> that introduced multiple importance sampling already made it clear that MIS doesn&rsquo;t necessarily improve quality all the time.
@@ -2139,6 +2139,169 @@ Apart from the common subsurface scattering materials, like skin, wax, this algo
 
       </div>
 
+      <div class="">
+        <style>
+    .toc {
+        position: fixed;
+        left: 50%;
+        top: 110px;
+        font-size: 0.8em;
+        width: 320px;
+        margin-left: 480px;
+        padding-left: 20px;
+        padding-bottom: 100px;
+        padding-top: 80px;
+        overflow-y: auto;
+        line-height: 1.7em;
+        scroll-padding-top: 100px;
+        border-left: 3px solid rgba(128, 128, 128, 0.4);;
+    }
+
+    .toc label {
+        font-size: 20px;
+        font-weight: bold;
+        margin: 6.4rem 0 3.2rem 0;
+    }
+
+    .toc a {
+        filter: grayscale(70%);
+    }
+
+    .toc a:hover {
+        font-weight: bold;
+        filter: grayscale(0%);
+    }
+
+    .toc ul {
+        margin-left:1px;
+        padding-left: 20px;
+    }
+    
+     
+    .toc ul ul{
+        margin-left:1px;
+        padding-left: 20px;
+    }
+
+     
+    .toc ul ul ul{
+        margin-left:1px;
+        padding-left: 20px;
+    }
+
+    .toc li a.active {
+        font-weight: bold;
+        filter: grayscale(0%);
+    }
+
+    @media (max-width: 1640px) {
+      main {
+        max-width: 100%;
+      }
+  
+      .toc {
+        display: none;
+      }
+    }
+
+</style>
+  
+
+
+
+
+
+
+
+
+
+
+<div class="toc" style="display:none;">
+    <label>Contents</label>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#what-is-subsurface-scattering">What is Subsurface Scattering</a></li>
+    <li><a href="#basic-idea-of-sss">Basic Idea of SSS</a>
+      <ul>
+        <li><a href="#evaluating-bssrdf">Evaluating BSSRDF</a></li>
+        <li><a href="#importance-sampling">Importance Sampling</a></li>
+        <li><a href="#how-does-it-fit-in-a-path-tracing-algorithm">How Does It Fit in a Path Tracing Algorithm</a></li>
+      </ul>
+    </li>
+    <li><a href="#enhancements">Enhancements</a>
+      <ul>
+        <li><a href="#reduce-fireflies">Reduce Fireflies</a>
+          <ul>
+            <li><a href="#dont-evaluate-sss-unnecessarily">Don&rsquo;t Evaluate SSS Unnecessarily</a>
+              <ul>
+                <li><a href="#what-happens-under-the-hood">What Happens Under the Hood</a></li>
+                <li><a href="#the-catch-of-replacing-sss-with-lambert">The Catch of Replacing SSS with Lambert</a></li>
+              </ul>
+            </li>
+            <li><a href="#evaluate-at-all-intersections">Evaluate at all Intersections</a></li>
+          </ul>
+        </li>
+        <li><a href="#no-fresnel-above-sss-material">No Fresnel above SSS material</a></li>
+        <li><a href="#avoid-finding-intersection-with-other-meshes">Avoid Finding Intersection with other Meshes</a></li>
+        <li><a href="#refactor-material-system-in-my-renderer">Refactor Material System in my Renderer</a></li>
+      </ul>
+    </li>
+    <li><a href="#optimizations">Optimizations</a>
+      <ul>
+        <li><a href="#intersection-tests">Intersection tests</a></li>
+        <li><a href="#avoid-mis">Avoid MIS</a></li>
+        <li><a href="#miscellaneous">Miscellaneous</a></li>
+      </ul>
+    </li>
+    <li><a href="#a-failed-attempt">A Failed Attempt</a></li>
+    <li><a href="#summary">Summary</a></li>
+    <li><a href="#references">References</a></li>
+  </ul>
+</nav>
+</div>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+    <script>
+        (function() {
+            var $toc = $('#TableOfContents');
+            
+            if ($toc.length > 0) {
+                var $window = $(window);
+                
+                function onScroll(){
+                    var currentScroll = $window.scrollTop();
+                    var h = $('h1, h2, h3, h4, h5, h6');
+                    var id = "";
+                    h.each(function (i, e) {
+                        e = $(e);
+                        if (e.offset().top - 10 <= currentScroll ) {
+                            id = e.attr('id');
+                        }
+                    });
+                    var active = $toc.find('a.active');
+                    if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
+
+                    active.each(function (i, e) {
+                        $(e).removeClass('active');
+                    });
+                    
+                    $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
+                        $(e).children('a').addClass('active');
+                    });
+                }
+
+                $window.on('scroll', onScroll);
+                $(document).ready(function() {
+                    onScroll();
+                    document.getElementsByClassName('toc')[0].style.display = '';
+                });
+            }
+        })();
+    </script>
+
+      </div>
 
       <footer>
         
