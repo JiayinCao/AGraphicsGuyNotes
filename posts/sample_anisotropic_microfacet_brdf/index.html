@@ -297,7 +297,7 @@
     }
 
     .toc a {
-        filter: grayscale(70%);
+        filter: grayscale(90%);
     }
 
     .toc a:hover {
@@ -325,6 +325,11 @@
     .toc li a.active {
         font-weight: bold;
         filter: grayscale(0%);
+    }
+
+    .toc li a.semi_active {
+        font-weight: bold;
+        filter: grayscale(60%);
     }
 
     @media (max-width: 1640px) {
@@ -388,9 +393,17 @@
                     active.each(function (i, e) {
                         $(e).removeClass('active');
                     });
+
+                    var semi_active = $toc.find('a.semi_active');
+                    semi_active.each(function (i, e) {
+                        $(e).removeClass('semi_active');
+                    });
                     
                     $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
-                        $(e).children('a').addClass('active');
+                        if( i == 0 )
+                            $(e).children('a').addClass('active');
+                        else
+                            $(e).children('a').addClass('semi_active');
                     });
                 }
 
