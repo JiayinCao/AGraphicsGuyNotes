@@ -18,15 +18,6 @@ In the beginning, I didn&amp;rsquo;t know how it would end up eventually due to 
     </item>
     
     <item>
-      <title>Public Resources of Vulkan</title>
-      <link>/posts/vulkan/</link>
-      <pubDate>Sun, 29 Nov 2020 00:00:00 -0800</pubDate>
-      
-      <guid>/posts/vulkan/</guid>
-      <description>Vulkan Introduction  Vulkan Graphics Getting explicit: How Hard is Vulkan really? Vulkan State of the Union  Vulkan Wrapper  ANGLE: OpenGL on Vulkan  Vulkan Memory Managment  Memory Management in Vulkan  Command Pool and Command Buffer Resource Barrier Vulkan Render Pass  Render Passes in Vulkan  Porting  Porting to Vulkan  Misc  Vulkan on Android Vulkan- The Future of High Performance Graphics  </description>
-    </item>
-    
-    <item>
       <title>Practical Tips for Implementing Subsurface Scattering in a Ray Tracer</title>
       <link>/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/</link>
       <pubDate>Fri, 13 Nov 2020 00:00:00 -0800</pubDate>
