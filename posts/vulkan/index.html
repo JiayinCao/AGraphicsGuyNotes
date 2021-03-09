@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+
+    <meta name="author" content="Jiayin Cao">
+    <meta name="description" content="Vulkan Introduction  Vulkan Graphics Getting explicit: How Hard is Vulkan really? Vulkan State of the Union  Vulkan Wrapper  ANGLE: OpenGL on Vulkan  Vulkan Memory Managment  Memory Management in Vulkan  Command Pool and Command Buffer Resource Barrier Vulkan Render Pass  Render Passes in Vulkan  Porting  Porting to Vulkan  Misc  Vulkan on Android Vulkan- The Future of High Performance Graphics  ">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://agraphicsguynotes.com/img/cover.png"/>
+
+<meta name="twitter:title" content="Public Resources of Vulkan"/>
+<meta name="twitter:description" content="Vulkan Introduction  Vulkan Graphics Getting explicit: How Hard is Vulkan really? Vulkan State of the Union  Vulkan Wrapper  ANGLE: OpenGL on Vulkan  Vulkan Memory Managment  Memory Management in Vulkan  Command Pool and Command Buffer Resource Barrier Vulkan Render Pass  Render Passes in Vulkan  Porting  Porting to Vulkan  Misc  Vulkan on Android Vulkan- The Future of High Performance Graphics  "/>
+
+    <meta property="og:title" content="Public Resources of Vulkan" />
+<meta property="og:description" content="Vulkan Introduction  Vulkan Graphics Getting explicit: How Hard is Vulkan really? Vulkan State of the Union  Vulkan Wrapper  ANGLE: OpenGL on Vulkan  Vulkan Memory Managment  Memory Management in Vulkan  Command Pool and Command Buffer Resource Barrier Vulkan Render Pass  Render Passes in Vulkan  Porting  Porting to Vulkan  Misc  Vulkan on Android Vulkan- The Future of High Performance Graphics  " />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/vulkan/" />
+<meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/>
+<meta property="article:published_time" content="2020-11-29T00:00:00-08:00" />
+<meta property="article:modified_time" content="2020-11-29T00:00:00-08:00" />
+
+
+    <title>
+  Public Resources of Vulkan · A Graphics Guy&#39;s Note
+</title>
+
+    
+      <link rel="canonical" href="/posts/vulkan/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.1.7/css/fork-awesome.min.css" integrity="sha256-gsmEoJAws/Kd3CjuOQzLie5Q3yshhvmo7YNtBG7aaEY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.9836c03fe5c87d102278a33e86d0591ef36c89b1e17e8e547ebf84c05cee010e.css" integrity="sha256-mDbAP&#43;XIfRAieKM&#43;htBZHvNsibHhfo5Ufr&#43;EwFzuAQ4=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="/css/coder-dark.min.717236c74e0a5208ef73964a9f44c6b443b689a95b270d8b2a40d0c012460dac.css" integrity="sha256-cXI2x04KUgjvc5ZKn0TGtEO2ialbJw2LKkDQwBJGDaw=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+      <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+    
+
+    
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-7T6R55SCY1"></script>
+      <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-7T6R55SCY1');
+      </script>
+    
+
+    <meta name="generator" content="Hugo 0.78.2" />
+  </head>
+
+  
+  
+    
+  
+  <body class="colorscheme-auto"
+        onload=" twemoji.parse(document.body); "
+  >
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      A Graphics Guy&#39;s Note
+    </a>
+    
+      
+        <span id="dark-mode-toggle" class="float-right">
+          <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+        </span>
+      
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+        
+        
+        
+          <li class="navigation-item separator">
+            <span>|</span>
+          </li>
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Public Resources of Vulkan</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2020-11-29T00:00:00-08:00'>
+                November 29, 2020
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              One-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+      
+      <div>
+        
+        <h1 id="vulkan-introduction">Vulkan Introduction</h1>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=DWLkA6-wzj0">Vulkan Graphics</a></li>
+<li><a href="https://www.youtube.com/watch?v=0R23npUCCnw">Getting explicit: How Hard is Vulkan really?</a></li>
+<li><a href="https://www.youtube.com/watch?v=KLZsAJQBR5o">Vulkan State of the Union</a></li>
+</ul>
+<h1 id="vulkan-wrapper">Vulkan Wrapper</h1>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=QrIKdjmpmaA">ANGLE: OpenGL on Vulkan</a></li>
+</ul>
+<h1 id="vulkan-memory-managment">Vulkan Memory Managment</h1>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=zSG6dPq57P8">Memory Management in Vulkan</a></li>
+</ul>
+<h1 id="command-pool-and-command-buffer">Command Pool and Command Buffer</h1>
+<h1 id="resource-barrier">Resource Barrier</h1>
+<h1 id="vulkan-render-pass">Vulkan Render Pass</h1>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=x2SGVjlVGhE">Render Passes in Vulkan</a></li>
+</ul>
+<h1 id="porting">Porting</h1>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=ptakmFGcIRU">Porting to Vulkan</a></li>
+</ul>
+<h1 id="misc">Misc</h1>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=Aeo62YzofGc">Vulkan on Android</a></li>
+<li><a href="https://www.youtube.com/watch?v=xtrNiYW8lh4">Vulkan- The Future of High Performance Graphics</a></li>
+</ul>
+
+      </div>
+
+      <div class="">
+        <style>
+    .toc {
+        position: fixed;
+        left: 50%;
+        top: 110px;
+        font-size: 0.8em;
+        width: 320px;
+        margin-left: 480px;
+        padding-left: 20px;
+        padding-bottom: 100px;
+        padding-top: 80px;
+        overflow-y: auto;
+        line-height: 1.7em;
+        scroll-padding-top: 100px;
+        border-left: 3px solid rgba(128, 128, 128, 0.4);;
+    }
+
+    .toc label {
+        font-size: 20px;
+        font-weight: bold;
+        margin: 6.4rem 0 3.2rem 0;
+    }
+
+    .toc a {
+        filter: grayscale(90%);
+    }
+
+    .toc a:hover {
+        font-weight: bold;
+        filter: grayscale(0%);
+    }
+
+    .toc ul {
+        margin-left:1px;
+        padding-left: 20px;
+        list-style-type: circle;
+    }
+    
+     
+    .toc ul ul{
+        margin-left:1px;
+        padding-left: 20px;
+        list-style-type: circle;
+    }
+
+     
+    .toc ul ul ul{
+        margin-left:1px;
+        padding-left: 20px;
+        list-style-type: circle;
+    }
+
+    .toc li a.active {
+        font-weight: bold;
+        filter: grayscale(0%);
+    }
+
+    .toc li a.semi_active {
+        font-weight: bold;
+        filter: grayscale(60%);
+    }
+
+    @media (max-width: 1640px) {
+      main {
+        max-width: 100%;
+      }
+  
+      .toc {
+        display: none;
+      }
+    }
+
+</style>
+  
+
+
+
+
+
+
+
+
+
+
+<div class="toc" style="display:none;">
+    <label>Contents</label>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#vulkan-introduction">Vulkan Introduction</a></li>
+    <li><a href="#vulkan-wrapper">Vulkan Wrapper</a></li>
+    <li><a href="#vulkan-memory-managment">Vulkan Memory Managment</a></li>
+    <li><a href="#command-pool-and-command-buffer">Command Pool and Command Buffer</a></li>
+    <li><a href="#resource-barrier">Resource Barrier</a></li>
+    <li><a href="#vulkan-render-pass">Vulkan Render Pass</a></li>
+    <li><a href="#porting">Porting</a></li>
+    <li><a href="#misc">Misc</a></li>
+  </ul>
+</nav>
+</div>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+    <script>
+        (function() {
+            var $toc = $('#TableOfContents');
+            
+            if ($toc.length > 0) {
+                var $window = $(window);
+                
+                function onScroll(){
+                    var currentScroll = $window.scrollTop();
+                    var h = $('h1, h2, h3, h4, h5, h6');
+                    var id = "";
+                    h.each(function (i, e) {
+                        e = $(e);
+                        if (e.offset().top - 80 <= currentScroll ) {
+                            id = e.attr('id');
+                        }
+                    });
+                    var active = $toc.find('a.active');
+                    if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
+
+                    active.each(function (i, e) {
+                        $(e).removeClass('active').siblings('ul').hide();
+                    });
+
+                    var semi_active = $toc.find('a.semi_active');
+                    semi_active.each(function (i, e) {
+                        $(e).removeClass('semi_active').siblings('ul').hide();
+                    });
+                    
+                    $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
+                        if( i == 0 )
+                            $(e).children('a').addClass('active').siblings('ul').show();
+                        else
+                            $(e).children('a').addClass('semi_active').siblings('ul').show();
+                    });
+                }
+
+                $window.on('scroll', onScroll);
+                $(document).ready(function() {
+                    $toc.find('a').parent('li').find('ul').hide();
+                    onScroll();
+                    document.getElementsByClassName('toc')[0].style.display = '';
+                });
+            }
+        })();
+    </script>
+
+      </div>
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "a-graphics-guys-notes" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+          2015 -
+        
+        2021
+         Jiayin Cao 
+      
+      
+      
+    </section>
+  </footer>
+
+    </main>
+
+    
+      
+      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>

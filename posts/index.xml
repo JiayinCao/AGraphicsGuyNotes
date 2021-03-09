@@ -6,7 +6,26 @@
     <description>Recent content in Posts on A Graphics Guy&#39;s Note</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 13 Nov 2020 00:00:00 -0800</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 09 Mar 2021 00:00:00 -0800</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Making a Shading Language for my Offline Renderer</title>
+      <link>/posts/making_a_shading_lagnauge_for_my_offline_renderer/</link>
+      <pubDate>Tue, 09 Mar 2021 00:00:00 -0800</pubDate>
+      
+      <guid>/posts/making_a_shading_lagnauge_for_my_offline_renderer/</guid>
+      <description>As a graphics programmer, I don&amp;rsquo;t usually spend too much time on something that is not strictly related to computer graphics or game engine. However, I did spend four months in my spare time last year building a shading language for my renderer SORT, which I call Tiny Shading Language (TSL).
+In the beginning, I didn&amp;rsquo;t know how it would end up eventually due to the lack of knowledge about how compilers work in general, this is not something graphics programmers touch regularly.</description>
+    </item>
+    
+    <item>
+      <title>Public Resources of Vulkan</title>
+      <link>/posts/vulkan/</link>
+      <pubDate>Sun, 29 Nov 2020 00:00:00 -0800</pubDate>
+      
+      <guid>/posts/vulkan/</guid>
+      <description>Vulkan Introduction  Vulkan Graphics Getting explicit: How Hard is Vulkan really? Vulkan State of the Union  Vulkan Wrapper  ANGLE: OpenGL on Vulkan  Vulkan Memory Managment  Memory Management in Vulkan  Command Pool and Command Buffer Resource Barrier Vulkan Render Pass  Render Passes in Vulkan  Porting  Porting to Vulkan  Misc  Vulkan on Android Vulkan- The Future of High Performance Graphics  </description>
+    </item>
+    
     <item>
       <title>Practical Tips for Implementing Subsurface Scattering in a Ray Tracer</title>
       <link>/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/</link>
@@ -50,7 +69,7 @@
       
       <guid>/posts/volume_rendering_in_offline_renderer/</guid>
       <description>Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.
-.row {display: -ms-flexbox; display: flex;-ms-flex-wrap: wrap; flex-wrap: wrap;padding: 0 4px;}.</description>
+ .row { display: -ms-flexbox; display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap; padding: 0 4px; } .</description>
     </item>
     
     <item>

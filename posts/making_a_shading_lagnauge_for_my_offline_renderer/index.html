@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+
+    <meta name="author" content="Jiayin Cao">
+    <meta name="description" content="As a graphics programmer, I don&rsquo;t usually spend too much time on something that is not strictly related to computer graphics or game engine. However, I did spend four months in my spare time last year building a shading language for my renderer SORT, which I call Tiny Shading Language (TSL).
+In the beginning, I didn&rsquo;t know how it would end up eventually due to the lack of knowledge about how compilers work in general, this is not something graphics programmers touch regularly.">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://agraphicsguynotes.com/img/cover.png"/>
+
+<meta name="twitter:title" content="Making a Shading Language for my Offline Renderer"/>
+<meta name="twitter:description" content="As a graphics programmer, I don&rsquo;t usually spend too much time on something that is not strictly related to computer graphics or game engine. However, I did spend four months in my spare time last year building a shading language for my renderer SORT, which I call Tiny Shading Language (TSL).
+In the beginning, I didn&rsquo;t know how it would end up eventually due to the lack of knowledge about how compilers work in general, this is not something graphics programmers touch regularly."/>
+
+    <meta property="og:title" content="Making a Shading Language for my Offline Renderer" />
+<meta property="og:description" content="As a graphics programmer, I don&rsquo;t usually spend too much time on something that is not strictly related to computer graphics or game engine. However, I did spend four months in my spare time last year building a shading language for my renderer SORT, which I call Tiny Shading Language (TSL).
+In the beginning, I didn&rsquo;t know how it would end up eventually due to the lack of knowledge about how compilers work in general, this is not something graphics programmers touch regularly." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/making_a_shading_lagnauge_for_my_offline_renderer/" />
+<meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/>
+<meta property="article:published_time" content="2021-03-09T00:00:00-08:00" />
+<meta property="article:modified_time" content="2021-03-09T00:00:00-08:00" />
+
+
+    <title>
+  Making a Shading Language for my Offline Renderer · A Graphics Guy&#39;s Note
+</title>
+
+    
+      <link rel="canonical" href="/posts/making_a_shading_lagnauge_for_my_offline_renderer/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.1.7/css/fork-awesome.min.css" integrity="sha256-gsmEoJAws/Kd3CjuOQzLie5Q3yshhvmo7YNtBG7aaEY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.9836c03fe5c87d102278a33e86d0591ef36c89b1e17e8e547ebf84c05cee010e.css" integrity="sha256-mDbAP&#43;XIfRAieKM&#43;htBZHvNsibHhfo5Ufr&#43;EwFzuAQ4=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="/css/coder-dark.min.717236c74e0a5208ef73964a9f44c6b443b689a95b270d8b2a40d0c012460dac.css" integrity="sha256-cXI2x04KUgjvc5ZKn0TGtEO2ialbJw2LKkDQwBJGDaw=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+      <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+    
+
+    
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-7T6R55SCY1"></script>
+      <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-7T6R55SCY1');
+      </script>
+    
+
+    <meta name="generator" content="Hugo 0.78.2" />
+  </head>
+
+  
+  
+    
+  
+  <body class="colorscheme-auto"
+        onload=" twemoji.parse(document.body); "
+  >
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      A Graphics Guy&#39;s Note
+    </a>
+    
+      
+        <span id="dark-mode-toggle" class="float-right">
+          <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+        </span>
+      
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+        
+        
+        
+          <li class="navigation-item separator">
+            <span>|</span>
+          </li>
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Making a Shading Language for my Offline Renderer</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2021-03-09T00:00:00-08:00'>
+                March 9, 2021
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              28-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+      
+      <div>
+        
+        <p>As a graphics programmer, I don&rsquo;t usually spend too much time on something that is not strictly related to computer graphics or game engine. However, I did spend four months in my spare time last year building a shading language for my renderer <a href="https://sort-renderer.com">SORT</a>, which I call <a href="https://tiny-shading-language.com/">Tiny Shading Language (TSL)</a>.</p>
+<p>In the beginning, I didn&rsquo;t know how it would end up eventually due to the lack of knowledge about how compilers work in general, this is not something graphics programmers touch regularly. However, it does turn out without too much work, this thing can be done by one person in a few months.</p>
+<p>In this blog, I will briefly cover some of my thoughts in designing this shading language library. To be more specific, this blog is about how the system is designed and how it works with an offline CPU renderer, instead of the detailed language implementation.</p>
+<p>The following is a screenshot of the <a href="https://github.com/JiayinCao/Tiny-Shading-Language/tree/master/src/tsl_sample">example tutorial</a> that comes with the TSL library.
+The patterns on the surface of the two spheres are procedurally generated in TSL.</p>
+<figure>
+    <img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/tsl_example.jpg" width="700"/> 
+</figure>
+
+<h1 id="motivation">Motivation</h1>
+<p>Whenever people heard about my new shading language, the first thing they asked was always, &lsquo;why do you want to make your own shading language since there is already OSL&rsquo;.</p>
+<p>This is a fairly good question, I had the same doubts for more than half a year before putting my hands on it.
+There are generally several reasons,</p>
+<ul>
+<li>By working on my own shading language, I can learn everything from scratch by myself. This is clearly the biggest reason that I chose to work on it. The knowledge gained in the process of making it would be valuable to my career in the future, at least it should have some indirect impact on my work. It should allow me to have a much deeper understanding of how a programming language compiler works.</li>
+<li>Having my own code base will allow me to change the library anyway I see fit. This alone offers me a lot more flexibility than OSL since I&rsquo;m not familiar with their implementation.</li>
+<li>Since Apple is currently in the transition from Intel chips to ARM, future MacOSs will be shipped on ARM architecture. Building OSL on ARM will require building all its dependencies on ARM too. If there is any implementation that is x86 specific in any of its dependencies, I will have to find a workaround implementation on ARM too. Without OSL on ARM, there is no way to port my renderer on Apple Silicon.</li>
+<li>OSL heavily uses this library called <a href="https://sites.google.com/site/openimageio/home">Open Image IO</a>, which is another open-source project. While OIIO further depends on several other small libraries like, <a href="https://www.openexr.com/">OpenExr</a>, <a href="http://www.libpng.org/pub/png/libpng.html">libpng</a>, <a href="http://www.libtiff.org/">libtiff</a> and a few others. Some of the basic data structures are only defined in OIIO, so decoupling OSL with OIIO would require quite some work. This was one of the options that I have considered, but after a second thought, it will also make updating OSL in my renderer very hard since it is locally modified.</li>
+<li>Having too many dependencies does make OSL a bit &lsquo;heavy&rsquo; than expected. My original expectation was just to have one OSL lib as dependencies, it certainly didn&rsquo;t end up the way I planned. Eventually, there are other libs too and on some platforms, some of the libraries have to be dynamically linked too. Ideally, I could have spent much more time to make sure all of the dependencies are statically compiled, but it is way more sophisticated than it sounds. I wouldn&rsquo;t want to spend too much time building those libraries from source code. Also, some of the pre-compiled libraries are OS-dependent on Ubuntu, which means that I will have to compile it another time on another version of Ubuntu. At the end of the day, after solving all these problems, features in OIIO are not even used in my renderer at all and I do not have a plan to use them in my renderer since doing it from scratch would be lots of fun, it is a dependency purely because OSL needs it.</li>
+</ul>
+<p>There are other reasons that motivate me to implement my own shading language. However, those are mostly related to OSL. I would like to avoid having comments about OSL since at the time this blog is written, I am an employe of Sony (Naughty Dog).</p>
+<p>With the above-mentioned reasons, I hope I have made it clear why I decided to implement my own shading language. Of course, I am fully aware that my own implementation will be way less robust than OSL since there is a team behind it and this tech has been involved for more than ten years. So my next question after finalizing my decision was whether this is doable by myself in a few months, I definitely didn&rsquo;t want to deviate from my trail too much, I&rsquo;m a graphics programmer anyway, no one will expect me to know too many details in designing a compiler.</p>
+<h1 id="taking-advantage-of-existed-work">Taking Advantage of Existed Work</h1>
+<p>The image below demonstrates some basic stages of compiling a programming language into machine code
+<figure>
+    <img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/compiler_stages.png"/> 
+</figure>
+</p>
+<p>Starting from scratch and making everything by myself sounds crazy and it is not likely that I can finish everything in a few months.
+After some basic research and learning, I found some useful tools that could help me make my shading language a reality.</p>
+<ul>
+<li><strong><a href="https://en.wikipedia.org/wiki/Flex_(lexical_analyser_generator)">Flex</a></strong><br>
+Flex is one of the commonly used tools as a lexical analyzer. Taking a string stream, it will basically tokenize all of the string in a pre-defined manner.</li>
+<li><strong><a href="https://en.wikipedia.org/wiki/GNU_Bison">Bison</a></strong><br>
+Bison is a syntax analyzer. It will take tokens generated from Flex and generate an <a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree">abstract syntax tree</a>.</li>
+<li><strong><a href="https://llvm.org/">LLVM</a></strong><br>
+LLVM is short for low level virtual machine. It is a complex infrastructure that could help convert LLVM IR to machine code on different target architectures, like PC, X86, etc. It also does optimization too.</li>
+</ul>
+<p>With the these tools, it sounds like I only need to do the following things</p>
+<ul>
+<li>Make a configuration file for Flex to tokenize my shading language.</li>
+<li>Make a configuration file for Bison to use the tokens generated from Flex and generate AST.</li>
+<li>Generate LLVM IR with the AST generated from Bison.</li>
+<li>Compile the IR into JITed machine code with LLVM.</li>
+</ul>
+<p>This is way more manageable than writing everything by myself. And it did give me some confidence that this is doable by one person.</p>
+<p>However, apart from the basic language support, which is to convert my shading language to JITed machine code, this is far from enough since a programmable shading language for CPU ray tracers is fundamentally different from its GPU counterpart.
+A large proportion of the project is to design a user-friendly interface and let it fit well in my renderer.
+This is no less than the amount of work to be done just to convert high level language to machine code.</p>
+<p>This blog is mainly about the latter. It won&rsquo;t mention anything about the former part since there is plenty of resources on the internet that could help in those topics. <a href="https://llvm.org/docs/tutorial/MyFirstLanguageFrontend/index.html">Kaleidoscope</a> is a very good example that comes with the LLVM library.</p>
+<h1 id="where-does-it-fit-in-a-ray-tracer">Where does It Fit in a Ray Tracer</h1>
+<p>Before we dive into the details of this shading language, I would like to put down some notes to offer the big picture of how this library fit in a ray tracer so that readers should have a brief idea about how it works with the rest of the system.</p>
+<p>A barebone path tracing algorithm could work like this,</p>
+<ol>
+<li>Spawn primary ray for each pixel sample.</li>
+<li>Find the nearest intersection with the scene.</li>
+<li>Use the material information to construct a BSDF.</li>
+<li>Evaluate the BSDF and update the throughput and accumulate it in the result.</li>
+<li>Importance sampling the BSDF and generate secondary rays if needed.</li>
+<li>Get back to step 2 and loop.</li>
+</ol>
+<p>The loop stops when there is no intersection found in step 2. Of course, this is also a simplified workflow since there is no volumetric rendering and subsurface scattering in it. But this is more than good enough for me to explain where TSL should fit.</p>
+<p>I guess all readers could have guessed at this point. The TSL execution should happen in step 3, which is exactly what the shader language is for. In PBRT 3rd, there are pre-defined materials with hard-coded BSDF and parameters of BXDF are exposed through pbrt input file with limited flexibility. With TSL, a ray tracer can translate shader script during runtime without itself being recompiled and this offers great flexibility. The purpose of TSL shader execution is to reconstruct BRDFs in the target BSDF, this purpose is very similar with what PBRT does with its material implementation, except that it is not hard coded in the ray tracer itself. Shader authoring can happen later when artists are working on assets.</p>
+<h1 id="language-system-design">Language System Design</h1>
+<p>TSL is designed to be simple and easy to use. The syntax of the language is very C-like, just like GLSL, HLSL, OSL. This is user friendly to even new shader authors.</p>
+<p>However, a CPU ray tracer shading language has lots of differences that are fundamentally different from a GPU shading language, which has a big impact on its language system design. TSL works in a very simliar manner with OSL, which also works on CPU. The followings are some of the major differences that TSL has compared with a GPU shading language.</p>
+<ul>
+<li>
+<p>In a graphics API, before issuing a draw call, we need to send information from host(CPU) to GPU, commonly including constant buffer, vertex buffer, index buffer, etc. Once all of the shader inputs are set, along with other render states, a draw call is issued. Depending on the exact situation, the number of shader executions could be up to a million or even more. In a nutshell, with everything setup once, shaders are usually executed on a massive scale.
+While TSL&rsquo;s shader setup and execution is almost always one vs one. This is defined by the nature of CPU ray tracers. CPU&rsquo;s parallelism is not utilized in the same way as GPU since different threads are not synchronized at all, there is simply nothing like Warp or Wavefront. Without synchronization, since different threads almost never run the same instructions like GPU does, executing shaders multiple times makes almost no sense at all. SIMD optimization would be a fairly bad fit for shaders since there are no four instances of shader executions at the same time.</p>
+</li>
+<li>
+<p>Modern game engines all support material graph, which is more of a visual programming language tool for technical artists to &lsquo;code&rsquo;. However, the GPU shader compilers are not aware of such a thing at all. There is something called &lsquo;shader builder&rsquo; that builds the finalized shader source code from different shader fragments collected from the material graph. These shaders are usually called material shaders. The other type of shaders in game engines is commonly called in-game shader, which is usually programmed by graphics programers. And the GPU shader compiler will take the shader source code without even knowning whether it is an in-game shader or a composited material shader.<br>
+There is generally no &lsquo;in-game&rsquo; shader in an offline renderer. But material shader concept is a necessarity to support a wide variety of material appearance on the surfaces. Different from GPU shader compiler, I chose to implement the &lsquo;shader builder&rsquo; algorithm inside TSL library just like OSL did so that renderers with TSL integrated only need to take shader fragments, which I call shader unit template, and TSL will be responsible for building the finalized shader code, which the renderer doesn&rsquo;t even get a chance to see. The benefit of doing this is that renderers are free of the responsibility of implementing a shader builder to support shader-graph-like material.</p>
+</li>
+<li>
+<p>In a GPU shader, the inputs are textures, constants and vertics. The output is usually a single plain data structure that has data for the following pipeline stages.
+The input of TSL is similar to GPU shading language, it has a global constant, global texture handles. While the output and shader source code definition is dramatically different from its GPU counterpart.<br>
+It is generally a bad idea to do all BXDF evaluation like game engines do in TSL alone for two reasons.</p>
+<ul>
+<li>First, BXDF supports not only its evaluation, but also interfaces for importance sampling. If everything is done in TSL, it means a shader graph must be translated into a few types of shaders, that support evaluation, importance sampling, etc. And whenever it needs more interfaces for BXDF, we need a new type of shader generated in TSL.</li>
+<li>Second, which is equally important, lots of renderers already have solid implementation of quite a few BXDFs. Having everything done in TSL will means for renderers integrating TSL, they need to re-implement everything they did in their BXDF implementation in TSL again. And not to mention there is no stl support in TSL, it will be very hard to implement sophisticated BXDF that could have been easily done in C++.</li>
+</ul>
+<p>Due to the above reasons, the output of TSL is designed to be a closure tree just like OSL. A closure basically indicates a BXDF in a renderer. Different from a real-time rendering engines, which mostly use Microfacet and Lambert as its shading model, offline renderers' material system could be a lot more complex, which is usually defined by a BSDF. A BSDF is composed of multiple BXDFs with them linearly combined. What makes it a bit more complex is that some BRDF takes other BSDF as an input argument, which essentially converts the BSDF to a tree.  In TSL, instead of returning a color value, it generates a tree of closures, which matches perfectly well with BSDF&rsquo;s definition. This will be covered in more detail later in this post. With the introduction of the type of closure tree, the only thing TSL needs to evaluate for real is actually the arguments to reconstruct the BSDF. For example, the base color for a lambert closure.<br>
+Here it is worth mentioning that closure concept is just a place holder with its input argument values. It doesn&rsquo;t necessarily match to BXDF. In the context of volumetric rendering, it can match to medium. As a matter of fact, it can match to anything to be evaluated later. I only used them to evaluate BXDF and medium in my renderer though.</p>
+</li>
+<li>
+<p>Unlike most GPU shading languages, TSL does allow call stack. As a matter of fact, TSL eventually will be resolved into CPU executable JITed code, there is simply no reason not to support call stack. Having call stacks will allow shader authors to implement algorithms like traversing a binary tree a lot easier than GPU shaders.</p>
+</li>
+<li>
+<p>Due to the nature of GPU, shader execution is always synchronized across multiple shader cores for better performance. While in a CPU ray tracer, synchronized shader evaluation across multiple threads doesn&rsquo;t offer too much benefit. TSL will be executed in a synchronized manner in its own thread though. Essentially, executing a TSL shader is nothing but calling a function from the host side, except that the machine code is compiled by TSL, not C++ compiler.</p>
+</li>
+</ul>
+<h2 id="shader-unit-template">Shader Unit Template</h2>
+<p>Shader unit template is the very basic compilation unit of TSL shaders. The corresponding concept in OSL is called shader layer.
+A shader unit template is nothing but a piece of shader code that will be compiled independently.</p>
+<p>For example, the following code is an example of shader unit template source code</p>
+<div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#007f7f">/*
+</span><span style="color:#007f7f"> * Shader entry for the shader unit template that makes a lamber closure
+</span><span style="color:#007f7f"> */</span>
+shader make_closure_lambert( in  color   basecolor,  <span style="color:#007f7f">// input basecolor
+</span><span style="color:#007f7f"></span>                             in  vector  normal,     <span style="color:#007f7f">// intput normal
+</span><span style="color:#007f7f"></span>                             out closure o0          <span style="color:#007f7f">// output closure
+</span><span style="color:#007f7f"></span>                           )
+{
+    <span style="color:#007f7f">// making a lambert closure with basecolor and its normal
+</span><span style="color:#007f7f"></span>    o0 = make_closure&lt;lambert&gt;( basecolor , normal );
+}
+</code></pre></div><p>This piece of shader code can be compiled into a shader unit template object. It has one output argument, which is a closure that indicates a lambert BRDF. Of course, it is eventually up to my renderer to explain how to interpret this into the final BRDF, which could totally be another type of BRDF too. But commonly, I don&rsquo;t do it that way.</p>
+<p>It is almost a perfect match for a node in a graph-based material system like what Blender offers.
+Following is an example of a SORT material in Blender,</p>
+<figure><a href="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/shader_graph.png">
+    <img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/shader_graph.png"/> </a>
+</figure>
+
+<p>As we can see, the above shader unit template can be used as the representation of the diffuse node in this graph.
+Both of them take two arguments as inputs and output one argument. Of course, shader unit template doesn&rsquo;t have to output closure all the time. For example, the image node in the above texture could be defined this way</p>
+<div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">texture2d g_texture;  <span style="color:#007f7f">// texture handle
+</span><span style="color:#007f7f"></span>shader ImageShaderLinear( vector UVCoordinate ,
+                          <span style="color:#fff;font-weight:bold">float</span>  UVTiling ,
+                          out color Result ,
+                          out <span style="color:#fff;font-weight:bold">float</span> Alpha ,
+                          out <span style="color:#fff;font-weight:bold">float</span> Red ,
+                          out <span style="color:#fff;font-weight:bold">float</span> Green ,
+                          out <span style="color:#fff;font-weight:bold">float</span> Blue ){
+    vector scaledUV = UVCoordinate * UVTiling;
+    Result = texture2d_sample&lt;g_texture&gt;( scaledUV.x , scaledUV.y );
+    Red = Result.x;
+    Green = Result.y;
+    Blue = Result.z;
+    Alpha = texture2d_sample_alpha&lt;g_texture&gt;( scaledUV.x , scaledUV.y );
+}
+</code></pre></div><p>As a matter of fact, this is exactly how this node is defined in my renderer with TSL.</p>
+<p>Careful readers might have noticed that we haven&rsquo;t got a chance to specify the value of some of the input arguments, like the normal in diffuse TSL shader code. And both of the two input arguments are not set with values in the texture sampling TSL code. These will be set during shader group template construction.
+A benefit of this design is that shader code doesn&rsquo;t need to be recompiled just because the default value for arguments are different.
+This means that the upper limit of the number of shader compilation is decided by the number of shader types, which commonly matches the type of material nodes. It is totally independent of the occurrences of each shader node in SORT materials.</p>
+<p>Also, there is a global texture handle defined in the above shader.
+The texture2d_sample&lt;g_texture&gt; code will actually trigger a call back function which eventually delegates things back to renderers.
+This way, renderers can perform all kinds of complex things like texture filtering, wrapping, or even texture cache system in native C++ programming language instead of TSL.</p>
+<h2 id="shader-group-template">Shader Group Template</h2>
+<p>Shader group template is what I used to represent a material with TSL in my renderer. The corresponding concept in OSL is called shader group.</p>
+<p>Unlike shader unit template, shader group template doesn&rsquo;t offer an interface to take any TSL shader code at all.
+Shader group template commonly takes the following information</p>
+<ul>
+<li>Shader unit templates</li>
+<li>Shader unit template connections</li>
+<li>The default value for arguments in shader unit templates</li>
+<li>Exposed arguments of the shader group templates</li>
+</ul>
+<div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#007f7f">// the shader group template that represent the material
+</span><span style="color:#007f7f"></span><span style="color:#fff;font-weight:bold">auto</span> shader_group = shading_context-&gt;begin_shader_group_template(<span style="color:#0ff;font-weight:bold">&#34;example material&#34;</span>);
+
+<span style="color:#007f7f">// add the two shader units in this group
+</span><span style="color:#007f7f"></span>shader_group-&gt;add_shader_unit(<span style="color:#0ff;font-weight:bold">&#34;blend_unit&#34;</span>, shader_unit_blend, <span style="color:#fff;font-weight:bold">true</span>);
+shader_group-&gt;add_shader_unit(<span style="color:#0ff;font-weight:bold">&#34;diffuse_unit&#34;</span>, shader_unit_diffuse);
+shader_group-&gt;add_shader_unit(<span style="color:#0ff;font-weight:bold">&#34;mirror_unit&#34;</span>, shader_unit_mirror);
+shader_group-&gt;add_shader_unit(<span style="color:#0ff;font-weight:bold">&#34;texture_unit&#34;</span>, shader_unit_texture);
+
+<span style="color:#007f7f">// setup connections between shader units
+</span><span style="color:#007f7f"></span>shader_group-&gt;connect_shader_units(<span style="color:#0ff;font-weight:bold">&#34;diffuse_unit&#34;</span>, <span style="color:#0ff;font-weight:bold">&#34;o0&#34;</span>, <span style="color:#0ff;font-weight:bold">&#34;shader_unit_blend&#34;</span>, <span style="color:#0ff;font-weight:bold">&#34;in_bxdf0&#34;</span>);
+shader_group-&gt;connect_shader_units(<span style="color:#0ff;font-weight:bold">&#34;mirror_unit&#34;</span>, <span style="color:#0ff;font-weight:bold">&#34;o0&#34;</span>, <span style="color:#0ff;font-weight:bold">&#34;shader_unit_blend&#34;</span>, <span style="color:#0ff;font-weight:bold">&#34;in_bxdf1&#34;</span>);
+shader_group-&gt;connect_shader_units(<span style="color:#0ff;font-weight:bold">&#34;texture_unit&#34;</span>, <span style="color:#0ff;font-weight:bold">&#34;Result&#34;</span>, <span style="color:#0ff;font-weight:bold">&#34;diffuse_unit&#34;</span>, <span style="color:#0ff;font-weight:bold">&#34;basecolor&#34;</span>);
+
+<span style="color:#007f7f">// Setup the default value for arguments
+</span><span style="color:#007f7f"></span>shader_group-&gt;init_shader_input(<span style="color:#0ff;font-weight:bold">&#34;texture_unit&#34;</span>, <span style="color:#0ff;font-weight:bold">&#34;UVCoordinate&#34;</span>, Tsl_Namespace::make_tsl_global_ref(<span style="color:#0ff;font-weight:bold">&#34;uvw&#34;</span>));
+shader_group-&gt;init_shader_input(<span style="color:#0ff;font-weight:bold">&#34;texture_unit&#34;</span>, <span style="color:#0ff;font-weight:bold">&#34;UVTiling&#34;</span>, <span style="color:#ff0;font-weight:bold">1.0f</span>);
+shader_group-&gt;init_shader_input(<span style="color:#0ff;font-weight:bold">&#34;diffuse_unit&#34;</span>, <span style="color:#0ff;font-weight:bold">&#34;normal&#34;</span>, Tsl_Namespace::make_float3(<span style="color:#ff0;font-weight:bold">0.0f</span>, <span style="color:#ff0;font-weight:bold">1.0f</span>, <span style="color:#ff0;font-weight:bold">0.0f</span>));
+shader_group-&gt;init_shader_input(<span style="color:#0ff;font-weight:bold">&#34;mirror_unit&#34;</span>, <span style="color:#0ff;font-weight:bold">&#34;normal&#34;</span>, Tsl_Namespace::make_float3(<span style="color:#ff0;font-weight:bold">0.0f</span>, <span style="color:#ff0;font-weight:bold">1.0f</span>, <span style="color:#ff0;font-weight:bold">0.0f</span>));
+shader_group-&gt;init_shader_input(<span style="color:#0ff;font-weight:bold">&#34;mirror_unit&#34;</span>, <span style="color:#0ff;font-weight:bold">&#34;basecolor&#34;</span>, Tsl_Namespace::make_float3(<span style="color:#ff0;font-weight:bold">1.0f</span>, <span style="color:#ff0;font-weight:bold">1.0f</span>, <span style="color:#ff0;font-weight:bold">1.0f</span>));
+
+<span style="color:#007f7f">// Expose arguments for the shader group template
+</span><span style="color:#007f7f"></span>shader_group-&gt;expose_shader_argument(<span style="color:#0ff;font-weight:bold">&#34;blend_unit&#34;</span>, <span style="color:#0ff;font-weight:bold">&#34;out_bxdf&#34;</span>);
+
+<span style="color:#007f7f">// indicate to the library the construction of shader group template is done
+</span><span style="color:#007f7f"></span>shading_context-&gt;end_shader_group_template(shader_group.get());
+</code></pre></div><p>Most of the above code is pretty self-explanatory. One detail that deserves our attention is the default value for UVCoordinate argument in texture_unit. Since the above code happens during shader initialization, there is no exact data of texture coordinate at this point at all. TSL allows its users to delay the value setup by referring to a global constant to be set up right before shader execution.</p>
+<p>The above code just demonstrates a simple shader graph. In real-world practical examples, there are cases the shader group template could be a lot more sophisticated than the above code. But the general idea holds the same.</p>
+<h2 id="tsl-global-constant">TSL Global Constant</h2>
+<p>It is more than necessary for the host program to provide some input so that shader can be executed with correct information. Such inputs are commonly texture coordinate, vertex position, vertex normal, etc. Basically, it is per shader execution data that can&rsquo;t be defined during shader authoring or shader compilation. These data will only be available right before shader execution.</p>
+<p>To pass the correct information, it is first necessary to define the memory layout of the data structure.
+And this memory layout needs to be visible to both of TSL shader code and host c++ program. In order to make things easier for TSL users, I made a macro inside TSL library. So to define a global constant, we only need to write down the following code</p>
+<div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#007f7f">// Following code needs to appear in a header file
+</span><span style="color:#007f7f"></span>DECLARE_TSLGLOBAL_BEGIN(TslGlobal)
+DECLARE_TSLGLOBAL_VAR(Tsl_float3, uvw)          <span style="color:#007f7f">// UV coordinate, W is preserved for now.
+</span><span style="color:#007f7f"></span>DECLARE_TSLGLOBAL_VAR(Tsl_float3, position)     <span style="color:#007f7f">// this is world space position
+</span><span style="color:#007f7f"></span>DECLARE_TSLGLOBAL_END()
+</code></pre></div><div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#007f7f">// Following code should typically appear in a cpp file
+</span><span style="color:#007f7f"></span>IMPLEMENT_TSLGLOBAL_BEGIN(TslGlobal)
+IMPLEMENT_TSLGLOBAL_VAR(Tsl_float3, uvw)          <span style="color:#007f7f">// UV coordinate, W is preserved for now.
+</span><span style="color:#007f7f"></span>IMPLEMENT_TSLGLOBAL_VAR(Tsl_float3, position)     <span style="color:#007f7f">// This is world space position
+</span><span style="color:#007f7f"></span>IMPLEMENT_TSLGLOBAL_END()
+</code></pre></div><p>The above code will silently create a data structure called TslGlobal and make it visible to both the shader code and its host program.
+Right before shader execution, this data structure needs to be filled so that shaders can be executed with the correct data.</p>
+<p>It is technically possible to have different constant data layout for different shaders. But I didn&rsquo;t choose to do it to avoid the cost of run-time branching even though modern CPUs might be good at branch prediction.</p>
+<h2 id="shader-instance">Shader Instance</h2>
+<p>Both of shader unit template and shader group template are only templates, they only define things. To execute a TSL shader, a shader instance needs to be constructed from either a shader unit template or a shader group template.
+It is shader instance that eventually holds the JITed function pointer for the host program to call.</p>
+<p>A shader instance is thread-safe in the way that it can be used to execute shader on multiple threads simultaneously with no performance penalty.</p>
+<p>Following is a piece of host c++ code demonstrating how to execute a TSL shader</p>
+<div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#fff;font-weight:bold">void</span> ExecuteSurfaceShader( Tsl_Namespace::ShaderInstance* shader , BSDF&amp; bsdf ){
+    <span style="color:#007f7f">// get the surface intersection data
+</span><span style="color:#007f7f"></span>    <span style="color:#fff;font-weight:bold">const</span> SurfaceInteraction&amp; intersection = bsdf.GetInteraction();
+
+    <span style="color:#007f7f">// fill in the tsl global constant
+</span><span style="color:#007f7f"></span>    TslGlobal global;
+    global.uvw = make_float3(intersection.u, intersection.v, <span style="color:#ff0;font-weight:bold">0.0f</span>);
+    global.position = make_float3(intersection.position.x, intersection.position.y, intersection.position.z);
+
+    <span style="color:#007f7f">// shader execution
+</span><span style="color:#007f7f"></span>    ClosureTreeNodeBase* closure = <span style="color:#fff;font-weight:bold">nullptr</span>;
+    <span style="color:#fff;font-weight:bold">auto</span> raw_function = (<span style="color:#fff;font-weight:bold">void</span>(*)(ClosureTreeNodeBase**, TslGlobal*))shader-&gt;get_function();
+    raw_function(&amp;closure, &amp;global);
+
+    <span style="color:#007f7f">// parse the surface shader
+</span><span style="color:#007f7f"></span>    ProcessSurfaceClosure(closure, bsdf);
+}
+</code></pre></div><h2 id="closure">Closure</h2>
+<p>TSL&rsquo;s closure tree concept is very similar to OSL&rsquo;s closure tree, if not the same.
+The introduction of closure tree is probably the biggest difference between TSL and GPU shaders.</p>
+<p>Closure is a concept for deferred execution. It is something to be evaluated later, but the real evaluation is left to the renderers, not the shaders. And it should have enough signal for renderers to pick them up. This usually means that closure will have its type id and of course, the arguments constructing the closure, which will be evaluated in TSL shader execution.</p>
+<p>As explained before, we won&rsquo;t evaluate BSDF in TSL.
+If we don&rsquo;t evaluate BSDF in TSL, the only choice is to delay the operations of BXDF later to a point where host C++ program can take control.
+This is somewhat similar to sampling texture in TSL, in which case the real sampling code is still written in C++, not TSL.
+But it is slightly different since there is no call back function for BSDF operations because these are only needed by the renderer, not the shading language.
+And most importantly, BSDF reconstruction doesn&rsquo;t need to be done before TSL shader execution is finished. Closure is pretty much the bridge concept between shader and ray tracer.</p>
+<h3 id="closure-type">Closure Type</h3>
+<p>Closure is like an indication of BXDF, with specific types and arguments so that it has enough information for renderers to reconstruct the BSDF of its interest. Of course, TSL library itself will have absolutely no knowledge of what type of BXDFs are supported by renderers. It is up to us to register a closure type in renderers before compiling shaders. And renderers need to parse them correspondingly when needed. This can be done this way</p>
+<p>To register a closure type, we need to specify a list of arguments first so that we know what information the closure takes. Again, this data structure needs to be visible for both host and target TSL programs. There is a macro in TSL library for us to claim the data structure</p>
+<div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#007f7f">// This is the declaration of the data structure of Lambert closure.
+</span><span style="color:#007f7f">// This needs to appear in a header file.
+</span><span style="color:#007f7f"></span>DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeLambert, <span style="color:#0ff;font-weight:bold">&#34;lambert&#34;</span>)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambert, Tsl_float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambert, Tsl_float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeLambert)
+</code></pre></div><div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#007f7f">// This is the definition of the data structure of Lambert closure
+</span><span style="color:#007f7f">// It has to match what is shown above. This commonly appears in a cpp file.
+</span><span style="color:#007f7f"></span>IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeLambert)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeLambert, Tsl_float3, base_color)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeLambert, Tsl_float3, normal)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeLambert)
+</code></pre></div><p>Once we have the closure type, registering the type in TSL library could be easily done through this code.</p>
+<div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#007f7f">// register lambert closure
+</span><span style="color:#007f7f"></span>ClosureTypeLambert::RegisterClosure();
+</code></pre></div><p>Once it is registered in TSL&rsquo;s system. TSL shader will recognize the closure type and generate the correct data if it is seen.
+It is already shown in the first piece of code in this blog</p>
+<div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">o0 = make_closure&lt;lambert&gt;( basecolor , normal );
+</code></pre></div><p>As we can see, there are two arguments in this closure type, they are all float3.
+And the name of the closure type has to match what is specified in the macro.</p>
+<h3 id="closure-operations-supported-in-tsl">Closure Operations Supported in TSL</h3>
+<p>Closure almost behaves a color in TSL, except that it only supports the following operations</p>
+<ul>
+<li>Closure can add with another closure, but not with a regular color in TSL.
+This does make sense since it makes no sense for a BXDF to blend with a constant color in offline renderers.</li>
+<li>Closure can only multiple with a regular color, closure can&rsquo;t multiply with another closure.
+The color is pretty much the weight for the closure, weighting a closure with another closure makes absolutely no sense at all.</li>
+<li>Results of the above two operations will be a closure type, it is not a regular color.
+So the results of the above operations will have to stick to the above two rules too.</li>
+</ul>
+<p>Since closure could be treated as an indication of BXDF, the above rule makes sense. The same rule applies in cases where closure is used for other deferred process, like medium.
+It is shader authors' responsibility to make sure no invalid math operations will be performed for closure type in TSL,
+which will easily result in compilation errors.</p>
+<h3 id="closure-tree">Closure Tree</h3>
+<p>A closure tree is usually what is generated for renderers to parse so that the expected BSDF can be reconstructed through its information.
+It should have the type of closures with the specific values for each argument.</p>
+<p>For example, with the above example, a closure tree could be like this</p>
+<figure>
+    <img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/closure.jpg" width="700"/> 
+</figure>
+
+<p>We can clearly notice from the above data structure that non-closure nodes have been resolved in the final closure tree.
+It is not up to renderers to evaluate the non-closure nodes, TSL should do it. There are two implicit closure types generated</p>
+<ul>
+<li><strong>Closure Add</strong><br>
+This simply adds two closure together</li>
+<li><strong>Closure Multiply</strong><br>
+This indicates that there is a closure with a weight.</li>
+</ul>
+<p>With the above data structure, it is easy for any renderers to parse it and generate the BSDF with 70% lambert and 30% mirror in it.
+And the exact arguments for constructing the BXDF is already packed in the above data structure by TSL.
+Renderers should have enough information to reconstruct the expected BSDF.</p>
+<h3 id="recursive-closure">Recursive Closure</h3>
+<p>One of the advanced closure usages is that a closure can be used as an input argument for another closure.
+This doesn&rsquo;t belong to the above two operations mentioned. This is pretty much the only exception.</p>
+<p>The following code is borrowed from my renderer SORT, it demonstrates the idea pretty well</p>
+<div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#007f7f">// functions defined by c library
+</span><span style="color:#007f7f"></span><span style="color:#fff;font-weight:bold">float</span> powf( <span style="color:#fff;font-weight:bold">float</span> base , <span style="color:#fff;font-weight:bold">float</span> exp );
+<span style="color:#fff;font-weight:bold">float</span> logf( <span style="color:#fff;font-weight:bold">float</span> x );
+
+<span style="color:#fff;font-weight:bold">float</span> helper( <span style="color:#fff;font-weight:bold">float</span> x , <span style="color:#fff;font-weight:bold">float</span> inv ){
+    <span style="color:#fff;font-weight:bold">float</span> y = logf(x) * inv;
+    <span style="color:#fff;font-weight:bold">return</span> y * y;
+}
+shader bxdf_coat(   <span style="color:#fff;font-weight:bold">float</span>     IndexofRefraction ,
+                    <span style="color:#fff;font-weight:bold">float</span>     Roughness ,
+                    color     ColorTint ,
+                    closure   Surface ,
+                    vector    Normal ,
+                    out closure Result ){
+    <span style="color:#fff;font-weight:bold">float</span> inv = <span style="color:#ff0;font-weight:bold">1.0</span> / ( <span style="color:#ff0;font-weight:bold">5.969</span> - <span style="color:#ff0;font-weight:bold">0.215</span> * Roughness + <span style="color:#ff0;font-weight:bold">2.532</span> * powf(Roughness,<span style="color:#ff0;font-weight:bold">2.0</span>) - <span style="color:#ff0;font-weight:bold">10.73</span> * powf(Roughness,<span style="color:#ff0;font-weight:bold">3.0</span>) + <span style="color:#ff0;font-weight:bold">5.574</span> * powf(Roughness,<span style="color:#ff0;font-weight:bold">4.0</span>) + <span style="color:#ff0;font-weight:bold">0.245</span> * powf(Roughness, <span style="color:#ff0;font-weight:bold">5.0</span>) );
+    color sigma;
+    sigma.r = helper(ColorTint.r,inv);
+    sigma.g = helper(ColorTint.g,inv);
+    sigma.b = helper(ColorTint.b,inv);
+    Result = make_closure&lt;coat&gt;( Surface , Roughness , IndexofRefraction , sigma , Normal );
+}
+</code></pre></div><p>As we can notice from the above code, the first argument of Coat closure is a closure itself, which is passed in.
+To give readers a better idea of its use case in my renderer, the following is a screenshot of a SORT material</p>
+<figure><a href="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/coat.png">
+    <img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/coat.png" width="800"/> </a>
+</figure>
+
+<p>The Coat material node does take one surface node, which essentially just matches to a closure tree, as its arguments.
+This offers the flexibility of supporting coating any other materials in the renderer.
+In the above case, a Disney BRDF is coated with this type of material, this gives a nice coating later on top of Disney&rsquo;s BRDF.
+Disney BRDF has its own coat layer though, but their BRDF model&rsquo;s coat layer shares the same normal data, which means that we will lose the smooth coating. Of course, it won&rsquo;t be too hard to slighly modify Disney BRDF to support multiple layers of normal. But the point here is that recursive closure offers more flexibility.</p>
+<p>Following is a screenshot of the final rendered shot, the above material is for the top of the helmet</p>
+<figure><a href="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/helmet.png">
+    <img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/helmet.png" width="700"/> </a>
+</figure>
+
+<p>We can easily notice that the coating layer and the underlying layer have a different normal map, which is exactly what we expected as specified in the source material.</p>
+<h1 id="improvement">Improvement</h1>
+<p>There aren&rsquo;t many improvements I made compared with OSL during the development of TSL.
+Most of the improvements are pretty minor. The only big one is that I made shader group template a type of shader unit template.</p>
+<h2 id="shader-group-template-being-a-shader-unit-template">Shader Group Template being a Shader Unit Template</h2>
+<p>This is by far one of my biggest improvements. I had this feature in mind the first day I initiated the project.
+So in TSL, shader group template is composed of multiple shader unit templates. These shader unit templates are connected so that TSL knows how to generate the target machine code.</p>
+<p>Shader group template being shader unit template opens a new door for lots of flexibility. It essentially turns what originally is a tree structure into a multi-dimensional tree structure. Imagine a tree has multiple nodes, each of which could be a tree themselves.
+A typical use case of this would be <a href="https://developer.nvidia.com/rtx/raytracing/dxr/DX12-Raytracing-tutorial-Part-1">TLAS and BLAS</a> in a real-time ray tracing program.
+This idea applies exactly the same in shader group template. With shader group template being shader unit template, it means that we can add a shader group template in another shader group template. And as a matter of fact, there is no limitation on how many extra dimensions can be added. We can totally have a shader group template A with another shader group template B in it and B can have its own shader group template C in it.</p>
+<p>This might not sound like a big feature to expend rendering features. But it does offer lots of value during my asset authoring.
+Below is a real use case in my renderer</p>
+<figure><a href="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/blender.png">
+    <img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/blender.png"/> </a>
+</figure>
+
+<p>On the right side is the root material graph for a material. We can notice that all of the inputs of the Disney BRDF node comes from a group node, which is defined and shown on the left panel. The group node itself is another shader group template itself, which is embedded in the root shader group template used to represent the material.</p>
+<p>The biggest flexibility is that this group node can be used in multiple materials. Any change made in this group material node will automatically propagate to all its client materials.</p>
+<p>I did have this feature implemented in my Blender plugin when OSL was used as my shading languages, but there was no clear match for it, I have to hack it in some way that the plugin silently ungroup everything before generating the OSL code. This could be unnecessarily complex if shader group is a shader layer itself. With this feature, it is implemented in a much easier and robust way.</p>
+<h2 id="other-misc-improvements">Other Misc Improvements</h2>
+<p>Apart from the above-mentioned improvement, I also adjust the library in the following way I desired</p>
+<ul>
+<li><strong>Simple Building Process</strong><br>
+Building TSL is fairly easy. For detailed steps, please check out <a href="https://tiny-shading-language.com/">TSL&rsquo;s main page</a>.</li>
+<li><strong>Multi-thread Shader Compilation</strong><br>
+Both Flex and Bison codes have been adjusted to support multi-thread processing.</li>
+<li><strong>Hidden Closure Registration</strong><br>
+Closure register is done through an interface, there is no need to have a sperate header file shipped with the final executable.</li>
+<li><strong>Shader Unit Template Order</strong><br>
+There is no need to pass shader unit templates to shader group template in a specific order, TSL will resolve it for its user.</li>
+<li><strong>Light Weight Library</strong><br>
+The library is light-weight in a way that no extra dependencies will be needed.</li>
+</ul>
+<h1 id="summary">Summary</h1>
+<p>In this blog post, I put down some notes of my thoughts during the design and implementation of the Tiny-Shading-Language system.
+The purpose of this blog is to provide readers a big picture of how a toy programmable shading language can be implemented for CPU ray tracers.
+And it is also for me to keep things recorded somewhere so that I won&rsquo;t be confused by my implementation when picking this up a few years later.</p>
+<p>This article by no means intends to offer a detailed specification of TSL. It only covers the very big picture of it. No detailed interfaces are mentioned. Sadly, I didn&rsquo;t choose to write a language spec because I have no time to maintain such an expensive thing. For readers who are interested in how it works in a real ray tracer, please check out the example tutorial coming along with TSL library. Of course, it is also suggested to check out my TSL integration in <a href="https://sort-renderer.com">SORT</a> to get a better idea of how this could fit in a slightly more sophisticated ray tracer.</p>
+<h2 id="future-work">Future Work</h2>
+<p>With only limited time, TSL is by no means a very stable programmable shading language.
+There are easily a thousand ways to crash the library without even a warning message by just writing invalid shaders, or even valid ones.
+Incorrect setup of TSL interface will also potentially crash the system too.
+However, during my usage of this library in my own renderer, once the shaders are written, it rarely crashes inside TSL shaders.</p>
+<p>If I have time, I would like to improve the following things</p>
+<ul>
+<li>More robust language syntax support</li>
+<li>More explanatory error and warning output</li>
+<li>Python interface to parse metadata of a shader unit template</li>
+</ul>
+<p>Unfortunately, I have shifted my focus on real-time rendering in my spare time a while ago. I still hope I may have time to pick it up sometime later.</p>
+<h1 id="reference">Reference</h1>
+<p>[1] <a href="http://llvm.org/devmtg/2010-11/Gritz-OpenShadingLang.pdf">LLVM for Open Shading Language</a><br>
+[2] <a href="https://www.guru99.com/compiler-design-phases-of-compiler.html">Phases of Compiler with Example</a><br>
+[3] <a href="https://www.freecodecamp.org/news/the-programming-language-pipeline-91d3f449c919/">I wrote a programming language. Here’s how you can, too</a><br>
+[4] <a href="https://gnuu.org/2009/09/18/writing-your-own-toy-compiler/">Writing Your Own Toy Compiler Using Flex, Bison and LLVM</a><br>
+[5] <a href="http://www.jonathanbeard.io/tutorials/FlexBisonC++">FLEX AND BISON IN C++</a><br>
+[6] <a href="https://efxa.org/2014/05/25/how-to-create-an-abstract-syntax-tree-while-parsing-an-input-stream/">How to create an abstract syntax tree while parsing an input stream</a><br>
+[7] <a href="https://steemit.com/utopian-io/@drifter1/writing-a-simple-compiler-on-my-own-abstract-syntax-tree-principle-c-flex-bison">Writing a simple Compiler on my own - Abstract Syntax Tree Principle [C][Flex][Bison]</a><br>
+[8] <a href="https://steemit.com/utopian-io/@drifter1/writing-a-simple-compiler-on-my-own-combine-flex-and-bison">Writing a simple Compiler on my own - Combine Flex and Bison</a><br>
+[9] <a href="https://www.coder4.com/archives/3978">Make a reentrant parser with Flex and Bison</a><br>
+[10] <a href="https://gist.github.com/38/39e7b514d916ed6fa6a2bba629fdf6ff">A Minimal LLVM JIT example for LLVM-5</a></p>
+
+      </div>
+
+      <div class="">
+        <style>
+    .toc {
+        position: fixed;
+        left: 50%;
+        top: 110px;
+        font-size: 0.8em;
+        width: 320px;
+        margin-left: 480px;
+        padding-left: 20px;
+        padding-bottom: 100px;
+        padding-top: 80px;
+        overflow-y: auto;
+        line-height: 1.7em;
+        scroll-padding-top: 100px;
+        border-left: 3px solid rgba(128, 128, 128, 0.4);;
+    }
+
+    .toc label {
+        font-size: 20px;
+        font-weight: bold;
+        margin: 6.4rem 0 3.2rem 0;
+    }
+
+    .toc a {
+        filter: grayscale(90%);
+    }
+
+    .toc a:hover {
+        font-weight: bold;
+        filter: grayscale(0%);
+    }
+
+    .toc ul {
+        margin-left:1px;
+        padding-left: 20px;
+        list-style-type: circle;
+    }
+    
+     
+    .toc ul ul{
+        margin-left:1px;
+        padding-left: 20px;
+        list-style-type: circle;
+    }
+
+     
+    .toc ul ul ul{
+        margin-left:1px;
+        padding-left: 20px;
+        list-style-type: circle;
+    }
+
+    .toc li a.active {
+        font-weight: bold;
+        filter: grayscale(0%);
+    }
+
+    .toc li a.semi_active {
+        font-weight: bold;
+        filter: grayscale(60%);
+    }
+
+    @media (max-width: 1640px) {
+      main {
+        max-width: 100%;
+      }
+  
+      .toc {
+        display: none;
+      }
+    }
+
+</style>
+  
+
+
+
+
+
+
+
+
+
+
+<div class="toc" style="display:none;">
+    <label>Contents</label>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#motivation">Motivation</a></li>
+    <li><a href="#taking-advantage-of-existed-work">Taking Advantage of Existed Work</a></li>
+    <li><a href="#where-does-it-fit-in-a-ray-tracer">Where does It Fit in a Ray Tracer</a></li>
+    <li><a href="#language-system-design">Language System Design</a>
+      <ul>
+        <li><a href="#shader-unit-template">Shader Unit Template</a></li>
+        <li><a href="#shader-group-template">Shader Group Template</a></li>
+        <li><a href="#tsl-global-constant">TSL Global Constant</a></li>
+        <li><a href="#shader-instance">Shader Instance</a></li>
+        <li><a href="#closure">Closure</a>
+          <ul>
+            <li><a href="#closure-type">Closure Type</a></li>
+            <li><a href="#closure-operations-supported-in-tsl">Closure Operations Supported in TSL</a></li>
+            <li><a href="#closure-tree">Closure Tree</a></li>
+            <li><a href="#recursive-closure">Recursive Closure</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#improvement">Improvement</a>
+      <ul>
+        <li><a href="#shader-group-template-being-a-shader-unit-template">Shader Group Template being a Shader Unit Template</a></li>
+        <li><a href="#other-misc-improvements">Other Misc Improvements</a></li>
+      </ul>
+    </li>
+    <li><a href="#summary">Summary</a>
+      <ul>
+        <li><a href="#future-work">Future Work</a></li>
+      </ul>
+    </li>
+    <li><a href="#reference">Reference</a></li>
+  </ul>
+</nav>
+</div>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+    <script>
+        (function() {
+            var $toc = $('#TableOfContents');
+            
+            if ($toc.length > 0) {
+                var $window = $(window);
+                
+                function onScroll(){
+                    var currentScroll = $window.scrollTop();
+                    var h = $('h1, h2, h3, h4, h5, h6');
+                    var id = "";
+                    h.each(function (i, e) {
+                        e = $(e);
+                        if (e.offset().top - 80 <= currentScroll ) {
+                            id = e.attr('id');
+                        }
+                    });
+                    var active = $toc.find('a.active');
+                    if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
+
+                    active.each(function (i, e) {
+                        $(e).removeClass('active').siblings('ul').hide();
+                    });
+
+                    var semi_active = $toc.find('a.semi_active');
+                    semi_active.each(function (i, e) {
+                        $(e).removeClass('semi_active').siblings('ul').hide();
+                    });
+                    
+                    $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
+                        if( i == 0 )
+                            $(e).children('a').addClass('active').siblings('ul').show();
+                        else
+                            $(e).children('a').addClass('semi_active').siblings('ul').show();
+                    });
+                }
+
+                $window.on('scroll', onScroll);
+                $(document).ready(function() {
+                    $toc.find('a').parent('li').find('ul').hide();
+                    onScroll();
+                    document.getElementsByClassName('toc')[0].style.display = '';
+                });
+            }
+        })();
+    </script>
+
+      </div>
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "a-graphics-guys-notes" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+          2015 -
+        
+        2021
+         Jiayin Cao 
+      
+      
+      
+    </section>
+  </footer>
+
+    </main>
+
+    
+      
+      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>
