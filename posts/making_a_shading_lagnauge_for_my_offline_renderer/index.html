@@ -148,7 +148,7 @@
             </span>
             <span class="reading-time">
               <i class="fa fa-clock-o" aria-hidden="true"></i>
-              28-minute read
+              29-minute read
             </span>
           </div>
           
@@ -175,11 +175,11 @@ There are generally several reasons,</p>
 <ul>
 <li>By working on my own shading language, I can learn everything from scratch by myself. This is clearly the biggest reason that I chose to work on it. The knowledge gained in the process of making it would be valuable to my career in the future, at least it should have some indirect impact on my work. It should allow me to have a much deeper understanding of how a programming language compiler works.</li>
 <li>Having my own code base will allow me to change the library anyway I see fit. This alone offers me a lot more flexibility than OSL since I&rsquo;m not familiar with their implementation.</li>
-<li>Since Apple is currently in the transition from Intel chips to ARM, future MacOSs will be shipped on ARM architecture. Building OSL on ARM will require building all its dependencies on ARM too. If there is any implementation that is x86 specific in any of its dependencies, I will have to find a workaround implementation on ARM too. Without OSL on ARM, there is no way to port my renderer on Apple Silicon.</li>
+<li>Since Apple is currently in the transition from Intel chips to ARM, future MacOSs will be shipped on ARM architecture. Building OSL on ARM will require building all its dependencies on ARM too. If there is any implementation that is x86 specific in any of its dependencies, I will have to find a workaround implementation on ARM too. Without OSL on ARM, there is no way to port my renderer on Apple Silicon. Supporting Apple Silicon is in OSL&rsquo;s roadmap, but it is unclear when it will be available by the time this blog was written.</li>
 <li>OSL heavily uses this library called <a href="https://sites.google.com/site/openimageio/home">Open Image IO</a>, which is another open-source project. While OIIO further depends on several other small libraries like, <a href="https://www.openexr.com/">OpenExr</a>, <a href="http://www.libpng.org/pub/png/libpng.html">libpng</a>, <a href="http://www.libtiff.org/">libtiff</a> and a few others. Some of the basic data structures are only defined in OIIO, so decoupling OSL with OIIO would require quite some work. This was one of the options that I have considered, but after a second thought, it will also make updating OSL in my renderer very hard since it is locally modified.</li>
 <li>Having too many dependencies does make OSL a bit &lsquo;heavy&rsquo; than expected. My original expectation was just to have one OSL lib as dependencies, it certainly didn&rsquo;t end up the way I planned. Eventually, there are other libs too and on some platforms, some of the libraries have to be dynamically linked too. Ideally, I could have spent much more time to make sure all of the dependencies are statically compiled, but it is way more sophisticated than it sounds. I wouldn&rsquo;t want to spend too much time building those libraries from source code. Also, some of the pre-compiled libraries are OS-dependent on Ubuntu, which means that I will have to compile it another time on another version of Ubuntu. At the end of the day, after solving all these problems, features in OIIO are not even used in my renderer at all and I do not have a plan to use them in my renderer since doing it from scratch would be lots of fun, it is a dependency purely because OSL needs it.</li>
 </ul>
-<p>There are other reasons that motivate me to implement my own shading language. However, those are mostly related to OSL. I would like to avoid having comments about OSL since at the time this blog is written, I am an employe of Sony (Naughty Dog).</p>
+<p>There are other reasons that motivate me to implement my own shading language. However, those are mostly related to OSL. I would like to avoid having comments about OSL since at the time this blog was written, I was an employee of Sony (Naughty Dog).</p>
 <p>With the above-mentioned reasons, I hope I have made it clear why I decided to implement my own shading language. Of course, I am fully aware that my own implementation will be way less robust than OSL since there is a team behind it and this tech has been involved for more than ten years. So my next question after finalizing my decision was whether this is doable by myself in a few months, I definitely didn&rsquo;t want to deviate from my trail too much, I&rsquo;m a graphics programmer anyway, no one will expect me to know too many details in designing a compiler.</p>
 <h1 id="taking-advantage-of-existed-work">Taking Advantage of Existed Work</h1>
 <p>The image below demonstrates some basic stages of compiling a programming language into machine code
@@ -228,7 +228,8 @@ This is no less than the amount of work to be done just to convert high level la
 <ul>
 <li>
 <p>In a graphics API, before issuing a draw call, we need to send information from host(CPU) to GPU, commonly including constant buffer, vertex buffer, index buffer, etc. Once all of the shader inputs are set, along with other render states, a draw call is issued. Depending on the exact situation, the number of shader executions could be up to a million or even more. In a nutshell, with everything setup once, shaders are usually executed on a massive scale.
-While TSL&rsquo;s shader setup and execution is almost always one vs one. This is defined by the nature of CPU ray tracers. CPU&rsquo;s parallelism is not utilized in the same way as GPU since different threads are not synchronized at all, there is simply nothing like Warp or Wavefront. Without synchronization, since different threads almost never run the same instructions like GPU does, executing shaders multiple times makes almost no sense at all. SIMD optimization would be a fairly bad fit for shaders since there are no four instances of shader executions at the same time.</p>
+While TSL&rsquo;s shader setup and execution is almost always one vs one. This is defined by the nature of CPU ray tracers. CPU&rsquo;s parallelism is not utilized in the same way as GPU since different threads are not synchronized at all, there is simply nothing like Warp or Wavefront. Without synchronization, since different threads almost never run the same instructions like GPU does, executing shaders multiple times makes almost no sense at all. SIMD optimization would be a fairly bad fit for shaders since there are no four instances of shader executions at the same time.<br>
+This statement is only true in my renderer. OSL has SIMD in its roadmap and some commercial renderers do take advantage of it to run batched shader execution for better performance.</p>
 </li>
 <li>
 <p>Modern game engines all support material graph, which is more of a visual programming language tool for technical artists to &lsquo;code&rsquo;. However, the GPU shader compilers are not aware of such a thing at all. There is something called &lsquo;shader builder&rsquo; that builds the finalized shader source code from different shader fragments collected from the material graph. These shaders are usually called material shaders. The other type of shaders in game engines is commonly called in-game shader, which is usually programmed by graphics programers. And the GPU shader compiler will take the shader source code without even knowning whether it is an in-game shader or a composited material shader.<br>
@@ -539,7 +540,8 @@ However, during my usage of this library in my own renderer, once the shaders ar
 [7] <a href="https://steemit.com/utopian-io/@drifter1/writing-a-simple-compiler-on-my-own-abstract-syntax-tree-principle-c-flex-bison">Writing a simple Compiler on my own - Abstract Syntax Tree Principle [C][Flex][Bison]</a><br>
 [8] <a href="https://steemit.com/utopian-io/@drifter1/writing-a-simple-compiler-on-my-own-combine-flex-and-bison">Writing a simple Compiler on my own - Combine Flex and Bison</a><br>
 [9] <a href="https://www.coder4.com/archives/3978">Make a reentrant parser with Flex and Bison</a><br>
-[10] <a href="https://gist.github.com/38/39e7b514d916ed6fa6a2bba629fdf6ff">A Minimal LLVM JIT example for LLVM-5</a></p>
+[10] <a href="https://gist.github.com/38/39e7b514d916ed6fa6a2bba629fdf6ff">A Minimal LLVM JIT example for LLVM-5</a><br>
+[11] <a href="https://www.youtube.com/watch?v=WL9FBwV0-3E">Open Shading Language Community Meeting</a></p>
 
       </div>
 
