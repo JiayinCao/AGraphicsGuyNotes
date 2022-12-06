@@ -656,7 +656,7 @@ This is where the number of <strong>indirectly visited proposal samples</strong>
 <p>This same process is repeated every frame. As frame goes, each pixel essentially visits millions of proposal samples in their RIS algorithm eventually resulting in drawing samples quite close to the target distribution, the unshadowed light contribution.</p>
 <p>Though, even with unlimited number of proposal samples, the above sampling method by using unshadowed distribution still won&rsquo;t produce noise free image as the distribution is not strictly proportional to the integral part of the rendering equation. The paper does introduce visibility reuse, which is to test visibility between the first and second phases to prevent blocked samples from spreading its impact. Since that part is not very tricky to understand, it won&rsquo;t be mentioned in this blog post.</p>
 <p>The above explanation really serves as a review of the algorithm to readers who read the paper. It could be a bit confusing for people who don&rsquo;t know the algorithm.</p>
-<h1 id="common-confusion-in-understanding-restir">Common confusion in Understanding ReStir</h1>
+<h1 id="common-confusion-in-understanding-restir">Common Confusion in Understanding ReStir</h1>
 <p>After my first time reading through the paper, I had a lot of confusion.</p>
 <ul>
 <li>The math in the paper assumes the proposal PDFs are all the same. Even if the PDF for taking light candidate is exactly the same for all pixels&rsquo; RIS execution, the PDF of taking initial light samples is the product of the PDF of picking a light candidate and the PDF of taking a light sample from the light candidate, the latter of which is not the same for all pixels. So does the implementation really uses one single PDF to take light samples?</li>
@@ -934,7 +934,7 @@ So where does this N fit in the math?</p>
         <li><a href="#basic-algorithm-workflow">Basic Algorithm Workflow</a></li>
       </ul>
     </li>
-    <li><a href="#common-confusion-in-understanding-restir">Common confusion in Understanding ReStir</a>
+    <li><a href="#common-confusion-in-understanding-restir">Common Confusion in Understanding ReStir</a>
       <ul>
         <li><a href="#same-light-proposal-pdf">Same Light Proposal PDF?</a></li>
         <li><a href="#what-exactly-is-neighbor-sampling">What Exactly is Neighbor Sampling?</a></li>
