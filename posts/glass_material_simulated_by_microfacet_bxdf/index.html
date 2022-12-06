@@ -8,7 +8,7 @@
 
     <meta name="author" content="Jiayin Cao">
     <meta name="description" content="Microfacet model can not only be used for rough metal, it can also be used to simulate rough glass material. This blog is about rendering glass material with microfacet model. Basically all of the theory comes from this paper. Different from the pure refraction model mentioned in my previous blog, the bxdf mentioned here can also refract a single incident ray into multiple directions instead of just one.
-  The above image is generated with my renderer.">
+ The above image is generated with my renderer.">
     <meta name="keywords" content="blog,developer,personal">
 
     <meta name="twitter:card" content="summary_large_image"/>
@@ -16,16 +16,16 @@
 
 <meta name="twitter:title" content="Glass Material Simulated by Microfacet BXDF"/>
 <meta name="twitter:description" content="Microfacet model can not only be used for rough metal, it can also be used to simulate rough glass material. This blog is about rendering glass material with microfacet model. Basically all of the theory comes from this paper. Different from the pure refraction model mentioned in my previous blog, the bxdf mentioned here can also refract a single incident ray into multiple directions instead of just one.
-  The above image is generated with my renderer."/>
+ The above image is generated with my renderer."/>
 
     <meta property="og:title" content="Glass Material Simulated by Microfacet BXDF" />
 <meta property="og:description" content="Microfacet model can not only be used for rough metal, it can also be used to simulate rough glass material. This blog is about rendering glass material with microfacet model. Basically all of the theory comes from this paper. Different from the pure refraction model mentioned in my previous blog, the bxdf mentioned here can also refract a single incident ray into multiple directions instead of just one.
-  The above image is generated with my renderer." />
+ The above image is generated with my renderer." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/posts/glass_material_simulated_by_microfacet_bxdf/" />
-<meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/>
-<meta property="article:published_time" content="2015-11-11T00:00:00-08:00" />
-<meta property="article:modified_time" content="2015-11-11T00:00:00-08:00" />
+<meta property="og:url" content="/posts/glass_material_simulated_by_microfacet_bxdf/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2015-11-11T00:00:00+00:00" />
+<meta property="article:modified_time" content="2015-11-11T00:00:00+00:00" />
+
 
 
     <title>
@@ -83,7 +83,7 @@
       </script>
     
 
-    <meta name="generator" content="Hugo 0.78.2" />
+    <meta name="generator" content="Hugo 0.94.0" />
   </head>
 
   
@@ -145,7 +145,7 @@
           <div class="date">
             <span class="posted-on">
               <i class="fa fa-calendar" aria-hidden="true"></i>
-              <time datetime='2015-11-11T00:00:00-08:00'>
+              <time datetime='2015-11-11T00:00:00Z'>
                 November 11, 2015
               </time>
             </span>
@@ -163,8 +163,7 @@
       <div>
         
         <p>Microfacet model can not only be used for rough metal, it can also be used to simulate rough glass material. This blog is about rendering glass material with microfacet model. Basically all of the theory comes from this <a href="https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.html">paper</a>. Different from the pure refraction model mentioned in my previous blog, the bxdf mentioned here can also refract a single incident ray into multiple directions instead of just one.</p>
-<figure>
-    <img src="/img/posts/glass_material_simulated_by_microfacet_bxdf/refract_microfacet.png" width="800"/> 
+<figure><img src="/img/posts/glass_material_simulated_by_microfacet_bxdf/refract_microfacet.png" width="800"/>
 </figure>
 
 <p>The above image is generated with <a href="https://sort-renderer.com">my renderer</a>. Each pixel takes 1024 samples and it took me an hour to finish it. As we can see from this image, this bxdf model handles both reflection and refraction. The roughness parameter for both of the objects is 0.04, which makes them look quite similar to combination of pure reflection and refraction bxdf.</p>
@@ -213,8 +212,7 @@
 <p>Handling total internal reflection is crucially important to achieve good result because otherwise some rays will be terminated inside the medium.</p>
 <h1 id="combine-refraction-with-reflection">Combine Refraction with Reflection</h1>
 <p>Only handling refraction will never deliver convinced result because there is no such a thing that only refracts light and totally ignores reflected light, at least most stuff in our daily life don&rsquo;t. The image below is a comparison between those two, as we can notice from it, there is no reflection of area light at the surface of the left objects and some of the light is totally consumed by them. Those are the results caused by totally ignoring reflection during bxdf evaluation.</p>
-<figure>
-    <img src="/img/posts/glass_material_simulated_by_microfacet_bxdf/compare_refraction.png" width="800"/> 
+<figure><img src="/img/posts/glass_material_simulated_by_microfacet_bxdf/compare_refraction.png" width="800"/>
 </figure>
 
 <p>In order to achieve better result like the right ones, it is necessary to evaluate both reflection and refraction. Regarding the rendering equation:</p>
@@ -227,8 +225,7 @@
 <p>Btdf for pure refraction is the same with <a href="/posts/derivation_of_pure_specular_reflection_brdf/">previous blog post</a>. However a subtle difference for pure reflection brdf definitely deserves our attention, it is the transmittance direction, instead of reflected direction, that we use to evaluate fresnel term. In special case, which total inner reflection happens, fresnel term should be exactly one. Although it makes sense, I&rsquo;ve no much idea how to prove these with mathematics, however that&rsquo;s how other renderers do it. And I&rsquo;m gonna stick to their solution.</p>
 <h1 id="microfacet-for-rough-glass-material">Microfacet for Rough Glass Material</h1>
 <p>Microfacet model is usually used for simulating metal surfaces in realtime rendering. It assumes the macro surface composes many small micro flat surfaces, each one uses perfect mirror reflection bxdf. With a simple change in this assumption that micro surfaces are not perfect mirror reflection surfaces but perfect transmittance surfaces, the same theory can be used to simulate rough glass. Here is an image with three monkeys, each with a different value of roughness.</p>
-<figure>
-    <img src="/img/posts/glass_material_simulated_by_microfacet_bxdf/different_roughness.png" width="800"/> 
+<figure><img src="/img/posts/glass_material_simulated_by_microfacet_bxdf/different_roughness.png" width="800"/>
 </figure>
 
 <p>The bxdf is the sum of microfacet reflection brdf and refraction btdf:</p>
@@ -401,7 +398,7 @@
 
         <div id="disqus_thread"></div>
 <script type="application/javascript">
-    var disqus_config = function () {
+    window.disqus_config = function () {
     
     
     
@@ -451,7 +448,7 @@
         
           2015 -
         
-        2021
+        2022
          Jiayin Cao 
       
       
@@ -463,7 +460,7 @@
 
     
       
-      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+      <script src="/js/dark-mode.min.1d139a81392167c6a37135df59f9fd95747abba988ba33c1a557c573776cb197.js"></script>
     
 
     

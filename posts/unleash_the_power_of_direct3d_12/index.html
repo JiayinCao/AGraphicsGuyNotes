@@ -22,10 +22,10 @@ The big picture Different from its predecessors, D3D12 mainly aims at reducing C
 <meta property="og:description" content="Direct3D12 is about to come. There are several presentations available in GDC this and last year talking about the new features in it. I&rsquo;m gonna list some of the changes that D3D12 introduces in this post. It only covers some of the changes.
 The big picture Different from its predecessors, D3D12 mainly aims at reducing CPU overhead. Improving CPU performance is the first priority in this new API. Of course that&rsquo;s not to say there is nothing more." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/posts/unleash_the_power_of_direct3d_12/" />
-<meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/>
-<meta property="article:published_time" content="2015-06-17T00:00:00-07:00" />
-<meta property="article:modified_time" content="2015-06-17T00:00:00-07:00" />
+<meta property="og:url" content="/posts/unleash_the_power_of_direct3d_12/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2015-06-17T00:00:00+00:00" />
+<meta property="article:modified_time" content="2015-06-17T00:00:00+00:00" />
+
 
 
     <title>
@@ -83,7 +83,7 @@ The big picture Different from its predecessors, D3D12 mainly aims at reducing C
       </script>
     
 
-    <meta name="generator" content="Hugo 0.78.2" />
+    <meta name="generator" content="Hugo 0.94.0" />
   </head>
 
   
@@ -145,7 +145,7 @@ The big picture Different from its predecessors, D3D12 mainly aims at reducing C
           <div class="date">
             <span class="posted-on">
               <i class="fa fa-calendar" aria-hidden="true"></i>
-              <time datetime='2015-06-17T00:00:00-07:00'>
+              <time datetime='2015-06-17T00:00:00Z'>
                 June 17, 2015
               </time>
             </span>
@@ -172,7 +172,7 @@ The big picture Different from its predecessors, D3D12 mainly aims at reducing C
 <li>Memory used to be strongly typed in old d3d. Developers have full control on it now. For buffers, we have buffer heap and it is totally valid for games developers to place multiple vertex buffer data and index buffer data in the same heap. This is no such as thing called vertex buffer object or index buffer object anymore, every buffer is just generic data. Though, there is still flags indicating the usages of buffers.</li>
 <li>There are 128 shader resource views for per programmable stage in D3D11. The number is limitless for d3d12. However, it is set in a whole new different way. Root signature is the window for doing all the resource binding stuff. There are still some resources to be set through old-school interface, like vertex buffer and index buffer. For the ones we care, like textures, constant data, samplers, it is no longer working this way.</li>
 <li>D3D11 tracks the resource states through reference counting, making sure that resource lifetime and residency management is well handled and avoids resource hazard. It is used to be a strange topic for some PC developers because game developers are not required to handle the issues themselves. In D3D12, developer needs to resolve these things themselves. It does intrudoce more work, but this is one of the key changes to allow multi-thread rendering, which simpliy puts is to allow issuing draw calls in different threads.</li>
-<li>D3D11 will accumulate commands for at most three frames before flushing the command list to hardware push buffer, the number is basically transparent to programmers. Now it is developers' responsibility to manage it explicitly, fencing is a necessary thing in D3D12.</li>
+<li>D3D11 will accumulate commands for at most three frames before flushing the command list to hardware push buffer, the number is basically transparent to programmers. Now it is developers&rsquo; responsibility to manage it explicitly, fencing is a necessary thing in D3D12.</li>
 <li>And D3D12 users should also manage back buffer explicitly from now on, D3D runtime won&rsquo;t babysit it for us.</li>
 </ul>
 <p>The above list is by no means a full review of what d3d12 has brought to us. But they are considered some of the most important changes.</p>
@@ -184,7 +184,7 @@ The big picture Different from its predecessors, D3D12 mainly aims at reducing C
 <p>Resource lifetime and residency management used to be handled by D3D11 runtime. Programmers usually don&rsquo;t need to care much about it. The sacrifices we have to make for this convenience is more CPU overhead through a lot of reference counting under the hood and the common &lsquo;solution&rsquo;, which is more of workarounds to me, is to find varies ways to reduce the number of draw calls.</p>
 <p>In order to reduce the CPU overhead, D3D12 programmers need to manage resource life time and residency explicitly. In this way, there is no need for D3D12 runtime to add reference counting for the purpose of lifetime and residency management, it will assume that everything is handled by programmer with their higher level knowledge. For example, in the old d3d, if we want to change something in a vertex buffer, we can map it first with &ldquo;discard&rdquo; flag, we will get a memory address immediately after this function call without flushing all API commands that relate to this specific vertex buffer, what happens is actually that another piece of memory is returned to us by driver and this very piece of memory will be used as the vertex buffer at a latter point. Through that way, the driver doesn&rsquo;t need to flush any related command calls before returning the memory address and it looks decent to the programmers. The efficiency will be lower if the size of memory is quite large. Of course there are other methods for updating the resource. In the new model, we are responsible for everything. It works in a map-persistent way similar to OpenGL4. We can map the buffer at the initialization stage and never unmap it. We can change the memory anytime we want. One simple rule holds here, since CPU and GPU are working asynchronously, it is necessary to make sure that we don&rsquo;t stamp on the memory in use by GPU. Usually a ring/circular buffer is used to avoid conflict.</p>
 <h2 id="resource-hazard-tracking">Resource hazard tracking</h2>
-<p>Similar to resource lifetime and residency management, resource hazard is another issue that belongs to the programmers' responsibilities from now on.</p>
+<p>Similar to resource lifetime and residency management, resource hazard is another issue that belongs to the programmers&rsquo; responsibilities from now on.</p>
 <p>Suppose we have a shadow map algorithm, a shadow map generation pass is performed first, followed with a shadow masking pass. In the first pass, a texture is used as a render target and it is then used as a shader resource view for reading in shadow masking pass. D3D11 runtime and driver will make sure to finish the shadow map generation pass before the execution of shadow masking pass, it won&rsquo;t in D3D12. D3D12 runtime will only guarantee that shadow map generation pass is issued earlier than shadow masking pass, in other words, instructions for the first pass will be before the instructions in the second pass in the command list or push buffer. However what it doesn&rsquo;t promise is that shadow masking pass is finished before the beginning of shadow masking pass, which may result in invalid reading of shadow map in shadow masking pass just because the first pass may not finish itself. That is a typical resource hazard case.</p>
 <p>What we need to do in D3D12 is to add a resource barrier to make sure everything is in the right state. With a resource barrier, the driver will wait for the first pass to finish before proceeding to the next ones. A big difference is that programmers are in control now.</p>
 <p>For better performance, a group of resource barriers can be triggered together. Resource barrier can even be split into two parts, begin and end. It will avoid dummy idle waits if there is gonna be one.</p>
@@ -402,7 +402,7 @@ And similar APIs, like Vulkan, Metal, share a common way of how modern graphics 
 
         <div id="disqus_thread"></div>
 <script type="application/javascript">
-    var disqus_config = function () {
+    window.disqus_config = function () {
     
     
     
@@ -439,7 +439,7 @@ And similar APIs, like Vulkan, Metal, share a common way of how modern graphics 
         
           2015 -
         
-        2021
+        2022
          Jiayin Cao 
       
       
@@ -451,7 +451,7 @@ And similar APIs, like Vulkan, Metal, share a common way of how modern graphics 
 
     
       
-      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+      <script src="/js/dark-mode.min.1d139a81392167c6a37135df59f9fd95747abba988ba33c1a557c573776cb197.js"></script>
     
 
     

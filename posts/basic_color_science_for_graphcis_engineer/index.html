@@ -19,10 +19,10 @@
     <meta property="og:title" content="Basic Color Science For Graphics Engineer" />
 <meta property="og:description" content="For more than a decade, we have been doing HDR rendering in our game engines, which means the intermediate render targets won&rsquo;t be limited by the precision of the color formats. It is an even more important concept after the emerging of physically based rendering, which is almost what everyone does these days. However, after so much effort rendering everything in linear color space, it is quite wasteful that we can only display colors with only limited chromaticity and luminance defined by sRGB space due to limitations of LDR monitor and TVs." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/posts/basic_color_science_for_graphcis_engineer/" />
-<meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/>
-<meta property="article:published_time" content="2018-11-29T00:00:00-08:00" />
-<meta property="article:modified_time" content="2018-11-29T00:00:00-08:00" />
+<meta property="og:url" content="/posts/basic_color_science_for_graphcis_engineer/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2018-11-29T00:00:00+00:00" />
+<meta property="article:modified_time" content="2018-11-29T00:00:00+00:00" />
+
 
 
     <title>
@@ -80,7 +80,7 @@
       </script>
     
 
-    <meta name="generator" content="Hugo 0.78.2" />
+    <meta name="generator" content="Hugo 0.94.0" />
   </head>
 
   
@@ -142,7 +142,7 @@
           <div class="date">
             <span class="posted-on">
               <i class="fa fa-calendar" aria-hidden="true"></i>
-              <time datetime='2018-11-29T00:00:00-08:00'>
+              <time datetime='2018-11-29T00:00:00Z'>
                 November 29, 2018
               </time>
             </span>
@@ -165,56 +165,47 @@
 <p>Unless we do real spectrum rendering, which is even rare in offline ray tracing, RGB is the most common representation that we use to represent a color. However, colors are way more complex than just three numbers.
 In order to understand colors, the first concept that we need to understand is spectral power distribution.</p>
 <p>The light we see every day is composed of lighting signals of different spectrums. Human beings can only see lights with its wavelength ranging from 380 nm to 750 nm, which is a very conservative range.  Rays beyond the range exist, but it is not directly visible to a human being so that we usually don’t care about them in rendering.</p>
-<figure>
-    <img src="/img/posts/basic_color_science_for_graphcis_engineer/g.jpg" width="700"/> 
+<figure><img src="/img/posts/basic_color_science_for_graphcis_engineer/g.jpg" width="700"/>
 </figure>
 
 <p>It is clearly shown the wavelength of visible lights is only a tiny fraction among all wavelengths. Rays like gamma rays, X rays, ultraviolet rays are those with smaller wavelength than the visible range. And infrared, microwaves, radios all have much larger wavelengths. Our focus here is obviously the range starting from 400 nm to 750 nm. Notice, this range is different from what I mentioned before because it was a very conservative range mentioned above, this range is also considered fine for rendering. As a matter of fact, PBRT only considers ranges starting from 400 nm to 700 nm, which is even smaller. So it is not uncommon for you to see ranges with different values in different places, as long as it generally covers the range as a whole, there should be no big problem.</p>
 <p>The concept of spectral color is defined as color that is evoked by a normal human by a single wavelength in the visible spectrum. Basically, it is quite rare for us to see spectral color in our life, almost all colors we see is composed of multiple spectral colors. One way to visualize it in a more intuitive manner is to shoot a white light to a prism. Because the index of refraction is a function of wavelength, the white light will be decomposed into multiple beams of lights.</p>
-<figure>
-    <img src="/img/posts/basic_color_science_for_graphcis_engineer/prism.jpeg"/> 
+<figure><img src="/img/posts/basic_color_science_for_graphcis_engineer/prism.jpeg"/>
 </figure>
 
 <p>It is not hard to imagine if we project the light luminance signal on different wavelengths, we will have a curve, which reveals the spectral power distribution. This is a very common way to represent a color in a self-explanatory manner. Following is an SPD of a light source.</p>
-<figure>
-    <img src="/img/posts/basic_color_science_for_graphcis_engineer/spectrum.png"/> 
+<figure><img src="/img/posts/basic_color_science_for_graphcis_engineer/spectrum.png"/>
 </figure>
 
 <h1 id="cie-chromaticity-diagram">CIE Chromaticity Diagram</h1>
 <p>Although some companies do full spectrum rendering in the movie industry, it is rare that anyone attempt rendering something with full spectrum in real time rendering because it is very expensive for interactive rendering. To make things easier for us, color scientists have figured out a way to represent color in a very convenient way to represent color without too much loss of precision.</p>
 <p>To see how it works, it is inevitable that we need to look into how human being sees things. Basically, inside our eyes, there are rods and cones on our retina. Rods are responsible for vision at low light levels. Cones are active at higher light levels and capable of color vision. There are three different types of cone receptors in our eyes, with each of them sensitive to light around specific wavelength. One of these types is most sensitive to long wavelengths, around 600 nm, which appear reddish to us. The sensitivity of the second type of cones peaks at the medium wavelength, 550nm, which appear greenish. The last receiptor peaks in the short wavelengths, 450nm, and it appears blueish. Luckily enough, with only three cone receptors in our eye, it is usually good enough to use three numbers to represent colors, the commonly well-known R/G/B.</p>
 <p>A color matching experiment works by picking three primaries first as the basis for the whole color space. These primaries contain single wavelength at 615nm, 525nm, 445nm. And for another light containing a single wavelength, there will be three parameters controlling the intensity of each primary to be tuned so that the combined color by mixing the three primaries with correct intensity appears exactly the same to human beings. Keeping doing it for all colors containing one single wavelength ranging in human being visible wavelengths range, we will get a list of numbers, which we can also plot on a two-dimensional space for better visualization of the data.</p>
-<figure>
-    <img src="/img/posts/basic_color_science_for_graphcis_engineer/the-color-matching-functions.png" width="700"/> 
+<figure><img src="/img/posts/basic_color_science_for_graphcis_engineer/the-color-matching-functions.png" width="700"/>
 </figure>
 
 <p>Above is an illustration of what the plot will look like across the whole visible wavelength range. One interesting fact we can easily notice is that there are some regions where we need a negative intensity for the primary. This is not physically plausible. What happened is that there is no way to reproduce the light at those wavelengths by simply adding colors containing the three primaries together. We have to ‘cheat’ by ‘subtracting’ colors to make it happen, since there is no real subtracting, what they did was to add color on the target color side to make it happen.</p>
 <p>Another way to visualize the data is to plot it in three-dimensional space. Imagine we have a normalized orthogonal space, with R/G/B as the three basis. We can plot all the above points in 3D space constructed by RGB. We can easily get something like this,</p>
-<figure>
-    <img src="/img/posts/basic_color_science_for_graphcis_engineer/image.png"/> 
+<figure><img src="/img/posts/basic_color_science_for_graphcis_engineer/image.png"/>
 </figure>
 
 <p>Notice that the curve crosses the BR plane, meaning they have some negative values along the ranges. As a matter of fact, they also have some negative value for the green channel, it is just a little bit hard to see from the above image.</p>
 <p>Because sometimes, people only need to care about the hue and saturation of the color, ignoring the intensity, meaning we can reduce the dimensionality by dropping one dimension. This is usually done by projecting the above curve onto the plane r+g+b=1. Another way to think about it is to shoot a ray from the original to every point on the curve, find the intersection set of these rays with the plane r+g+b=1, which is also a curve. Below is an image demonstrating the idea,</p>
-<figure>
-    <img src="/img/posts/basic_color_science_for_graphcis_engineer/image2.png"/> 
+<figure><img src="/img/posts/basic_color_science_for_graphcis_engineer/image2.png"/>
 </figure>
 
 <p>Since we have the constraint r+g+b = 1, working in 3D space is kind of unnecessarily complex because we can always reconstruct the original signal in 2D space by utilizing the constraint. That said, we can project this curve on RG plane without caring about B, which usually matches intensity. And then we have this curve on 2D space,</p>
-<figure>
-    <img src="/img/posts/basic_color_science_for_graphcis_engineer/image3.png"/> 
+<figure><img src="/img/posts/basic_color_science_for_graphcis_engineer/image3.png"/>
 </figure>
 
 <p>This curve enclosure colors with all chromaticity are visible to human beings. However, that is not to say this is displayable with RGB system because some of them have negative value. The displayable area is the grey area. And unfortunately, this is not even the displayable area in most TV/monitors, which is usually smaller than it. We will mention it later.</p>
 <p>The fact we have some negative area will easily cause some trouble. And some really smart people come up with this idea, instead of using the primaries mentioned above, why don’t we use some imaginary color as the basis. Here comes the XYZ axis, which is purely imaginary, not physically plausible. The derivation of XYZ axis is out of the scope of this blog. However, since all visible color range lies in the positive area, XYZ is a pretty common color basis when we talk about color science.</p>
 <p>Although, there is no way to do the same color matching experiment with XYZ primaries because they are not physically plausible. But we can still transform the original data to the new XYZ space and generate the curve in the new space.</p>
-<figure>
-    <img src="/img/posts/basic_color_science_for_graphcis_engineer/image4.png"/> 
+<figure><img src="/img/posts/basic_color_science_for_graphcis_engineer/image4.png"/>
 </figure>
 
 <p>Above is the plot for the color matching result in XYZ space, these are all positive values, which is a very important reason to introduce XYZ space in the first place. The same way we plot the samples in 3D space as above, we can do the same for these samples, the only difference is the basis now are XYZ. Only the final projected color range will be shown here for simplicity. However, it is strongly suggested to check out <a href="https://graphics.stanford.edu/courses/cs178/applets/threedgamut.html">this page</a> for a better feel of this data representation in 3D space.</p>
-<figure>
-    <img src="/img/posts/basic_color_science_for_graphcis_engineer/image5.png"/> 
+<figure><img src="/img/posts/basic_color_science_for_graphcis_engineer/image5.png"/>
 </figure>
 
 <p>The professional term for the above curve is called ‘chromaticity diagram’. There is one type of <a href="https://en.wikipedia.org/wiki/CIELUV">variation</a> of this chromaticity diagram, but this is the most commonly used one. One good thing about this chromaticity diagram is that it allows people from different industry to talk about color in a unified standard. For example, when people talk about a specific color in the above diagram, it is absolutely independent of their hardware used to display, generate the color.</p>
@@ -225,7 +216,7 @@ In order to understand colors, the first concept that we need to understand is s
 <p>When we define a color space, it is quite common to specific their primaries coordinate in the chromaticity diagram. However, as we mentioned before, the chromaticity diagram is already a diagram of two-dimension by losing the intensity of the original signal. Then defining just the coordinate of the primaries in the chromaticity diagram is not good enough because there is not enough signal to reconstruct the color space. To put it simply, the scale of each primary is still unknown even if the coordinate in the chromaticity diagram is defined. Instead of defining the scaling factor for each of the primaries directly, people choose to define an extra point called ‘white point’ to implicitly define them.</p>
 <p>One important insight to be aware of is that the interpolation on chromaticity diagram is by no means linear after the projections. Just think about the perspective correction in rasterization, it works similarly. Usually, we use (1,1,1) as the white color in the system. However, the white color projection on x+y+z=1 plane is not exactly the centroid ( center of gravity ) of the triangle defined by the primaries in the chromaticity diagram. In order to calculate the chromaticity of the white color, we need the scaling factor for all the three primaries. Just to make it clear, the white point calculation is not our interest here, this is just a clear example to show things. We are more interested in the scaling factor than the white point itself, not to mention in the color space definition, the white point is usually explicitly well defined.</p>
 <p>To calculate the three scaling factor, we need to introduce one constraint, that is the Y channel of R+G+B should be exactly 1. With that in mind, if we already have the white point defined in the color space definition the same way the other three primaries are defined, 2D coordinate in the chromaticity diagram. We can easily project the white point back to the XYZ space by scaling the vector so that the Y coordinate is exactly one. And then we have the following equation,</p>
-<p>$ S_r * R_{xyz} + S_g * G_{xyz} + S_b * B _{xyz} = \dfrac{W_{xyz}}{W_y} $</p>
+<p>$ S_r * R_{xyz} + S_g * G_{xyz} + S_b * B <em>{xyz} = \dfrac{W</em>{xyz}}{W_y} $</p>
 <p>It is very straightforward and easy to solve the equation above,</p>
 <p>$ \begin{bmatrix} S_r \\\ S_g \\\ S_b \end{bmatrix} = \begin{bmatrix} \dfrac{W_x}{W_y} \\\ 1.0 \\\ \dfrac{W_z}{W_y} \end{bmatrix} * { \begin{bmatrix} R_x &amp; R_y &amp; R_z \\\ G_x &amp; G_y &amp; G_y \\\ B_x &amp; B_y &amp; B_z \end{bmatrix} }^{-1} $</p>
 <h2 id="rec-709">Rec. 709</h2>
@@ -237,8 +228,7 @@ In order to understand colors, the first concept that we need to understand is s
 <li>B – ( 0.15 , 0.06 )</li>
 <li>W – ( 0.3127 , 0.3290 )</li>
 </ul>
-<figure>
-    <img src="/img/posts/basic_color_science_for_graphcis_engineer/image6.png" width="450"/> 
+<figure><img src="/img/posts/basic_color_science_for_graphcis_engineer/image6.png" width="450"/>
 </figure>
 
 <p>The above image clearly shows the coverage of Rec.709 gamut. All colors inside the triangle are displayable by sRGB standard, LDR devices won’t be able to reproduce the color outside the triangle.
@@ -247,12 +237,12 @@ The transformation from the CIE XYZ tristimulus color space into linear Rec.709 
 <p>On the other side, it is easy to define the reversed transformation to transform color from Rec. 709 space to XYZ space.</p>
 <p>$ \begin{bmatrix} X \\\ Y \\\ Z \end{bmatrix} = { \begin{bmatrix} 0.4124564 &amp; 0.3575761&amp; 0.1804375 \\\ 0.2126729 &amp; 0.7151522 &amp; 0.0721750 \\\ 0.0193339 &amp; 0.1191920 &amp; 0.9503041 \end{bmatrix}} * \begin{bmatrix} R_{rec709} \\\ G_{rec709} \\\ B_{rec709} \end{bmatrix}  $</p>
 <p>Apart from the primaries, the transfer function is also defined by the standard.</p>
-<p>$ C_{709}'= \begin{cases} 4.5C_{709}&amp;0&lt;=C_{709}&lt;0.0018 \\\ 1.099C_{709}^{1/\gamma} - 0.099 &amp; 0.018&lt;=C_{709}&lt;1 \end{cases} $</p>
+<p>$ C_{709}&rsquo;= \begin{cases} 4.5C_{709}&amp;0&lt;=C_{709}&lt;0.0018 \\\ 1.099C_{709}^{1/\gamma} - 0.099 &amp; 0.018&lt;=C_{709}&lt;1 \end{cases} $</p>
 <p>$ \gamma = 2.2 $</p>
 <h2 id="srgb">sRGB</h2>
 <p>sRGB is the most commonly used color space in game development. It was created by HP and Microsoft together in 1996 for display on monitors, printer and the internet.</p>
 <p>The primaries of sRGB are exactly the same with Rec.709. So is the transformation matrix between to transform data from XYZ space. However, it has slightly different transfer function comparing with Rec.709.</p>
-<p>$ C_{sRGB}'= \begin{cases} 12.92C_{sRGB}&amp;0&lt;=C_{sRGB}&lt;0.0031 \\\ 1.055C_{sRGB}^{1/\gamma} - 0.055 &amp;0.031&lt;=C_{sRGB}&lt;1 \end{cases} $</p>
+<p>$ C_{sRGB}&rsquo;= \begin{cases} 12.92C_{sRGB}&amp;0&lt;=C_{sRGB}&lt;0.0031 \\\ 1.055C_{sRGB}^{1/\gamma} - 0.055 &amp;0.031&lt;=C_{sRGB}&lt;1 \end{cases} $</p>
 <p>$ \gamma = 2.4 $</p>
 <p>Sadly, sRGB is the most commonly used color space in gaming, even if it only covers only 35.9% of the whole CIE 1931 Color space. Basically, when we talked about physically based shading, an important concept is linear color space. Color can be linear in several different color spaces, the common linear color space we used in our rendering engine is most likely sRGB. This is mostly because most developers use LDR monitor for their daily work. And sRGB was the industry standard for LDR monitors. Unless everyone, at least relevant people, is geared with HDR monitor, which is obviously an investment for a game studio, linear color space is always in sRGB. Even if there is an HDR monitor for everyone in the studio, transiting the whole rendering engine from sRGB to Rec.2020 still involves some work.</p>
 <p>What most people do is to perform rendering equation evaluation in sRGB linear color space and then convert the data to Rec.2020 for higher dynamic range. Technically speaking, there is no way to generate any color out of sRGB gamut even if they are converted to Rec.2020. But some game engines will perform color grading in Rec.2020, which will make the color more saturated. In this case, there is some possibility to generate color outside sRGB gamut.</p>
@@ -266,8 +256,7 @@ The transformation from the CIE XYZ tristimulus color space into linear Rec.709 
 <li>W – ( 0.3127 , 0.3290 )</li>
 </ul>
 <p>Following is an image demonstrating the gamut of this color space,</p>
-<figure>
-    <img src="/img/posts/basic_color_science_for_graphcis_engineer/image7.png" width="450"/> 
+<figure><img src="/img/posts/basic_color_science_for_graphcis_engineer/image7.png" width="450"/>
 </figure>
 
 <p>There are two things that are very obvious. They share the same white point. Rec. 2020 covers way bigger area than Rec.709/sRGB, the coverage goes from 35.9% to 75.80%.</p>
@@ -472,7 +461,7 @@ The transformation from the CIE XYZ tristimulus color space into linear Rec.709 
 
         <div id="disqus_thread"></div>
 <script type="application/javascript">
-    var disqus_config = function () {
+    window.disqus_config = function () {
     
     
     
@@ -522,7 +511,7 @@ The transformation from the CIE XYZ tristimulus color space into linear Rec.709 
         
           2015 -
         
-        2021
+        2022
          Jiayin Cao 
       
       
@@ -534,7 +523,7 @@ The transformation from the CIE XYZ tristimulus color space into linear Rec.709 
 
     
       
-      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+      <script src="/js/dark-mode.min.1d139a81392167c6a37135df59f9fd95747abba988ba33c1a557c573776cb197.js"></script>
     
 
     

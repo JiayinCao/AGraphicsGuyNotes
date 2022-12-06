@@ -19,10 +19,10 @@
     <meta property="og:title" content="Image Based Lighting in Offline and Real-time Rendering" />
 <meta property="og:description" content="Image-based lighting is a practical way to enhance the visual quality of computer graphics. I used to be confused by it until I read the book &ldquo;High Dynamic Range Imaging&rdquo;, which provides a very clear explanation about IBL. And I actually have implemented the algorithm in my offline renderer before, it was just that I didn&rsquo;t know it is IBL. The book PBRT has some materials talking about it without explicitly mentioning the term." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/posts/image_based_lighting_in_offline_and_realtime_rendering/" />
-<meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/>
-<meta property="article:published_time" content="2016-09-07T00:00:00-07:00" />
-<meta property="article:modified_time" content="2016-09-07T00:00:00-07:00" />
+<meta property="og:url" content="/posts/image_based_lighting_in_offline_and_realtime_rendering/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2016-09-07T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-09-07T00:00:00+00:00" />
+
 
 
     <title>
@@ -80,7 +80,7 @@
       </script>
     
 
-    <meta name="generator" content="Hugo 0.78.2" />
+    <meta name="generator" content="Hugo 0.94.0" />
   </head>
 
   
@@ -142,7 +142,7 @@
           <div class="date">
             <span class="posted-on">
               <i class="fa fa-calendar" aria-hidden="true"></i>
-              <time datetime='2016-09-07T00:00:00-07:00'>
+              <time datetime='2016-09-07T00:00:00Z'>
                 September 7, 2016
               </time>
             </span>
@@ -265,8 +265,7 @@
 I won&rsquo;t repeat them again in this blog.</p>
 <p>First thing first, what is image based lighting. My take on it is that IBL uses a special HDR map recording all incoming radiance from different solid angles to simulate complex lighting environment. It is pretty much like the spherical reflection map we used to render reflective materials in the old days. For old-school reflective materials in real time rendering, only one texture sampling is necessary, which makes the algorithm feasible even in fixed function pipe. Since not all materials need only one texture sampling, using the HDR image to render other materials is a challenging task. The essential difference between the two lies in the fact that pure reflective BRDF is actually delta function, which will reduce the dimension of the integral. In offline rendering, since speed is not the most sensitive thing, one can always use Monte-Carlo method to evaluate the integral of rendering equation. So, in a nut-shell, IBL is a technique that uses HDR environment light to light 3d objects in the scene.</p>
 <p>Below is an HDR image used in the first images shown above. Of course, it has been converted into LDR since majority displays on the market doesn&rsquo;t support HDR.</p>
-<figure><a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/glacier_latlong.png">
-    <img src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/glacier_latlong.png" width="700"/> </a>
+<figure><a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/glacier_latlong.png"><img src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/glacier_latlong.png" width="700"/></a>
 </figure>
 
 <p>The only important thing that is not mentioned in my previous blog is how to do importance sampling with the HDR image. It is actually quite simple, just a discretized inversion method. Please refer to the book <a href="https://pbrt.org/">PBRT</a> for further detail implementation of it.</p>
@@ -277,8 +276,7 @@ I won&rsquo;t repeat them again in this blog.</p>
 <p>I will skip the original rendering equation and its Monte Carlo integration. We need to evaluate the following equation in a very efficient manner.</p>
 <p>$ \dfrac{1}{N} \sum_{k=1}^{N} \dfrac{L_i(l_k) f(l_k,v) cos\theta_{l_k}}{p(l_k,v)} \approx (\dfrac{1}{N} \sum_{k=1}^{N} L_i(l_k) ) (\dfrac{1}{N} \sum_{k=1}^{N} \dfrac{f(l_k,v) cos\theta_{l_k}}{p(l_k,v)} ) $</p>
 <p>The approximation is not exactly 100% accurate. However, the bias introduced in a real rendering scene can be barely noticed.</p>
-<figure><a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/s2013_pbs_epic_slides-17-dragged.png">
-    <img src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/s2013_pbs_epic_slides-17-dragged.png" width="700"/> </a>
+<figure><a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/s2013_pbs_epic_slides-17-dragged.png"><img src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/s2013_pbs_epic_slides-17-dragged.png" width="700"/></a>
 </figure>
 
 <p>The above slide comes from UE4&rsquo;s presentation in Siggraph 2013, I can barely tell the difference between the balls in the first two rows. Clearly, the split sum is an acceptable approximation in real time rendering. However, the goal here is to reduce the number of sampling in IBL tech, splitting the equation is only the beginning, it doesn&rsquo;t reduce anything yet at all. The golden idea here is to pre-compute some computation heavy task first before real-time rendering happens.</p>
@@ -297,8 +295,7 @@ I won&rsquo;t repeat them again in this blog.</p>
 <p>As a matter of fact, a simple math trick will factor albedo out of the equation:</p>
 <p>$ \int_H f(w_i,w_o) cos\theta_{w_i} dw_i = F_0 \int_H \frac{f(w_i,w_o) cos\theta_{w_i}}{F( w_i, h )} ( 1 - ( 1 - w_i h )^5 ) d w_i +\int_H \frac{f(w_i,w_o) cos\theta_{w_i}}{F( w_i, h )} ( 1 - w_i h )^5 d w_i $</p>
 <p>Don&rsquo;t be scared by the complex equation, it is actually clearer than it used to be before. Now, we only need to evaluate the first and second integral on the right side before-hand, leaving the F0 or albedo evaluation in the real time rendering.</p>
-<figure>
-    <img src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/env_brdf.png" width="300"/> 
+<figure><img src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/env_brdf.png" width="300"/>
 </figure>
 
 <p>With only two dimensions in the equation, we can save the pre-computed information in one single texture. And the above texture is one example of it. During pixel shading, one can simply estimate the integral with the following calculation:</p>
@@ -650,7 +647,7 @@ sliderJQuery(function( $ ) {
 
         <div id="disqus_thread"></div>
 <script type="application/javascript">
-    var disqus_config = function () {
+    window.disqus_config = function () {
     
     
     
@@ -700,7 +697,7 @@ sliderJQuery(function( $ ) {
         
           2015 -
         
-        2021
+        2022
          Jiayin Cao 
       
       
@@ -712,7 +709,7 @@ sliderJQuery(function( $ ) {
 
     
       
-      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+      <script src="/js/dark-mode.min.1d139a81392167c6a37135df59f9fd95747abba988ba33c1a557c573776cb197.js"></script>
     
 
     

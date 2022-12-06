@@ -19,10 +19,10 @@
     <meta property="og:title" content="The Missing Primary Ray PDF in Path Tracing" />
 <meta property="og:description" content="I was always wondering why don&rsquo;t we take the PDF of primary ray into account in a path tracer. Sadly there aren&rsquo;t many resources available explaining it. I guess the book Physically based rendering 3rd will provide some explanation, however it is not released yet. After some searching on the internet, I finally got something to explain it. It actually gets cancelled with the terms in importance function and LTE. It gets cancelled in a very elegant way that we don&rsquo;t need to put any resources on it at all, which is why many open-source ray tracer don&rsquo;t consider it in the first place." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/posts/the_missing_primary_ray_pdf_in_path_tracing/" />
-<meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/>
-<meta property="article:published_time" content="2016-02-04T00:00:00-08:00" />
-<meta property="article:modified_time" content="2016-02-04T00:00:00-08:00" />
+<meta property="og:url" content="/posts/the_missing_primary_ray_pdf_in_path_tracing/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2016-02-04T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-02-04T00:00:00+00:00" />
+
 
 
     <title>
@@ -80,7 +80,7 @@
       </script>
     
 
-    <meta name="generator" content="Hugo 0.78.2" />
+    <meta name="generator" content="Hugo 0.94.0" />
   </head>
 
   
@@ -142,7 +142,7 @@
           <div class="date">
             <span class="posted-on">
               <i class="fa fa-calendar" aria-hidden="true"></i>
-              <time datetime='2016-02-04T00:00:00-08:00'>
+              <time datetime='2016-02-04T00:00:00Z'>
                 February 4, 2016
               </time>
             </span>
@@ -164,8 +164,7 @@
 <p>First thing first, what is the pdf of primary ray.
 Assuming we have an imaginary image plane placing at a specific distance from the camera point so that area of each pixel in this image plane is exactly one. Since we already know the resolution of the image, we can calculate the distance with the following equation:</p>
 <p>$ d = \dfrac{res_h}{tan(fov_y)} $</p>
-<figure>
-    <img src="/img/posts/the_missing_primary_ray_pdf_in_path_tracing/1147198.jpg"/> 
+<figure><img src="/img/posts/the_missing_primary_ray_pdf_in_path_tracing/1147198.jpg"/>
 </figure>
 
 <p>Here is a ray generating through a pixel, we can also get the distance from the eye point and the intersection between the ray and the target pixel.</p>
@@ -185,8 +184,7 @@ Assuming we have an imaginary image plane placing at a specific distance from th
 <h2 id="importance-function">Importance Function</h2>
 <p>The &lsquo;We&rsquo; term is also called importance function. Unfortunately, I&rsquo;m not 100% sure that my derivation is a correct one. Since it works pretty well in my renderer, so I decided to go with it until I get a better understanding on it from somewhere else.</p>
 <p>First thing we should know about this importance function is that it has illumination fall off by a factor of $ cos^4 \theta $, where $ \theta $ is the angle between the primary ray and the camera forward direction. This thing usually manifest itself as Vignetting, where the corner of the image is a little bit darker than the center.</p>
-<figure>
-    <img src="/img/posts/the_missing_primary_ray_pdf_in_path_tracing/vignetting.jpg" width="800"/> 
+<figure><img src="/img/posts/the_missing_primary_ray_pdf_in_path_tracing/vignetting.jpg" width="800"/>
 </figure>
 
 <p>Here is a demonstration, as we can notice from the image, pixels at corners appear much more dimmer than the center ones. For a better explanation of this fall off thing, I found it kind of helpful.</p>
@@ -371,7 +369,7 @@ Assuming we have an imaginary image plane placing at a specific distance from th
 
         <div id="disqus_thread"></div>
 <script type="application/javascript">
-    var disqus_config = function () {
+    window.disqus_config = function () {
     
     
     
@@ -421,7 +419,7 @@ Assuming we have an imaginary image plane placing at a specific distance from th
         
           2015 -
         
-        2021
+        2022
          Jiayin Cao 
       
       
@@ -433,7 +431,7 @@ Assuming we have an imaginary image plane placing at a specific distance from th
 
     
       
-      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+      <script src="/js/dark-mode.min.1d139a81392167c6a37135df59f9fd95747abba988ba33c1a557c573776cb197.js"></script>
     
 
     

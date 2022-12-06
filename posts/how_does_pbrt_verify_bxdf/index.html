@@ -19,10 +19,10 @@
     <meta property="og:title" content="How does PBRT verify BXDF" />
 <meta property="og:description" content="Unit test for BXDF in offline rendering turns out to be way more important than what I thought it would be. I still remember it took me quite a long time when I debugged my bi-directional path tracing algorithm before I noticed there was a little BXDF bug, which easily led to some divergence between BDPT and path tracing. Life will be much easier if we could find any potential BXDF problem at the very beginning." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/posts/how_does_pbrt_verify_bxdf/" />
-<meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/>
-<meta property="article:published_time" content="2018-03-09T00:00:00-08:00" />
-<meta property="article:modified_time" content="2018-03-09T00:00:00-08:00" />
+<meta property="og:url" content="/posts/how_does_pbrt_verify_bxdf/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2018-03-09T00:00:00+00:00" />
+<meta property="article:modified_time" content="2018-03-09T00:00:00+00:00" />
+
 
 
     <title>
@@ -80,7 +80,7 @@
       </script>
     
 
-    <meta name="generator" content="Hugo 0.78.2" />
+    <meta name="generator" content="Hugo 0.94.0" />
   </head>
 
   
@@ -142,7 +142,7 @@
           <div class="date">
             <span class="posted-on">
               <i class="fa fa-calendar" aria-hidden="true"></i>
-              <time datetime='2018-03-09T00:00:00-08:00'>
+              <time datetime='2018-03-09T00:00:00Z'>
                 March 9, 2018
               </time>
             </span>
@@ -170,8 +170,7 @@
 <p>In this blog, I will talk about how PBRT verifies its BXDF in its &lsquo;bsdftest&rsquo; program.</p>
 <h1 id="how-the-verification-works">How the verification works</h1>
 <p>Following is one of the outputs from the verification program</p>
-<figure>
-    <img src="/img/posts/how_does_pbrt_verify_bxdf/image1.png"/> 
+<figure><img src="/img/posts/how_does_pbrt_verify_bxdf/image1.png"/>
 </figure>
 
 <p>It is fairly clear that it shows results for three BRDFs. If we look at the output information closely, we will notice the following detail.</p>
@@ -209,10 +208,10 @@
 <p>First of all, we need to pay attention to the way the algorithm divides the hemisphere domain. For phi, it is evenly divided into 10 equal-size region. For theta, it is very important to notice that it is the result of cosine theta that is evenly divided, not theta itself. So that said, theta is divided in the following sub-region.</p>
 <p>$ [acos(\dfrac{i}{10}), acos(\dfrac{i+1}{10})) $</p>
 <p>In the above formula, i goes from 0 to 9. For the last sub-region, it is fully inclusive. It may be very confused to see it is divided this way. But if we look at the solid angle extended by each sub-region, we will suddenly understand why it works this way.</p>
-<p>$ \begin{array} {lcl} \int_{{\Omega}_{ij}} \mathrm{d}{\omega}  &amp; = &amp; \int_{2*PI*i/10}^{2*PI*(i+1)/10} \int_{acos({(j+1)/10})}^{acos(j/10)} sin(\theta)\mathrm{d} \theta\mathrm{d} \phi \\\ &amp; = &amp;\int_{2*PI*i/10}^{2*PI*(i+1)/10}\mathrm{d} \phi \int_{acos(j/10)}^{acos({(j+1)/10})}\mathrm{d}(cos(\theta)) \\\ &amp; = &amp; 2*PI/100 \end{array} $</p>
+<p>$ \begin{array} {lcl} \int_{{\Omega}<em>{ij}} \mathrm{d}{\omega}  &amp; = &amp; \int</em>{2<em>PI</em>i/10}^{2<em>PI</em>(i+1)/10} \int_{acos({(j+1)/10})}^{acos(j/10)} sin(\theta)\mathrm{d} \theta\mathrm{d} \phi \\\ &amp; = &amp;\int_{2<em>PI</em>i/10}^{2<em>PI</em>(i+1)/10}\mathrm{d} \phi \int_{acos(j/10)}^{acos({(j+1)/10})}\mathrm{d}(cos(\theta)) \\\ &amp; = &amp; 2*PI/100 \end{array} $</p>
 <p>The size of the solid angle is in-dependent of which sub-region it is casted from. The solid angle extended by the sub-region turns out to be same size!</p>
 <p>Next, let&rsquo;s define a visibility function so that we can focus on a single entry.</p>
-<p>$ V_{i j }(\omega) = \begin{cases} 1&amp;:\theta \in [acos((i+1)/10),acos(i/10))  ,  \phi \in [2*PI*j/10,2*PI*(j+1)/10) \\\ 0 &amp;:otherwise \end{cases} $</p>
+<p>$ V_{i j }(\omega) = \begin{cases} 1&amp;:\theta \in [acos((i+1)/10),acos(i/10))  ,  \phi \in [2<em>PI</em>j/10,2<em>PI</em>(j+1)/10) \\\ 0 &amp;:otherwise \end{cases} $</p>
 <p>This visibility function gives you only the visibility of a single entry, leaving the rest of them as zero so that we can easily focus on one single entry. Since we divide the two-dimentional domain into sub-domain, i and j can identify which sub-domain we are focusing on. We can easily derive the following equation:</p>
 <p>$ \int_{\omega} V_{ij}(\omega) \mathrm{d}(\omega) = \int_{{\Omega}_{ij}} \mathrm{d}{\omega} = 2 * PI / 100 $</p>
 <p>Again, let&rsquo;s look at the Monte Carlo estimator for the left-most integral in the above equation.</p>
@@ -391,7 +390,7 @@
 
         <div id="disqus_thread"></div>
 <script type="application/javascript">
-    var disqus_config = function () {
+    window.disqus_config = function () {
     
     
     
@@ -441,7 +440,7 @@
         
           2015 -
         
-        2021
+        2022
          Jiayin Cao 
       
       
@@ -453,7 +452,7 @@
 
     
       
-      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+      <script src="/js/dark-mode.min.1d139a81392167c6a37135df59f9fd95747abba988ba33c1a557c573776cb197.js"></script>
     
 
     

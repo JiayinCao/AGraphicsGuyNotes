@@ -22,10 +22,10 @@ Monte Carlo Integral Monte Carlo tries to solve integral problem by random samp
 <meta property="og:description" content="The book physically based rendering doesn&rsquo;t spend too much effort explaining MIS, however it does mention it. In order to be more familiar with MIS(Multiple Importance Sampling), I spent some time reading Veach&rsquo;s thesis. The whole thesis is relatively long, however the chapter about MIS is kind of independent to the other ones. Worth taking some notes in case I forget later.
 Monte Carlo Integral Monte Carlo tries to solve integral problem by random sampling." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/posts/monte_carlo_integral_with_multiple_importance_sampling/" />
-<meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/>
-<meta property="article:published_time" content="2015-08-10T00:00:00-07:00" />
-<meta property="article:modified_time" content="2015-08-10T00:00:00-07:00" />
+<meta property="og:url" content="/posts/monte_carlo_integral_with_multiple_importance_sampling/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2015-08-10T00:00:00+00:00" />
+<meta property="article:modified_time" content="2015-08-10T00:00:00+00:00" />
+
 
 
     <title>
@@ -83,7 +83,7 @@ Monte Carlo Integral Monte Carlo tries to solve integral problem by random samp
       </script>
     
 
-    <meta name="generator" content="Hugo 0.78.2" />
+    <meta name="generator" content="Hugo 0.94.0" />
   </head>
 
   
@@ -145,7 +145,7 @@ Monte Carlo Integral Monte Carlo tries to solve integral problem by random samp
           <div class="date">
             <span class="posted-on">
               <i class="fa fa-calendar" aria-hidden="true"></i>
-              <time datetime='2015-08-10T00:00:00-07:00'>
+              <time datetime='2015-08-10T00:00:00Z'>
                 August 10, 2015
               </time>
             </span>
@@ -219,8 +219,7 @@ Monte Carlo Integral Monte Carlo tries to solve integral problem by random samp
 <h1 id="multiple-importance-sampling">Multiple Importance Sampling</h1>
 <p>Importance sampling increases the convergence rate, however it is not everything. Sometimes you may need to take sample with different pdfs according to the situation.</p>
 <p>For example, for matte surfaces with small size light sources, it is better to sample the light source instead of the brdf. Because sampling the brdf will very likely miss the light and those samples that don&rsquo;t miss the light will give relatively large result due to the small pdf value. On the contrary. for glossy surfaces with large area light sources, sampling the brdf will be better. Taking samples on the light source will probably contribute nothing to the final image and it really depends on how spiky the brdf is. The more spiky the brdf is, the better sampling brdf is. Below is an image of this situation. On the left it takes samples on the light source, there is clearly very low convergence rate for the top-right reflection. In the middle, it takes samples according to the brdf, for the lambertain surfaces, it works pretty badly with small light source. The right one is the result generated with MIS, we&rsquo;ll get back later.</p>
-<figure>
-    <img src="/img/posts/monte_carlo_integral_with_multiple_importance_sampling/mis.png" width="800"/> 
+<figure><img src="/img/posts/monte_carlo_integral_with_multiple_importance_sampling/mis.png" width="800"/>
 </figure>
 
 <p>In general, the rule of thumb is to generate samples according to the pdf that is proportional to the dominant factor in the rendering equation. Although we might be able to switch between sampling brdf and sampling light source for the above case depending on the surfaces and light sources, most of the time we don&rsquo;t even know which one of the three is the dominant one and that is the problem.</p>
@@ -437,7 +436,7 @@ Monte Carlo Integral Monte Carlo tries to solve integral problem by random samp
 
         <div id="disqus_thread"></div>
 <script type="application/javascript">
-    var disqus_config = function () {
+    window.disqus_config = function () {
     
     
     
@@ -487,7 +486,7 @@ Monte Carlo Integral Monte Carlo tries to solve integral problem by random samp
         
           2015 -
         
-        2021
+        2022
          Jiayin Cao 
       
       
@@ -499,7 +498,7 @@ Monte Carlo Integral Monte Carlo tries to solve integral problem by random samp
 
     
       
-      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+      <script src="/js/dark-mode.min.1d139a81392167c6a37135df59f9fd95747abba988ba33c1a557c573776cb197.js"></script>
     
 
     

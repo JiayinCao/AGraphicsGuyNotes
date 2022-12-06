@@ -19,10 +19,10 @@
     <meta property="og:title" content="Directional Light Map from the Ground Up" />
 <meta property="og:description" content="A couple of days ago, an artist asked me what exactly a directional light map is. I found this page talking about the solutions in Unity 3D and explained to him. And I am reading the book &ldquo;Real time rendering“ these days, it also talks about directional light map, which gives a more detailed and low-level explanation on it. Sounds like a very interesting topic, so I decided to take some notes." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/posts/directional_light_map_from_the_groud_up/" />
-<meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/>
-<meta property="article:published_time" content="2015-06-24T00:00:00-07:00" />
-<meta property="article:modified_time" content="2015-06-24T00:00:00-07:00" />
+<meta property="og:url" content="/posts/directional_light_map_from_the_groud_up/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2015-06-24T00:00:00+00:00" />
+<meta property="article:modified_time" content="2015-06-24T00:00:00+00:00" />
+
 
 
     <title>
@@ -80,7 +80,7 @@
       </script>
     
 
-    <meta name="generator" content="Hugo 0.78.2" />
+    <meta name="generator" content="Hugo 0.94.0" />
   </head>
 
   
@@ -142,7 +142,7 @@
           <div class="date">
             <span class="posted-on">
               <i class="fa fa-calendar" aria-hidden="true"></i>
-              <time datetime='2015-06-24T00:00:00-07:00'>
+              <time datetime='2015-06-24T00:00:00Z'>
                 June 24, 2015
               </time>
             </span>
@@ -246,8 +246,7 @@
 <p>The lucky thing is that the integral part of this equation turns out to be irradiance. And irradiance is what needs to be stored in light map. As a matter of fact, light map was also named irradiance map by some people.</p>
 <h2 id="radiosity-algorithm">Radiosity Algorithm</h2>
 <p>Radiosity is usually the algorithm for calculating those values. Basically it divides the scene into many small patches and generates form factors between each two patches and then makes some interations. During the first iteration, only emissive patches have energy, they distribute those energy to other visible patches. After the first iteration, patches directly visible to emissive patches receive some energy, however there won&rsquo;t be effects like color bleeding or multiple light bounces. Some patches will be totally black. With the second iteration, there are more patches with energy that can be distributed to other patches. Even if patches not directly visible to emissive patches, usually light sources, will be lit this time. After several rounds of iteration, it will reach equilibrium. It should give a good result. Check <a href="https://en.wikipedia.org/wiki/Radiosity_(computer_graphics)">here</a> for more detailed explanation.</p>
-<figure>
-    <img src="/img/posts/directional_light_map_from_the_ground_up/680px-radiosity_progress.png"/> 
+<figure><img src="/img/posts/directional_light_map_from_the_ground_up/680px-radiosity_progress.png"/>
 </figure>
 
 <p>The algorithm is not suitable for non-lambertian brdf surfaces. For example, mirrors will not be rendered correctly with this technique alone because the lambertian brdf is totally different from a highly reflective brdf. And it is extremely slow.</p>
@@ -264,8 +263,7 @@
 <h2 id="radiosity-normal-map">Radiosity Normal Map</h2>
 <p>A much more practical solution is proposed by Valve, it is called radiosity normal map by them. It is not physically correct, however it works pretty well in the real case.</p>
 <p>Instead of integrating over the hemisphere around geometry normal, three different basis are used during baking irradiance. That gives three different irradiance value for each sampled position.</p>
-<figure>
-    <img src="/img/posts/directional_light_map_from_the_ground_up/basis.png" width="300"/> 
+<figure><img src="/img/posts/directional_light_map_from_the_ground_up/basis.png" width="300"/>
 </figure>
 
 <p>Those three basis are not arbitrarily chosen. They are pairwise orthogonal and cover the whole hemisphere. The reconstruction process is relatively simple:</p>
@@ -455,7 +453,7 @@
 
         <div id="disqus_thread"></div>
 <script type="application/javascript">
-    var disqus_config = function () {
+    window.disqus_config = function () {
     
     
     
@@ -505,7 +503,7 @@
         
           2015 -
         
-        2021
+        2022
          Jiayin Cao 
       
       
@@ -517,7 +515,7 @@
 
     
       
-      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+      <script src="/js/dark-mode.min.1d139a81392167c6a37135df59f9fd95747abba988ba33c1a557c573776cb197.js"></script>
     
 
     

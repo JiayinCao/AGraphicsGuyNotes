@@ -19,10 +19,10 @@
     <meta property="og:title" content="Naive Bidirectional Path Tracing" />
 <meta property="og:description" content="I posted a blog about path tracing some time ago, I didn&rsquo;t regard it as a simple algorithm until I got my hands dirty on bidirectional path tracing. It really took me quite a while to get everything hooked up. Getting BDPT (short for bidirectional path tracing) converging to the same result with path tracing is far from a trivial task, any tiny bug hidden in the renderer will drag you into a nightmare." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/posts/naive_bidirectional_path_tracing/" />
-<meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/>
-<meta property="article:published_time" content="2016-01-03T00:00:00-08:00" />
-<meta property="article:modified_time" content="2016-01-03T00:00:00-08:00" />
+<meta property="og:url" content="/posts/naive_bidirectional_path_tracing/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2016-01-03T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-01-03T00:00:00+00:00" />
+
 
 
     <title>
@@ -80,7 +80,7 @@
       </script>
     
 
-    <meta name="generator" content="Hugo 0.78.2" />
+    <meta name="generator" content="Hugo 0.94.0" />
   </head>
 
   
@@ -142,7 +142,7 @@
           <div class="date">
             <span class="posted-on">
               <i class="fa fa-calendar" aria-hidden="true"></i>
-              <time datetime='2016-01-03T00:00:00-08:00'>
+              <time datetime='2016-01-03T00:00:00Z'>
                 January 3, 2016
               </time>
             </span>
@@ -253,15 +253,13 @@
 <p>And light tracing achieves the best result out of the three method in the above comparison for a reason, the spot light change makes the scene pretty light tracing friendly because basically all light paths contribute to the image.</p>
 <h2 id="bidirectional-path-tracing">Bidirectional Path Tracing</h2>
 <p>Different from unidirectional path tracing, bidirectional path tracing generates path from both light sources and eye point and then combines each pair of vertices at two sides, including the traditional path tracing path and light tracing path. In some sense that bidirectional path tracing is a super set of path tracing and light tracing.</p>
-<figure>
-    <img src="/img/posts/naive_bidirectional_path_tracing/bdpt.png" width="700"/> 
+<figure><img src="/img/posts/naive_bidirectional_path_tracing/bdpt.png" width="700"/>
 </figure>
 
 <p>Here is a great demonstration from Eric Veach&rsquo;s thesis. For a specific length of three, we have four cases above. The first two cases are what we usually do in path tracing, the third one is the light tracing we are talking about. The last one is the case when light ray actually hits the aperture and in most cases we just ignore the fourth case because it brings no differentiation comparing with the third case.</p>
 <p>Each case is good at rendering something. If the surface of the table is highly reflective, in other words with spiky brdf, the first case will generate the best result. However if the light source is very small or delta light source, like point light, and the table surface gets a matte look, the second one will be much better. Light tracing case may not be very powerful in this very case, however if there were some glasses, light tracing will deliver good looking caustics in an efficient manner.</p>
 <p>Since we&rsquo;ve already talked about the first three cases, I&rsquo;d like to mention another case which is not shown in the above image.</p>
-<figure>
-    <img src="/img/posts/naive_bidirectional_path_tracing/mcrt10.jpg"/> 
+<figure><img src="/img/posts/naive_bidirectional_path_tracing/mcrt10.jpg"/>
 </figure>
 
 <p>I won&rsquo;t write down the equation here because it is pretty similar to the ones mentioned above. However one noticeable detail is that we missed one g-term in the denominator, it is the g-term between the connecting vertices that can&rsquo;t be cancelled, we need to evaluate the g-term explicitly in this case, or the result will be biased.</p>
@@ -438,7 +436,7 @@
 
         <div id="disqus_thread"></div>
 <script type="application/javascript">
-    var disqus_config = function () {
+    window.disqus_config = function () {
     
     
     
@@ -488,7 +486,7 @@
         
           2015 -
         
-        2021
+        2022
          Jiayin Cao 
       
       
@@ -500,7 +498,7 @@
 
     
       
-      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+      <script src="/js/dark-mode.min.1d139a81392167c6a37135df59f9fd95747abba988ba33c1a557c573776cb197.js"></script>
     
 
     

@@ -19,10 +19,10 @@
     <meta property="og:title" content="Practical implementation of MIS in Bidirectional Path Tracing" />
 <meta property="og:description" content="In my previous post, I talked some basic stuff about naive bidirectional path tracing. However it is hard to show any real value since there are always too much noise comparing with best solutions depending on the scene to be rendered. That is because the contribution of each specific path is not properly weighted. And multiple importance sampling can be the key to the issue, the following comparison shows big difference between different methods." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/posts/practical_implementation_of_mis_in_bidirectional_path_tracing/" />
-<meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/>
-<meta property="article:published_time" content="2016-01-16T00:00:00-08:00" />
-<meta property="article:modified_time" content="2016-01-16T00:00:00-08:00" />
+<meta property="og:url" content="/posts/practical_implementation_of_mis_in_bidirectional_path_tracing/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2016-01-16T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-01-16T00:00:00+00:00" />
+
 
 
     <title>
@@ -80,7 +80,7 @@
       </script>
     
 
-    <meta name="generator" content="Hugo 0.78.2" />
+    <meta name="generator" content="Hugo 0.94.0" />
   </head>
 
   
@@ -142,7 +142,7 @@
           <div class="date">
             <span class="posted-on">
               <i class="fa fa-calendar" aria-hidden="true"></i>
-              <time datetime='2016-01-16T00:00:00-08:00'>
+              <time datetime='2016-01-16T00:00:00Z'>
                 January 16, 2016
               </time>
             </span>
@@ -383,7 +383,7 @@ sliderJQuery(function( $ ) {
 <p>A subtle difference is the pdf evaluation. With regard to the camera weight, forward pdf means pdf of sampling a direction from vertex, which is nearer to the camera vertex in term of path, to the next vertex. Vice versa. However for the light weight, forward pdf means pdf of sampling a direction from vertex, which is nearer to the light, instead of the camera vertex, to the next vertex. And what is also inverse is the index of vertex, vertex 0 means the light vertex in the former case, while it is camera sensor vertex in the latter case. Since they obey exact the same rule from their own perspective, I&rsquo;m gonna drop the subscript.</p>
 <p>$ w_{i}=\dfrac{\overleftarrow{p_i}(\bar{y})}{\overrightarrow{p_i}(\bar{y})}(w_{i-1}+1)\ \ \ \ (18)$</p>
 <p>There are two issues blocking us from evaluating the term directly, the $ \overleftarrow{p_i}(\bar{y})$ is unknown because next vertex is not traced yet, neither the pdf w.r.t solid angle, nor the directional g-term can be calculated before we have a clue of what the next vertex is. Another subtle issue is hidden in the $ w_{i-1} $ term, to evaluate this term, we need to know the pdf w.r.t solid angle from vertex i to i-1, sadly it is also determined by vertex i+1 because that&rsquo;s where the reverse input direction is for the brdf. In order to avoid those terms, it is defined the following way:</p>
-<p>$ w_{i}=\overleftarrow{p_i}(\bar{y})(\underbrace{\dfrac{w_{i-1}}{\overrightarrow{p_i}(\bar{y})}}_{\overleftarrow{p_{\sigma,i-1}} \boxed{vc_i}}+\underbrace{\dfrac{1}{\overrightarrow{p_i}(\bar{y})}}_{\boxed{vcm_i}})\ \ \ \ (19)$</p>
+<p>$ w_{i}=\overleftarrow{p_i}(\bar{y})(\underbrace{\dfrac{w_{i-1}}{\overrightarrow{p_i}(\bar{y})}}<em>{\overleftarrow{p</em>{\sigma,i-1}} \boxed{vc_i}}+\underbrace{\dfrac{1}{\overrightarrow{p_i}(\bar{y})}}_{\boxed{vcm_i}})\ \ \ \ (19)$</p>
 <p>From this equation, we can see that both VC and VCM can be calculated for the current vertex because those which can&rsquo;t be calculated are avoided in the equation. This simply give us the following equation:</p>
 <p>$ vcm_i = \dfrac{1}{\overrightarrow{p_i}}\ \ \ \ (20)$</p>
 <p>$ vc_i=\dfrac{\overleftarrow{g_{i-1}}}{\overrightarrow{p_i}}(vcm_{i-1}+\overleftarrow{p_{\sigma,i-2}}vc_{i-1})\ \ \ \ (21)$</p>
@@ -416,8 +416,7 @@ sliderJQuery(function( $ ) {
 <p>In term of distance between light source and target vertex, distant light and sky light need special handling because there is actually no real surface for these light sources and vertices sampled on these light sources can be arbitrarily far.</p>
 <p>We&rsquo;ll start from sky light first. A sky sphere is used in my render to simulate the radiance distribution of the whole sky. Even for a physical based renderer, a sky light is actually not 100% accurate. For each point to be shaded, it is always the center of the whole skysphere, no matter where the vertex is. Since we are simulating the radiance far away from the whole scene, it introduces little visual artifact that is noticeable.</p>
 <p>To sample a point on a sky light source, we first sample a direction from the target vertex, which is always (0,0,0) in sky sphere&rsquo;s space. After a direction is sampled, we can evaluate the radiance along the inverse direction. </p>
-<figure>
-    <img src="/img/posts/practical_implementation_of_mis_in_bidirectional_path_tracing/infinite.png" width="500"/> 
+<figure><img src="/img/posts/practical_implementation_of_mis_in_bidirectional_path_tracing/infinite.png" width="500"/>
 </figure>
 
 <p>Then we need to sample a point from a plane that is perpendicular to the direction and also the tangent plane of the bounding sphere of the scene. What we only need to know is the radius of the sphere since it can be arbitrary.</p>
@@ -602,7 +601,7 @@ sliderJQuery(function( $ ) {
 
         <div id="disqus_thread"></div>
 <script type="application/javascript">
-    var disqus_config = function () {
+    window.disqus_config = function () {
     
     
     
@@ -652,7 +651,7 @@ sliderJQuery(function( $ ) {
         
           2015 -
         
-        2021
+        2022
          Jiayin Cao 
       
       
@@ -664,7 +663,7 @@ sliderJQuery(function( $ ) {
 
     
       
-      <script src="/js/dark-mode.min.0213e1773e6d1c5a644f847c67a6f8abac49a3776e2976f6008038af8c5b76a1.js"></script>
+      <script src="/js/dark-mode.min.1d139a81392167c6a37135df59f9fd95747abba988ba33c1a557c573776cb197.js"></script>
     
 
     
