@@ -83,7 +83,7 @@
       </script>
     
 
-    <meta name="generator" content="Hugo 0.94.0" />
+    <meta name="generator" content="Hugo 0.88.1" />
   </head>
 
   
@@ -210,9 +210,9 @@
 <p>We have only one question left, how to generate result for infinitive number of bounces. Russion roullete is the key here.</p>
 <p>$ { L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) + \sum\limits_{n=1}^{\infty} P(n) }  $</p>
 <p>Since it is assumed that the more bounces in the path, the less contribution it has to the final image. There are cases breaking this assumption for sure, however it is true most of the time. If we define a function like this:</p>
-<p>$ P^{&rsquo;}(n)= \begin{cases} \frac{P(n)}{T}&amp;:t&lt;T \\\ 0&amp;:t\ge T \end{cases} $</p>
+<p>$ P^{'}(n)= \begin{cases} \frac{P(n)}{T}&amp;:t&lt;T \\\ 0&amp;:t\ge T \end{cases} $</p>
 <p>We have certain probability to terminate the path without introducing any bias. Putting this into the rendering equation:</p>
-<p>$ { L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) + P(0) + P(1) + P(2) + \sum\limits_{n=3}^{\infty} P^{&rsquo;}(n) }  $</p>
+<p>$ { L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) + P(0) + P(1) + P(2) + \sum\limits_{n=3}^{\infty} P^{'}(n) }  $</p>
 <p>It seems look better, however it is still needed for infinite number of paths to generate the result. Let&rsquo;s go further:</p>
 <p>$ { L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) + P(0) + P(1) + P(2) + \frac{1}{T} * ( P(3) + \frac{1}{T} * ( P(4) + \frac{1}{T} * ( P(5) + &hellip; ))) }  $</p>
 <p>We have non-zero probability of reaching path with any number of bounces. In a practical case, it will most likely to terminate the whole computation after several number of bounces without introducing any bias in the rendering equation.</p>
@@ -396,7 +396,7 @@
 
         <div id="disqus_thread"></div>
 <script type="application/javascript">
-    window.disqus_config = function () {
+    var disqus_config = function () {
     
     
     
@@ -458,7 +458,7 @@
 
     
       
-      <script src="/js/dark-mode.min.1d139a81392167c6a37135df59f9fd95747abba988ba33c1a557c573776cb197.js"></script>
+      <script src="/js/dark-mode.min.aee9c8a464eb7b3534c7110f7c5e169e7039e2fd92710e0626d451d6725af137.js"></script>
     
 
     

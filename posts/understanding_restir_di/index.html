@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+
+    <meta name="author" content="Jiayin Cao">
+    <meta name="description" content="Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReStir (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like ReStir DI, ReStir GI, ReStir PT, Volumetric ReStir, etc.
+The original papers are clearly the best resources to learn the tech. But understanding the theory and math remains challenging for graphics programmers who are not very familiar with sampling methods.">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://agraphicsguynotes.com/img/cover.png"/>
+
+<meta name="twitter:title" content="Understanding ReStir DI"/>
+<meta name="twitter:description" content="Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReStir (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like ReStir DI, ReStir GI, ReStir PT, Volumetric ReStir, etc.
+The original papers are clearly the best resources to learn the tech. But understanding the theory and math remains challenging for graphics programmers who are not very familiar with sampling methods."/>
+
+    <meta property="og:title" content="Understanding ReStir DI" />
+<meta property="og:description" content="Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReStir (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like ReStir DI, ReStir GI, ReStir PT, Volumetric ReStir, etc.
+The original papers are clearly the best resources to learn the tech. But understanding the theory and math remains challenging for graphics programmers who are not very familiar with sampling methods." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/understanding_restir_di/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-11-25T00:00:00+00:00" />
+<meta property="article:modified_time" content="2022-11-25T00:00:00+00:00" />
+
+
+
+    <title>
+  Understanding ReStir DI · A Graphics Guy&#39;s Note
+</title>
+
+    
+      <link rel="canonical" href="/posts/understanding_restir_di/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.1.7/css/fork-awesome.min.css" integrity="sha256-gsmEoJAws/Kd3CjuOQzLie5Q3yshhvmo7YNtBG7aaEY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.9836c03fe5c87d102278a33e86d0591ef36c89b1e17e8e547ebf84c05cee010e.css" integrity="sha256-mDbAP&#43;XIfRAieKM&#43;htBZHvNsibHhfo5Ufr&#43;EwFzuAQ4=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="/css/coder-dark.min.717236c74e0a5208ef73964a9f44c6b443b689a95b270d8b2a40d0c012460dac.css" integrity="sha256-cXI2x04KUgjvc5ZKn0TGtEO2ialbJw2LKkDQwBJGDaw=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+      <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+    
+
+    
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-7T6R55SCY1"></script>
+      <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-7T6R55SCY1');
+      </script>
+    
+
+    <meta name="generator" content="Hugo 0.88.1" />
+  </head>
+
+  
+  
+    
+  
+  <body class="colorscheme-auto"
+        onload=" twemoji.parse(document.body); "
+  >
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      A Graphics Guy&#39;s Note
+    </a>
+    
+      
+        <span id="dark-mode-toggle" class="float-right">
+          <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+        </span>
+      
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+        
+        
+        
+          <li class="navigation-item separator">
+            <span>|</span>
+          </li>
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Understanding ReStir DI</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2022-11-25T00:00:00Z'>
+                November 25, 2022
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              27-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+      
+      <div>
+        
+        <p>Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReStir (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like <a href="https://research.nvidia.com/publication/2020-07_spatiotemporal-reservoir-resampling-real-time-ray-tracing-dynamic-direct">ReStir DI</a>, <a href="https://research.nvidia.com/publication/2021-06_restir-gi-path-resampling-real-time-path-tracing">ReStir GI</a>, <a href="https://research.nvidia.com/publication/2022-07_generalized-resampled-importance-sampling-foundations-restir">ReStir PT</a>, <a href="https://graphics.cs.utah.edu/research/projects/volumetric-restir/">Volumetric ReStir</a>, etc.</p>
+<p>The original papers are clearly the best resources to learn the tech. But understanding the theory and math remains challenging for graphics programmers who are not very familiar with sampling methods. There are also a few blog posts <a href="http://www.zyanidelab.com/how-to-add-thousands-of-lights-to-your-renderer/">[5]</a> <a href="https://gamehacker1999.github.io/posts/restir/">[6]</a> available. However, there are still some fundermental mathematical questions not answered in the blog, which are fairly important for readers to understand why the math works the way it does in ReStir.</p>
+<p>In this blog post, rather than talking about the different variations of ReStir, I would like to talk about the very original method, ReStir DI. Different from previous blog posts, I would not mention any implementation details. The whole blog will be focusing on the mathematics behind the original ReStir, with more indepth analysis of why it works. This should be a complementary reading of the original ReStir DI algorithm. It is highly recommended readers to go through the original <a href="https://research.nvidia.com/publication/2020-07_spatiotemporal-reservoir-resampling-real-time-ray-tracing-dynamic-direct">paper</a> first before start reading this post. Hopefully, after reading this post, readers would have a deeper understanding how ReStir DI works mathematically.</p>
+<h1 id="preliminary-reading">Preliminary Reading</h1>
+<p>Since ReStir DI is not an easy algorithm to understand and it does involves the basics of sampling method as well. I would like to briefly talk about some of the necessary sampling theory first before starting explaining ReStir.</p>
+<h2 id="importance-sampling">Importance Sampling</h2>
+<p>This is the most fundermental concept in evaluating rendering equation. Most of the concepts will be skiped as I would assume readers already have a decent understanding of it.</p>
+<p>Basically, to evaluate the integral of $\int f(x) dx$, we would need to</p>
+<ul>
+<li>Draw N samples from a PDF</li>
+<li>Drop the N samples in the Monte Carlo estimator<br>
+$I=\dfrac{1}{N} \Sigma_{i=1}^N f(x_i)/p(x_i)$</li>
+</ul>
+<p>It is so easy to prove this that I would skip the math. If you would like to know how, check out my previous post <a href="/posts/monte_carlo_integral_with_multiple_importance_sampling/">here</a>.</p>
+<p>However, I would like to point out an important condition here.
+The domain of p(x) has to cover the whole domain of f(x). If it doesn&rsquo;t, this can&rsquo;t work.</p>
+<p>To prove it, let&rsquo;s say there is a sub domain in the f(x)&rsquo;s domain $\Omega$ that is not covered by p(x), naming it $\Omega_1$. 
+This introduces a blind spot in sampling domain. Clearly, we have</p>
+<p>$ \Omega = \Omega_0 + \Omega_1 $</p>
+<p>Working out the math here</p>
+<p>$ \begin{array} {lcl} E[I] &amp; = &amp; \dfrac{1}{N} E[ \sum\limits_{i=1}^N \dfrac{f(x_{i})}{p(x_{i})}] \\\ \\\ &amp; = &amp; \dfrac{1}{N} \int_{\Omega_0} \sum\limits_{i=1}^N \dfrac{f(x)}{p(x)} p(x) dx\\\ \\\ &amp; = &amp; \int_{\Omega_0} f(x) dx \\\ \\\ &amp; = &amp; \int_{\Omega} f(x)dx - \int_{\Omega_1} f(x) dx \end{array} $</p>
+<p>As we can see, we have a cut from the expected result. Intuitively explaining, this is because the estimator is no longer a function of any signal inside the domain $\Omega_1$ anymore, while the target is a function of it. If anything is different inside that domain, it would cause a different result integral while this change can&rsquo;t be picked up by the estimator as the PDF is unable to capture any signal there. Mathematically speaking, we can see that as long as $\int_{\Omega_1} f(x) dx$ is not zero, the result won&rsquo;t be what we want. And it is almost not zero all the time. As a matter of fact, if we know beforehand, f(x) integrates to 0 in the domain of $\Omega_1$, we would only need to evaluate the integral of the function in the domain of $\Omega_0$ in the first place.</p>
+<h2 id="multiple-importance-sampling">Multiple Importance Sampling</h2>
+<p>MIS is a common technique to improve sampling efficiency by taking multiple samples from different sources of PDFs, rather than just one.
+This method commonly improves sampling efficiency and can deal with integrals that is hard to approximate with one single source of PDF.</p>
+<p>$ I_{mis}^{M,N} = \Sigma_{i=1}^M \dfrac{1}{N_i} \Sigma_{j=1}^{N_i} w_i(x_{ij}) \dfrac{f(x_{ij})}{p_i(x_{ij})} $</p>
+<p>For MIS to be mathematically unbiased, it has to meets a few requirements.
+In the domain of f(x),</p>
+<ul>
+<li>We must have $ \Sigma_{i=1}^M w_i(x) = 1 $</li>
+<li>The union of the domains of all source PDFs must cover the domain of f(x)</li>
+<li>$w_i(x)$ must be 0 whenever $p_i(x) = 0$</li>
+</ul>
+<p>Since this post is about explaining ReStir, I would only put down some details that matters to ReStir. Other characteristics of MIS would be skipped. For a deeper explaination of MIS, please check out <a href="https://graphics.stanford.edu/papers/veach_thesis/thesis.pdf">Eric Veach&rsquo;s Thesis</a>.</p>
+<h3 id="mathematical-proof-of-mis">Mathematical Proof of MIS</h3>
+<p>In order to have a deeper understanding of this, let&rsquo;s see how the math works under the hood first.</p>
+<p>$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; E[ \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x_{ij})\dfrac{f(x_{ij})}{p_i(x_{ij})}] \\\ &amp; = &amp; \int \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x)\dfrac{f(x)}{p_i(x)} p_i(x) dx \\\ &amp; = &amp; \int \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x) f(x) dx \\\ &amp; = &amp; \int \sum\limits_{i=1}^M w_i(x) f(x) dx \end{array} $</p>
+<p>It is obivous that as long as it meets the first condition ($ \Sigma_{i=1}^M w_i(x) = 1 $), we would have an unbiased approximation of the integral of our interest.</p>
+<p>$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; \int \sum\limits_{i=1}^M w_i(x) f(x) dx \\\ &amp; = &amp; \int f(x) dx \end{array} $</p>
+<p>For the second requirement, since it is less relevant to ReStir, I would only put down some intuitive explaination here, leaving the math a practice to readers (The proof should be fairly similar with what I showed above, but slightly more complicated). Same as importance sampling blind spot issue mentioned above, if none of the PDF covers a sub-domain of the target function, it won&rsquo;t pick up any changes in that domain either, while changes in that domain will indeed cause changes in the final result. This easily makes the algorithm not functional anymore.</p>
+<p>However, I would like to point out that this is by no means to say that all source PDF&rsquo;s domain would have to cover the domain of the function to be integrated. As long as one of them covers any sub-domain, it is good enough. Though, there is one important condition, that is the third one mentioned above. Since it is slightly trickier to understand, I&rsquo;ll put down the math proof here,</p>
+<p>Let&rsquo;s imagine for one PDF $p_k$, it has zero probability of taking a sample in a sub-domain, $\Omega_1$. We can then devide the domain of the function $\Omega$ into two parts $\Omega_0$ and $\Omega_1$. Clearly, we have</p>
+<p>$ \Omega = \Omega_0 + \Omega_1 $</p>
+<p>So let&rsquo;s divide the previous MIS proof into two domains and see what happens,</p>
+<p>$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; E[ \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x_{ij})\dfrac{f(x_{ij})}{p_i(x_{ij})}] \\\ \\\ &amp; = &amp; E[ \sum\limits_{i=1, i!=k}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x_{ij})\dfrac{f(x_{ij})}{p_i(x_{ij})} + \dfrac{1}{N_k} \sum\limits_{j=1}^{N_k} w_k(x_{ij})\dfrac{f(x_{ij})}{p_i(x_{ij})}] \\\ \\\ &amp; = &amp; \int_{\Omega} \sum\limits_{i=1,i!=k}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x)\dfrac{f(x)}{p_i(x)} p_i(x) dx + \int_{\Omega_0} \dfrac{1}{N_k} \sum\limits_{j=1}^{N_k} w_i(x)\dfrac{f(x)}{p_i(x)} p_i(x) dx\\\ \\\ &amp; = &amp; \Sigma_{i=1, i!=k}^M \int_{\Omega} w_i(x)f(x)dx + \int_{\Omega_0}w_k(x)f(x)dx \\\ \\\ &amp; = &amp; \Sigma_{i=1}^M \int_{\Omega} w_i(x)f(x)dx - \int_{\Omega_1}w_k(x)f(x)dx  \\\  \\\ &amp; = &amp; \int f(x) dx - \int_{\Omega_1}w_k(x)f(x)dx \end{array} $</p>
+<p>What happens here is that our estimator has an extra cut from the expected value just like the blind spot issue mentioned above. And this is exactly why we need to make sure we meet the third condition. If we do meet the third condition, what would happen is that the extra cut will be canceled because $w_k(x)$ is zero, leaving the rest parts precisely what we want. Making the estimator unbiased again.</p>
+<p>As a side note, I would like to point out that in theory we don&rsquo;t really need to meet the first or third condition to make the algorithm unbiased. There is a more generalized form</p>
+<ul>
+<li>First condition<br>
+$\int \Sigma_{i=1}^M w(x) f(x) dx = 1$</li>
+<li>Third condition<br>
+$\int_{\Omega_1} w_k(x) f(x) dx = 0$</li>
+</ul>
+<p>However, in almost all contexts, it is a lot more tricky to meet this requirement without meeting the special form of them mentioned above. So this is rarely mentioned in most materials.</p>
+<h3 id="commonly-used-mis-weight">Commonly Used MIS Weight</h3>
+<p>Here I&rsquo;d like to point out a few commonly used weight</p>
+<ul>
+<li>Balance Heuristic<br>
+This is the most commonly used weight functions in MIS. The mathematical form of the weight is quite simple, $ w_k(x) = N_k p_k(x) / \Sigma_{i=1}^{M} N_i p_i(x)$ . If we pay attention to the details, we would notice that it automatically fullfills the first and third conditions, which is very nice. Even though the weight looks quite simple, sometimes it can get quite complicated, like in the algorithm of <a href="/posts/practical_implementation_of_mis_in_bidirectional_path_tracing/">Bidirectional Path Tracing</a>.   What is even worse is that some times the PDFs are not even trackable, making it impossible to use this method.</li>
+<li>Power Heuristic<br>
+This weight is sort of similar with balance heuristic, except it adds a power on top of each element in the nominator and denominator, leaving the math form like this $ w_k(x) = (N_k p_k(x))^\beta / \Sigma_{i=1}^{M} (N_i p_i(x))^{\beta}$. We can easily tell here that balance heuristic is nothing but a special form of power heuristic when $\beta$ is simply one. And this weight also meets the first and third conditions as well. It is less commonly used compared with balance heuristic, but it is indeeded used in some cases for better sampling efficiency.</li>
+<li>Constant Weight<br>
+As its name implies, it is a constant. Since it is constant and it has to meet the first condition, we can easily imagine what the weight is, it should simply be $ w_k(x) = {1}/{N_k} $.<br>
+Not really meeting the third condition makes this weight seems to be pretty ridiculars at the beginning. As a matter of fact, if we use this weight, it possbily won&rsquo;t reduce the fireflies at all, making this weight very unattractive. However, in the case where the PDFs are not even trackable, this is the only weight that we can consider using when it comes to MIS. And special attention is needed to make sure the method is unbiased.</li>
+</ul>
+<h2 id="sample-importance-resampling-sir">Sample Importance Resampling (SIR)</h2>
+<p>SIR is a method for approximating taking samples from a target PDF, just like inversion sampling, except that it has way less requirements on the target PDF itself.
+Please be noted that this method only approximate sampling the target PDF, it is not really taking samples from the target PDF.</p>
+<p>Given a target PDF $\hat{p}(x)$ to sample from, the basic workflow of SIR is as below</p>
+<ul>
+<li>Take M samples from a simpler and trackable PDF, we call this PDF proposal PDF, $p(x)$</li>
+<li>For each samples taken, we assign a weight for the sample, which is<br>
+$ w(x) = {\hat{p}(x)}/{p(x)}$</li>
+<li>Next draw a sample from this proposal sample set of M. The probability of each sample to be picked is proportional to its weight. And throughout the rest of this post, this type of sample would be called as target sample.</li>
+</ul>
+<p>The workflow is simple and straightforward. I&rsquo;d like to point out all the PDFs in this process</p>
+<ul>
+<li>Proposal PDF<br>
+This is what we use to draw samples from in the first place. It should be trackable and cheap enough to take sample from as we would take multiple proposal samples from this PDF.
+I do want to point out if this proposal PDF is expensive, it won&rsquo;t have any impact on the unbiasedness of the algorithm though, except that it would probably make the algorithm unrealistic to be performant.</li>
+<li>Target PDF<br>
+Target pdf is what we used to assign the weight. Ideally, it shouldn&rsquo;t be expensive either. Just like proposal PDF, it could be. For example, in the work of <a href="https://research.nvidia.com/publication/2021-06_restir-gi-path-resampling-real-time-path-tracing">ReStir GI</a>, the target pdf needs a ray to be shot, making it very expensive, forcing the algorithm to take a lot less number of proposal samples compared with other variations of ReStir. The paper distributizes the proposal samples across frames to mitigate the performance flaw.</li>
+<li>SIR PDF<br>
+Some work called it real PDF. For consistency, I would call it SIR PDF throughout the whole post. This is the PDF that we are really drawing samples from. Clearly, we are not really drawing the final samples from the proposal PDF unless the number of proposal samples drawn is one. The truth is, unless the number of proposal samples are unlimited, we are not drawing from the target PDF either. We are actually drawing something in between, something that gradually converges to the target PDF from the proposal PDF as the number of proposal samples grows.</li>
+</ul>
+<p>Below is a graph taken from the <a href="https://scholarsarchive.byu.edu/cgi/viewcontent.cgi?article=1662&amp;context=etd">Talbot&rsquo;s paper</a>.
+With different number of proposal samples (M), we can see that even with a uniform PDF across the domain, we would eventually result in taking samples that is close to the target PDF as M grows.</p>
+<figure><a href="/img/posts/understanding_restir_di/SIR.png"><img src="/img/posts/understanding_restir_di/SIR.png" width="700"/></a>
+</figure>
+
+<p>There are some pretty attactive characteristics of the sampling method</p>
+<ul>
+<li>Unlike inversion sampling, which is one of the most common methods widely used, we do not need any knowledge about the target distribution, apart from that we must be able to evaluate it given a sample. This alone gives us a lot of flexibility in choosing the target PDF.</li>
+<li>What makes the algorithm even more attactive is that we can even add a constant scaling factor on the target PDF as the algorithm would be the same. A relative scaling factor on all weights would mean no scaling factor applied at all.<br>
+This offers an extra level of freedom for us to choose our target PDF as a lot of the times we can&rsquo;t really normalize our target PDF. This opens the door for us to choose literally any function we would like to use, rather than a PDF that has to integrate to 1 in its domain.<br>
+To be more precise, I would call this target distribution from now on as it is not a traditional sense PDF that we used to know. Strictly speaking, it is not really a PDF, it is a distribution function.</li>
+</ul>
+<p>With all these limitations gone, it is not hard to imagine the value of SIR. It offers us a powerful tool to draw samples from distributions that we couldn&rsquo;t with other methods, for example the rendering equation itself. If we can take samples from a PDF that is proportional to $L(w_i) f_r(w_i, w_o) cos(\theta_i)$, we really just need one single sample to solve the rendering equation without any noise. This is really hard for traditional methods, like inversion sampling, rejection sampling. Because the distribution is not even a PDF, there is no easy way to normalize the distribution. Normalizing the distribution requires us to evaluate the integral in the first place, this is a chicken and egg problem itself. However, just because we can&rsquo;t draw samples from this distribution doesn&rsquo;t prevent us from approximate drawing a sample from it using SIR. This is exactly what ReStir GI does.</p>
+<p>With these limitations gone, it seems that we have the power to sample from any distribution now. However, there are clearly some downside of this algorithm as well</p>
+<ul>
+<li>The biggest downside of this SIR method is that it is unfortunately untrackable. To be more specific, it means that we don&rsquo;t really have a closed form of the SIR pdf that we take samples from given a specific M, proposal PDF and target distribution.</li>
+<li>There is a big issue because of the untrackable nature of the PDF. Given a random sample taken from somewhere else, we can&rsquo;t know the probability of taking this given sample with this SIR method.<br>
+To illustrate why it matters, if we take a re-visit of the previous MIS balance heuristic weight metnioned above. We can quickly realize that balance heuristic is not possible as long as one single source PDF is a SIR pdf, meaning we take one single sample with this SIR method as the source samples in MIS, balance heuristic is not an option anymore.</li>
+<li>Sometimes it would require a big number of proposal samples to achieve a good approximation of sampling the target distribution. This could be a deal breaker as generating a huge number of proposal samples doesn&rsquo;t sound cheap itself. ReStir solves this problem by reusing sample signals from temporal history and neighbors, which greatly reduces the number of real proposal samples needed to be taken per-pixel.</li>
+</ul>
+<h2 id="resampled-importance-sampling-ris">Resampled Importance Sampling (RIS)</h2>
+<p>RIS is a technique that takes advantage of Sampling Importance Resampling to approximate the integral in an unbiased manner.
+Different from SIR, it also comes with a complete solution to approximate the integral without any bias.</p>
+<p>To evaluate $\int f(x)dx$, RIS works as followings</p>
+<ul>
+<li>Find a proposal pdf p(x) that is easy to draw samples from and draw M samples using this PDF.</li>
+<li>Find a target distribution $\hat{p}(x)$ that suits the function well</li>
+<li>For each proposal sample, assign a weight for it, $w(x)=\hat{p}(x)/(p(x) M)$</li>
+<li>Draw N samples from the proposal sample set with replacement, the probability of each proposal sample being taken should be proportional to its weight. Replacement means that the N samples taken out of the proposal sample set could be duplicated. This simplifies the problem into taking one sample base on the weights and repeat the process N times.</li>
+<li>Then we use the N samples to evaluate the integral approximation, but with a bias correction factor, which is $\Sigma_{i=1}^{M} w_i(x)$</li>
+</ul>
+<p>Please be noted that the weight here is slightly different from the previously metioned weight. This is fine as scaling the weight is allowed. But the below function has to skip the 1/M part since it is merged into the weights already.</p>
+<p>The final form of our Monte Carlo estimator would be as below</p>
+<p>$I_{RIS} = \dfrac{1}{N} \Sigma_{i=1}^{N} \dfrac{f(x_i)}{\hat{p}(x_i)} \Sigma_{j=1}^{M} w(x_j)$</p>
+<p>Here $x_i$ is only a subset of $x_j$. The way $x_i$ is picked can either be done through a binary search or a linear processing like Reservoir algorithm. Binary search would requires us to pre-process the proposal samples beforehand, which is not practical in the context of ReStir though.</p>
+<p>There are some requirements for this method as well</p>
+<ul>
+<li>M and N have to be both larger than 0.<br>
+It is quite easy to understand this. If either proposal sample count or target sample count is zero, we are not really doing anything here.</li>
+<li>In the domain of f(x), both $\hat{p}(x)$ and p(x) have to be larger than zero as well.<br>
+This is not hard to understand as well. If either of the PDFs is zero in a sub domain, what happens is that the SIR method would have no chance to pick samples from that domain at all. And this is precisely the blind spot issue mentioned above in the Importance Sampling section.</li>
+</ul>
+<p>To Make it a bit easier to understand the workflow, below is a graph demonstrating how it works
+<figure><a href="/img/posts/understanding_restir_di/RIS.png"><img src="/img/posts/understanding_restir_di/RIS.png" width="500"/></a>
+</figure>
+</p>
+<h3 id="mis-used-with-ris">MIS used with RIS</h3>
+<p>Whenever it comes to multiple importance sampling, there are two ways that it could be used with RIS.</p>
+<p>The first option is when taking proposal samples from the proposal PDFs, there is really nothing prevent us from drawing samples from different PDFs. In the previous section, we mentioned that all the proposal samples are coming from a same proposal PDF. This is not a limitation at all. We could draw samples from multiple different PDFs if we want to. Though, it is critically important to make sure the conditions of the MIS are met properly.</p>
+<p>As pointed out in the <a href="https://research.nvidia.com/publication/2022-07_generalized-resampled-importance-sampling-foundations-restir">GRIS paper</a>, the weight for each proposal pdf could be generalized to this form</p>
+<p>$w_i(x) = w_{i,mis}(x) \hat{p}(x) / p_i(x)$</p>
+<p>It is not hard to realize that the previous weight is nothing but a special form of this generalized form where the MIS weight is simply constant and the proposal PDF is all the same.
+Since that weight is a MIS weight, it has to make sure it would meet the two conditions involving weight in the MIS algorithm. Otherwise, it could introduce bias.</p>
+<p>Below is another graph demonstrating the workflow for MIS used in RIS.
+<figure><a href="/img/posts/understanding_restir_di/MIS_RIS.png"><img src="/img/posts/understanding_restir_di/MIS_RIS.png"/></a>
+</figure>
+</p>
+<p>Another usage of MIS with RIS is to treat SIR as a individual sampling method itself.
+So target samples drawn from different SIR methods could be used as different sample taken from different PDFs in MIS. Put it in another way, we essentially treat different SIRs as different PDFs in MIS. From the perspective of MIS estimator, it doesn&rsquo;t really care about whether the sample is drawn from one SIR or another, or maybe even from a different method, like inversion sampling.
+However, there is one tricky thing to point out, as balance heuristics would require evaluating samples on all PDFs, since SIR&rsquo;s PDF is not even trackable, it would be difficult to use balance heuristics as weight.</p>
+<p>Same as before, here is a diagram showing how we can treat RIS as a regular sampling method in MIS.
+<figure><a href="/img/posts/understanding_restir_di/RIS_MIS.png"><img src="/img/posts/understanding_restir_di/RIS_MIS.png"/></a>
+</figure>
+</p>
+<h3 id="math-proof-of-ris">Math Proof of RIS</h3>
+<p>For those readers who don&rsquo;t like taking things for granted, to fully understand the RIS method, it is necessary to understand why it is unbiased.
+There is a very clear proof of it mentioned in the appendix of <a href="https://scholarsarchive.byu.edu/cgi/viewcontent.cgi?article=1662&amp;context=etd">Talbot&rsquo;s paper</a>.</p>
+<p>Rather than repeating his derivation, I would like to put down another slightly different proof, which is similar to what the ReStir DI paper does when it talks about biasness of the ReStir method.</p>
+<p>Since the original samples come from the proposal PDF(s), target samples are merely a subset of proposal samples without introducing new signals to the evaluation, we would only need to integrate over the proposal samples to get the approximation.</p>
+<p>To simplify our derivation, let&rsquo;s define a few terms first</p>
+<p>$w_i(x) = w_{i,mis}(x) \hat{p}(x) / p_i(x)$</p>
+<p>$W = \Sigma_{i=1}^{M}w_i(x_i)$</p>
+<p>Please notice that without losing generosity, I used different proposal PDFs here. To prove RIS with same proposal PDF, we simply need to get rid of the subscript of $w_i(x)$.</p>
+<p>$ \begin{array} {lcl} E(\dfrac{f(x)}{\hat{p}(x)} \Sigma_{i=1}^{M}\dfrac{w_{i,mis}(x_i)\hat{p}(x)}{p_i(x)}) &amp; = &amp; E(\dfrac{f(x)}{\hat{p}(x)} W) \\\ \\\ &amp; = &amp; \Sigma_{k=1}^{M} \underset{\text{M}}{\int \dots \int} \dfrac{f(x_k)}{\hat{p}(x_k)} W \dfrac{w_k(x_k)}{W} \Pi_{i=1}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M\ \\\ \\\ &amp; = &amp; \Sigma_{k=1}^{M} \underset{\text{M}}{\int \dots \int} f(x) w_{k,mis}(x_k) \Pi_{i=1, i!=k}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M\ \\\ \\\ &amp; = &amp; \Sigma_{k=1}^{M} \int f(x_k) w_{k,mis}(x_k) dx_k\ \underset{\text{M-1}}{\int \dots \int} \Pi_{i=1, i!=k}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M\ \\\ \\\ &amp; = &amp; \int f(x_k) \Sigma_{k=1}^{M} w_{k,mis}(x_k) dx_k\ \\\ \\\ &amp; = &amp; \int f(x) dx\ \end{array}$</p>
+<p>As we can see from the above derivation, lots of the items cancels, leaving a very simple form, the exact result that we would like to approximate in the first place. With this proof, we can easily see that it doesn&rsquo;t matter if RIS picks proposal samples from different PDFs, this is exactly how MIS works in RIS in the first method I mentioned above.</p>
+<h3 id="nice-properties-of-ris">Nice Properties of RIS</h3>
+<p>Before moving to the next section, let&rsquo;s summarize some of the nice properties of RIS.</p>
+<ul>
+<li>There isn&rsquo;t that much needed between the proposal PDF and target distribution, offering a lot of flexibility in terms of choosing the best PDF/distribution for your application. The only thing that is required is that they have to both cover the domain of target function f(x). To be more specific, if we are sampling from different proposal PDFs, the union of the domains of all proposal PDFs would need to cover the whole target function domain. If one of the proposal PDFs doesn&rsquo;t cover the full target function domain, it is fine as long as the MIS weight is properly adjusted.</li>
+<li>This was mentioned in the previous section. I would like to emphasize it again since it is something important. The target distribution used in RIS doesn&rsquo;t need to be a normalized PDF at all. It can literally be anything. As a matter of fact, ReStir DI algorithm uses the unshadowed light contribution, $L(w_i)f_r(w_o,w_i)cos(\theta_i)$, as target function. With traditional sampling method, it is very hard as this distribution is hardly a PDF itself.</li>
+</ul>
+<h2 id="weighted-reservoir-sampling-wrs">Weighted Reservoir Sampling (WRS)</h2>
+<p>The second step of SIR algorithm requires us to pick a sample from all proposal samples and each sample&rsquo;s probability being picked is proportional to its weight. This application easily reminds us a binary search algorithm with a prefix sum table. However, even if the time complexity is only O(lg(N)), the preprocessing step&rsquo;s time complexity is still O(N). It would suit for cases where data is more static and can be preprocessed and used multiple times later, like HDRI sky importance sampling. In a more dynamic environment, it is less practical as the bottleneck will be O(N) during preprossing. And it also requires O(N) space as well, which is another deal breaker for efficient SIR sampling. All these issues requires us to seek for an alternative solution, which is where WRS chimes in.</p>
+<p>Weighted reservoir sampling is an elegant algorithm that draw a sample from a stream of samples without pre-existed knowledge about how many samples are coming. Each sample in the stream would stand a chance that is proportional to its weight to be picked as the winner. For example, if we have three samples A, B, C, with their cooresponding weight as 1.0, 2.0, 5.0, there will be 12.5% chance that A will be picked, 25% chance that B will be picked and 62.5% chance that C will be picked. Besides, if there is a forth sample D coming even if after the WRS is executed, the algorithm is flexible enough to take the forth sample in without breaking the rule that each sample would have a chance proportional to its weight of being picked.
+And what makes it even more attractive is that it only requires O(1) space, rather than linear space. There are certainly more attractive properties of this algorithm, which we would mention by the end of this section after learning how the math works first.</p>
+<p>To be clear, there are certainly variations of WRS existed. For example, the algorithm could actually pick multiple samples rather than just one of them among the set. However, this is the only version we care in ReStir DI as ReStir DI requires sampling proposal sample set with replacement. So all we need to do is to repeat the above algorithm multiple times. Though, there may be more optimized algorithm existed to pick samples with replacement. But this is out of the scope of the topic in this post.</p>
+<p>In order to implement the algorithm, we would need to define a reservoir structure with a few necessary fields</p>
+<ul>
+<li>Current picked sample</li>
+<li>Total processed weight</li>
+</ul>
+<p>An empty reservoir would have none as current picked sample and 0 as total processed weight.</p>
+<p>Please be noted that these are the only two fields required for WRS algorithm. ReStir DI does require another field, which is the number of samples processed so far. But since this section is all about WRS, the processed sample count is ignored to avoid confusion.</p>
+<p>The basic workflow of WRS goes like this. For an incoming sample, it would either take the sample or ignore the sample depending on a random choice. A random number between 0 and 1 is drawn. If it is larger than a threshold, which is defined this way</p>
+<p>$threshold = W_{new} / (W_{new} + W_{total})$</p>
+<p>The incoming sample will be ignored. Otherwise, the new sample will be picked as winner replacing the previously picked sample, if existed. Regardless, the total weight will be updated accordingly. A side note here, pay special attention when your random number equals to the threshold. This could be problematic depending on how we would like to deal with the incoming sample when it is equal.</p>
+<ul>
+<li>If we would like to pick it when it is equal, there is a non-zero chance to pick incoming sample with zero weight.</li>
+<li>If we would like to ignore it when it is equal, there is a non-zero chance that we would ignore the first sample, which should have always been picked. Of course, if the first sample has zero weight, it is even trickier.</li>
+</ul>
+<p>How to deal with this sort of corner case is left to the readers as an execise as this is not exactly what this post is about.
+But be sure to deal with this situations when implementation algorithm to avoid weight bugs.</p>
+<h3 id="mathematics-proof">Mathematics Proof</h3>
+<p>Compare with the previous math proof, this one is a lot simpler, requires nothing but junior high math.</p>
+<p>To prove how it works, let&rsquo;s start with the first incoming sample with non-zero weight in the WRS algorithm. We don&rsquo;t care about the first few samples with zero weight, we can pretend they don&rsquo;t exist.
+What will happen for sure is that the incoming sample will be taken as the random number will not be larger than the threshold, which is 1.0, forcing the new sample to be picked. And this indeed matches our expecation as if we only have one sample, the probability of this sample being picked is 100%.</p>
+<p>So assuming the algorithm works after processing N incoming samples, this is to assume that after processing N samples, each visited samples stands a chance being picked that is precisely this</p>
+<p>$p(x_k) = W(x_k) / \Sigma_{i=1}^{N} W(x_i)$</p>
+<p>As the way WRS works, we do have the denominator nicely recorded in a single variable</p>
+<p>$W_{total} = \Sigma_{i=1}^{N} W(x_i)$</p>
+<p>Let&rsquo;s see what would happen when a new sample coming in.
+If the random number is smaller than the threshold mentioned above, the new comer will be picked.
+This means that the probability of the new sample being picked is</p>
+<p>$p(x_N) = \dfrac{W(x_{N+1})}{W_{total} + W(x_{N+1})} = \dfrac{W(x_{N+1})}{\Sigma_{i=1}^{N+1} W(x_i)}$</p>
+<p>And this probability is exactly what we want for the new sample to be picked. And there is also a chance that the new sample will not be picked, which is</p>
+<p>$1-p(x_N) = \dfrac{\Sigma_{i=1}^{N} W(x_i)}{\Sigma_{i=1}^{N+1} W(x_i)}$</p>
+<p>So each of the previous samples being picked is reduced by the risk of the new sample could be picked. And the probability goes down by exactly the above factor, leaving each of the previous sample standing a chance of this being picked,</p>
+<p>$p'(x_k) = p(x_k) \dfrac{\Sigma_{i=1}^{N} W(x_i)}{\Sigma_{i=1}^{N+1} W(x_i)} = \dfrac{W(x_k)}{\Sigma_{i=1}^{N} W(x_i)} \dfrac{\Sigma_{i=1}^{N} W(x_i)}{\Sigma_{i=1}^{N+1} W(x_i)} = \dfrac{W(x_k)}{\Sigma_{i=1}^{N+1} W(x_i)}$</p>
+<p>And this probability again is also what we want for each of the old samples to hold to be picked.</p>
+<p>At this point, we can easily see that if WRS works for N incoming samples, it would work for N + 1 samples as well. Since we also proved that it indeed works when N is 1, it would mean by thinking it recursively, it would work for any number of incoming samples.</p>
+<h3 id="treating-a-new-sample-as-a-reservoir">Treating a New Sample as a Reservoir</h3>
+<p>As we previsouly mentioned, reservoir structure really only needs to hold two members, the total processed weight and the picked sample. And if we think about each new sample, it really just have a weight. However, we can also regard a new sample as a mini reservoir with the sample itself picked and total weight equals to the sample weight.
+From this perspective, there is no individual sample anymore, everthing is a reservoir. And the WRS algorithm would simply use the tracked reservoir and takes new single sample reservoir.</p>
+<p>So the question is, can WRS also take reservoirs generated by other WRS execution, rather than just single sample reservoir?</p>
+<p>Fortunately, the answer is yes.
+Let&rsquo;s say the WRS has processed N samples so far and it takes an incoming reservoir as its next input.
+If the incoming reservoir has processed M samples first, each sample in the visited M samples would stand a chance of this of being picked</p>
+<p>$p(y_k) = \dfrac{w(y_k)}{\Sigma_{i=1}^{M} w(y_i)} $</p>
+<p>I purposely used y here to indicate it is a different source of samples. Dropping it in the current reservoir processing, we would have each of the previously visited sample having this chance to be picked</p>
+<p>$p(y_k) = \dfrac{w(y_k)}{\Sigma_{i=1}^{M} w(y_i)} * \dfrac{\Sigma_{i=1}^{M} w(y_i)}{\Sigma_{i=1}^{N} w(x_i) + \Sigma_{i=1}^{M} w(y_i)} = \dfrac{w(y_k)}{\Sigma_{i=1}^{N} w(x_i) + \Sigma_{i=1}^{M} w(y_i)}$</p>
+<p>So after being processed by the WRS algorithm, each of the previously visited M samples would have correct probability to be picked as a whole. Even though this is done in two passes, rather than than the previosuly mentioned one pass algorithm.</p>
+<p>W.r.t the visited N samples, their probability of being picked is also reduced by this factor</p>
+<p>$\dfrac{\Sigma_{i=1}^{N} w(x_i)}{\Sigma_{i=1}^{N} w(x_i) + \Sigma_{i=1}^{M} w(y_i)}$</p>
+<p>Applying this to the existed probability, we will have each visited sample having this chance of being picked</p>
+<p>$p'(x_k) = \dfrac{w(x_k)}{\Sigma_{i=1}^{N} w(x_i)} \dfrac{\Sigma_{i=1}^{N} w(x_i)}{\Sigma_{i=1}^{N} w(x_i) + \Sigma_{i=1}^{M} w(y_i)} = \dfrac{w(x_k)}{\Sigma_{i=1}^{N} w(x_i) + \Sigma_{i=1}^{M} w(y_i)}$</p>
+<p>This nicely matches our expectation as well. So at this point, we can safely draw the conclusion that WRS can be performed in multiple recursive passes, it won&rsquo;t have impact on the probability of each sample being picked. It is also not hard to see that this recursive process certainly doesn&rsquo;t get limited by two levels.</p>
+<h3 id="nice-properties-of-wrs">Nice Properties of WRS</h3>
+<p>Now we know the math behind this algorithm as well, it is time to summarize what properties we can take advantages later</p>
+<ul>
+<li>WRS doesn&rsquo;t need to know the number of samples during its execution. It takes a stream of inputs, rather than a fixed array of inputs.</li>
+<li>WRS has O(1) space requirement even if the processed samples could be millions. It also requires only O(1) time to process each input, even if the input is a reservoir with millions of samples processed.</li>
+<li>WRS support divide and concur. Imagine there is a source of samples of a million, we can first divide them into multiple trunks and process each trunk on a different CPU thread. The order of each trunk being process is irrelevant. After every thread is finished, we can resolve the result with a final gather pass. How and when we divide won&rsquo;t have any impact on the probabilities at all.</li>
+</ul>
+<h1 id="restir-di-introduction">ReStir DI Introduction</h1>
+<p>With all the above context mentioned, we are now in a good position to move forward to discuss detail choices made by ReStir DI.</p>
+<p>Before doing it, I would like to give a brief introduction of what ReStir DI is and what problem it tries to tackle.</p>
+<h1 id="reference">Reference</h1>
+<p>[1] <a href="https://research.nvidia.com/publication/2020-07_spatiotemporal-reservoir-resampling-real-time-ray-tracing-dynamic-direct">Spatiotemporal reservoir resampling for real-time ray tracing with dynamic direct lighting</a><br>
+[2] <a href="https://research.nvidia.com/publication/2021-06_restir-gi-path-resampling-real-time-path-tracing">ReSTIR GI: Path Resampling for Real-Time Path Tracing</a><br>
+[3] <a href="https://research.nvidia.com/publication/2022-07_generalized-resampled-importance-sampling-foundations-restir">Generalized Resampled Importance Sampling: Foundations of ReSTIR</a><br>
+[4] <a href="https://graphics.cs.utah.edu/research/projects/volumetric-restir/">Fast Volume Rendering with Spatiotemporal Reservoir Resampling</a><br>
+[5] <a href="http://www.zyanidelab.com/how-to-add-thousands-of-lights-to-your-renderer/">How to add thousands of lights to your renderer and not die in the process</a><br>
+[6] <a href="https://gamehacker1999.github.io/posts/restir/">Spatiotemporal Reservoir Resampling (ReSTIR) - Theory and Basic Implementation</a><br>
+[7] <a href="https://graphics.stanford.edu/papers/veach_thesis/thesis.pdf">ROBUST MONTE CARLO METHODS FOR LIGHT TRANSPORT SIMULATION</a><br>
+[8] <a href="/posts/practical_implementation_of_mis_in_bidirectional_path_tracing/">Practical implementation of MIS in Bidirectional Path Tracing</a><br>
+[9] <a href="https://scholarsarchive.byu.edu/cgi/viewcontent.cgi?article=1662&amp;context=etd">Importance Resampling for Global Illumination</a><br>
+[10] <a href="https://blog.demofox.org/2022/03/02/sampling-importance-resampling/">Sampling Importance Resampling</a><br>
+[11] <a href="/posts/monte_carlo_integral_with_multiple_importance_sampling/">Monte Carlo Integral with Multiple Importance Sampling</a></p>
+
+      </div>
+
+      <div class="">
+        <style>
+    .toc {
+        position: fixed;
+        left: 50%;
+        top: 110px;
+        font-size: 0.8em;
+        width: 320px;
+        margin-left: 480px;
+        padding-left: 20px;
+        padding-bottom: 100px;
+        padding-top: 80px;
+        overflow-y: auto;
+        line-height: 1.7em;
+        scroll-padding-top: 100px;
+        border-left: 3px solid rgba(128, 128, 128, 0.4);;
+    }
+
+    .toc label {
+        font-size: 20px;
+        font-weight: bold;
+        margin: 6.4rem 0 3.2rem 0;
+    }
+
+    .toc a {
+        filter: grayscale(90%);
+    }
+
+    .toc a:hover {
+        font-weight: bold;
+        filter: grayscale(0%);
+    }
+
+    .toc ul {
+        margin-left:1px;
+        padding-left: 20px;
+        list-style-type: circle;
+    }
+    
+     
+    .toc ul ul{
+        margin-left:1px;
+        padding-left: 20px;
+        list-style-type: circle;
+    }
+
+     
+    .toc ul ul ul{
+        margin-left:1px;
+        padding-left: 20px;
+        list-style-type: circle;
+    }
+
+    .toc li a.active {
+        font-weight: bold;
+        filter: grayscale(0%);
+    }
+
+    .toc li a.semi_active {
+        font-weight: bold;
+        filter: grayscale(60%);
+    }
+
+    @media (max-width: 1640px) {
+      main {
+        max-width: 100%;
+      }
+  
+      .toc {
+        display: none;
+      }
+    }
+
+</style>
+  
+
+
+
+
+
+
+
+
+
+
+<div class="toc" style="display:none;">
+    <label>Contents</label>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#preliminary-reading">Preliminary Reading</a>
+      <ul>
+        <li><a href="#importance-sampling">Importance Sampling</a></li>
+        <li><a href="#multiple-importance-sampling">Multiple Importance Sampling</a>
+          <ul>
+            <li><a href="#mathematical-proof-of-mis">Mathematical Proof of MIS</a></li>
+            <li><a href="#commonly-used-mis-weight">Commonly Used MIS Weight</a></li>
+          </ul>
+        </li>
+        <li><a href="#sample-importance-resampling-sir">Sample Importance Resampling (SIR)</a></li>
+        <li><a href="#resampled-importance-sampling-ris">Resampled Importance Sampling (RIS)</a>
+          <ul>
+            <li><a href="#mis-used-with-ris">MIS used with RIS</a></li>
+            <li><a href="#math-proof-of-ris">Math Proof of RIS</a></li>
+            <li><a href="#nice-properties-of-ris">Nice Properties of RIS</a></li>
+          </ul>
+        </li>
+        <li><a href="#weighted-reservoir-sampling-wrs">Weighted Reservoir Sampling (WRS)</a>
+          <ul>
+            <li><a href="#mathematics-proof">Mathematics Proof</a></li>
+            <li><a href="#treating-a-new-sample-as-a-reservoir">Treating a New Sample as a Reservoir</a></li>
+            <li><a href="#nice-properties-of-wrs">Nice Properties of WRS</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#restir-di-introduction">ReStir DI Introduction</a></li>
+    <li><a href="#reference">Reference</a></li>
+  </ul>
+</nav>
+</div>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+    <script>
+        (function() {
+            var $toc = $('#TableOfContents');
+            
+            if ($toc.length > 0) {
+                var $window = $(window);
+                
+                function onScroll(){
+                    var currentScroll = $window.scrollTop();
+                    var h = $('h1, h2, h3, h4, h5, h6');
+                    var id = "";
+                    h.each(function (i, e) {
+                        e = $(e);
+                        if (e.offset().top - 80 <= currentScroll ) {
+                            id = e.attr('id');
+                        }
+                    });
+                    var active = $toc.find('a.active');
+                    if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
+
+                    active.each(function (i, e) {
+                        $(e).removeClass('active').siblings('ul').hide();
+                    });
+
+                    var semi_active = $toc.find('a.semi_active');
+                    semi_active.each(function (i, e) {
+                        $(e).removeClass('semi_active').siblings('ul').hide();
+                    });
+                    
+                    $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
+                        if( i == 0 )
+                            $(e).children('a').addClass('active').siblings('ul').show();
+                        else
+                            $(e).children('a').addClass('semi_active').siblings('ul').show();
+                    });
+                }
+
+                $window.on('scroll', onScroll);
+                $(document).ready(function() {
+                    $toc.find('a').parent('li').find('ul').hide();
+                    onScroll();
+                    document.getElementsByClassName('toc')[0].style.display = '';
+                });
+            }
+        })();
+    </script>
+
+      </div>
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "a-graphics-guys-notes" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );">
+  </script>
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+          2015 -
+        
+        2022
+         Jiayin Cao 
+      
+      
+      
+    </section>
+  </footer>
+
+    </main>
+
+    
+      
+      <script src="/js/dark-mode.min.aee9c8a464eb7b3534c7110f7c5e169e7039e2fd92710e0626d451d6725af137.js"></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>

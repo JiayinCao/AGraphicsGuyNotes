@@ -8,7 +8,7 @@
 
     <meta name="author" content="Jiayin Cao">
     <meta name="description" content="Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.
- .row { display: -ms-flexbox; display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap; padding: 0 4px; } .">
+.row {display: -ms-flexbox; display: flex;-ms-flex-wrap: wrap; flex-wrap: wrap;padding: 0 4px;}.">
     <meta name="keywords" content="blog,developer,personal">
 
     <meta name="twitter:card" content="summary_large_image"/>
@@ -16,11 +16,11 @@
 
 <meta name="twitter:title" content="Volume Rendering in Offline Renderer"/>
 <meta name="twitter:description" content="Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.
- .row { display: -ms-flexbox; display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap; padding: 0 4px; } ."/>
+.row {display: -ms-flexbox; display: flex;-ms-flex-wrap: wrap; flex-wrap: wrap;padding: 0 4px;}."/>
 
     <meta property="og:title" content="Volume Rendering in Offline Renderer" />
 <meta property="og:description" content="Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.
- .row { display: -ms-flexbox; display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap; padding: 0 4px; } ." />
+.row {display: -ms-flexbox; display: flex;-ms-flex-wrap: wrap; flex-wrap: wrap;padding: 0 4px;}." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="/posts/volume_rendering_in_offline_renderer/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2016-11-10T00:00:00+00:00" />
@@ -83,7 +83,7 @@
       </script>
     
 
-    <meta name="generator" content="Hugo 0.94.0" />
+    <meta name="generator" content="Hugo 0.88.1" />
   </head>
 
   
@@ -216,7 +216,7 @@
 <p>In a nutshell, volume can change the way light propagates, which is why we care. More specifically, volume consists tons of very small particles that can interact with light rays. Some of them change the direction of light rays, others will absorb some energy from the ray, some even emits energy. There are four types of interaction that we need to consider in an offline renderer:</p>
 <ul>
 <li><strong>Absorption</strong>. Light will attenuate as it travels through a volume.</li>
-<li><strong>Emission</strong>. Some volume may emit energy making itself a &rsquo;light source'.</li>
+<li><strong>Emission</strong>. Some volume may emit energy making itself a &lsquo;light source&rsquo;.</li>
 <li><strong>Scattering</strong>. There are two kinds of scattering:
 <ul>
 <li><strong>Out-Scattering</strong>. This happens when the light ray changes its direction. This is why fog makes background dimmer.</li>
@@ -244,7 +244,7 @@
 <p>What it says is that light will attenuate with exactly the same rate at all points along the ray. Comparing with micro level equation, what we care more is a higher level knowledge of light interaction with volume, instead of small particles that are not visible to human vision at all. So the real practical question is how much light will still remain after passing through a uniform volume like the above one.</p>
 <p>First of all, let&rsquo;s convert the equation this way:</p>
 <p>$ \dfrac{dL(p,w)}{L(p,w)} = -\sigma_a(p,w)dt $</p>
-<p>One detail that we haven&rsquo;t mentioned is the parameter of &rsquo;t&rsquo;. Any point along the ray could be represented by $ p(t)=p(0) + t*w $. In other words, it is the distance between the starting point and ending point that we consider. So we can regard &lsquo;p&rsquo; as a function of t in the above equation. If we take an integral from 0 to d, we have the following equation.</p>
+<p>One detail that we haven&rsquo;t mentioned is the parameter of &rsquo;t'. Any point along the ray could be represented by $ p(t)=p(0) + t*w $. In other words, it is the distance between the starting point and ending point that we consider. So we can regard &lsquo;p&rsquo; as a function of t in the above equation. If we take an integral from 0 to d, we have the following equation.</p>
 <p>$ \int_0^d \dfrac{dL(p(t),w)}{L(p(t),w)} = \int_0^d -\sigma_a(p(t),w)dt $</p>
 <p>It is quite easy to derive the following equation.</p>
 <p>$ \dfrac{L(p+d*w,w)}{L(p,w)} = e^{ -\int_0^d \sigma_a(p,w)dt} $</p>
@@ -266,9 +266,9 @@
 <p>$ \dfrac{dL(p)}{dt} = -\sigma_t(p) L(p) + S( p ) $</p>
 <p>What it says is really simple, it states the fact that the differential change due to in-scattering along the ray is the amount of differential in-coming scattering radiance S(p) minus the attenuation by absorption and out-scattering. For the simplicity, I won&rsquo;t include the definition of S here. One can always read PBRT(2nd) for further information.</p>
 <p>The other equation in PBRT is the following one, which according to the book can be derived from the above one.</p>
-<p>$ L_i(p,\omega) = \int_0^{\infty} T_r(p&rsquo; \rightarrow p) S(p&rsquo;, -\omega) dt $</p>
+<p>$ L_i(p,\omega) = \int_0^{\infty} T_r(p' \rightarrow p) S(p', -\omega) dt $</p>
 <p>Again, let&rsquo;s get rid of the subscript first.</p>
-<p>$ L(p,-\omega) = \int_0^{\infty} T_r(p&rsquo; \rightarrow p) S(p&rsquo;, -\omega) dt $</p>
+<p>$ L(p,-\omega) = \int_0^{\infty} T_r(p' \rightarrow p) S(p', -\omega) dt $</p>
 <p>If you look at the picture below, you will find that this description is even better than the previous one, although both make perfect sense. What it says is that the radiance at point p along direction -w due to in-scattering is actually the accumulation of all in-scattering radiance at all points along direction -w attenuated by its corresponding beam transmittance.</p>
 <figure><img src="/img/posts/volume_rendering_in_offline_renderer/volume_rendering.png"/>
 </figure>
@@ -282,9 +282,9 @@
 <p>I&rsquo;ll skip the derivation of the solution in this blog, one can find further detail here. And please also notice that the subscript of $ \sigma $ and the $ \omega $ are also dropped because they don&rsquo;t change in the equation, but please notice that the L(p) in the following equation means L(p,-w). To solve the equation, the first thing to do is to determine the constant factor C. We already know that $ L(p( \infty)) $ is zero, dropping it in the equation, we can get C.</p>
 <p>$ C = \int e^{\int \sigma (p)dt} S(p) dt |_\infty $</p>
 <p>Again, we get the following equation by dropping the value of C in it.</p>
-<p>$ \begin{array} {lcl} L(p(t)) &amp; = &amp; \dfrac{1}{e^{-\int \sigma (p)dt}} \int_t^{\infty} e^{- \int \sigma (p)dt&rsquo;} S(p) dt&rsquo; \\\ &amp; = &amp; \int_t^{\infty} e^{- \int_{t}^{t&rsquo;} \sigma (p)dt&rsquo;&rsquo;} S(p) dt&rsquo; \end{array} $</p>
+<p>$ \begin{array} {lcl} L(p(t)) &amp; = &amp; \dfrac{1}{e^{-\int \sigma (p)dt}} \int_t^{\infty} e^{- \int \sigma (p)dt'} S(p) dt' \\\ &amp; = &amp; \int_t^{\infty} e^{- \int_{t}^{t'} \sigma (p)dt''} S(p) dt' \end{array} $</p>
 <p>What we want is actually L(p(0)), letting t equals to zero, will give you the following equation:</p>
-<p>$  L(p(0)) = \int_0^{\infty} e^{- \int_{0}^{t} \sigma (p)dt&rsquo;} S(p) = \int_0^{\infty} T_r(p(t) \rightarrow p(0)) S(p(t)) dt $</p>
+<p>$  L(p(0)) = \int_0^{\infty} e^{- \int_{0}^{t} \sigma (p)dt'} S(p) = \int_0^{\infty} T_r(p(t) \rightarrow p(0)) S(p(t)) dt $</p>
 <p>And with the above equation, we finished the derivation.</p>
 <h1 id="reference">Reference</h1>
 <p>[1] <a href="http://pbrt.org/">Physically Based Rendering, second edition</a><br>
@@ -455,7 +455,7 @@
 
         <div id="disqus_thread"></div>
 <script type="application/javascript">
-    window.disqus_config = function () {
+    var disqus_config = function () {
     
     
     
@@ -517,7 +517,7 @@
 
     
       
-      <script src="/js/dark-mode.min.1d139a81392167c6a37135df59f9fd95747abba988ba33c1a557c573776cb197.js"></script>
+      <script src="/js/dark-mode.min.aee9c8a464eb7b3534c7110f7c5e169e7039e2fd92710e0626d451d6725af137.js"></script>
     
 
     

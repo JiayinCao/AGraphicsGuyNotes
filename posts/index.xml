@@ -6,15 +6,15 @@
     <description>Recent content in Posts on A Graphics Guy&#39;s Note</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 05 Dec 2022 00:00:00 +0000</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 25 Nov 2022 00:00:00 +0000</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Understanding The Math Behind ReStir DI</title>
-      <link>/posts/understanding_the_math_behind_restir_di/</link>
-      <pubDate>Mon, 05 Dec 2022 00:00:00 +0000</pubDate>
+      <title>Understanding ReStir DI</title>
+      <link>/posts/understanding_restir_di/</link>
+      <pubDate>Fri, 25 Nov 2022 00:00:00 +0000</pubDate>
       
-      <guid>/posts/understanding_the_math_behind_restir_di/</guid>
+      <guid>/posts/understanding_restir_di/</guid>
       <description>Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReStir (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like ReStir DI, ReStir GI, ReStir PT, Volumetric ReStir, etc.
-The original papers are clearly the best resources to learn the tech. Due to the complexity of the algorithm, understanding the theory and math remains challenging for graphics programmers who are not very familiar with sampling methods.</description>
+The original papers are clearly the best resources to learn the tech. But understanding the theory and math remains challenging for graphics programmers who are not very familiar with sampling methods.</description>
     </item>
     
     <item>
@@ -70,7 +70,7 @@ In the beginning, I didn&amp;rsquo;t know how it would end up eventually due to 
       
       <guid>/posts/volume_rendering_in_offline_renderer/</guid>
       <description>Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.
- .row { display: -ms-flexbox; display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap; padding: 0 4px; } .</description>
+.row {display: -ms-flexbox; display: flex;-ms-flex-wrap: wrap; flex-wrap: wrap;padding: 0 4px;}.</description>
     </item>
     
     <item>
