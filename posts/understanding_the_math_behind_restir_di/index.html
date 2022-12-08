@@ -151,7 +151,7 @@ The original papers are clearly the best resources to learn the tech. Due to the
             </span>
             <span class="reading-time">
               <i class="fa fa-clock-o" aria-hidden="true"></i>
-              56-minute read
+              62-minute read
             </span>
           </div>
           
@@ -638,6 +638,10 @@ In order to take the proposal samples, ReStir DI first pick a light randomly wit
 All of the proposal samples will be processed in RIS algorithm through weighted reservoir sampling. The target distribution is unshadowed light contribution. Mathematically, it is $L(w_i,w_o) f_r(w_o,w_i) cos(\theta_i)$, except that we don&rsquo;t know if the light is visible to the shaded point or not.</p>
 </li>
 <li>
+<p>An optional visibility reuse phase could be done here. This is introduced because even with unlimited number of proposal samples, the result could still be noisy due to the gap between the target distribution and the rendering equation, specificially, the visibility function. By introducing a visibility check here, we could use the real rendering equation (the integral part) as our target distribution, resulting in much less noise caused by visibility issues. If this algorithm is used, the algorithm would need to check visibility during neighbor target sample merging as well to preserve its unbiasness.<br>
+This is an optional phase as it could introduce big performance impact due to a larger set of rays shot each pixel.</p>
+</li>
+<li>
 <p>The second phase in the algorithm is temporal reuse. With some motion vector, the algorithm could find itself in the history of rendering the previous frames. And it combines the reservoir that belongs to the corresponding pixel in the previous frame. Just like TAA algorithm that improves the image quality by distributing cost of super sampling across multiple frames, the temporal reuse does exactly the same thing.</p>
 </li>
 <li>
@@ -654,7 +658,6 @@ This is where the number of <strong>indirectly visited proposal samples</strong>
 </li>
 </ul>
 <p>This same process is repeated every frame. As frame goes, each pixel essentially visits millions of proposal samples in their RIS algorithm eventually resulting in drawing samples quite close to the target distribution, the unshadowed light contribution.</p>
-<p>Though, even with unlimited number of proposal samples, the above sampling method by using unshadowed distribution still won&rsquo;t produce noise free image as the distribution is not strictly proportional to the integral part of the rendering equation. The paper does introduce visibility reuse, which is to test visibility between the first and second phases to prevent blocked samples from spreading its impact. Since that part is not very tricky to understand, it won&rsquo;t be mentioned in this blog post.</p>
 <p>The above explanation really serves as a review of the algorithm to readers who read the paper. It could be a bit confusing for people who don&rsquo;t know the algorithm.</p>
 <h1 id="common-confusion-in-understanding-restir">Common Confusion in Understanding ReStir</h1>
 <p>After my first time reading through the paper, I had a lot of confusion.</p>
@@ -663,6 +666,7 @@ This is where the number of <strong>indirectly visited proposal samples</strong>
 <li>I had a really hard time to be convinced this is unbiased, especially the sampling neighbor part since the neighbor pixel&rsquo;s RIS algorithm essentially uses a different target distribution than the current pixel. The RIS algorithm we derived above shows no sign of supporting multiple target distributions at all.</li>
 <li>The paper has a very clear explanation and proof that the expectation of the big W (the sum of all weights divided by target distribution and the number of visited proposal samples) is the reciprocal of the SIR PDF. However, it was not obvious to me why this would allow us to replace the reciprocal of SIR PDF in the math directly without introducing bias.</li>
 <li>We all know temporal AA is by far not an unbiased algorithm, even if it became an industry standard for AAA games. Why doesn&rsquo;t the temporal reuse introduce any bias in this algorithm?</li>
+<li>From a mathematic stand point, what exactly is visibility reuse? It seems that it uses the shadowed light contribution as the target distribution. The problem is that it still uses unshadowed light contribution to pick a winner sample from all proposal light samples, while it uses the shadowed light contribution, a different target distribution, for picking the finalized target sample among the winner light sample and neighbor target samples in RIS algorithm. This, again, seems breaking the assumption made by RIS, which is only one single target distribution is allowed.</li>
 </ul>
 <p>Above are just some examples of my early confusion, it doesn&rsquo;t cover everything.
 With lots of confusion like these, I spend quite some time researching related materials and eventually got fully convinced that this algorithm is indeed unbiased. The following sections of this blog will be explaining my confusion, I hope this could be helpful to those who have similar confusion as well.</p>
@@ -740,7 +744,7 @@ What is the MIS weight in this case then? Can we use balance heuristics at all?<
 <h2 id="what-is-the-proposal-pdf-for-neighbors-target-sample">What is the Proposal PDF for Neighbors Target Sample?</h2>
 <p>In order to perform RIS algorithm, we would need to know the proposal PDF for each incoming proposal sample. However, there is a particularly tricky problem, the neighbor pixel&rsquo;s SIR PDF is not trackable. There is no easy way to evaluate what the PDF is.</p>
 <p>Luckily enough, the paper does explain that the big W, which is shown below, takes the role of reciprocal of SIR PDF,</p>
-<p>$W(y) = \dfrac{1}{M} \dfrac{1}{\hat{p}(y)}\Sigma_{i=1}^{M}\dfrac{\hat{p}(x)}{p_i(x)}$</p>
+<p>$W(y) = \dfrac{1}{M} \dfrac{1}{\hat{p}(y)}\Sigma_{i=1}^{M}\dfrac{\hat{p}(x_i)}{p_i(x_i)}$</p>
 <p>Here $y$ is the lucky winner sample that was eventually picked through WRS.</p>
 <p>To be more mathematical, the expectation of W is precisely the reciprocal of SIR PDF evaluated at the target sample as long as there is no proposal PDF that is zero there. If there is, we can easily avoid bias by adjusting the constant weight as well.</p>
 <p>$E(W(y)) = \dfrac{1}{p_{ris}(y)}$</p>
@@ -784,9 +788,55 @@ So where does this N fit in the math?</p>
 <h2 id="correcting-the-bias-in-restir">Correcting the Bias in ReStir</h2>
 <p>In order to correct bias for uniform MIS weight, we would need to evaluate how many PDFs would have non-zero contribution at a specific sample position. Once again, we encounter the same problem as before, the SIR PDF is not trackable.</p>
 <p>However, what we need from the SIR PDF is really whether it is large than zero or not, it is a binary information. We don&rsquo;t really need to know what exactly the value it is. In order to predict that, as we previously mentioned, we can choose to use target distribution and proposal PDF to predict if SIR PDF is zero. If either of them is zero, the SIR PDF will be zero. On the other hand, if both of them are not zero, the SIR PDF is larger than zero. And we can also take advantage of the fact that any proposal sample positions to be evaluated for bias correction is already on a light source because they originally came in as an initial light sample. Either through direct light proposal PDF or SIR PDF, they indeed made it this far, meaning their proposal PDF is already larger than zero. So all we need to do is to test if the target distribution is larger than zero or now, which is exactly what the paper does.</p>
+<h2 id="visibility-reuse">Visibility Reuse</h2>
+<p>This is the last topic I would like to explain.
+I almost had myself convinced it was a biased solution for quite a while until recently when I realized it is not.
+To begin with, let&rsquo;s start with this graph,</p>
+<figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReStir_5.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReStir_5.png"/></a>
+</figure>
+
+<p>Compared with the first ReStir graph we showed, this simply adds a visibility check (purple diamond shape) before even merging the samples. If it is occluded, it would ignore this sample. If we regard the visibility to be part of the target distribution, we would simplify the graph this way</p>
+<figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReStir_6.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReStir_6.png"/></a>
+</figure>
+
+<p>It seems that there could be a problem here, we use two different target distributions here for the current pixel. And RIS doesn&rsquo;t support it mathematically. For the top left part of the graph, for quite a while, I thought the algorithm should have checked visibilitiy for each proposal light sample, rather than only the winner light sample to make sure the target distribution is consistent for this pixel&rsquo;s RIS algorithm.</p>
+<p>However, it turns out that we don&rsquo;t necessarily need to do it even if it is not a wrong thing to do. Just like we regard the whole top right part as a single execution of RIS. We could think about the light samples exactly the same way. The essential truth behind it is that the current pixel&rsquo;s reservoir never sees the individual light proposal samples when visibility reuse is used, it sees a target sample drawn from a RIS method with unshadowed light contribution as target distribution. Just like a neighbor target sample is drawn from a different target distribution, this simply uses another target distribution for its own mini RIS execution.</p>
+<p>With this explanation, the above graph boils down to this simplified form that we are very familiar with</p>
+<figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReStir_7.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReStir_7.png"/></a>
+</figure>
+
+<p>Needless to explain at this point, this is just MIS used in RIS, something we have visited a few times in this blog. The key observation here is that with visibility reuse, the current pixel&rsquo;s reservoir no longer sees the light proposal samples anymore and this is why we can use different a target distribution to filter samples as the later RIS execution sees only one sample drawn from a RIS method, it doesn&rsquo;t care what target distribution it uses.</p>
+<p>Now we can see that this has its theoretical basis that it is not biased. But we have another follow-up question here, since this is just like sampling a neighbor target sample, we would need to have one single target sample with the proper weight coming in. So if we would like to take a sample from a RIS pdf, we would need to use the weight of $\hat{p}'(x) W(x) N$, where N is the number of light proposal samples and $\hat{p}'(x)$ is the shadowed light contribution $L(w_i) f_r(w_i, w_o) cos(\theta_i) V(p, p')$, W is just the big W we talked about <a href="http://localhost:1313/posts/understanding_the_math_behind_restir_di/#what-is-the-proposal-pdf-for-neighbors-target-sample">before</a>. It seems that a more self-explanatory implementation is to use one reservoir to pick light sample winners and another empty reservoir to merge all the target samples, either from light sample filtering, temporal reuse or neighbor pixels' reservoir. However, rather than starting with a new reservoir in the temporal reuse phase, the paper reuses the light samples reservoir directly, which doesn&rsquo;t match the graph we showed above. The only thing that the paper does is to adjust the reservoir big W to zero if the winner light sample is occluded. This reuse of reservoir easily gives people a false impression that the current pixel&rsquo;s reservoir has visited all the light proposal samples directly and then the neighbor&rsquo;s target sample as they seem sharing the same reservoir. So it is very easy to have this confusion about the two different target distribution issues. The truth is the paper does nothing wrong, so let&rsquo;s see what happens.</p>
+<p>Right after phase 1, where we finished all proposal sample generation and resolved a winner light sample, the current pixel&rsquo;s reservoir state is</p>
+<ul>
+<li>y -&gt; The selected winner sample.</li>
+<li>$w_{sum}$ -&gt; The sum of all light samples' weights. Please be noted that the light sample weight&rsquo;s nominator uses the unshadowed target distribution, rather than the shadowed one we will use to pick a final sample for this pixel.</li>
+<li>N -&gt; The number of direct light proposal samples it has visited so far. (The paper used M here, in order to stay consistent with my previous derivation, N is used here. It is the same thing.)</li>
+<li>W -&gt; This is a derived member that merely serves as a cache. It doesn&rsquo;t have any extra signal.</li>
+</ul>
+<p>As a reminder, the big W is defined as</p>
+<p>$W(x) = \dfrac{1}{N} \dfrac{1}{\hat{p}(x)}\Sigma_{i=1}^{N}\dfrac{\hat{p}(y_i)}{p(y_i)}$</p>
+<p>Please be noted that I swapped the notation of x and y here, but it is the same thing, except that x is a subset of y now. And M is swapped with N as well. None of these changes the essential meaning of this equation. One subtle change I made here is the lack of subscripts in proposal PDF, this is fine as the paper does indicate it only uses one single proposal PDF for light sample picking, which we have explained as well.</p>
+<p>If we would start with a brand new empty reservoir, we would need to treat the resolved target light sample with this weight, $\hat{p}'(x) W(x) N$. Since the new target distribution is nothing but the original unshadowed target distribution with an extra binary signal on top of it. We have</p>
+<p>$\hat{p}'(x) = V \hat{p}(x)$</p>
+<p>If we combine the two math equations and drop a new sample generated by RIS method in an empty reservoir, we would have this as its weight for the incoming proposal sample in the execution of this pixel&rsquo;s RIS execution,</p>
+<p>$ \begin{array} {lcl} \hat{p}'(x) W(x) N &amp; = &amp; V \hat{p}(x) N \dfrac{1}{N} \dfrac{1}{\hat{p}(x)}\Sigma_{i=1}^{N}\dfrac{\hat{p}(y)}{p(y)} \\\ \\\ &amp; = &amp; V \Sigma_{i=1}^{N}\dfrac{\hat{p}(y)}{p(y)} \end{array} $</p>
+<p>So if we would start from a new reservoir, the weight for the one single sample, which is the resolved target light sample, is exactly the sum of all previous light samples' weight, but with an extra visibility term. Please be mindful that the nominator in the sum is the original unshadowed target distribution, rather than the new shadowed one.</p>
+<p>Depending on the occlusion situation, we have two options here,</p>
+<ul>
+<li>If the resolved light target sample is not occluded, we have precisely what is already cached in the reservoir after phase 1.</li>
+<li>If it is occluded, this single new sample will have zero weight as its target distribution is zero. All we need to do is to adjust the weight to zero, which is exactly what the paper does.</li>
+</ul>
+<p>It is a lot easier to understand the other members in the reservoir data structure,</p>
+<ul>
+<li>For the picked sample, regardless which of the two implementations is used, after the optional phase, they all pick the resolved light sample. Of course, if it is occluded, nothing is picked.</li>
+<li>And for the number of visited samples in the reservoir, since we pretend to duplicate the resolved light target sample by the number of visited proposal light samples, this is a perfect match as well.</li>
+<li>Since the big W is nothing but a cache, it is also a match as all its variables are already matched.</li>
+</ul>
+<p>So now we can see that the paper does indeed implement the same thing if we take a deeper look at the math. Though I do think the paper should have cleared the value of visited samples in reservoir as well, rather than just the big W. But this could be just an oversight, something a lot more minor than if the algorithm is biased.</p>
 <h1 id="summary">Summary</h1>
 <p>In this blog post, I summarized my understanding of the original ReStir algorithm. I dug into the mathematical details and explained why the algorithm is unbiased. This blog is what I collected during my learning process. I put it down here in the hope that it could be helpful to those people who have similar confusion like myself. Hopefully, this could be helpful for someone to get a deeper understanding of the tech.</p>
-<p>This blog doesn&rsquo;t mention any engineering problems that we could face during implementing ReStir, like memory catch issue when sampling millions of samples, floating point precision overflow issue after a few iterations, etc. For more details about that part, I would recommend watching this <a href="https://developer.nvidia.com/blog/new-video-light-resampling-in-practice-with-rtxdi/">talk</a> or taking a look at the source code of <a href="https://developer.nvidia.com/rtx/ray-tracing/rtxdi">RTX DI</a>.</p>
+<p>This blog doesn&rsquo;t mention any engineering problems that we could face during implementing ReStir, like memory catch issue when sampling millions of lights, floating point precision overflow issue after a few iterations, etc. For more details about that part, I would recommend watching this <a href="https://developer.nvidia.com/blog/new-video-light-resampling-in-practice-with-rtxdi/">talk</a> or taking a look at the source code of <a href="https://developer.nvidia.com/rtx/ray-tracing/rtxdi">RTX DI</a>.</p>
 <h1 id="reference">Reference</h1>
 <p>[1] <a href="https://research.nvidia.com/publication/2020-07_spatiotemporal-reservoir-resampling-real-time-ray-tracing-dynamic-direct">Spatiotemporal reservoir resampling for real-time ray tracing with dynamic direct lighting</a><br>
 [2] <a href="https://research.nvidia.com/publication/2021-06_restir-gi-path-resampling-real-time-path-tracing">ReSTIR GI: Path Resampling for Real-Time Path Tracing</a><br>
@@ -945,6 +995,7 @@ So where does this N fit in the math?</p>
         <li><a href="#importance-of-neighbors-target-samples">Importance of Neighbors' Target Samples</a></li>
         <li><a href="#temporal-reuse">Temporal Reuse</a></li>
         <li><a href="#correcting-the-bias-in-restir">Correcting the Bias in ReStir</a></li>
+        <li><a href="#visibility-reuse">Visibility Reuse</a></li>
       </ul>
     </li>
     <li><a href="#summary">Summary</a></li>
