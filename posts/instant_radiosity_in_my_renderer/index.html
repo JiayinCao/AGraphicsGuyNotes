@@ -80,7 +80,30 @@
       </script>
     
 
-    <meta name="generator" content="Hugo 0.88.1" />
+    
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$", right: "$", display: false}
+      ]
+    });
+  });
+</script>
+
+    
+
+    <meta name="generator" content="Hugo 0.104.0" />
   </head>
 
   
@@ -219,14 +242,16 @@
 <p>This is not the whole rendering equation, it just stands for radiance value contributed by k+1 vertices length path, including both camera vertex and light vertex. For an unbiased renderer, it needs to evaluate the above equation for every possible k value, where k usually starts from 2 in the case of direct visible light. For a Monte Carlo estimator, it uses the following equation to approach the integral:</p>
 <p>$ L(p,w_i) = \dfrac{1}{N}\Sigma_{i=1}^N(\dfrac{\prod_{i=1}^{k-1}(f_r(x_{i+1}\rightarrow x_i\rightarrow x_{i-1})G(x_i\longleftrightarrow x_{i+1}))L_e(x_k\rightarrow x_{k-1})}{\prod_{i=2}^{k} p_a(x_i)}) $</p>
 <p>Since there are two stages in this algorithm, we can only evaluate part of the equation in the first stage, it is the part that doesn&rsquo;t involve the x1 and x0, they should be two bsdf evaluation and a gterm.</p>
-<p>$ \begin{array} {lcl} L(p,w_i) &amp;=&amp; \dfrac{1}{N}\Sigma_{i=1}^N(\underbrace{f_r(x_2\rightarrow x_1 \rightarrow x_0)G(x_1\longleftrightarrow x_2)f_r(x_3\rightarrow x_2 \rightarrow x_1)}_{sample, radiance, evaluation, in, stage2} \\\ &amp; &amp; \prod_{i=3}^{k-1}(\underbrace{\dfrac{f_r(x_{i+1}\rightarrow x_i\rightarrow x_{i-1})G(x_i\longleftrightarrow x_{i-1})}{p_a(x_{i-1})}}_{stored,in,vertex, during, light, path, tracing, in, stage1})\dfrac{G(x_k\longleftrightarrow x_{k-1})L_e(x_k\rightarrow x_{k-1})}{p_a(x_{k-1})p_a(x_k)}) \end{array} $</p>
+
+$ \begin{array} {lcl} L(p,w_i) &amp;=&amp; \dfrac{1}{N}\Sigma_{i=1}^N(\underbrace{f_r(x_2\rightarrow x_1 \rightarrow x_0)G(x_1\longleftrightarrow x_2)f_r(x_3\rightarrow x_2 \rightarrow x_1)}_{sample\, radiance\, evaluation\, in\, stage2} \\\\\\ &amp;=&amp; \prod_{i=3}^{k-1}(\underbrace{\dfrac{f_r(x_{i&#43;1}\rightarrow x_i\rightarrow x_{i-1})G(x_i\longleftrightarrow x_{i-1})}{p_a(x_{i-1})}}_{stored\,in\,vertex\, during\, light\, path\, tracing\, in\, stage1})\dfrac{G(x_k\longleftrightarrow x_{k-1})L_e(x_k\rightarrow x_{k-1})}{p_a(x_{k-1})p_a(x_k)}) \end{array} $
 <p>Although it may look more complex by a first look, however it is actually more clear for implementing the algorithm. As we can see from the above equation, the first two brdf and g-term are to be evaluated in radiance sampling in the second stage. While the rest of the equation should be done in the pre-process stage 1, which distributes virtual point lights around the whole scene. And it can be done in an incremental way, just like we trace rays in a path tracer. To be simpler, the above equation can be further simplified since we don&rsquo;t actually pick samples w.r.t area, we sample new vertex by bsdf pdf w.r.t to the solid angle.</p>
-<p>$ \begin{array} {lcl} L(p,w_i) &amp;=&amp; \dfrac{1}{N}\Sigma_{i=1}^N(\underbrace{f_r(x_2\rightarrow x_1 \rightarrow x_0)G(x_1\longleftrightarrow x_2)f_r(x_3\rightarrow x_2 \rightarrow x_1)}_{sample, radiance, evaluation, in, stage2} \\\ &amp; &amp; \prod_{i=3}^{k-1}(\underbrace{\dfrac{f_r(x_{i+1}\rightarrow x_i\rightarrow x_{i-1})cos\theta_{i\rightarrow i-1}}{p_w(x_i\rightarrow x_{i-1})}}_{stored,in,vertex, during, light, path, tracing, in, stage1})\dfrac{cos\theta_{k\rightarrow k-1}L_e(x_k\rightarrow x_{k-1})}{p_w(x_k \rightarrow x_{k-1})p_a(x_k)}) \end{array} $</p>
+
+$ \begin{array} {lcl} L(p,w_i) &amp;=&amp; \dfrac{1}{N}\Sigma_{i=1}^N(\underbrace{f_r(x_2\rightarrow x_1 \rightarrow x_0)G(x_1\longleftrightarrow x_2)f_r(x_3\rightarrow x_2 \rightarrow x_1)}_{sample\, radiance\, evaluation\, in\, stage2} \\\\\\ &amp; &amp; \prod_{i=3}^{k-1}(\underbrace{\dfrac{f_r(x_{i&#43;1}\rightarrow x_i\rightarrow x_{i-1})cos\theta_{i\rightarrow i-1}}{p_w(x_i\rightarrow x_{i-1})}}_{stored\,in\,vertex\, during\, light\, path\, tracing\, in\, stage1})\dfrac{cos\theta_{k\rightarrow k-1}L_e(x_k\rightarrow x_{k-1})}{p_w(x_k \rightarrow x_{k-1})p_a(x_k)}) \end{array} $
 <p>This is pretty clear for implementing the algorithm. After the first stage is done, we only need to trace one ray segment for evaluate each virtual point light&rsquo;s contribution, no matter how long the path actually is.</p>
 <h1 id="handling-the-artifacts">Handling the Artifacts</h1>
 <p>As we can see from the above comparison, we can&rsquo;t get anything from the mirror like box because it is almost delta function. In a practical ray tracer, it definitely needs special treatment for delta bsdf. Sadly, there is no delta bsdf support in my renderer, the mirror like material is actually a microfacet bsdf with 0 as roughness value. I&rsquo;m not sure if there is a practical way to handle materials like this.</p>
 <p>The other artifact that we can handle is those hot spots at the corner of the Cornell box. Those high lighted area is caused by connecting quite near vertices, resulting in a very large g-term value. According to the book, advanced global illumination, we can add a very small bias in the denominator of gterm to avoid those large values so that we can remove the hot spots by introducing bias into the method, which is unnoticeable. I can&rsquo;t say that I agree with the idea, it is totally visible to me. Pbrt book introduces a great way of removing those ugly hot spot, it works pretty well to me. However I made a tiny change in the original method. My method is to clamp the inverse of the squared distance in the gterm when connecting vertices. Clamping it will definitely introduce a bias which is not something that I&rsquo;d like to see, in order to get our unbiased feature back, we&rsquo;ll add more code to handle it.</p>
-<p>$ \begin{array} {lcl} G(x_1,x_2) &amp;=&amp; \dfrac{cos\theta_{1\rightarrow 2} cos\theta_{2\rightarrow 1}}{|x_1 - x_2|} \\\ &amp;=&amp; cos\theta_{1\rightarrow 2} cos\theta_{2\rightarrow 1} ( min( \dfrac{1}{|x_1-x_2|} , g_{clamp} ) + max( \dfrac{1}{|x_1-x_2|} - g_{clamp} , 0 ) ) \\\ &amp;=&amp; \underbrace{cos\theta_{1\rightarrow 2} cos\theta_{2\rightarrow 1} min( \dfrac{1}{|x_1-x_2|} , g_{clamp} )}_{evaluate, the, same, way} \\\ &amp; &amp; + \underbrace{cos\theta_{1\rightarrow 2} cos\theta_{2\rightarrow 1} max( \dfrac{1}{|x_1-x_2|} - g_{clamp} , 0 )}_{evaluate, recursively} \end{array} $</p>
+<p>$ \begin{array} {lcl} G(x_1,x_2) &amp;=&amp; \dfrac{cos\theta_{1\rightarrow 2} cos\theta_{2\rightarrow 1}}{|x_1 - x_2|} \\\ &amp;=&amp; cos\theta_{1\rightarrow 2} cos\theta_{2\rightarrow 1} ( min( \dfrac{1}{|x_1-x_2|} , g_{clamp} ) + max( \dfrac{1}{|x_1-x_2|} - g_{clamp} , 0 ) ) \\\ &amp;=&amp; \underbrace{cos\theta_{1\rightarrow 2} cos\theta_{2\rightarrow 1} min( \dfrac{1}{|x_1-x_2|} , g_{clamp} )}<em>{evaluate, the, same, way} \\\ &amp; &amp; + \underbrace{cos\theta</em>{1\rightarrow 2} cos\theta_{2\rightarrow 1} max( \dfrac{1}{|x_1-x_2|} - g_{clamp} , 0 )}_{evaluate, recursively} \end{array} $</p>
 <p>$ G_0(x_1,x_2)=cos\theta_{1\rightarrow 2} cos\theta_{2\rightarrow 1} min(\dfrac{1}{|x_1-x_2|},g_{clamp}) $</p>
 <p>$ G_1(x_1,x_2)=cos\theta_{1\rightarrow 2} cos\theta_{2\rightarrow 1} max(\dfrac{1}{|x_1-x_2|}-g_{clamp},0) $</p>
 <p>$ G(x_1,x_2)=G_0(x_1,x_2)+G_1(x_1,x_2) $</p>
@@ -451,7 +476,7 @@
 
         <div id="disqus_thread"></div>
 <script type="application/javascript">
-    var disqus_config = function () {
+    window.disqus_config = function () {
     
     
     
@@ -513,7 +538,7 @@
 
     
       
-      <script src="/js/dark-mode.min.aee9c8a464eb7b3534c7110f7c5e169e7039e2fd92710e0626d451d6725af137.js"></script>
+      <script src="/js/dark-mode.min.c2d8a1f8f2660e4a46d776277c72695a1e0ca65939d79f754441d47551604af5.js"></script>
     
 
     

@@ -83,7 +83,9 @@ The original papers are clearly the best resources to learn the tech. Due to the
       </script>
     
 
-    <meta name="generator" content="Hugo 0.88.1" />
+    
+
+    <meta name="generator" content="Hugo 0.104.0" />
   </head>
 
   
@@ -151,7 +153,7 @@ The original papers are clearly the best resources to learn the tech. Due to the
             </span>
             <span class="reading-time">
               <i class="fa fa-clock-o" aria-hidden="true"></i>
-              62-minute read
+              61-minute read
             </span>
           </div>
           
@@ -178,7 +180,7 @@ $I=\dfrac{1}{N} \Sigma_{i=1}^N f(x_i)/p(x_i)$</li>
 <p>It is so easy to prove this that I would skip the math. If you would like to know how, check out my previous post <a href="/posts/monte_carlo_integral_with_multiple_importance_sampling/">here</a>.</p>
 <p>However, I would like to point out an important condition here.
 The domain of p(x) has to cover the whole domain of f(x). If it doesn&rsquo;t, this can&rsquo;t work.</p>
-<p>To prove it, let&rsquo;s say there is a subdomain in the f(x)&rsquo;s domain $\Omega$ that is not covered by p(x), naming it $\Omega_1$. 
+<p>To prove it, let&rsquo;s say there is a subdomain in the f(x)&rsquo;s domain $\Omega$ that is not covered by p(x), naming it $\Omega_1$.
 This introduces a blind spot in the sampling domain. Clearly, we have</p>
 <p>$ \Omega = \Omega_0 + \Omega_1 $</p>
 <p>Working out the math here</p>
@@ -243,7 +245,7 @@ $ w(x) = {\hat{p}(x)}/{p(x)}$</li>
 This is what we use to draw samples from in the first place. It should be trackable and cheap enough to take samples from as we would take multiple proposal samples from this PDF.
 I also want to point out that if this proposal PDF is expensive, it won&rsquo;t have any impact on the unbiasedness of the algorithm though, except that it would need some extra treatment to avoid the cost. For example, in the work of <a href="https://research.nvidia.com/publication/2021-06_restir-gi-path-resampling-real-time-path-tracing">ReStir GI</a>, in order to generate a proposal sample, a ray needs to be shot, making it expensive, forcing the algorithm to take a lot less number of proposal samples compared with other variations of ReStir. The paper distributes the proposal samples across frames to achieve good performance.</li>
 <li>Target PDF<br>
-Target pdf is what we used to assign the weight. Ideally, it shouldn&rsquo;t be expensive either. 
+Target pdf is what we used to assign the weight. Ideally, it shouldn&rsquo;t be expensive either.
 Just like the proposal PDF, it could be.<br>
 One nice property of the target PDF is that it doesn&rsquo;t even need to be normalized. This is quite a nice property and later we will see why this limitation doesn&rsquo;t apply here.</li>
 <li>SIR PDF<br>
@@ -587,7 +589,7 @@ This means that the probability of the new sample being picked is</p>
 <p>And this probability is exactly what we want for the new sample to be picked. And there is also a chance that the new sample will not be picked, which is</p>
 <p>$1-p(x_N) = \dfrac{\Sigma_{i=1}^{N} W(x_i)}{\Sigma_{i=1}^{N+1} W(x_i)}$</p>
 <p>So each of the previous samples being picked is reduced by the risk of the new sample could be picked. And the probability goes down by exactly the above factor, leaving each of the previous samples standing a chance of this being picked,</p>
-<p>$p'(x_k) = p(x_k) \dfrac{\Sigma_{i=1}^{N} W(x_i)}{\Sigma_{i=1}^{N+1} W(x_i)} = \dfrac{W(x_k)}{\Sigma_{i=1}^{N} W(x_i)} \dfrac{\Sigma_{i=1}^{N} W(x_i)}{\Sigma_{i=1}^{N+1} W(x_i)} = \dfrac{W(x_k)}{\Sigma_{i=1}^{N+1} W(x_i)}$</p>
+<p>$p&rsquo;(x_k) = p(x_k) \dfrac{\Sigma_{i=1}^{N} W(x_i)}{\Sigma_{i=1}^{N+1} W(x_i)} = \dfrac{W(x_k)}{\Sigma_{i=1}^{N} W(x_i)} \dfrac{\Sigma_{i=1}^{N} W(x_i)}{\Sigma_{i=1}^{N+1} W(x_i)} = \dfrac{W(x_k)}{\Sigma_{i=1}^{N+1} W(x_i)}$</p>
 <p>And this probability again is also what we want for each of the old samples to hold to be picked.</p>
 <p>At this point, we can easily see that if WRS works for N incoming samples, it would work for N + 1 samples as well. Since we also proved that it indeed works when N is 1, it would mean by thinking it recursively, it would work for any number of incoming samples.</p>
 <h3 id="treating-a-new-sample-as-a-reservoir">Treating a New Sample as a Reservoir</h3>
@@ -604,7 +606,7 @@ If the incoming reservoir has processed M samples first, each sample in the visi
 <p>W.r.t the visited N samples, their probability of being picked is also reduced by this factor</p>
 <p>$\dfrac{\Sigma_{i=1}^{N} w(x_i)}{\Sigma_{i=1}^{N} w(x_i) + \Sigma_{i=1}^{M} w(y_i)}$</p>
 <p>Applying this to the existing probability, we will have each visited sample having this chance of being picked</p>
-<p>$p'(x_k) = \dfrac{w(x_k)}{\Sigma_{i=1}^{N} w(x_i)} \dfrac{\Sigma_{i=1}^{N} w(x_i)}{\Sigma_{i=1}^{N} w(x_i) + \Sigma_{i=1}^{M} w(y_i)} = \dfrac{w(x_k)}{\Sigma_{i=1}^{N} w(x_i) + \Sigma_{i=1}^{M} w(y_i)}$</p>
+<p>$p&rsquo;(x_k) = \dfrac{w(x_k)}{\Sigma_{i=1}^{N} w(x_i)} \dfrac{\Sigma_{i=1}^{N} w(x_i)}{\Sigma_{i=1}^{N} w(x_i) + \Sigma_{i=1}^{M} w(y_i)} = \dfrac{w(x_k)}{\Sigma_{i=1}^{N} w(x_i) + \Sigma_{i=1}^{M} w(y_i)}$</p>
 <p>This nicely matches our expectations as well. So at this point, we can safely draw the conclusion that WRS can be performed in multiple recursive passes, it won&rsquo;t have any impact on the probability of each sample being picked. It is also not hard to see that this recursive process certainly doesn&rsquo;t get limited by two levels.</p>
 <h3 id="nice-properties-of-wrs">Nice Properties of WRS</h3>
 <p>Now we know the math behind this algorithm as well, it is time to summarize what properties we can take advantage later</p>
@@ -662,7 +664,7 @@ This is where the number of <strong>indirectly visited proposal samples</strong>
 <h1 id="common-confusion-in-understanding-restir">Common Confusion in Understanding ReStir</h1>
 <p>After my first time reading through the paper, I had a lot of confusion.</p>
 <ul>
-<li>The math in the paper assumes the proposal PDFs are all the same. Even if the PDF for taking light candidate is exactly the same for all pixels' RIS execution, the PDF of taking initial light samples is the product of the PDF of picking a light candidate and the PDF of taking a light sample from the light candidate, the latter of which is not the same for all pixels. So does the implementation really uses one single PDF to take light samples?</li>
+<li>The math in the paper assumes the proposal PDFs are all the same. Even if the PDF for taking light candidate is exactly the same for all pixels&rsquo; RIS execution, the PDF of taking initial light samples is the product of the PDF of picking a light candidate and the PDF of taking a light sample from the light candidate, the latter of which is not the same for all pixels. So does the implementation really uses one single PDF to take light samples?</li>
 <li>I had a really hard time to be convinced this is unbiased, especially the sampling neighbor part since the neighbor pixel&rsquo;s RIS algorithm essentially uses a different target distribution than the current pixel. The RIS algorithm we derived above shows no sign of supporting multiple target distributions at all.</li>
 <li>The paper has a very clear explanation and proof that the expectation of the big W (the sum of all weights divided by target distribution and the number of visited proposal samples) is the reciprocal of the SIR PDF. However, it was not obvious to me why this would allow us to replace the reciprocal of SIR PDF in the math directly without introducing bias.</li>
 <li>We all know temporal AA is by far not an unbiased algorithm, even if it became an industry standard for AAA games. Why doesn&rsquo;t the temporal reuse introduce any bias in this algorithm?</li>
@@ -675,19 +677,19 @@ With lots of confusion like these, I spend quite some time researching related m
 <p>Even if it is the same PDF used in ReStir DI, it is by no means simply the discretized PDF used to pick a light candidate.</p>
 <p>To understand it, we would have to realize that there are two categories of PDFs involved in this sampling process</p>
 <ul>
-<li>PDF L is used to pick a light canidates, this is also a discretized PDF. In the paper&rsquo;s implementation, this is consistent across all pixels' execution of RIS algorithm.</li>
+<li>PDF L is used to pick a light canidates, this is also a discretized PDF. In the paper&rsquo;s implementation, this is consistent across all pixels&rsquo; execution of RIS algorithm.</li>
 <li>PDF S is used to pick a light sample on the selected light candidate, this is a continuous PDF. It could be different based on light types. It is even different for lights of the same type as the size of the area light could be different or the HDRI could have different radiance distribution.</li>
 </ul>
 <p>The finalized PDF is a product of the two</p>
 <p>$ p(k, s) = p_L(k) p_{S,k}(s) $</p>
-<p>k is the id of the picked light candidate and s is the light sample drawn from this light candidate. Even if $p_{S,k}(s)$ could be different per light, the product of the two remains consistent across all RIS' execution. By hiding the light candidate id, which we don&rsquo;t really care about much in ReStir, we can use the product PDF as our light sample PDF. And this is already consistent.</p>
-<p>If this is not obvious enough, let&rsquo;s find an example that we are already very familiar with it, the sky importance sampling. 
-The method that Pbrt choose is quite a similar case to the light sample sampling in ReStir. In order to take a sample from HDRI sky, we pre-calculate CDFs, each row gets a CDF by accumulating its pixels' value in it, and there is one more CDF generated by accumulating the sum of pixel values on each row. In order to take a sample, we first randomly choose a row by binary searching the CDF for all rows. Once a row is picked, its corresponding CDF is used for picking the final sample. The second CDF used is clearly different across different rows, just like our light sample PDF could be different based on the exact instance of light.</p>
+<p>k is the id of the picked light candidate and s is the light sample drawn from this light candidate. Even if $p_{S,k}(s)$ could be different per light, the product of the two remains consistent across all RIS&rsquo; execution. By hiding the light candidate id, which we don&rsquo;t really care about much in ReStir, we can use the product PDF as our light sample PDF. And this is already consistent.</p>
+<p>If this is not obvious enough, let&rsquo;s find an example that we are already very familiar with it, the sky importance sampling.
+The method that Pbrt choose is quite a similar case to the light sample sampling in ReStir. In order to take a sample from HDRI sky, we pre-calculate CDFs, each row gets a CDF by accumulating its pixels&rsquo; value in it, and there is one more CDF generated by accumulating the sum of pixel values on each row. In order to take a sample, we first randomly choose a row by binary searching the CDF for all rows. Once a row is picked, its corresponding CDF is used for picking the final sample. The second CDF used is clearly different across different rows, just like our light sample PDF could be different based on the exact instance of light.</p>
 <p>To relate the two use cases, we can notice that both take samples through a two steps process. In the light sample case, it picks a light candidate first, in the HDRI sky importance sampling case, it picks a row. Once the first phase is done, both would choose to take a finalized sample with a conditional PDF, the only minor difference between the two is that it is a continuous PDF in the case of light sampling while it is discretized in the other application.</p>
 <p>We almost never doubt that the sky importance sampling PDF is different based on row picking. This clearly indicates that the light sample picking in ReStir is also consistent across all pixels as well.</p>
 <p>Luckily, the complexity of the proposal light sample PDF is pretty much independent from the rest of the algorithm.</p>
 <h2 id="what-exactly-is-neighbor-sampling">What Exactly is Neighbor Sampling?</h2>
-<p>By neighbor sampling, I mean the process to take samples from its neighbors' reservoirs. I think lots of readers would have confusion similar to mine as well. Since the neighbor pixels don&rsquo;t share exactly the same target distribution, there seems no theoretical basis for taking samples from neighbors. The truth is it can take signals from its neighbors and it is also unbiased. In order to understand why, let&rsquo;s draw a graph first</p>
+<p>By neighbor sampling, I mean the process to take samples from its neighbors&rsquo; reservoirs. I think lots of readers would have confusion similar to mine as well. Since the neighbor pixels don&rsquo;t share exactly the same target distribution, there seems no theoretical basis for taking samples from neighbors. The truth is it can take signals from its neighbors and it is also unbiased. In order to understand why, let&rsquo;s draw a graph first</p>
 <figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReStir_1.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReStir_1.png"/></a>
 </figure>
 
@@ -713,7 +715,7 @@ This graph is about pixel A picking its light samples. In the beginning, both A 
 </figure>
 
 <p>Please take a look at the first graph in <a href="/posts/understanding_the_math_behind_restir_di/#mis-used-with-ris">this section</a> again, I think it should be quite clear that we are essentially just using MIS in RIS. To further explain it, it treats the target sample from its neighbors as a proposal sample here and the proposal PDF for this sample is the SIR PDF from its neighbors. As we mentioned in the previous sections, RIS does allow different proposal PDFs to co-exist together as long as the target distribution is consistent.</p>
-<p>At this point, it is clear how we can answer the question of this section. The behavior of borrowing neighbor pixels' target sample is essentially introducing a new PDF that is different than the light sample PDF. And this mathematically is totally fine and introduces no bias at all as <a href="/posts/understanding_the_math_behind_restir_di/#math-proof-of-ris">proved</a> before. This is precisely why even if neighbor pixels have their own target distributions the algorithm is still unbiased.</p>
+<p>At this point, it is clear how we can answer the question of this section. The behavior of borrowing neighbor pixels&rsquo; target sample is essentially introducing a new PDF that is different than the light sample PDF. And this mathematically is totally fine and introduces no bias at all as <a href="/posts/understanding_the_math_behind_restir_di/#math-proof-of-ris">proved</a> before. This is precisely why even if neighbor pixels have their own target distributions the algorithm is still unbiased.</p>
 <p>One subtle thing that deserves our attention is that ReStir DI really uses different proposal PDFs even if all light samples are drawn from the same light sample PDF. This is because the target samples from neighbors, which are treated as proposal samples, all come from different SIR PDFs.</p>
 <h2 id="the-proposal-samples-visited-by-ris">The Proposal Samples Visited by RIS</h2>
 <p>One common misunderstanding of ReStir DI algorithm is that if a neighbor pixel&rsquo;s reservoir has visited 100 samples, by &lsquo;merging&rsquo; the target sample from it, our current pixel&rsquo;s visited samples count will be grown by 100. This was briefly mentioned before, I&rsquo;d like to explain with a bit more text here.</p>
@@ -730,7 +732,7 @@ And please be mindful that I purposely removed the subscript to give us an illus
 <p>Rather than thinking about it that way, I would prefer to think that pixel A would only see its own initial light samples first. For each neighbor sampling, it sees nothing but one single higher quality sample based on a SIR PDF that is a lot closer to the target distribution compared with the light sample proposal PDFs. The more samples visited by neighbor&rsquo;s reservoir, the higher quality its target sample would be. To some degree, we can think about it this way, pixel A visits pixel B&rsquo;s proposal samples indirectly, definitely not in a way that regular proposal samples are visited. Of course, this is just an intuitive explanation.</p>
 <p>To emphasize it, we need to be aware that by merging neighbor&rsquo;s target sample it doesn&rsquo;t give us the mathematical equivalent of visiting neighbor&rsquo;s light proposal samples. But it does offer a higher quality sample than the initial light samples, which means that we would still benefit a lot if neighbor pixels have visited tons of proposal samples.</p>
 <h2 id="what-is-the-mis-weight">What is the MIS Weight?</h2>
-<p>With the above explanation, I think some readers may have already had a question at this point. 
+<p>With the above explanation, I think some readers may have already had a question at this point.
 What is the MIS weight in this case then? Can we use balance heuristics at all?</p>
 <p>There are a few things making the problem a bit tricky,</p>
 <ul>
@@ -752,29 +754,29 @@ What is the MIS weight in this case then? Can we use balance heuristics at all?<
 <p>There is one question that needs a bit of clarification. Why can we replace the PDF with this just because the expectation is a match?
 It is actually not difficult to prove this, let&rsquo;s assume that there are only K - 1 proposal samples coming from the lights, there is also a Kth proposal sample borrowed from a neighbor.</p>
 <p>$ \begin{array} {lcl} E(I_{ris}) &amp; = &amp; E(\dfrac{1}{N}\Sigma_{i=1}^{N}(\dfrac{1}{M}\dfrac{f(y)}{\hat{p}(y)} (\Sigma_{k=1}^{M-1}\dfrac{\hat{p}(x_k)}{p_k(x_k)} + \hat{p}(x_M) W(x_M)) \\\ \\\ &amp; = &amp; E(\dfrac{1}{M}\dfrac{f(y)}{\hat{p}(y)} (\Sigma_{k=1}^{M-1}\dfrac{\hat{p}(x_k)}{p_i(x_k)} + \hat{p}(x_M) E(W(x_M))) \\\ \\\ &amp; = &amp; E(\dfrac{1}{M}\dfrac{f(y)}{\hat{p}(y)} (\Sigma_{k=1}^{M-1}\dfrac{\hat{p}(x_k)}{p_k(x)} + \dfrac{\hat{p}(x_M)}{p_M(x_M)})) \\\ \\\ &amp; = &amp; E(\dfrac{1}{M}\dfrac{f(y)}{\hat{p}(y)} \Sigma_{k=1}^{M}\dfrac{\hat{p}(x_k)}{p_k(x_k)}) dx\ \\\ \\\ &amp; = &amp; \int f(x) dx\ \end{array}$</p>
-<h2 id="importance-of-neighbors-target-samples">Importance of Neighbors' Target Samples</h2>
+<h2 id="importance-of-neighbors-target-samples">Importance of Neighbors&rsquo; Target Samples</h2>
 <p>Careful readers at this point may have already realized that the weight for the neighbor target sample I showed above doesn&rsquo;t match what the paper used, which is $\hat{p}(x) W(x_M) N$.
 N is the number of visited proposal samples in the neighbor&rsquo;s reservoir execution, either directly or indirectly.
 So where does this N fit in the math?</p>
 <p>To answer the question, let&rsquo;s take a look at another question that has not been answered yet. Assuming there is only one neighbor reservoir sampled just like before. In each frame, for each pixel, there is 32 initial light samples. If the neighbor reservoir has visited N samples so far, it is clearly likely to be a higher quality sample than the light samples if N is relatively big. How does the WRS algorithm know? The truth is it may not know. In order to emphasize the importance of neighbor&rsquo;s target samples, we can choose to feed them into the current pixel N times, with N being the number of proposal samples visited by the neighbor&rsquo;s reservoir directly and indirectly. So a target sample that is picked from a million proposal samples will be a million times more respected than an initial light sample drawn in the first phase.</p>
 <p>Mathematically, the likelihood of picking this sample will clearly be boosted by N times and since we feed it N times, the number of visited proposal samples in this reservoir would need to be bumped by N as well, not 1. Mathematically, we don&rsquo;t really need to feed the neighbor target sample by N times at all, we only need to feed it once, but with the weight scaled by N and bump the visited sample count by N in the current reservoir. This all can be done within O(1) time.</p>
 <p>Below is the algorithm 4 in the original paper,</p>
-<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">6
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;display:grid;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;display:grid;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">6
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">function combineReservoirs(q, r1, r2, ..., rk)
-  Reservoir s
-  <span style="color:#fff;font-weight:bold">for</span> r in {r1, r2, ..., rk} do
-    s.update(r.y, p_hat(r.y) * r.W * r.M)
-  s.M = s1.M + s2.M + ... + sk.M
-  s.W = s.w_sum / (p_hat(s.y) * s.M)</code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;display:grid;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>function combineReservoirs(q, r1, r2, ..., rk)
+</span></span><span style="display:flex;"><span>  Reservoir s
+</span></span><span style="display:flex;"><span>  <span style="color:#fff;font-weight:bold">for</span> r in {r1, r2, ..., rk} do
+</span></span><span style="display:flex;"><span>    s.update(r.y, p_hat(r.y) * r.W * r.M)
+</span></span><span style="display:flex;"><span>  s.M = s1.M + s2.M + ... + sk.M
+</span></span><span style="display:flex;"><span>  s.W = s.w_sum / (p_hat(s.y) * s.M)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 <p>Please notice that the 4th line re-update the M of the reservoir even if it is already updated in the update function on the 3rd line already. It actually overrides that. The M is bumped by one in the update function as it assumes the incoming input sample is only one sample. However, as we essentially treat each target sample as it has multiple duplications and feed them multiple times, we would need to update the visited sample count properly.</p>
@@ -806,22 +808,22 @@ To begin with, let&rsquo;s start with this graph,</p>
 </figure>
 
 <p>Needless to explain at this point, this is just MIS used in RIS, something we have visited a few times in this blog. The key observation here is that with visibility reuse, the current pixel&rsquo;s reservoir no longer sees the light proposal samples anymore and this is why we can use different a target distribution to filter samples as the later RIS execution sees only one sample drawn from a SIR method, it doesn&rsquo;t care what target distribution it uses.</p>
-<p>Now we can see that this has its theoretical basis that it is not biased. But we have another follow-up question here, since this is just like sampling a neighbor target sample, we would need to have one single target sample with the proper weight coming in. So if we would like to take a sample from a RIS pdf, we would need to use the weight of $\hat{p}'(x) W(x) N$, where N is the number of light proposal samples and $\hat{p}'(x)$ is the shadowed light contribution $L(w_i) f_r(w_i, w_o) cos(\theta_i) V(p, p')$, W is just the big W we talked about <a href="http://localhost:1313/posts/understanding_the_math_behind_restir_di/#what-is-the-proposal-pdf-for-neighbors-target-sample">before</a>. It seems that a more self-explanatory implementation is to use one reservoir to pick light sample winners and another empty reservoir to merge all the target samples, either from light sample filtering, temporal reuse or neighbor pixels' reservoir. However, rather than starting with a new reservoir in the temporal reuse phase, the paper reuses the light samples reservoir directly, which doesn&rsquo;t match the graph we showed above. The only thing that the paper does is to adjust the reservoir big W to zero if the winner light sample is occluded. This reuse of reservoir easily gives people a false impression that the current pixel&rsquo;s reservoir has visited all the light proposal samples directly and then the neighbor&rsquo;s target sample as they seem sharing the same reservoir. So it is very easy to have this confusion about the two different target distribution issues. The truth is the paper does nothing wrong, so let&rsquo;s see what happens.</p>
+<p>Now we can see that this has its theoretical basis that it is not biased. But we have another follow-up question here, since this is just like sampling a neighbor target sample, we would need to have one single target sample with the proper weight coming in. So if we would like to take a sample from a RIS pdf, we would need to use the weight of $\hat{p}&rsquo;(x) W(x) N$, where N is the number of light proposal samples and $\hat{p}&rsquo;(x)$ is the shadowed light contribution $L(w_i) f_r(w_i, w_o) cos(\theta_i) V(p, p&rsquo;)$, W is just the big W we talked about <a href="http://localhost:1313/posts/understanding_the_math_behind_restir_di/#what-is-the-proposal-pdf-for-neighbors-target-sample">before</a>. It seems that a more self-explanatory implementation is to use one reservoir to pick light sample winners and another empty reservoir to merge all the target samples, either from light sample filtering, temporal reuse or neighbor pixels&rsquo; reservoir. However, rather than starting with a new reservoir in the temporal reuse phase, the paper reuses the light samples reservoir directly, which doesn&rsquo;t match the graph we showed above. The only thing that the paper does is to adjust the reservoir big W to zero if the winner light sample is occluded. This reuse of reservoir easily gives people a false impression that the current pixel&rsquo;s reservoir has visited all the light proposal samples directly and then the neighbor&rsquo;s target sample as they seem sharing the same reservoir. So it is very easy to have this confusion about the two different target distribution issues. The truth is the paper does nothing wrong, so let&rsquo;s see what happens.</p>
 <p>Right after phase 1, where we finished all proposal sample generation and resolved a winner light sample, the current pixel&rsquo;s reservoir state is</p>
 <ul>
 <li>y -&gt; The selected winner sample.</li>
-<li>$w_{sum}$ -&gt; The sum of all light samples' weights. Please be noted that the light sample weight&rsquo;s nominator uses the unshadowed target distribution, rather than the shadowed one we will use to pick a final sample for this pixel.</li>
+<li>$w_{sum}$ -&gt; The sum of all light samples&rsquo; weights. Please be noted that the light sample weight&rsquo;s nominator uses the unshadowed target distribution, rather than the shadowed one we will use to pick a final sample for this pixel.</li>
 <li>N -&gt; The number of direct light proposal samples it has visited so far. (The paper used M here, in order to stay consistent with my previous derivation, N is used here. It is the same thing.)</li>
 <li>W -&gt; This is a derived member that merely serves as a cache. It doesn&rsquo;t have any extra signal.</li>
 </ul>
 <p>As a reminder, the big W is defined as</p>
 <p>$W(x) = \dfrac{1}{N} \dfrac{1}{\hat{p}(x)}\Sigma_{i=1}^{N}\dfrac{\hat{p}(y_i)}{p(y_i)}$</p>
 <p>Please be noted that I swapped the notation of x and y here, but it is the same thing, except that x is a subset of y now. And M is swapped with N as well. None of these changes the essential meaning of this equation. One subtle change I made here is the lack of subscripts in proposal PDF, this is fine as the paper does indicate it only uses one single proposal PDF for light sample picking, which we have explained as well.</p>
-<p>If we would start with a brand new empty reservoir, we would need to treat the resolved target light sample with this weight, $\hat{p}'(x) W(x) N$. Since the new target distribution is nothing but the original unshadowed target distribution with an extra binary signal on top of it. We have</p>
-<p>$\hat{p}'(x) = V \hat{p}(x)$</p>
+<p>If we would start with a brand new empty reservoir, we would need to treat the resolved target light sample with this weight, $\hat{p}&rsquo;(x) W(x) N$. Since the new target distribution is nothing but the original unshadowed target distribution with an extra binary signal on top of it. We have</p>
+<p>$\hat{p}&rsquo;(x) = V \hat{p}(x)$</p>
 <p>If we combine the two math equations and drop a new sample generated by SIR method in an empty reservoir, we would have this as its weight for the incoming proposal sample in the execution of this pixel&rsquo;s RIS execution,</p>
-<p>$ \begin{array} {lcl} \hat{p}'(x) W(x) N &amp; = &amp; V \hat{p}(x) N \dfrac{1}{N} \dfrac{1}{\hat{p}(x)}\Sigma_{i=1}^{N}\dfrac{\hat{p}(y_i)}{p(y_i)} \\\ \\\ &amp; = &amp; V \Sigma_{i=1}^{N}\dfrac{\hat{p}(y_i)}{p(y_i)} \end{array} $</p>
-<p>So if we would start from a new reservoir, the weight for the one single sample, which is the resolved target light sample, is exactly the sum of all previous light samples' weight, but with an extra visibility term. Please be mindful that the nominator in the sum is the original unshadowed target distribution, rather than the new shadowed one.</p>
+<p>$ \begin{array} {lcl} \hat{p}&rsquo;(x) W(x) N &amp; = &amp; V \hat{p}(x) N \dfrac{1}{N} \dfrac{1}{\hat{p}(x)}\Sigma_{i=1}^{N}\dfrac{\hat{p}(y_i)}{p(y_i)} \\\ \\\ &amp; = &amp; V \Sigma_{i=1}^{N}\dfrac{\hat{p}(y_i)}{p(y_i)} \end{array} $</p>
+<p>So if we would start from a new reservoir, the weight for the one single sample, which is the resolved target light sample, is exactly the sum of all previous light samples&rsquo; weight, but with an extra visibility term. Please be mindful that the nominator in the sum is the original unshadowed target distribution, rather than the new shadowed one.</p>
 <p>Depending on the occlusion situation, we have two possibilities here,</p>
 <ul>
 <li>If the resolved light target sample is not occluded, we have precisely what is already cached in the reservoir after phase 1.</li>
@@ -993,7 +995,7 @@ Hopefully, this would convince readers that this algorithm is indeed unbiased.</
         <li><a href="#the-proposal-samples-visited-by-ris">The Proposal Samples Visited by RIS</a></li>
         <li><a href="#what-is-the-mis-weight">What is the MIS Weight?</a></li>
         <li><a href="#what-is-the-proposal-pdf-for-neighbors-target-sample">What is the Proposal PDF for Neighbors Target Sample?</a></li>
-        <li><a href="#importance-of-neighbors-target-samples">Importance of Neighbors' Target Samples</a></li>
+        <li><a href="#importance-of-neighbors-target-samples">Importance of Neighbors&rsquo; Target Samples</a></li>
         <li><a href="#temporal-reuse">Temporal Reuse</a></li>
         <li><a href="#correcting-the-bias-in-restir">Correcting the Bias in ReStir</a></li>
         <li><a href="#visibility-reuse">Visibility Reuse</a></li>
@@ -1063,7 +1065,7 @@ Hopefully, this would convince readers that this algorithm is indeed unbiased.</
 
         <div id="disqus_thread"></div>
 <script type="application/javascript">
-    var disqus_config = function () {
+    window.disqus_config = function () {
     
     
     
@@ -1125,7 +1127,7 @@ Hopefully, this would convince readers that this algorithm is indeed unbiased.</
 
     
       
-      <script src="/js/dark-mode.min.aee9c8a464eb7b3534c7110f7c5e169e7039e2fd92710e0626d451d6725af137.js"></script>
+      <script src="/js/dark-mode.min.c2d8a1f8f2660e4a46d776277c72695a1e0ca65939d79f754441d47551604af5.js"></script>
     
 
     

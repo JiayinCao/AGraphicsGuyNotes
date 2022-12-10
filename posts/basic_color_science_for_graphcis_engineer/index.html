@@ -80,7 +80,9 @@
       </script>
     
 
-    <meta name="generator" content="Hugo 0.88.1" />
+    
+
+    <meta name="generator" content="Hugo 0.104.0" />
   </head>
 
   
@@ -216,7 +218,7 @@ In order to understand colors, the first concept that we need to understand is s
 <p>When we define a color space, it is quite common to specific their primaries coordinate in the chromaticity diagram. However, as we mentioned before, the chromaticity diagram is already a diagram of two-dimension by losing the intensity of the original signal. Then defining just the coordinate of the primaries in the chromaticity diagram is not good enough because there is not enough signal to reconstruct the color space. To put it simply, the scale of each primary is still unknown even if the coordinate in the chromaticity diagram is defined. Instead of defining the scaling factor for each of the primaries directly, people choose to define an extra point called ‘white point’ to implicitly define them.</p>
 <p>One important insight to be aware of is that the interpolation on chromaticity diagram is by no means linear after the projections. Just think about the perspective correction in rasterization, it works similarly. Usually, we use (1,1,1) as the white color in the system. However, the white color projection on x+y+z=1 plane is not exactly the centroid ( center of gravity ) of the triangle defined by the primaries in the chromaticity diagram. In order to calculate the chromaticity of the white color, we need the scaling factor for all the three primaries. Just to make it clear, the white point calculation is not our interest here, this is just a clear example to show things. We are more interested in the scaling factor than the white point itself, not to mention in the color space definition, the white point is usually explicitly well defined.</p>
 <p>To calculate the three scaling factor, we need to introduce one constraint, that is the Y channel of R+G+B should be exactly 1. With that in mind, if we already have the white point defined in the color space definition the same way the other three primaries are defined, 2D coordinate in the chromaticity diagram. We can easily project the white point back to the XYZ space by scaling the vector so that the Y coordinate is exactly one. And then we have the following equation,</p>
-<p>$ S_r * R_{xyz} + S_g * G_{xyz} + S_b * B _{xyz} = \dfrac{W_{xyz}}{W_y} $</p>
+<p>$ S_r * R_{xyz} + S_g * G_{xyz} + S_b * B <em>{xyz} = \dfrac{W</em>{xyz}}{W_y} $</p>
 <p>It is very straightforward and easy to solve the equation above,</p>
 <p>$ \begin{bmatrix} S_r \\\ S_g \\\ S_b \end{bmatrix} = \begin{bmatrix} \dfrac{W_x}{W_y} \\\ 1.0 \\\ \dfrac{W_z}{W_y} \end{bmatrix} * { \begin{bmatrix} R_x &amp; R_y &amp; R_z \\\ G_x &amp; G_y &amp; G_y \\\ B_x &amp; B_y &amp; B_z \end{bmatrix} }^{-1} $</p>
 <h2 id="rec-709">Rec. 709</h2>
@@ -237,12 +239,12 @@ The transformation from the CIE XYZ tristimulus color space into linear Rec.709 
 <p>On the other side, it is easy to define the reversed transformation to transform color from Rec. 709 space to XYZ space.</p>
 <p>$ \begin{bmatrix} X \\\ Y \\\ Z \end{bmatrix} = { \begin{bmatrix} 0.4124564 &amp; 0.3575761&amp; 0.1804375 \\\ 0.2126729 &amp; 0.7151522 &amp; 0.0721750 \\\ 0.0193339 &amp; 0.1191920 &amp; 0.9503041 \end{bmatrix}} * \begin{bmatrix} R_{rec709} \\\ G_{rec709} \\\ B_{rec709} \end{bmatrix}  $</p>
 <p>Apart from the primaries, the transfer function is also defined by the standard.</p>
-<p>$ C_{709}'= \begin{cases} 4.5C_{709}&amp;0&lt;=C_{709}&lt;0.0018 \\\ 1.099C_{709}^{1/\gamma} - 0.099 &amp; 0.018&lt;=C_{709}&lt;1 \end{cases} $</p>
+<p>$ C_{709}&rsquo;= \begin{cases} 4.5C_{709}&amp;0&lt;=C_{709}&lt;0.0018 \\\ 1.099C_{709}^{1/\gamma} - 0.099 &amp; 0.018&lt;=C_{709}&lt;1 \end{cases} $</p>
 <p>$ \gamma = 2.2 $</p>
 <h2 id="srgb">sRGB</h2>
 <p>sRGB is the most commonly used color space in game development. It was created by HP and Microsoft together in 1996 for display on monitors, printer and the internet.</p>
 <p>The primaries of sRGB are exactly the same with Rec.709. So is the transformation matrix between to transform data from XYZ space. However, it has slightly different transfer function comparing with Rec.709.</p>
-<p>$ C_{sRGB}'= \begin{cases} 12.92C_{sRGB}&amp;0&lt;=C_{sRGB}&lt;0.0031 \\\ 1.055C_{sRGB}^{1/\gamma} - 0.055 &amp;0.031&lt;=C_{sRGB}&lt;1 \end{cases} $</p>
+<p>$ C_{sRGB}&rsquo;= \begin{cases} 12.92C_{sRGB}&amp;0&lt;=C_{sRGB}&lt;0.0031 \\\ 1.055C_{sRGB}^{1/\gamma} - 0.055 &amp;0.031&lt;=C_{sRGB}&lt;1 \end{cases} $</p>
 <p>$ \gamma = 2.4 $</p>
 <p>Sadly, sRGB is the most commonly used color space in gaming, even if it only covers only 35.9% of the whole CIE 1931 Color space. Basically, when we talked about physically based shading, an important concept is linear color space. Color can be linear in several different color spaces, the common linear color space we used in our rendering engine is most likely sRGB. This is mostly because most developers use LDR monitor for their daily work. And sRGB was the industry standard for LDR monitors. Unless everyone, at least relevant people, is geared with HDR monitor, which is obviously an investment for a game studio, linear color space is always in sRGB. Even if there is an HDR monitor for everyone in the studio, transiting the whole rendering engine from sRGB to Rec.2020 still involves some work.</p>
 <p>What most people do is to perform rendering equation evaluation in sRGB linear color space and then convert the data to Rec.2020 for higher dynamic range. Technically speaking, there is no way to generate any color out of sRGB gamut even if they are converted to Rec.2020. But some game engines will perform color grading in Rec.2020, which will make the color more saturated. In this case, there is some possibility to generate color outside sRGB gamut.</p>
@@ -461,7 +463,7 @@ The transformation from the CIE XYZ tristimulus color space into linear Rec.709 
 
         <div id="disqus_thread"></div>
 <script type="application/javascript">
-    var disqus_config = function () {
+    window.disqus_config = function () {
     
     
     
@@ -523,7 +525,7 @@ The transformation from the CIE XYZ tristimulus color space into linear Rec.709 
 
     
       
-      <script src="/js/dark-mode.min.aee9c8a464eb7b3534c7110f7c5e169e7039e2fd92710e0626d451d6725af137.js"></script>
+      <script src="/js/dark-mode.min.c2d8a1f8f2660e4a46d776277c72695a1e0ca65939d79f754441d47551604af5.js"></script>
     
 
     

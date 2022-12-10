@@ -80,7 +80,9 @@
       </script>
     
 
-    <meta name="generator" content="Hugo 0.88.1" />
+    
+
+    <meta name="generator" content="Hugo 0.104.0" />
   </head>
 
   
@@ -208,10 +210,10 @@
 <p>First of all, we need to pay attention to the way the algorithm divides the hemisphere domain. For phi, it is evenly divided into 10 equal-size region. For theta, it is very important to notice that it is the result of cosine theta that is evenly divided, not theta itself. So that said, theta is divided in the following sub-region.</p>
 <p>$ [acos(\dfrac{i}{10}), acos(\dfrac{i+1}{10})) $</p>
 <p>In the above formula, i goes from 0 to 9. For the last sub-region, it is fully inclusive. It may be very confused to see it is divided this way. But if we look at the solid angle extended by each sub-region, we will suddenly understand why it works this way.</p>
-<p>$ \begin{array} {lcl} \int_{{\Omega}_{ij}} \mathrm{d}{\omega}  &amp; = &amp; \int_{2*PI*i/10}^{2*PI*(i+1)/10} \int_{acos({(j+1)/10})}^{acos(j/10)} sin(\theta)\mathrm{d} \theta\mathrm{d} \phi \\\ &amp; = &amp;\int_{2*PI*i/10}^{2*PI*(i+1)/10}\mathrm{d} \phi \int_{acos(j/10)}^{acos({(j+1)/10})}\mathrm{d}(cos(\theta)) \\\ &amp; = &amp; 2*PI/100 \end{array} $</p>
+<p>$ \begin{array} {lcl} \int_{{\Omega}<em>{ij}} \mathrm{d}{\omega}  &amp; = &amp; \int</em>{2<em>PI</em>i/10}^{2<em>PI</em>(i+1)/10} \int_{acos({(j+1)/10})}^{acos(j/10)} sin(\theta)\mathrm{d} \theta\mathrm{d} \phi \\\ &amp; = &amp;\int_{2<em>PI</em>i/10}^{2<em>PI</em>(i+1)/10}\mathrm{d} \phi \int_{acos(j/10)}^{acos({(j+1)/10})}\mathrm{d}(cos(\theta)) \\\ &amp; = &amp; 2*PI/100 \end{array} $</p>
 <p>The size of the solid angle is in-dependent of which sub-region it is casted from. The solid angle extended by the sub-region turns out to be same size!</p>
 <p>Next, let&rsquo;s define a visibility function so that we can focus on a single entry.</p>
-<p>$ V_{i j }(\omega) = \begin{cases} 1&amp;:\theta \in [acos((i+1)/10),acos(i/10))  ,  \phi \in [2*PI*j/10,2*PI*(j+1)/10) \\\ 0 &amp;:otherwise \end{cases} $</p>
+<p>$ V_{i j }(\omega) = \begin{cases} 1&amp;:\theta \in [acos((i+1)/10),acos(i/10))  ,  \phi \in [2<em>PI</em>j/10,2<em>PI</em>(j+1)/10) \\\ 0 &amp;:otherwise \end{cases} $</p>
 <p>This visibility function gives you only the visibility of a single entry, leaving the rest of them as zero so that we can easily focus on one single entry. Since we divide the two-dimentional domain into sub-domain, i and j can identify which sub-domain we are focusing on. We can easily derive the following equation:</p>
 <p>$ \int_{\omega} V_{ij}(\omega) \mathrm{d}(\omega) = \int_{{\Omega}_{ij}} \mathrm{d}{\omega} = 2 * PI / 100 $</p>
 <p>Again, let&rsquo;s look at the Monte Carlo estimator for the left-most integral in the above equation.</p>
@@ -390,7 +392,7 @@
 
         <div id="disqus_thread"></div>
 <script type="application/javascript">
-    var disqus_config = function () {
+    window.disqus_config = function () {
     
     
     
@@ -452,7 +454,7 @@
 
     
       
-      <script src="/js/dark-mode.min.aee9c8a464eb7b3534c7110f7c5e169e7039e2fd92710e0626d451d6725af137.js"></script>
+      <script src="/js/dark-mode.min.c2d8a1f8f2660e4a46d776277c72695a1e0ca65939d79f754441d47551604af5.js"></script>
     
 
     
