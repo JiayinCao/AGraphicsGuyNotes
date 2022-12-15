@@ -83,6 +83,27 @@ Monte Carlo Integral Monte Carlo tries to solve integral problem by random samp
     
 
     
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$", right: "$", display: false}
+      ]
+    });
+  });
+</script>
+
+    
 
     <meta name="generator" content="Hugo 0.108.0">
   </head>
@@ -166,15 +187,18 @@ Monte Carlo Integral Monte Carlo tries to solve integral problem by random samp
         <p>The book physically based rendering doesn&rsquo;t spend too much effort explaining MIS, however it does mention it. In order to be more familiar with MIS(Multiple Importance Sampling), I spent some time reading Veach&rsquo;s thesis. The whole thesis is relatively long, however the chapter about MIS is kind of independent to the other ones. Worth taking some notes in case I forget later.</p>
 <h1 id="monte-carlo-integral">Monte Carlo Integral</h1>
 <p>Monte Carlo tries to solve integral problem by random sampling. Basically it takes N independent samples randomly across the whole domain and use these samples to evaluate the integral.</p>
-<p>$ I = \int_{\Omega} f(x) , \mathrm{d}x $</p>
+
+$ I = \int_{\Omega} f(x) \, \mathrm{d}x $
 <p>Assuming here is the integral to be evaluated. Monte Carlo method is quite simple. First, N independent samples $ x_0,x_1, &hellip; x_n $ are generated according to some property density function p(x). Then the estimator is like this:</p>
-<p>$ F_{N} = \dfrac{1}{N} \sum\limits_{i=1}^{N} \dfrac{f(x_i)}{p(x_i)} $</p>
+
+$ F_{N} = \dfrac{1}{N} \sum\limits_{i=1}^{N} \dfrac{f(x_i)}{p(x_i)} $ 
 <p>The estimator is unbiased. In other words, the average of the estimator is exactly the integral we target on.</p>
 <p>$ \begin{array} {lcl} E[F_{N}] &amp; = &amp; E[\dfrac{1}{N} \sum\limits_{i=1}^{N} \dfrac{f(x_i)}{p(x_i)}] \\\ &amp; = &amp; \dfrac{1}{N}\sum\limits_{i=1}^{N}\int_{\Omega} \dfrac{f(x_i)}{p(x_i)} p(x_i) d(x) \\\ &amp; = &amp;\int_{\Omega} f(x) , \mathrm{d}x \\\ &amp; = &amp; I \end{array} $</p>
 <p>Just having the average value equaling to the integral doesn&rsquo;t solve the problem, it is necessary to make sure that it converge to the right one as the number of samples grows. The variance approaches to zero if N keeps growing.</p>
 <p>$ \begin{array} {lcl} V[F_{N}] &amp; = &amp; V[\dfrac{1}{N} \sum\limits_{i=1}^{N} \dfrac{f(x_i)}{p(x_i)}] \\\ &amp; = &amp; \dfrac{1}{N^2}\sum\limits_{i=1}^{N} V[\dfrac{f(x_i)}{p(x_i)}] \\\ &amp; = &amp;\dfrac{1}{N}V[\dfrac{f(x)}{p(x)}] \\\ &amp; = &amp; \dfrac{1}{N}( \int_{\Omega} \dfrac{f^2(x)}{p(i)} d(x) - I ) \end{array} $</p>
 <p>According to Chebychev&rsquo;s inequality, we have:</p>
-<p>$ Pr{|F_{N} - I|\ge\sqrt{\dfrac{V[\dfrac{f}{p}]}{N\delta}}}\le\delta $</p>
+
+$ Pr\{|F_{N} - I|\ge\sqrt{\dfrac{V[\dfrac{f}{p}]}{N\delta}}\}\le\delta $
 <p>That said the estimator convergences to the value of integral. It is consistent.</p>
 <p>Combined with the two properties, the conclusion is that as long as we have enough samples, the result gets to the correct one we want to evaluate in the first place. And that is how we usually solve the integral problems in computer graphics.</p>
 <p>There are several benefits with this method:</p>
@@ -187,9 +211,11 @@ Monte Carlo Integral Monte Carlo tries to solve integral problem by random samp
 <h2 id="consistent-and-unbiased">Consistent and Unbiased</h2>
 <p>There are two terms mentioned above, consistent and unbiased. Although they may look similar to each other at first glance, they are totally different concept.</p>
 <p>The estimator is unbiased if:</p>
-<p>$ E[F_{N}-I] = 0 $</p>
+
+$ E[F_{N}-I] = 0 $
 <p>An estimator is said to be consistent if it satisfy the following condition:</p>
-<p>$ \lim_{x\to\infty} P[|F_{N}-I|&gt;\epsilon]= 0 $</p>
+
+$ \lim_{x\to\infty} P[|F_{N}-I|&gt;\epsilon]= 0 $
 <p>According to this wiki page, an unbiased estimator which converges to the integral value is said to be consistent. These two terms look quite similar to me, I actually thought one is the other&rsquo;s super set. However it is not the case.</p>
 <ul>
 <li>$ F_{N}(X) = X_{1} $ This one is an unbiased estimator, however it never converges to anything.</li>
@@ -229,8 +255,10 @@ Monte Carlo Integral Monte Carlo tries to solve integral problem by random samp
 <p>$ F_{mis} = \sum\limits_{i=1}^n \dfrac{1}{n_i} \sum\limits_{j=1}^{n_i} w_i(X_{i,j})\dfrac{f(X_{i,j})}{p_i(X_{i,j})}$</p>
 <p>For MIS estimator, the following conditions need to hold true:</p>
 <ul>
-<li>$ \sum\limits_{i=1}^{n}w_i(x) = 1 $ if $ f(x) \ne 0 $</li>
-<li>$ w_i(x) = 0 $ if $ p_i(x) = 0$</li>
+<li> $ \sum\limits_{i=1}^{n}w_i(x) = 1 $ if $ f(x) \neq 0 $ 
+</li>
+<li> $ w_i(x) = 0 $ if $ p_i(x) = 0$ 
+</li>
 </ul>
 <p>The MIS estimator is an unbiased one if the above conditions are fulfilled. Here is the proof:</p>
 <p>$ \begin{array} {lcl} E[F_{mis}] &amp; = &amp; E[ \sum\limits_{i=1}^n \dfrac{1}{n_i} \sum\limits_{j=1}^{n_i} w_i(X_{i,j})\dfrac{f(X_{i,j})}{p_i(X_{i,j})}] \\\ &amp; = &amp; \int \sum\limits_{i=1}^n \dfrac{1}{n_i} \sum\limits_{j=1}^{n_i} w_i(x)\dfrac{f(x)}{p_i(x)} p_i(x) dx \\\ &amp; = &amp; \int \sum\limits_{i=1}^n \dfrac{1}{n_i} \sum\limits_{j=1}^{n_i} w_i(x) f(x) dx \\\ &amp; = &amp; \int \sum\limits_{i=1}^n w_i(x) f(x) dx \\\ &amp; = &amp; \int f(x) dx \end{array} $</p>
@@ -455,20 +483,7 @@ Monte Carlo Integral Monte Carlo tries to solve integral problem by random samp
       </footer>
     </article>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
-    onload="renderMathInElement(document.body,
-      {
-        delimiters: [
-          {left: '$$', right: '$$', display:true},
-          {left: '$', right: '$', display:false},
-          {left: '\\(', right: '\\)', display: false},
-          {left: '\\[', right: '\\]', display: true}
-        ]
-      }
-    );">
-  </script>
+    
   </section>
 
       </div>
