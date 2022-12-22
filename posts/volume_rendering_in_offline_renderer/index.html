@@ -83,6 +83,32 @@ In case someone is not familiar with what volume rendering is, the above texture
     
 
     
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$", right: "$", display: false}
+      ]
+    });
+  });
+</script>
+
+<style>
+  .katex-display > .katex {
+    text-align: left !important;
+  }
+</style>
+    
 
     <meta name="generator" content="Hugo 0.108.0">
   </head>
@@ -237,55 +263,75 @@ In case someone is not familiar with what volume rendering is, the above texture
 </figure>
 
 <p>We have the following equation at a micro level:</p>
-<p>$ L_o(p,w) - L_i(p,-w) = dL_o(p,w) = -\sigma_a(p,w)L_i(p,-w)dt$</p>
+
+$$ L_o(p,w) - L_i(p,-w) = dL_o(p,w) = -\sigma_a(p,w)L_i(p,-w)dt$$
 <p>This may look confusing the first time one sees it because of the subscripts, it adopts the commonly used term Li and Lo in it. Detail explanation is at the page of 286 of the <a href="https://pbrt.org/">book</a> (second edition). After converting all subscript into one, we get the following equation:</p>
-<p>$ dL_o(p,w) = -\sigma_a(p,w)L_o(p,w)dt $</p>
+
+$$ dL_o(p,w) = -\sigma_a(p,w)L_o(p,w)dt $$
 <p>And since the subscript is just something that we use to distinguish between incoming and outgoing light, we can drop it in the above equation making it much clearer than it used to be.</p>
-<p>$ dL(p,w) = -\sigma_a(p,w)L(p,w)dt $</p>
+
+$$ dL(p,w) = -\sigma_a(p,w)L(p,w)dt $$
 <p>What it says is that light will attenuate with exactly the same rate at all points along the ray. Comparing with micro level equation, what we care more is a higher level knowledge of light interaction with volume, instead of small particles that are not visible to human vision at all. So the real practical question is how much light will still remain after passing through a uniform volume like the above one.</p>
 <p>First of all, let&rsquo;s convert the equation this way:</p>
-<p>$ \dfrac{dL(p,w)}{L(p,w)} = -\sigma_a(p,w)dt $</p>
+
+$$ \dfrac{dL(p,w)}{L(p,w)} = -\sigma_a(p,w)dt $$
 <p>One detail that we haven&rsquo;t mentioned is the parameter of &rsquo;t&rsquo;. Any point along the ray could be represented by $ p(t)=p(0) + t*w $. In other words, it is the distance between the starting point and ending point that we consider. So we can regard &lsquo;p&rsquo; as a function of t in the above equation. If we take an integral from 0 to d, we have the following equation.</p>
-<p>$ \int_0^d \dfrac{dL(p(t),w)}{L(p(t),w)} = \int_0^d -\sigma_a(p(t),w)dt $</p>
+
+$$ \int_0^d \dfrac{dL(p(t),w)}{L(p(t),w)} = \int_0^d -\sigma_a(p(t),w)dt $$
 <p>It is quite easy to derive the following equation.</p>
-<p>$ \dfrac{L(p+d*w,w)}{L(p,w)} = e^{ -\int_0^d \sigma_a(p,w)dt} $</p>
+
+$$ \dfrac{L(p&#43;d*w,w)}{L(p,w)} = e^{ -\int_0^d \sigma_a(p,w)dt} $$
 <p>The above equation is the attenuation, which only takes absorption into account, due to the existence of the volume. And it is exactly the second equation mentioned at the page of 578 in PBRT book (second edition).</p>
 <h2 id="out-scattering">Out-Scattering</h2>
 <p>Out-scattering is quite similar with absorption. As a matter of fact, there is no difference between them in handling attenuation. So instead of saving absorption factor, we can save attenuation factor which is the summation of absorption and out-scattering. Unless we have a clear reason to save them separately, there is no need to do that.</p>
-<p>$ \sigma_t=\sigma_a+\sigma_s$</p>
+
+$$ \sigma_t=\sigma_a&#43;\sigma_s$$
 <p>For our convenience, it is better to define one term, which is commonly named &lsquo;beam transmittance&rsquo; and defines the proportion of light survives the uniform volume due to attenuation (out-scattering and absorption).</p>
-<p>$ T_r(p(0) \rightarrow p(d) ) = e^{ -\int_0^d \sigma_t(p,w)dt} $</p>
+
+$$ T_r(p(0) \rightarrow p(d) ) = e^{ -\int_0^d \sigma_t(p,w)dt} $$
 <h2 id="emission">Emission</h2>
 <p>Emission is actually the simplest one among the four. The differential change is just the emission rate.</p>
-<p>$ dL(p,w) = L_{e}(p,w)dt $</p>
+
+$$ dL(p,w) = L_{e}(p,w)dt $$
 <h2 id="in-scattering">In-Scattering</h2>
 <p>This is the most complex one among the four, it took me a while to figure out the mathematics behind it. I&rsquo;d like to start with two equations in PBRT(2nd) and explain the derivation between them. First equation is the differential changes along the ray direction due to in-scattering.</p>
-<p>$ \dfrac{dL_o(p,\omega)}{dt} = -\sigma_t(p,\omega) L_i(p,-\omega) + S( p,\omega) $</p>
+
+$$ \dfrac{dL_o(p,\omega)}{dt} = -\sigma_t(p,\omega) L_i(p,-\omega) &#43; S( p,\omega) $$
 <p>At a first glance, it seems weird due to the fact that it involves both $ L_i $ and $ L_o $. As a matter of fact, we can easily convert it to uniform direction by switching $ L_i $ to $ L_o $.</p>
-<p>$ \dfrac{dL_o(p,\omega)}{dt} = -\sigma_t(p,\omega) L_o(p,\omega) + S( p,\omega) $</p>
+
+$$ \dfrac{dL_o(p,\omega)}{dt} = -\sigma_t(p,\omega) L_o(p,\omega) &#43; S( p,\omega) $$
 <p>One good feature about it is that since we only have $ L_o $, we can safely drop that subscript making the equation simpler. Although all functions in this equation are functions of both solid angle and position, which is further a function of t, the distance from the original point as mentioned above, it is also safe to drop the solid angle parameter because it doesn&rsquo;t change in the equation at all. We can further simplify the equation to the following state:</p>
-<p>$ \dfrac{dL(p)}{dt} = -\sigma_t(p) L(p) + S( p ) $</p>
+
+$$ \dfrac{dL(p)}{dt} = -\sigma_t(p) L(p) &#43; S( p ) $$
 <p>What it says is really simple, it states the fact that the differential change due to in-scattering along the ray is the amount of differential in-coming scattering radiance S(p) minus the attenuation by absorption and out-scattering. For the simplicity, I won&rsquo;t include the definition of S here. One can always read PBRT(2nd) for further information.</p>
 <p>The other equation in PBRT is the following one, which according to the book can be derived from the above one.</p>
-<p>$ L_i(p,\omega) = \int_0^{\infty} T_r(p&rsquo; \rightarrow p) S(p&rsquo;, -\omega) dt $</p>
+
+$$ L_i(p,\omega) = \int_0^{\infty} T_r(p&#39; \rightarrow p) S(p&#39;, -\omega) dt $$
 <p>Again, let&rsquo;s get rid of the subscript first.</p>
-<p>$ L(p,-\omega) = \int_0^{\infty} T_r(p&rsquo; \rightarrow p) S(p&rsquo;, -\omega) dt $</p>
+
+$$ L(p,-\omega) = \int_0^{\infty} T_r(p&#39; \rightarrow p) S(p&#39;, -\omega) dt $$
 <p>If you look at the picture below, you will find that this description is even better than the previous one, although both make perfect sense. What it says is that the radiance at point p along direction -w due to in-scattering is actually the accumulation of all in-scattering radiance at all points along direction -w attenuated by its corresponding beam transmittance.</p>
 <figure><img src="/img/posts/volume_rendering_in_offline_renderer/volume_rendering.png"/>
 </figure>
 
 <p>In order to derive from the first equation to the second one, we need to handle one small issue. Notice that the first equation proceed along the direction w, while the second one goes just in the opposite way. I choose to invert the first equation in my derivation. It becomes this:</p>
-<p>$ \dfrac{dL(p,-\omega)}{d(-t)} = -\sigma_t(p,-\omega) L(p , -\omega ) + S( p , -\omega ) $</p>
+
+$$ \dfrac{dL(p,-\omega)}{d(-t)} = -\sigma_t(p,-\omega) L(p , -\omega ) &#43; S( p , -\omega ) $$
 <p>One subtle difference between this equation and the original one is that the differential denominator is -t instead of t. This is by no means a typo. This is because we invert the direction of the ray along -w. If we take the negative sign out of the denominator, we get the following equation</p>
-<p>$ \dfrac{dL(p,-\omega)}{d(t)} = \sigma_t(p,-\omega) L(p , -\omega ) - S( p , -\omega ) $</p>
+
+$$ \dfrac{dL(p,-\omega)}{d(t)} = \sigma_t(p,-\omega) L(p , -\omega ) - S( p , -\omega ) $$
 <p>One can easily notice that this is quite standard first order linear differential equation. The solution is available as the following one:</p>
-<p>$ L(p(t)) = \dfrac{1}{e^{-\int \sigma (p)dt}}( -\int e^{- \int \sigma (p)dt} S(p) dt + C ) $</p>
+
+$$ L(p(t)) = \dfrac{1}{e^{-\int \sigma (p)dt}}( -\int e^{- \int \sigma (p)dt} S(p) dt &#43; C ) $$
 <p>I&rsquo;ll skip the derivation of the solution in this blog, one can find further detail here. And please also notice that the subscript of $ \sigma $ and the $ \omega $ are also dropped because they don&rsquo;t change in the equation, but please notice that the L(p) in the following equation means L(p,-w). To solve the equation, the first thing to do is to determine the constant factor C. We already know that $ L(p( \infty)) $ is zero, dropping it in the equation, we can get C.</p>
-<p>$ C = \int e^{\int \sigma (p)dt} S(p) dt |_\infty $</p>
+
+$$ C = \int e^{\int \sigma (p)dt} S(p) dt |_\infty $$
 <p>Again, we get the following equation by dropping the value of C in it.</p>
-<p>$ \begin{array} {lcl} L(p(t)) &amp; = &amp; \dfrac{1}{e^{-\int \sigma (p)dt}} \int_t^{\infty} e^{- \int \sigma (p)dt&rsquo;} S(p) dt&rsquo; \\\ &amp; = &amp; \int_t^{\infty} e^{- \int_{t}^{t&rsquo;} \sigma (p)dt&rsquo;&rsquo;} S(p) dt&rsquo; \end{array} $</p>
+
+$$ \begin{array} {lcl} L(p(t)) &amp; = &amp; \dfrac{1}{e^{-\int \sigma (p)dt}} \int_t^{\infty} e^{- \int \sigma (p)dt&#39;} S(p) dt&#39; \\\\ &amp; = &amp; \int_t^{\infty} e^{- \int_{t}^{t&#39;} \sigma (p)dt&#39;&#39;} S(p) dt&#39; \end{array} $$
 <p>What we want is actually L(p(0)), letting t equals to zero, will give you the following equation:</p>
-<p>$  L(p(0)) = \int_0^{\infty} e^{- \int_{0}^{t} \sigma (p)dt&rsquo;} S(p) = \int_0^{\infty} T_r(p(t) \rightarrow p(0)) S(p(t)) dt $</p>
+
+$$  L(p(0)) = \int_0^{\infty} e^{- \int_{0}^{t} \sigma (p)dt&#39;} S(p) = \int_0^{\infty} T_r(p(t) \rightarrow p(0)) S(p(t)) dt $$
 <p>And with the above equation, we finished the derivation.</p>
 <h1 id="reference">Reference</h1>
 <p>[1] <a href="http://pbrt.org/">Physically Based Rendering, second edition</a><br>
@@ -474,20 +520,7 @@ In case someone is not familiar with what volume rendering is, the above texture
       </footer>
     </article>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
-    onload="renderMathInElement(document.body,
-      {
-        delimiters: [
-          {left: '$$', right: '$$', display:true},
-          {left: '$', right: '$', display:false},
-          {left: '\\(', right: '\\)', display: false},
-          {left: '\\[', right: '\\]', display: true}
-        ]
-      }
-    );">
-  </script>
+    
   </section>
 
       </div>

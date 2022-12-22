@@ -384,7 +384,8 @@ $$ \tag{2} \overrightarrow{p_{\sigma , i}}(\bar{y}) =\begin{cases} {p_{\sigma}}(
 
 $$ \tag{3} \overrightarrow{g_i}(\bar{y}) = \dfrac{cos \theta_{i\rightarrow i-1}}{\|y_i - y_{i-1} \|^2}$$
 <p> $ p_{\sigma} $ 
- denotes the pdf w.r.t solid angle, $ p_a $ represents the pdf w.r.t area. For the first  $ p_{\sigma} $ 
+ denotes the pdf w.r.t solid angle,  $ p_a $ 
+ represents the pdf w.r.t area. For the first  $ p_{\sigma} $ 
  , it is defined the type of light sources or camera sensor and brdf defines the rest of them. The  $ \overrightarrow{g} $ 
   term converts the pdf measured from solid angle to area. With these terms defined, we have the pdf of a specific path starting from one side with s vertices, including the vertex on light sources or camera sensor, as the following one:</p>
 
@@ -498,7 +499,10 @@ $$ \tag{36} \overleftarrow{p_0}=\overleftarrow{p_{\sigma,0}} $$
 $$ \tag{37} \overleftarrow{g_0}=1 $$
 
 $$ \tag{38} \overrightarrow{p_1}=p_a(\hat{y_1}) cos\theta_{1\rightarrow 0} $$
-<p>That works because the $ \overleftarrow{p_0} $ and $ \overrightarrow{p_0} $ always appear in pair and the g-terms just get canceled with each other.  After a direction is picked, there is really no g-term available in the pdf ($ \overrightarrow{p_1} $) because the direction is fixed. And the radius value totally gets vanished. Since we need to calculate shadow, we still need to setup a number for this radius value, however it doesn&rsquo;t have anything to do with MIS weight and Monte Carlo estimation. Any number larger than the radius of scene bounding sphere can be fine.</p>
+<p>That works because the  $ \overleftarrow{p_0} $ 
+  and  $ \overrightarrow{p_0} $ 
+ always appear in pair and the g-terms just get canceled with each other.  After a direction is picked, there is really no g-term available in the pdf (  $ \overrightarrow{p_1} $ 
+ ) because the direction is fixed. And the radius value totally gets vanished. Since we need to calculate shadow, we still need to setup a number for this radius value, however it doesn&rsquo;t have anything to do with MIS weight and Monte Carlo estimation. Any number larger than the radius of scene bounding sphere can be fine.</p>
 <p>Direction light is very similar except the fact that we don&rsquo;t need to sample a direction in the first place because it is fixed. The others are totally the same.</p>
 <h2 id="implementing-naive-bdpt-for-comparison">Implementing Naive BDPT for Comparison</h2>
 <p>It is the power heuristic we mentioned above. In a practical MIS bidirectional path tracer, we always wrap some components of MIS weight, so that we can easily switch between balanced heuristic and power heuristic.</p>

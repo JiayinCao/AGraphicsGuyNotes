@@ -83,6 +83,32 @@ The left monkey has pure reflection brdf which is mentioned in my previous blog 
     
 
     
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$", right: "$", display: false}
+      ]
+    });
+  });
+</script>
+
+<style>
+  .katex-display > .katex {
+    text-align: left !important;
+  }
+</style>
+    
 
     <meta name="generator" content="Hugo 0.108.0">
   </head>
@@ -171,14 +197,17 @@ The left monkey has pure reflection brdf which is mentioned in my previous blog 
 <p>The right way of sampling microfacet brdf is mentioned in this <a href="https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.html">paper</a>. What I want to write down in this blog is how these conclusions are derived from the original microfacet model. Using these better sampling methods, we will get similar result for those two monkeys eventually.</p>
 <h1 id="why-default-sampling-method-is-inefficient">Why Default Sampling Method is Inefficient</h1>
 <p>So why is this default sampling method inefficient for mirror like brdf model. First of all, the default sampling method goes with the following pdf:</p>
-<p>$ p_h(\omega) = \dfrac{cos(\theta)}{\pi} $</p>
+
+$$ p_h(\omega) = \dfrac{cos(\theta)}{\pi} $$
 <p>It achieves good result for diffuse surfaces like Lambert, OrenNayar. In fact, it is not a sampling method for diffuse brdfs, a sampling method for lambert brdf will respect a pdf with constant value, it also involves the cosine factor located in the rendering equation or LTE.</p>
-<p>$ {L_{o}(\omega_{o}) = \int L_{i}(\omega_{i}) *f( \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i}} $</p>
+
+$$ {L_{o}(\omega_{o}) = \int L_{i}(\omega_{i}) *f( \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i}} $$
 <p>Since it is extreme difficult, if not impossible, to have any knowledge on the incident radiance, the only thing we have is the brdf and cosine factor. The sampling method mentioned above could be efficient if the product of brdf and cosine factor is the dominant one in this equation. It works pretty well in practice most of the time.</p>
 <p>However the efficiency of default sampling method tanks quickly as the brdf becomes the dominant factor with roughness going to zero. For microfacet brdf here, its extreme form is like a dirac-delta function, it is almost impossible to get a sample with brdf having a non-zero value. And for the lucky ones that do have non-zero brdf values, it could reach super high value due to its low probability, introducing high variance to the sampling result. In other words, the convergence rate is quite low, which is exactly why we are seeing the above image. It can be even treated as a bug. Obviously, we need a better way to sample these microfacet brdfs.</p>
 <h1 id="microfacet-model">Microfacet Model</h1>
 <p>Microfacet Model is quite hot in real time rendering these years, it is the basics of physically based shading algorithm. Basically, its basic form is like the following:</p>
-<p>$ f(\omega_i,\omega_o,x) = \dfrac{F(\omega_i , h) G(\omega_i,\omega_o,h) D(h)}{4 cos(\theta_i) cos(\theta_o)}$</p>
+
+$$ f(\omega_i,\omega_o,x) = \dfrac{F(\omega_i , h) G(\omega_i,\omega_o,h) D(h)}{4 cos(\theta_i) cos(\theta_o)}$$
 <p>The first component is Fresnel, the second one is a shadowing factor called G term, the last one is normal distribution function (NDF). Comparing with the old ad-hoc bxdf model, microfacet model obeys the rule of energy conservation which allows the artist to change the roughness of the material through one parameter instead of two, specular color and specular power.</p>
 <p>Among all those factors in this equation, the NDF term is usually the dominant one. The specific shape of NDF is largely affected by the roughness of the bxdf. In order to sample the microfacet brdf model, it is usually to sample NDF first getting a random microfacet normal that respects the NDF and then reflect the exitence radiance along the normal to generate the incident direction.</p>
 <p>There are several kinds of NDF around. The following three will be covered in this blog and all that will be mentioned are isotropic ones.</p>
@@ -188,55 +217,81 @@ The left monkey has pure reflection brdf which is mentioned in my previous blog 
 <li>Blinn</li>
 </ul>
 <p>Before we proceed, there is one rule that all NDF should follow:</p>
-<p>$ \int_{\Omega} D(m) cos(\theta_m) d\omega = 1$</p>
+
+$$ \int_{\Omega} D(m) cos(\theta_m) d\omega = 1$$
 <p>We will use this equation in our following derivation. Explaining the equation is outside the scope of this blog, however one can refer <a href="http://www.reedbeta.com/blog/hows-the-ndf-really-defined/">here</a> for further detail.</p>
 <h2 id="sampling-ggx">Sampling GGX</h2>
 <p>Here is the basic form of GGX:</p>
-<p>$ D(h) = \dfrac{\alpha^2}{\pi ((\alpha^2-1) cos^2\theta + 1 ) ^2} $</p>
+
+$$ D(h) = \dfrac{\alpha^2}{\pi ((\alpha^2-1) cos^2\theta &#43; 1 ) ^2} $$
 <p>So the pdf respecting solid angle is like this:</p>
-<p>$ p_h(\omega)=\dfrac{\alpha^2cos\theta}{\pi((\alpha^2-1) cos^2\theta+1)^2}$</p>
+
+$$ p_h(\omega)=\dfrac{\alpha^2cos\theta}{\pi((\alpha^2-1) cos^2\theta&#43;1)^2}$$
 <p>Instead of sampling solid angle directly, we usually use spherical coordinate to sample it. So it is not the pdf respecting the solid angle that we are interested, it is the pdf respecting the spherical coordinates.</p>
-<p>$ p_h(\theta,\phi)=\dfrac{\alpha^2cos\theta sin\theta}{\pi((\alpha^2-1) cos^2\theta+1)^2}$</p>
+
+$$ p_h(\theta,\phi)=\dfrac{\alpha^2cos\theta sin\theta}{\pi((\alpha^2-1) cos^2\theta&#43;1)^2}$$
 <p>The following task is quite straight forward, which is basically sampling according to a specific pdf. Inversion method goes pretty well for all NDFs in this blog. Notice that $ \phi $ is not even in this equation, that said the NDF is totally isotropic and we can sample $ \phi $ uniformly. For detail proof, please refer <a href="https://www.tobias-franke.eu/log/2014/03/30/notes_on_importance_sampling.html">here</a>. The only thing left here is how to sample $ \theta $. In order to do that, we need to get the pdf for $ \theta $ first.</p>
-<p>$ p_h(\theta)=\int_{0}^{2\pi}p_h(\theta,\phi)d\phi = \dfrac{2\alpha^2cos\theta sin\theta}{((\alpha^2-1) cos^2\theta+1)^2} $</p>
+
+$$ p_h(\theta)=\int_{0}^{2\pi}p_h(\theta,\phi)d\phi = \dfrac{2\alpha^2cos\theta sin\theta}{((\alpha^2-1) cos^2\theta&#43;1)^2} $$
 <p>Let&rsquo;s calculate the CDF next:</p>
-<p>$ \begin{array} {lcl} P_h(\theta) &amp; = &amp; \int_{0}^{\theta} \dfrac{2\alpha^2 cos(t) sin(t)}{(cos^2t(\alpha^2-1)+1)^2}dt \\\ &amp; = &amp; \int_{\theta}^{0} \dfrac{\alpha^2}{(cos^2t(\alpha^2-1)+1)^2}d(cos^2t) \\\ &amp; = &amp; \dfrac{\alpha^2}{\alpha^2-1} \int_{0}^{\theta} d{\dfrac{1}{cos^2t(\alpha^2-1)+1}}\\\ &amp; = &amp; \dfrac{\alpha^2}{\alpha^2-1} {(\dfrac{1}{cos^2\theta(\alpha^2-1)+1}-\dfrac{1}{\alpha^2})}\\\ &amp; = &amp; \dfrac{\alpha^2}{cos^2\theta(\alpha^2-1)^2+(\alpha^2-1)}-\dfrac{1}{\alpha^2-1} \end{array} $</p>
+
+$$ \begin{array} {lcl} P_h(\theta) &amp; = &amp; \int_{0}^{\theta} \dfrac{2\alpha^2 cos(t) sin(t)}{(cos^2t(\alpha^2-1)&#43;1)^2}dt \\\\ &amp; = &amp; \int_{\theta}^{0} \dfrac{\alpha^2}{(cos^2t(\alpha^2-1)&#43;1)^2}d(cos^2t) \\\\ &amp; = &amp; \dfrac{\alpha^2}{\alpha^2-1} \int_{0}^{\theta} d{\dfrac{1}{cos^2t(\alpha^2-1)&#43;1}} \\\\ &amp; = &amp; \dfrac{\alpha^2}{\alpha^2-1} {(\dfrac{1}{cos^2\theta(\alpha^2-1)&#43;1}-\dfrac{1}{\alpha^2})} \\\\ &amp; = &amp; \dfrac{\alpha^2}{cos^2\theta(\alpha^2-1)^2&#43;(\alpha^2-1)}-\dfrac{1}{\alpha^2-1} \end{array} $$
 <p>With a random number ranging from 0 to 1 $ \epsilon $ that is equal to this CDF, we have the following equation:</p>
-<p>$ \epsilon =\dfrac{\alpha^2}{cos^2\theta(\alpha^2-1)^2 + (\alpha^2-1)} - \dfrac{1}{\alpha^2-1}$</p>
+
+$$ \epsilon =\dfrac{\alpha^2}{cos^2\theta(\alpha^2-1)^2 &#43; (\alpha^2-1)} - \dfrac{1}{\alpha^2-1}$$
 <p>To solve this equation requires no more knowledge than mathematic in junior high school, I guess there is no need to show the whole process. The final solution of the above equation is:</p>
-<p>$ \theta =arccos\sqrt{\dfrac{1-\epsilon}{\epsilon(\alpha^2-1)+1}} $ or $ \theta =arctan(\alpha\sqrt{\dfrac{\epsilon}{1-\epsilon}})$</p>
+<p> $ \theta =arccos\sqrt{\dfrac{1-\epsilon}{\epsilon(\alpha^2-1)+1}} $ 
+
+or
+ $ \theta =arctan(\alpha\sqrt{\dfrac{\epsilon}{1-\epsilon}}) $ 
+</p>
 <p>The above two equations are exactly the same thing. Choosing which one to use is just a matter of taste.</p>
 <h2 id="sampling-beckmann">Sampling Beckmann</h2>
 <p>The derivation of sampling method for Beckmann is quite similar to the above procedure. Here is the Beckmann distribution:</p>
-<p>$ D(h) =\frac{1}{\pi\alpha^2cos^4\theta}e^{-\frac{tan^2\theta}{\alpha^2}}$</p>
+
+$$ D(h) =\frac{1}{\pi\alpha^2cos^4\theta}e^{-\frac{tan^2\theta}{\alpha^2}}$$
 <p>The pdf respecting spherical coordinate is like this:</p>
-<p>$ p_h(\theta,\phi)=\frac{sin\theta}{\pi\alpha^2cos^3\theta}e^{-\frac{tan^2\theta}{\alpha^2}}$</p>
+
+$$ p_h(\theta,\phi)=\frac{sin\theta}{\pi\alpha^2cos^3\theta}e^{-\frac{tan^2\theta}{\alpha^2}}$$
 <p>Again, $ \phi $ can be sampled uniformly. The pdf for $ \theta $ should be this:</p>
-<p>$ p_h(\theta)=\frac{2sin\theta}{\alpha^2cos^3\theta}e^{-\frac{tan^2\theta}{\alpha^2}}$</p>
+
+$$ p_h(\theta)=\frac{2sin\theta}{\alpha^2cos^3\theta}e^{-\frac{tan^2\theta}{\alpha^2}}$$
 <p>The CDF for $ \theta $ can be calculated this way:</p>
-<p>$ \begin{array} {lcl} P_h(\theta) &amp; = &amp; \int_{0}^{\theta} \frac{2sin(t)}{\alpha^2cos^3t}e^{-\frac{tan^2t}{\alpha^2}}dt \\\ &amp; = &amp; \int_{0}^{\theta} \frac{-2}{\alpha^2cos^3t}e^{-\frac{tan^2t}{\alpha^2}}d(cos(t))\\\ &amp; = &amp;\int_{0}^{\theta} \frac{1}{\alpha^2}e^{-\frac{tan^2t}{\alpha^2}}d(\frac{1}{cos^2(t)}) \\\ &amp; = &amp; \int_{0}^{\theta} \frac{1}{\alpha^2}e^{\frac{1}{\alpha^2}(1-\frac{1}{\cos^2t})}d(\frac{1}{cos^2(t)})\\\ &amp; = &amp; \int_{\theta}^{0} d(e^{\frac{1}{\alpha^2}(1-\frac{1}{\cos^2t})})\\\ &amp; = &amp; 1- e^{\frac{1}{\alpha^2}(1-\frac{1}{\cos^2\theta})} \end{array} $</p>
+
+$$ \begin{array} {lcl} P_h(\theta) &amp; = &amp; \int_{0}^{\theta} \frac{2sin(t)}{\alpha^2cos^3t}e^{-\frac{tan^2t}{\alpha^2}}dt \\\\ &amp; = &amp; \int_{0}^{\theta} \frac{-2}{\alpha^2cos^3t}e^{-\frac{tan^2t}{\alpha^2}}d(cos(t)) \\\\ &amp; = &amp;\int_{0}^{\theta} \frac{1}{\alpha^2}e^{-\frac{tan^2t}{\alpha^2}}d(\frac{1}{cos^2(t)}) \\\\ &amp; = &amp; \int_{0}^{\theta} \frac{1}{\alpha^2}e^{\frac{1}{\alpha^2}(1-\frac{1}{\cos^2t})}d(\frac{1}{cos^2(t)}) \\\\ &amp; = &amp; \int_{\theta}^{0} d(e^{\frac{1}{\alpha^2}(1-\frac{1}{\cos^2t})}) \\\\ &amp; = &amp; 1- e^{\frac{1}{\alpha^2}(1-\frac{1}{\cos^2\theta})} \end{array} $$
 <p>Solving the equation of $ P_h(\theta) = \epsilon $ gives the following solution:</p>
-<p>$ \theta =arccos\sqrt{\dfrac{1}{1-\alpha^2 ln(1-\epsilon)}} $ or $ \theta =arctan\sqrt{-\alpha^2\ln(1-\epsilon)} $</p>
+<p> $ \theta =arccos\sqrt{\dfrac{1}{1-\alpha^2 ln(1-\epsilon)}} $ 
+ or
+ $ \theta =arctan\sqrt{-\alpha^2\ln(1-\epsilon)} $ 
+</p>
 <h2 id="sampling-blinn">Sampling Blinn</h2>
 <p>Here is the Blinn NDF:</p>
-<p>$ D(h)=\dfrac{\alpha+2}{2\pi}(cos\theta)^\alpha$</p>
+
+$$ D(h)=\dfrac{\alpha&#43;2}{2\pi}(cos\theta)^\alpha$$
 <p>The pdf respecting to spherical coordinate is:</p>
-<p>$ p_h(\theta,\phi)=\dfrac{\alpha+2}{2\pi}(cos\theta)^{\alpha+1}sin\theta $</p>
+
+$$ p_h(\theta,\phi)=\dfrac{\alpha&#43;2}{2\pi}(cos\theta)^{\alpha&#43;1}sin\theta $$
 <p>Isolating $ \phi $ gives the following:</p>
-<p>$ p_h(\theta) = (\alpha+2)(cos\theta)^{\alpha+1}sin\theta $</p>
+
+$$ p_h(\theta) = (\alpha&#43;2)(cos\theta)^{\alpha&#43;1}sin\theta $$
 <p>This one is a lot simpler than the previous two, here is the CDF:</p>
-<p>$ \begin{array} {lcl} P_h(\theta) &amp; = &amp; \int_{0}^{\theta} (\alpha+2)cos(t)^{\alpha+1}sin(t)d(t) \\\ &amp; = &amp; \int_{\theta}^{0} (\alpha+2)cos(t)^{\alpha+1}d(cos(t)) \\\ &amp; = &amp;\int_{\theta}^{0} d(cos(t)^{\alpha+2}) \\\ &amp; = &amp;{1-cos(\theta)^{\alpha+2}} \end{array} $</p>
+
+$$ \begin{array} {lcl} P_h(\theta) &amp; = &amp; \int_{0}^{\theta} (\alpha&#43;2)cos(t)^{\alpha&#43;1}sin(t)d(t) \\\\ &amp; = &amp; \int_{\theta}^{0} (\alpha&#43;2)cos(t)^{\alpha&#43;1}d(cos(t)) \\\\ &amp; = &amp;\int_{\theta}^{0} d(cos(t)^{\alpha&#43;2}) \\\\ &amp; = &amp;{1-cos(\theta)^{\alpha&#43;2}} \end{array} $$
 <p>Here is the relation between random number and $ \theta $</p>
-<p>$ \theta=arccos((1-\epsilon)^{\frac{1}{\alpha+2}})$</p>
+
+$$ \theta=arccos((1-\epsilon)^{\frac{1}{\alpha&#43;2}})$$
 <p>Since $ \epsilon $ is a uniformly distributed random number between 0 and 1, $ 1-\epsilon $ is the same. So we can simplify the above equation with the following one:</p>
-<p>$ \theta=arccos(\epsilon^{\frac{1}{\alpha+2}})$</p>
+
+$$ \theta=arccos(\epsilon^{\frac{1}{\alpha&#43;2}})$$
 <p>A little more about this sampling method. I&rsquo;m not quite confident with this solution, although I can see nothing wrong in this derivation. PBRT gives a similar solution for Blinn which is:</p>
-<p>$ \theta=arccos(\epsilon^{\frac{1}{\alpha+1}})$</p>
+
+$$ \theta=arccos(\epsilon^{\frac{1}{\alpha&#43;1}})$$
 <p>And another open-source ray tracer, <a href="https://www.mitsuba-renderer.org/">mitsuba</a>, also adopts this way of sampling. I don&rsquo;t quite understand the derivation in the book, so I&rsquo;ll just stick to this one, which is also the one mentioned <a href="https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.html">here</a>. I tried the pbrt&rsquo;s way of sampling, only minor difference can be noticed from the image.</p>
 <h1 id="one-extra-step">One Extra Step</h1>
 <p>There is still one step further from being done. It is the incident direction sampling that we are interested, not the normal. The reason we are sampling the normal instead of incident direction directly is because NDF is usually the dominant factor in microfacet model. Generating the incident direction after sampling normal is a more efficient way than sampling the incident direction itself.</p>
 <p>However the way we calculate PDF given an incident direction is different from the above ones respecting half-vector, whether it&rsquo;s solid angle or spherical coordinate. What we have so far is the pdf for half-vector, a transformation is necessary.</p>
-<p>$ p(\theta) = p_h(\theta) \dfrac{d\omega_h}{d\omega_i} = \dfrac{p_h(\theta)}{4 (\omega_o \cdot \omega_h)} $</p>
+
+$$ p(\theta) = p_h(\theta) \dfrac{d\omega_h}{d\omega_i} = \dfrac{p_h(\theta)}{4 (\omega_o \cdot \omega_h)} $$
 <h1 id="conclusion">Conclusion</h1>
 <p>Here are the images generated after and before the new sampling method.</p>
 
@@ -650,20 +705,7 @@ $('.ba-slider'+"10b97b22b77d4af64917b9b2ab6df72b").beforeAfter();
       </footer>
     </article>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
-    onload="renderMathInElement(document.body,
-      {
-        delimiters: [
-          {left: '$$', right: '$$', display:true},
-          {left: '$', right: '$', display:false},
-          {left: '\\(', right: '\\)', display: false},
-          {left: '\\[', right: '\\]', display: true}
-        ]
-      }
-    );">
-  </script>
+    
   </section>
 
       </div>

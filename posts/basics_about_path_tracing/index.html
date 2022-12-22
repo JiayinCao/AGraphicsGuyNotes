@@ -83,6 +83,32 @@ I really want to render something different using my ray tracer, however it does
     
 
     
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$", right: "$", display: false}
+      ]
+    });
+  });
+</script>
+
+<style>
+  .katex-display > .katex {
+    text-align: left !important;
+  }
+</style>
+    
 
     <meta name="generator" content="Hugo 0.108.0">
   </head>
@@ -179,24 +205,40 @@ I really want to render something different using my ray tracer, however it does
 </ul>
 <h2 id="math-behind-it">Math behind it</h2>
 <p>Basically every algorithm tries to simulate the famous rendering equation. It is also a good start point for path tracing theory.</p>
-<p>$ {L_{o}(\omega_{o}) = L_{e}(\omega_{o}) + \int L_{i}(\omega_{i}) *f( \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i}} $</p>
+
+$$ {L_{o}(\omega_{o}) = L_{e}(\omega_{o}) &#43; \int L_{i}(\omega_{i}) *f( \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i}} $$
 <p>The difficulty for simulating this equation is that L is appeared at both side of the equation. And L itself is a function of position and direction, that said the L at different side of this equation may have different values, most of the time they are not the same. In order to compute the Lo on the left, it is necessary to get the radiance values for Li first. Notice that we may need multiple Li since it is an integral. Actually Lo is no essentially different from Li, they are all radiance values. So &hellip; in order to generate the Li, we need other radiance values which is implicit in this equation. And it is a recursive problem, never ends. That is why rendering equation is very hard to solve.</p>
 <p>We are now rewriting this equation removing the difference between Lo and Li, they are all L</p>
-<p>$ {L(\omega_{o}) = L_{e}(\omega_{o}) + \int L(\omega_{i}) * f( \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i}} $</p>
+
+$$ {L(\omega_{o}) = L_{e}(\omega_{o}) &#43; \int L(\omega_{i}) * f( \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i}} $$
 <p>In order to make it more clear for paths with different number of bounces, let&rsquo;s redefine the L and brdf this way:</p>
-<p>$ {L(\omega) = L( x_{0} \to x_{1} )} $</p>
-<p>The left L means that radiance value along the direction $ {\omega} $, while the right one represents the radiance value from point x0 to x1.</p>
-<p>$ {f( \omega_{i}, \omega_{o} ) = f( x_{0} \to x_{1} \to x_{2} ) } $</p>
+
+$$ {L(\omega) = L( x_{0} \to x_{1} )} $$
+<p>The left L means that radiance value along the direction  $ {\omega} $ 
+ , while the right one represents the radiance value from point x0 to x1.</p>
+
+$$ {f( \omega_{i}, \omega_{o} ) = f( x_{0} \to x_{1} \to x_{2} ) } $$
 <p>This one is similar. The left one is the traditional four-dimensional brdf, the right one is the brdf value at point x1, the two directions are determined by point x0 and x2.</p>
-<p>Now it is the time to expand the equation. Replace the radiance value on the right with the equation itself. For any path, let&rsquo;s define the first vertex is x0, the second one is x1 and so on. $ {\theta_{i}}&amp;s=1$ stands for the angle between surface normal and the direction pointing from $ {x_{i}}&amp;s=1$ to $ {x_{i+1}}&amp;s=1$. $ {\omega_{i}}&amp;s=1$ is the solid angle around the point $ {x_{i}}&amp;s=1$.</p>
-<p>$ {L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) + \int L(x_{2} \to x_{1}) * f( x_{2} \to x_{1} \to x_{0} ) *cos(\theta_{1}) d\omega_{1}} $</p>
+<p>Now it is the time to expand the equation. Replace the radiance value on the right with the equation itself. For any path, let&rsquo;s define the first vertex is  $ x_0 $ 
+, the second one is  $ x_1 $ 
+ and so on.  $ \theta_1 $ 
+ stands for the angle between surface normal and the direction pointing from  $ x_1 $ 
+ to  $ x_2 $ 
+.  $ {\omega_{1}}$ 
+ is the solid angle around the point  $ x_1 $.
+</p>
+
+$$ {L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) &#43; \int L(x_{2} \to x_{1}) * f( x_{2} \to x_{1} \to x_{0} ) *cos(\theta_{1}) d\omega_{1}} $$
 <p>Although we redefined rendering equation this way, we are still integrating over the solid angle instead of area because that&rsquo;s exactly how we generate path later. If we replace the L value on the right with the equation itself, we have something like this:</p>
-<p>$ \begin{array} {lcl} L(x_{1} \to x_{0}) &amp; = &amp; L_{e}(x_{1} \to x_{0}) + \\\ &amp; &amp; \int (L_{e}(x_{2} \to x_{1}) + \int L(x_{3} \to x_{2}) * f( x_{3} \to x_{2} \to x_{1} ) *cos(\theta_{2}) d\omega_{2}) * f( x_{2} \to x_{1} \to x_{0} ) *cos(\theta_{1}) d\omega_{1} \\\ &amp; = &amp; L_{e}(x_{1} \to x_{0}) + \\\ &amp; &amp; \int L_{e}(x_{2} \to x_{1}) * f( x_{2} \to x_{1} \to x_{0} ) *cos(\theta_{1}) d\omega_{1} + \\\ &amp; &amp; \int \int L(x_{3} \to x_{2}) * f( x_{3} \to x_{2} \to x_{1} ) *cos(\theta_{2}) * f( x_{2} \to x_{1} \to x_{0} ) *cos(\theta_{1}) d\omega_{1}d\omega_{2} \end{array} $</p>
+
+$ \begin{array} {lcl} L(x_{1} \to x_{0}) &amp; = &amp; L_{e}(x_{1} \to x_{0}) &#43; \int (L_{e}(x_{2} \to x_{1}) &#43; \\ &amp; &amp; \int L(x_{3} \to x_{2}) * f( x_{3} \to x_{2} \to x_{1} ) *cos(\theta_{2}) d\omega_{2}) * f( x_{2} \to x_{1} \to x_{0} ) *cos(\theta_{1}) d\omega_{1} \\ &amp; = &amp; L_{e}(x_{1} \to x_{0}) &#43; \\ &amp; &amp; \int L_{e}(x_{2} \to x_{1}) * f( x_{2} \to x_{1} \to x_{0} ) *cos(\theta_{1}) d\omega_{1} &#43; \\ &amp; &amp; \int \int L(x_{3} \to x_{2}) * f( x_{3} \to x_{2} \to x_{1} ) *cos(\theta_{2}) * f( x_{2} \to x_{1} \to x_{0} ) *cos(\theta_{1}) d\omega_{1}d\omega_{2} \end{array} $
 <p>It is a very long equation. The simple truth here is that it represents 0 bounces contribution (intersected object is emissive) in the third line of this equation, 1 bounce in the fourth line of it and further bounces in the last line. Maybe expend it again will be more clear, however I don&rsquo;t think I can show that long a equation in such small space. In case it is too long, let&rsquo;s define some basic terms first.</p>
 <p>It is not hard to get the light contribution of n bounces, n is from 1 to infinite.</p>
-<p>$ P(n) = {\int&hellip;\int} L_{e}(x_{n+1} \to x_{n}) * \prod\limits_{i=1}^n (f( x_{i+1} \to x_{i} \to x_{i-1} ) *cos(\theta_{i})) d\omega_{1}d\omega_{2}&hellip;d\omega_{n} $</p>
+
+$$ P(n) = {\int...\int} L_{e}(x_{n&#43;1} \to x_{n}) * \prod\limits_{i=1}^n (f( x_{i&#43;1} \to x_{i} \to x_{i-1} ) *cos(\theta_{i})) d\omega_{1}d\omega_{2}...d\omega_{n} $$
 <p>With the above equations replacing the extended rendering equation, we have a quite simpler form.</p>
-<p>$ { L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) + \sum\limits_{n=1}^{\infty} P(n) }  $</p>
+
+$$ { L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) &#43; \sum\limits_{n=1}^{\infty} P(n) }  $$
 <p>That is the exact form we used to simulate rendering equation with path tracing. What it says is relatively clear comparing with the original rendering equation, radiance from a specific point to another is the summation of the emissive energy and the light contribution with every number of bounces. That leaves us only two problems to solve.</p>
 <h2 id="generate-a-path-with-specific-number-of-bounces">Generate a path with specific number of bounces</h2>
 <p>Now we are focusing on P(n). With Monte Carlo, we only need to generate a number of paths with n time bounces to simulate the integral. Given a specific number &ldquo;n&rdquo;, how to generate a path with the exact number of bounces. The answer is you can randomly pick the points anywhere you want with any probability density function(pdf), however different form of rendering equation is needed if picking point through surfaces instead of solid angle. I never seen any path tracing implementation picking sample points on surfaces, may be you can do that in cornell case. However it will introduce high variance for a moderate scene. Although PBRT does start the theory with this way, it ends up to generate path through brdf eventually.</p>
@@ -209,13 +251,17 @@ I really want to render something different using my ray tracer, however it does
 <p>Here is an example taken from here. The image on the left samples light source, the glossier the surface is, the worse the result is. As for the middle one which samples brdf, we can see there is extremely low convergence rate for small light sources. The right most one uses multiple importance sampling, it gives pretty good result. And for the best part, you don&rsquo;t even need to know which pdf is similar to the integrated function, it just works.</p>
 <h2 id="sampling-infinitive-number-of-paths-with-finite-resources">Sampling infinitive number of paths with finite resources</h2>
 <p>We have only one question left, how to generate result for infinitive number of bounces. Russion roullete is the key here.</p>
-<p>$ { L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) + \sum\limits_{n=1}^{\infty} P(n) }  $</p>
+
+$$ { L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) &#43; \sum\limits_{n=1}^{\infty} P(n) }  $$
 <p>Since it is assumed that the more bounces in the path, the less contribution it has to the final image. There are cases breaking this assumption for sure, however it is true most of the time. If we define a function like this:</p>
-<p>$ P^{&rsquo;}(n)= \begin{cases} \frac{P(n)}{T}&amp;:t&lt;T \\\ 0&amp;:t\ge T \end{cases} $</p>
+
+$$ P^{&#39;}(n)= \begin{cases} \frac{P(n)}{T}&amp;:t&lt;T \\ 0&amp;:t\ge T \end{cases} $$
 <p>We have certain probability to terminate the path without introducing any bias. Putting this into the rendering equation:</p>
-<p>$ { L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) + P(0) + P(1) + P(2) + \sum\limits_{n=3}^{\infty} P^{&rsquo;}(n) }  $</p>
+
+$$ { L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) &#43; P(0) &#43; P(1) &#43; P(2) &#43; \sum\limits_{n=3}^{\infty} P^{&#39;}(n) }  $$
 <p>It seems look better, however it is still needed for infinite number of paths to generate the result. Let&rsquo;s go further:</p>
-<p>$ { L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) + P(0) + P(1) + P(2) + \frac{1}{T} * ( P(3) + \frac{1}{T} * ( P(4) + \frac{1}{T} * ( P(5) + &hellip; ))) }  $</p>
+
+$$ { L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) &#43; P(0) &#43; P(1) &#43; P(2) &#43; \frac{1}{T} * ( P(3) &#43; \frac{1}{T} * ( P(4) &#43; \frac{1}{T} * ( P(5) &#43; ... ))) }  $$
 <p>We have non-zero probability of reaching path with any number of bounces. In a practical case, it will most likely to terminate the whole computation after several number of bounces without introducing any bias in the rendering equation.</p>
 <h1 id="optimization">Optimization</h1>
 <p>Path tracing is an elegant algorithm, it captures all effects in the rendering equation. However it usually takes a great number of samples per pixel to reach acceptable result, that means a lot of time consumed by computing. There are a couple of ways to improve the performance of path tracing.</p>
@@ -415,20 +461,7 @@ I really want to render something different using my ray tracer, however it does
       </footer>
     </article>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
-    onload="renderMathInElement(document.body,
-      {
-        delimiters: [
-          {left: '$$', right: '$$', display:true},
-          {left: '$', right: '$', display:false},
-          {left: '\\(', right: '\\)', display: false},
-          {left: '\\[', right: '\\]', display: true}
-        ]
-      }
-    );">
-  </script>
+    
   </section>
 
       </div>

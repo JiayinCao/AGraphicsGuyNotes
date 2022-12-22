@@ -80,6 +80,32 @@
     
 
     
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$", right: "$", display: false}
+      ]
+    });
+  });
+</script>
+
+<style>
+  .katex-display > .katex {
+    text-align: left !important;
+  }
+</style>
+    
 
     <meta name="generator" content="Hugo 0.108.0">
   </head>
@@ -215,8 +241,11 @@
 <h1 id="light-map">Light Map</h1>
 <h2 id="rendering-equation">Rendering Equation</h2>
 <p>Basically everything in computer graphics, whether it is offline rendering or real time rendering, tries to simulate the famous rendering equation. The only difference is that how much assumption it has to make to design the algorithm. Some places little limitation, like path tracing. Some puts more, like ambient occlusion. The less assumption it is made, it is more likely to achieve better result.</p>
-<p>$ {L_{o}(\omega_{o}) = \int L_{i}(\omega_{i}) *f( \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i}} $</p>
-<p>In certain cases, you may have a Le component in this equation, which represents emissive materials. Since it is not involved in the context of this article, it is not shown here. Li and Lo represent radiance value for the output and input angle. &ldquo;f&rdquo; is the four dimensional brdf function.  $\theta_{i}$ is the angle between $ \omega_{i} $ and normal. Don&rsquo;t be afraid of this integral, what it says is to accumulate contributions of light from all angles, nothing more.</p>
+
+$$ {L_{o}(\omega_{o}) = \int L_{i}(\omega_{i}) *f( \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i}} $$
+<p>In certain cases, you may have a Le component in this equation, which represents emissive materials. Since it is not involved in the context of this article, it is not shown here. Li and Lo represent radiance value for the output and input angle. &ldquo;f&rdquo; is the four dimensional brdf function.  $\theta_{i}$ 
+is the angle between  $ \omega_{i} $ 
+ and normal. Don&rsquo;t be afraid of this integral, what it says is to accumulate contributions of light from all angles, nothing more.</p>
 <p>For traditional light map, there are a couple of assumptions made:</p>
 <ul>
 <li>All surfaces in the scene is purely diffuse which behaves as exactly lambertian surfaces.</li>
@@ -232,18 +261,26 @@
 <li>radiance. Flux per unit-area per solid angle</li>
 </ul>
 <p>It is radiance that human can perceive and its value is not changed along a certain direction if there is only vacuum. The following equation demonstrates how to get irradiance value from radiance:</p>
-<p>$ { E = \int L_{i}(\omega_{i}) *cos(\theta_{i}) d\omega_{i}} $</p>
+
+$$ { E = \int L_{i}(\omega_{i}) *cos(\theta_{i}) d\omega_{i}} $$
 <h2 id="lambertian-surface-feature">Lambertian surface feature</h2>
 <p>Lambertian surface appears equally bright from all viewing directions and reflects all incident light. It has a very nice feature, the brdf function returns a constant value regardless of the two angles for any specific position. The below equation is the directional-hemisphere reflectance equation:</p>
-<p>$ \rho_{d} = \int f( \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i} $</p>
-<p>Notice that  $ \rho_{d} $ is a function of position. Since we are focusing on a single position, it is dropped in the above equation. Because brdf is a constant value, we have the following equation after isolating this factor out of the integral:</p>
-<p>$ \rho_{d} = f( \omega_{i}, \omega_{o} ) * \int cos(\theta_{i}) d\omega_{i} $</p>
-<p>The integral component is actually $ \pi $:</p>
-<p>$ \begin{array} {lcl} \int cos(\theta_{i}) d\omega_{i} &amp; = &amp; \int_{0}^{2\pi} \int_{0}^{\frac{\pi}{2}} cos(\theta_{i}) sin(\theta_{i}) d\theta_i d\phi \\\ &amp; = &amp; \int_{0}^{2\pi} d\phi \int_{0}^{\frac{\pi}{2}} cos(\theta_{i}) sin(\theta_{i}) d\theta_i \\\ &amp; = &amp; 2\pi \int_{0}^{\frac{\pi}{2}} cos(\theta_{i}) sin(\theta_{i}) d\theta_i \\\ &amp; = &amp; 0.5 * \pi \int_{0}^{\frac{\pi}{2}} sin(2\theta_{i}) d(2\theta_i) \\\ &amp; = &amp; \pi \end{array} $</p>
+
+$$ \rho_{d} = \int f( \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i} $$
+<p>Notice that  $ \rho_{d} $ 
+is a function of position. Since we are focusing on a single position, it is dropped in the above equation. Because brdf is a constant value, we have the following equation after isolating this factor out of the integral:</p>
+
+$$ \rho_{d} = f( \omega_{i}, \omega_{o} ) * \int cos(\theta_{i}) d\omega_{i} $$
+<p>The integral component is actually  $ \pi $ 
+:</p>
+
+$$ \begin{array} {lcl} \int cos(\theta_{i}) d\omega_{i} &amp; = &amp; \int_{0}^{2\pi} \int_{0}^{\frac{\pi}{2}} cos(\theta_{i}) sin(\theta_{i}) d\theta_i d\phi \\\\ &amp; = &amp; \int_{0}^{2\pi} d\phi \int_{0}^{\frac{\pi}{2}} cos(\theta_{i}) sin(\theta_{i}) d\theta_i \\\\ &amp; = &amp; 2\pi \int_{0}^{\frac{\pi}{2}} cos(\theta_{i}) sin(\theta_{i}) d\theta_i \\\\ &amp; = &amp; 0.5 * \pi \int_{0}^{\frac{\pi}{2}} sin(2\theta_{i}) d(2\theta_i) \\\\ &amp; = &amp; \pi \end{array} $$
 <p>So we have the final equation for our lambertian brdf, which is extremely simple:</p>
-<p>$ f(\omega_{i}, \omega_{o}) = \dfrac{\rho_{d}}{\pi} $</p>
+
+$$ f(\omega_{i}, \omega_{o}) = \dfrac{\rho_{d}}{\pi} $$
 <p>If we substitute the brdf function in the rendering equation with this one, here is what we will get:</p>
-<p>$ {L_{o}(\omega_{o}) = \dfrac{\rho_{d}}{\pi} * \int L_{i}(\omega_{i}) *cos(\theta_{i}) d\omega_{i}} $</p>
+
+$$ {L_{o}(\omega_{o}) = \dfrac{\rho_{d}}{\pi} * \int L_{i}(\omega_{i}) *cos(\theta_{i}) d\omega_{i}} $$
 <p>The lucky thing is that the integral part of this equation turns out to be irradiance. And irradiance is what needs to be stored in light map. As a matter of fact, light map was also named irradiance map by some people.</p>
 <h2 id="radiosity-algorithm">Radiosity Algorithm</h2>
 <p>Radiosity is usually the algorithm for calculating those values. Basically it divides the scene into many small patches and generates form factors between each two patches and then makes some interations. During the first iteration, only emissive patches have energy, they distribute those energy to other visible patches. After the first iteration, patches directly visible to emissive patches receive some energy, however there won&rsquo;t be effects like color bleeding or multiple light bounces. Some patches will be totally black. With the second iteration, there are more patches with energy that can be distributed to other patches. Even if patches not directly visible to emissive patches, usually light sources, will be lit this time. After several rounds of iteration, it will reach equilibrium. It should give a good result. Check <a href="https://en.wikipedia.org/wiki/Radiosity_(computer_graphics)">here</a> for more detailed explanation.</p>
@@ -268,7 +305,8 @@
 </figure>
 
 <p>Those three basis are not arbitrarily chosen. They are pairwise orthogonal and cover the whole hemisphere. The reconstruction process is relatively simple:</p>
-<p>$ \begin{array} {lcl} color &amp;=&amp; dot( normal , basis[0] )^2 * lightmap_color[0] \\\ &amp;+&amp; dot( normal, basis[1] )^2 * lightmap_color[1] \\\ &amp;+&amp; dot( normal , basis[2] )^2 * lightmap_color[2] \end{array} $</p>
+
+$$ \begin{array} {lcl} color &amp;=&amp; dot( normal , basis[0] )^2 * lightmap\_color[0] &#43; \\ &amp; &amp; dot( normal, basis[1] )^2 * lightmap\_color[1] &#43; \\ &amp; &amp; dot( normal , basis[2] )^2 * lightmap\_color[2] \end{array} $$
 <p>Please note that the equation above is not exactly the same with the one mention in the paper by valve, it is the one from real time rendeing. Because the equation in the paper is incorrect. Since it is orthogonal basis that the normal projects on, there is no need to normalize the factors because the summation of the squared projected values is exactly 1.</p>
 <p>Source engine by Valve uses this method. And Unreal Engine 3 uses a simpler version of it, only one irradiance value and three intensity value (three numbers) are stored. Instead of blending among the three, intensity values are blended and then multiply the irradiance value. So varying per-pixel values in normal map can only produce different brightnesses of the lightmap texel color instead of different colors.</p>
 <p>If normal is not used for other purpose, normal map can be changed in another different form. Instead of storing normal in it, the squared projected values of the normal on the basis can be stored in it. And it can save many hardware cycles during real time calculation. <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.406.4625&amp;rep=rep1&amp;type=pdf">Here</a> is more detailed explanation.</p>
@@ -472,20 +510,7 @@
       </footer>
     </article>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
-    onload="renderMathInElement(document.body,
-      {
-        delimiters: [
-          {left: '$$', right: '$$', display:true},
-          {left: '$', right: '$', display:false},
-          {left: '\\(', right: '\\)', display: false},
-          {left: '\\[', right: '\\]', display: true}
-        ]
-      }
-    );">
-  </script>
+    
   </section>
 
       </div>

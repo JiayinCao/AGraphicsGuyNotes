@@ -83,6 +83,32 @@ This is a memo for me recording the derivation of specular reflection in a more 
     
 
     
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$", right: "$", display: false}
+      ]
+    });
+  });
+</script>
+
+<style>
+  .katex-display > .katex {
+    text-align: left !important;
+  }
+</style>
+    
 
     <meta name="generator" content="Hugo 0.108.0">
   </head>
@@ -168,48 +194,66 @@ This is a memo for me recording the derivation of specular reflection in a more 
 <h1 id="questions-after-reading-the-two-chapters">Questions after Reading the two Chapters</h1>
 <p>A couple of questions occurred to me last time I read these two chapters.</p>
 <p>There is an equation at the page of 439 describing the relationship between brdf, fresnel and incident/existence radiance.</p>
-<p>$ L_{o}(\omega_o) = f_r( \omega_o , \omega_i ) L_i(\omega_i) = F_r(\omega_i) L_i(\omega_i)$</p>
+
+$$ L_{o}(\omega_o) = f_r( \omega_o , \omega_i ) L_i(\omega_i) = F_r(\omega_i) L_i(\omega_i)$$
 <p>Looking at the first part of this equation, it says:</p>
-<p>$ L_{o}(\omega_o) = f_r( \omega_o , \omega_i ) L_i(\omega_i) $</p>
+
+$$ L_{o}(\omega_o) = f_r( \omega_o , \omega_i ) L_i(\omega_i) $$
 <p>Little transformation shows something really weird:</p>
-<p>$ f_r( \omega_o , \omega_i ) = \dfrac{L_{o}(\omega_o)}{L_i(\omega_i)} $</p>
+
+$$ f_r( \omega_o , \omega_i ) = \dfrac{L_{o}(\omega_o)}{L_i(\omega_i)} $$
 <p>I was quite confused by this equation at first. Where are the missing solid angle and cosine part? It looks like a mistake to me, so I tried to look for it in the errata page and found Jérémy Riviere&rsquo;s correction about this line. It says &ldquo;In the first displayed equation, the middle term should be an integral over directions \omega, along the lines of the standard reflection equation.&rdquo;, the equation should be the following way according to him:</p>
-<p>$ {L_{o}(\omega_{o}) = \int L_{i}(\omega_{i}) f( \omega_{i}, \omega_{o} ) |cos(\theta_{i})| d\omega_{i}} $</p>
+
+$$ {L_{o}(\omega_{o}) = \int L_{i}(\omega_{i}) f( \omega_{i}, \omega_{o} ) |cos(\theta_{i})| d\omega_{i}} $$
 <p>This equation itself is a correct one, it is the basic form of LTE without the emission component. However it doesn&rsquo;t explain anything in the following context in a clear way. And things get more and more blurry if the integral is extended to the last part of the first equation. Actually you can&rsquo;t just extend the integral to the third part at all, because Fresnel is not delta function, they are not equal at all. If the integral doesn&rsquo;t goes to the third one, we have another confusion that is why we can replace the integral of brdf and others with a single Fresnel directly?</p>
 <p>I&rsquo;d say that everything is right so far except the very first one. However it is jut not clear to me how it comes with the conclusion. I spend two hours on it before I figured out a better explanation of everything above and drawing the same conclusion with pbrt&rsquo;s.</p>
 <h1 id="reflectionbrdf">Reflection BRDF</h1>
 <h2 id="relationship-between-fresnel-and-radiance">Relationship between Fresnel and Radiance</h2>
 <p>Let&rsquo;s first see the relationship between Fresnel and incident/existence radiance. Here is the definition from wiki &ldquo;When light moves from a medium of a given <a href="https://en.wikipedia.org/wiki/Refractive_index">refractive index</a> n1 into a second medium with refractive index n2, both <a href="https://en.wikipedia.org/wiki/Reflection_(physics)">reflection</a> and <a href="https://en.wikipedia.org/wiki/Refraction">refraction</a> of the light may occur. The Fresnel equations describe what fraction of the light is reflected and what fraction is refracted (i.e., transmitted).&rdquo;</p>
 <p>To be honest I didn&rsquo;t quite understand the whole theory of Fresnel, the most important part of this line is &ldquo;what fraction of light&rdquo;. To be more precise, I think it should be &ldquo;what fraction of flux&rdquo; and that&rsquo;s exactly how the book uses it at the page of 442. Let&rsquo;s use it the same way here:</p>
-<p>$ d\Phi_o = F_r(\omega_i) d\Phi_i $</p>
+
+$$ d\Phi_o = F_r(\omega_i) d\Phi_i $$
 <p>Extend it in the following way:</p>
-<p>$ L_o(\omega_o) cos( \theta_o) sin(\theta_o) dA d\phi_o d\theta_o = F_r(\omega_i) L_i(\omega_i) cos(\theta_i) sin(\theta_i) dA d\phi_i d\theta_i$</p>
+
+$$ L_o(\omega_o) cos( \theta_o) sin(\theta_o) dA d\phi_o d\theta_o = F_r(\omega_i) L_i(\omega_i) cos(\theta_i) sin(\theta_i) dA d\phi_i d\theta_i$$
 <p>And we have the following condition for pure reflection surface.</p>
-<p>$ \theta_i = \theta_o $</p>
-<p>$ \phi_i = \phi_o + \pi $</p>
+
+$$ \theta_i = \theta_o $$
+
+$$ \phi_i = \phi_o &#43; \pi $$
 <p>That said a number of factors are cancelled out. Dropping those components, we have the new equation which is much simpler than before:</p>
-<p>$ L_o(\omega_o) = F_r(R(\omega_o)) L_i(R(\omega_o)) $</p>
+
+$$ L_o(\omega_o) = F_r(R(\omega_o)) L_i(R(\omega_o)) $$
 <p>R is the reflection vector of its input vector around normal.</p>
 <p>That is exactly the equation mentioned first, although without the middle part. Now let&rsquo;s find the middle part.</p>
 <h2 id="relationship-between-brdf-and-radiance">Relationship between BRDF and Radiance</h2>
 <p>Let&rsquo;s start from the rendering equation without emission component, which is exactly how Jérémy Riviere suggested to change it.</p>
-<p>$ {L_{o}(\omega_{o}) = \int L_{i}(\omega_{i}) f( \omega_{i}, \omega_{o} ) |cos(\theta_{i})| d\omega_{i}}$</p>
+
+$$ {L_{o}(\omega_{o}) = \int L_{i}(\omega_{i}) f( \omega_{i}, \omega_{o} ) |cos(\theta_{i})| d\omega_{i}}$$
 <p>What we want is the exact form of BRDF, however the only thing we have so far is that it is a delta function for pure reflection surfaces, so let&rsquo;s go with it first, defining the brdf this way:</p>
-<p>$ f( \omega_{i}, \omega_{o} ) = f_{other}(\omega_{i}, \omega_{o} ) \delta( \omega_i - R(\omega_o) ) $</p>
-<p>$ f_{other} $ is our new target now. Drop it into the LTE mentioned above, we have this:</p>
-<p>$ \begin{array} {lcl} L_{o}(\omega_{o}) &amp; = &amp; \int L_{i}(\omega_{i}) f_{other}(\omega_{i}, \omega_{o} ) \delta( \omega_i - R(\omega_o) ) |cos(\theta_{i})| d\omega_{i} \\\ &amp; = &amp; L_{i}(R(\omega_{o})) f_{other}(R(\omega_{o}), \omega_{o} ) |cos(R(\theta_{o}))| \end{array} $</p>
+
+$$ f( \omega_{i}, \omega_{o} ) = f_{other}(\omega_{i}, \omega_{o} ) \delta( \omega_i - R(\omega_o) ) $$
+<p> $ f_{other} $ 
+ is our new target now. Drop it into the LTE mentioned above, we have this:</p>
+
+$$ \begin{array} {lcl} L_{o}(\omega_{o}) &amp; = &amp; \int L_{i}(\omega_{i}) f_{other}(\omega_{i}, \omega_{o} ) \delta( \omega_i - R(\omega_o) ) |cos(\theta_{i})| d\omega_{i} \\ &amp; = &amp; L_{i}(R(\omega_{o})) f_{other}(R(\omega_{o}), \omega_{o} ) |cos(R(\theta_{o}))| \end{array} $$
 <h2 id="connect-them-together">Connect them together</h2>
 <p>Now we can connect them together reaching the following equation:</p>
-<p>$ L_{o}(\omega_{o}) =L_{i}(R(\omega_{o})) f_{other}(R(\omega_{o}), \omega_{o} ) |cos(R(\theta_{o}))| =F_r(R(\omega_o)) L_i(R(\omega_o)) $</p>
+
+$$ L_{o}(\omega_{o}) =L_{i}(R(\omega_{o})) f_{other}(R(\omega_{o}), \omega_{o} ) |cos(R(\theta_{o}))| =F_r(R(\omega_o)) L_i(R(\omega_o)) $$
 <p>Please be noted that this is quite similar to the one mentioned first except that we have an extra cosine term here. And a big difference between this one and the suggestion from Jérémy Riviere is that there is no complex integral at all. The first part of this equation is not that important any more, focusing on the following two parts and dropping the radiance value, we have the exact form of the missing part of our brdf.</p>
-<p>$ f_{other}(R(\omega_{o}), \omega_{o} ) = \dfrac{F_r(R(\omega_o))}{|cos(R(\theta_{o}))|} $</p>
+
+$$ f_{other}(R(\omega_{o}), \omega_{o} ) = \dfrac{F_r(R(\omega_o))}{|cos(R(\theta_{o}))|} $$
 <p>Putting them together, we have the final BRDF equation:</p>
-<p>$ f(\omega_{i}, \omega_{o} ) = \dfrac{F_r(\omega_i) \delta( \omega_i - R(\omega_o) )}{|cos(\theta_{i})|} $</p>
+
+$$ f(\omega_{i}, \omega_{o} ) = \dfrac{F_r(\omega_i) \delta( \omega_i - R(\omega_o) )}{|cos(\theta_{i})|} $$
 <h1 id="refraction-btdf">Refraction BTDF</h1>
 <p>Relationship between Fresnel and radiance won&rsquo;t be mentioned here because it is well explained in the book at the pages of 442 and 443. Here it is:</p>
-<p>$ L_o(\omega_o) = ( 1 - F_r(\omega_i) ) \dfrac{{\eta_o}^2}{{\eta_i}^2} L_i(\omega_i) $</p>
+
+$$ L_o(\omega_o) = ( 1 - F_r(\omega_i) ) \dfrac{{\eta_o}^2}{{\eta_i}^2} L_i(\omega_i) $$
 <p>Derivation of the relationship between radiance and btdf is also similar to the one mentioned above, except the fact that R is replaced with T representing the transmittance direction, T can be calculated through Snell&rsquo;s law. Refraction depending on different wavelength is also ignored here. Here is the final conclusion drawn by PBRT:</p>
-<p>$ f(\omega_i , \omega_o) = ( 1 - F_r(\omega_i) ) \dfrac{{\eta_o}^2}{{\eta_i}^2}\dfrac{\delta( \omega_i - T(\omega_o) )}{|cos(\theta_{i})|} $</p>
+
+$$ f(\omega_i , \omega_o) = ( 1 - F_r(\omega_i) ) \dfrac{{\eta_o}^2}{{\eta_i}^2}\dfrac{\delta( \omega_i - T(\omega_o) )}{|cos(\theta_{i})|} $$
 <h1 id="reference">Reference</h1>
 <p>[1] <a href="http://pbrt.org/">Physically Based Rendering, second edition</a></p>
 
@@ -394,20 +438,7 @@ This is a memo for me recording the derivation of specular reflection in a more 
       </footer>
     </article>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
-    onload="renderMathInElement(document.body,
-      {
-        delimiters: [
-          {left: '$$', right: '$$', display:true},
-          {left: '$', right: '$', display:false},
-          {left: '\\(', right: '\\)', display: false},
-          {left: '\\[', right: '\\]', display: true}
-        ]
-      }
-    );">
-  </script>
+    
   </section>
 
       </div>

@@ -80,6 +80,32 @@
     
 
     
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$", right: "$", display: false}
+      ]
+    });
+  });
+</script>
+
+<style>
+  .katex-display > .katex {
+    text-align: left !important;
+  }
+</style>
+    
 
     <meta name="generator" content="Hugo 0.108.0">
   </head>
@@ -275,7 +301,8 @@ I won&rsquo;t repeat them again in this blog.</p>
 <p>The slide is here. However, one can easily get lost like I did during the introduction of IBL in this slide. Luckily, the note explains everything in a very clear manner.</p>
 <h1 id="split-sum-approximation">Split Sum Approximation</h1>
 <p>I will skip the original rendering equation and its Monte Carlo integration. We need to evaluate the following equation in a very efficient manner.</p>
-<p>$ \dfrac{1}{N} \sum_{k=1}^{N} \dfrac{L_i(l_k) f(l_k,v) cos\theta_{l_k}}{p(l_k,v)} \approx (\dfrac{1}{N} \sum_{k=1}^{N} L_i(l_k) ) (\dfrac{1}{N} \sum_{k=1}^{N} \dfrac{f(l_k,v) cos\theta_{l_k}}{p(l_k,v)} ) $</p>
+
+$$ \dfrac{1}{N} \sum_{k=1}^{N} \dfrac{L_i(l_k) f(l_k,v) cos\theta_{l_k}}{p(l_k,v)} \approx (\dfrac{1}{N} \sum_{k=1}^{N} L_i(l_k) ) (\dfrac{1}{N} \sum_{k=1}^{N} \dfrac{f(l_k,v) cos\theta_{l_k}}{p(l_k,v)} ) $$
 <p>The approximation is not exactly 100% accurate. However, the bias introduced in a real rendering scene can be barely noticed.</p>
 <figure><a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/s2013_pbs_epic_slides-17-dragged.png"><img src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/s2013_pbs_epic_slides-17-dragged.png" width="700"/></a>
 </figure>
@@ -283,24 +310,30 @@ I won&rsquo;t repeat them again in this blog.</p>
 <p>The above slide comes from UE4&rsquo;s presentation in Siggraph 2013, I can barely tell the difference between the balls in the first two rows. Clearly, the split sum is an acceptable approximation in real time rendering. However, the goal here is to reduce the number of sampling in IBL tech, splitting the equation is only the beginning, it doesn&rsquo;t reduce anything yet at all. The golden idea here is to pre-compute some computation heavy task first before real-time rendering happens.</p>
 <h1 id="pre-filter-environment-map">Pre-Filter Environment Map</h1>
 <p>Following is the first part of the split sum, it is relatively easy to pre-compute an estimation.</p>
-<p>$ \dfrac{1}{N} \sum_{k=1}^{N} L_i(l_k) $</p>
+
+$$ \dfrac{1}{N} \sum_{k=1}^{N} L_i(l_k) $$
 <p>Averaging the radiance for different roughness will yield a good result and we can actually store textures for each roughness value into different mipmap levels. However, UE4 convolves the environment map with the GGX distribution of their shading model using importance sampling. One minor detail is that since microfacet BRDF is also a function of incoming angle, they actually made an assumption that the incoming angle is actually zero, in other words, the incoming direction is exactly the opposite of the surface normal. Of course, it introduces another source of bias here.</p>
 <h1 id="environment-brdf">Environment BRDF</h1>
 <p>This is actually where the most magic happens. Let&rsquo;s first look at the original integral form of the equation.</p>
-<p>$ \int_H f(w_i,w_o) cos\theta_{w_i} dw_i $</p>
+
+$$ \int_H f(w_i,w_o) cos\theta_{w_i} dw_i $$
 <p>By assuming the BRDF is actually microfacet model, we have the form of BRDF like this:</p>
-<p>$ f(\omega_i,\omega_o,x) = \dfrac{F(\omega_i , h) G(\omega_i,\omega_o,h) D(h)}{4 cos(\theta_i) cos(\theta_o)} $</p>
+
+$$ f(\omega_i,\omega_o,x) = \dfrac{F(\omega_i , h) G(\omega_i,\omega_o,h) D(h)}{4 cos(\theta_i) cos(\theta_o)} $$
 <p>Schlick&rsquo;s approximation of Fresnel is used in it:</p>
-<p>$ F(w_i,h) = F_0 + ( 1 - F_0 ) ( 1 - w_i h )^5 $</p>
+
+$$ F(w_i,h) = F_0 &#43; ( 1 - F_0 ) ( 1 - w_i h )^5 $$
 <p>In order to pre-compute what we need in shading, we need to know how many parameters there are in the BRDF. The obvious ones are the incoming direction, outgoing direction, roughness, albedo (or direction-hemisphere reflectance). Since what we care is how to compute the integral efficiently, the incoming direction is not our concern at all, leaving us five dimensions, out going direction, roughness and albedo ( three dimensions here because it is a color ). One may wonder here that isn&rsquo;t outgoing direction two-dimensional? The truth is only the cosine factor of the angle between it and the normal is relevant in a D-term, thus reducing it to one single dimension. Sadly a five dimensional data is really hard to pre-computed before-hand.</p>
 <p>As a matter of fact, a simple math trick will factor albedo out of the equation:</p>
-<p>$ \int_H f(w_i,w_o) cos\theta_{w_i} dw_i = F_0 \int_H \frac{f(w_i,w_o) cos\theta_{w_i}}{F( w_i, h )} ( 1 - ( 1 - w_i h )^5 ) d w_i +\int_H \frac{f(w_i,w_o) cos\theta_{w_i}}{F( w_i, h )} ( 1 - w_i h )^5 d w_i $</p>
+
+$$ \int_H f(w_i,w_o) cos\theta_{w_i} dw_i = F_0 \int_H \frac{f(w_i,w_o) cos\theta_{w_i}}{F( w_i, h )} ( 1 - ( 1 - w_i h )^5 ) d w_i &#43;\int_H \frac{f(w_i,w_o) cos\theta_{w_i}}{F( w_i, h )} ( 1 - w_i h )^5 d w_i $$
 <p>Don&rsquo;t be scared by the complex equation, it is actually clearer than it used to be before. Now, we only need to evaluate the first and second integral on the right side before-hand, leaving the F0 or albedo evaluation in the real time rendering.</p>
 <figure><img src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/env_brdf.png" width="300"/>
 </figure>
 
 <p>With only two dimensions in the equation, we can save the pre-computed information in one single texture. And the above texture is one example of it. During pixel shading, one can simply estimate the integral with the following calculation:</p>
-<p>$ EnvBRDF = Color * tex2d( cos\theta_o , roughness ).x + tex2d( cos\theta_o , roughness ).y $</p>
+
+$$ EnvBRDF = Color * tex2d( cos\theta_o , roughness ).x &#43; tex2d( cos\theta_o , roughness ).y $$
 <p>It looks simpler enough to me. Only one texture sampling to evaluate the second integral of the split sum!</p>
 
 
@@ -666,20 +699,7 @@ sliderJQuery(function( $ ) {
       </footer>
     </article>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
-    onload="renderMathInElement(document.body,
-      {
-        delimiters: [
-          {left: '$$', right: '$$', display:true},
-          {left: '$', right: '$', display:false},
-          {left: '\\(', right: '\\)', display: false},
-          {left: '\\[', right: '\\]', display: true}
-        ]
-      }
-    );">
-  </script>
+    
   </section>
 
       </div>

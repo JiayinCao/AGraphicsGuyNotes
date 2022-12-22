@@ -83,6 +83,32 @@ The original papers are clearly the best resources to learn the tech. Due to the
     
 
     
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$", right: "$", display: false}
+      ]
+    });
+  });
+</script>
+
+<style>
+  .katex-display > .katex {
+    text-align: left !important;
+  }
+</style>
+    
 
     <meta name="generator" content="Hugo 0.108.0">
   </head>
@@ -164,7 +190,8 @@ The original papers are clearly the best resources to learn the tech. Due to the
       <div>
         
         <p>Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReStir (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like <a href="https://research.nvidia.com/publication/2020-07_spatiotemporal-reservoir-resampling-real-time-ray-tracing-dynamic-direct">ReStir DI</a>, <a href="https://research.nvidia.com/publication/2021-06_restir-gi-path-resampling-real-time-path-tracing">ReStir GI</a>, <a href="https://research.nvidia.com/publication/2022-07_generalized-resampled-importance-sampling-foundations-restir">ReStir PT</a>, <a href="https://graphics.cs.utah.edu/research/projects/volumetric-restir/">Volumetric ReStir</a>, etc.</p>
-<p>The original papers are clearly the best resources to learn the tech. Due to the complexity of the algorithm, understanding the theory and math remains challenging for graphics programmers who are not very familiar with sampling methods. There are also a few blog posts <a href="http://www.zyanidelab.com/how-to-add-thousands-of-lights-to-your-renderer/">[5]</a> <a href="https://gamehacker1999.github.io/posts/restir/">[6]</a> available. However, there are still some fundamental mathematical questions not answered in the posts, which are fairly important for us to understand why the math works the way it does in ReStir.</p>
+<p>The original papers are clearly the best resources to learn the tech. Due to the complexity of the algorithm, understanding the theory and math remains challenging for graphics programmers who are not very familiar with sampling methods. There are also a few blog posts <sup><a href="http://www.zyanidelab.com/how-to-add-thousands-of-lights-to-your-renderer/">[5]</a> <a href="https://gamehacker1999.github.io/posts/restir/">[6]</a></sup>
+ available. However, there are still some fundamental mathematical questions not answered in the posts, which are fairly important for us to understand why the math works the way it does in ReStir.</p>
 <p>In this blog post, rather than talking about the different variations of ReStir, I would like to talk about the very original method, ReStir DI. Different from existing blog posts, I would not mention any implementation details. The whole blog will be focusing on the mathematics behind the original ReStir, with more in-depth analysis of why it works. This should be a complementary reading of the original ReStir DI paper. It is highly recommended to go through the original <a href="https://research.nvidia.com/publication/2020-07_spatiotemporal-reservoir-resampling-real-time-ray-tracing-dynamic-direct">paper</a> first before start reading this post. Hopefully, after reading this post, readers would have a deeper understanding of how ReStir DI works mathematically.</p>
 <h1 id="preliminary-reading">Preliminary Reading</h1>
 <p>Since ReStir DI is not an easy algorithm to understand and lots of the details rely on some really basic theory. I think it makes a lot of sense to go through the basics first before starting to explain ReStir. So the first half of the post will be mainly about reviewing some fundamental concepts so that we would have a solid understanding of what is needed to understand ReStir.</p>
@@ -181,14 +208,17 @@ $I=\dfrac{1}{N} \Sigma_{i=1}^N f(x_i)/p(x_i)$</li>
 The domain of p(x) has to cover the whole domain of f(x). If it doesn&rsquo;t, this can&rsquo;t work.</p>
 <p>To prove it, let&rsquo;s say there is a subdomain in the f(x)&rsquo;s domain $\Omega$ that is not covered by p(x), naming it $\Omega_1$.
 This introduces a blind spot in the sampling domain. Clearly, we have</p>
-<p>$ \Omega = \Omega_0 + \Omega_1 $</p>
+
+$$ \Omega = \Omega_0 &#43; \Omega_1 $$
 <p>Working out the math here</p>
-<p>$ \begin{array} {lcl} E[I] &amp; = &amp; \dfrac{1}{N} E[ \sum\limits_{i=1}^N \dfrac{f(x_{i})}{p(x_{i})}] \\\ \\\ &amp; = &amp; \dfrac{1}{N} \int_{\Omega_0} \sum\limits_{i=1}^N \dfrac{f(x)}{p(x)} p(x) dx\\\ \\\ &amp; = &amp; \int_{\Omega_0} f(x) dx \\\ \\\ &amp; = &amp; \int_{\Omega} f(x)dx - \int_{\Omega_1} f(x) dx \end{array} $</p>
+
+$$ \begin{array} {lcl} E[I] &amp; = &amp; \dfrac{1}{N} E[ \sum\limits_{i=1}^N \dfrac{f(x_{i})}{p(x_{i})}] \\\\ &amp; = &amp; \dfrac{1}{N} \int_{\Omega_0} \sum\limits_{i=1}^N \dfrac{f(x)}{p(x)} p(x) dx \\\\ &amp; = &amp; \int_{\Omega_0} f(x) dx \\\\ &amp; = &amp; \int_{\Omega} f(x)dx - \int_{\Omega_1} f(x) dx \end{array} $$
 <p>As we can see, we have a cut from the expected result. Intuitively explaining, this is because the estimator is no longer a function of any signal inside the domain $\Omega_1$ anymore, while the target is a function of it. If anything is different inside that domain, it would cause a different result integral while this change can&rsquo;t be detected by the estimator as the PDF is unable to capture any signal there. Mathematically speaking, we can see that as long as $\int_{\Omega_1} f(x) dx$ is not zero, the result won&rsquo;t be what we want. And it is almost not zero all the time. As a matter of fact, if we know beforehand, f(x) integrates to 0 over the domain of $\Omega_1$, we would only need to evaluate the integral of the function in the domain of $\Omega_0$ in the first place.</p>
 <h2 id="multiple-importance-sampling">Multiple Importance Sampling</h2>
 <p>MIS is a common technique to improve sampling efficiency by taking multiple samples from different sources of PDFs, rather than just one.
 This method commonly improves sampling efficiency and can deal with integrals that are hard to approximate with one single source of PDF.</p>
-<p>$ I_{mis}^{M,N} = \Sigma_{i=1}^M \dfrac{1}{N_i} \Sigma_{j=1}^{N_i} w_i(x_{ij}) \dfrac{f(x_{ij})}{p_i(x_{ij})} $</p>
+
+$$ I_{mis}^{M,N} = \Sigma_{i=1}^M \dfrac{1}{N_i} \Sigma_{j=1}^{N_i} w_i(x_{ij}) \dfrac{f(x_{ij})}{p_i(x_{ij})} $$
 <p>For MIS to be mathematically unbiased, it has to meet a few requirements.
 In the domain of f(x),</p>
 <ul>
@@ -199,15 +229,19 @@ In the domain of f(x),</p>
 <p>Since this post is about explaining ReStir, I would only put down some details that matter to ReStir. Other characteristics of MIS would be skipped. For a deeper explanation of MIS, please check out <a href="https://graphics.stanford.edu/papers/veach_thesis/thesis.pdf">Eric Veach&rsquo;s Thesis</a>.</p>
 <h3 id="mathematical-proof-of-mis">Mathematical Proof of MIS</h3>
 <p>In order to have a deeper understanding of this, let&rsquo;s see how the math works under the hood first.</p>
-<p>$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; E[ \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x_{ij})\dfrac{f(x_{ij})}{p_i(x_{ij})}] \\\ &amp; = &amp; \int \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x)\dfrac{f(x)}{p_i(x)} p_i(x) dx \\\ &amp; = &amp; \int \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x) f(x) dx \\\ &amp; = &amp; \int \sum\limits_{i=1}^M w_i(x) f(x) dx \end{array} $</p>
+
+$$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; E[ \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x_{ij})\dfrac{f(x_{ij})}{p_i(x_{ij})}] \\\\ &amp; = &amp; \int \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x)\dfrac{f(x)}{p_i(x)} p_i(x) dx \\\\ &amp; = &amp; \int \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x) f(x) dx \\\\ &amp; = &amp; \int \sum\limits_{i=1}^M w_i(x) f(x) dx \end{array} $$
 <p>It is obvious that as long as it meets the first condition ($ \Sigma_{i=1}^M w_i(x) = 1 $), we would have an unbiased approximation of the integral of our interest.</p>
-<p>$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; \int \sum\limits_{i=1}^M w_i(x) f(x) dx \\\ &amp; = &amp; \int f(x) dx \end{array} $</p>
+
+$$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; \int \sum\limits_{i=1}^M w_i(x) f(x) dx \\\\ &amp; = &amp; \int f(x) dx \end{array} $$
 <p>For the second requirement, since it is less relevant to ReStir, I would only put down some intuitive explanation here, leaving the math as a practice to readers (The proof should be fairly similar to what I showed in the previous section, but slightly more complicated). Same as the importance sampling blind spot issue mentioned above, if none of the PDF covers a sub-domain of the target function, it won&rsquo;t pick up any changes in that domain either, while changes in that domain will indeed cause changes in the final result. This easily makes the estimate not accurate anymore.</p>
 <p>However, this is by no means to say that all source PDF&rsquo;s domains would have to cover the domain of the function to be integrated. For any sub-domain, as long as one of them covers it, it is good enough. Though there is one important condition, which is the third one mentioned above. Since it is slightly trickier to understand, I&rsquo;ll put down the math proof here,</p>
 <p>Let&rsquo;s imagine for one PDF $p_k$, it has zero probability of taking a sample in a sub-domain, $\Omega_1$. We can then divide the domain of the function $\Omega$ into two parts $\Omega_0$ and $\Omega_1$. So we have</p>
-<p>$ \Omega = \Omega_0 + \Omega_1 $</p>
+
+$$ \Omega = \Omega_0 &#43; \Omega_1 $$
 <p>So let&rsquo;s divide the previous MIS proof into two domains and see what happens,</p>
-<p>$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; E[ \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x_{ij})\dfrac{f(x_{ij})}{p_i(x_{ij})}] \\\ \\\ &amp; = &amp; E[ \sum\limits_{i=1, i!=k}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x_{ij})\dfrac{f(x_{ij})}{p_i(x_{ij})} + \dfrac{1}{N_k} \sum\limits_{j=1}^{N_k} w_k(x_{kj})\dfrac{f(x_{kj})}{p_k(x_{kj})}] \\\ \\\ &amp; = &amp; \int_{\Omega} \sum\limits_{i=1,i!=k}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x)\dfrac{f(x)}{p_i(x)} p_i(x) dx + \int_{\Omega_0} \dfrac{1}{N_k} \sum\limits_{j=1}^{N_k} w_k(x)\dfrac{f(x)}{p_k(x)} p_k(x) dx\\\ \\\ &amp; = &amp; \Sigma_{i=1, i!=k}^M \int_{\Omega} w_i(x)f(x)dx + \int_{\Omega_0}w_k(x)f(x)dx \\\ \\\ &amp; = &amp; \Sigma_{i=1}^M \int_{\Omega} w_i(x)f(x)dx - \int_{\Omega_1}w_k(x)f(x)dx  \\\  \\\ &amp; = &amp; \int f(x) dx - \int_{\Omega_1}w_k(x)f(x)dx \end{array} $</p>
+
+$$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; E[ \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x_{ij})\dfrac{f(x_{ij})}{p_i(x_{ij})}] \\\\ &amp; = &amp; E[ \sum\limits_{i=1, i!=k}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x_{ij})\dfrac{f(x_{ij})}{p_i(x_{ij})} &#43; \dfrac{1}{N_k} \sum\limits_{j=1}^{N_k} w_k(x_{kj})\dfrac{f(x_{kj})}{p_k(x_{kj})}] \\\\ &amp; = &amp; \int_{\Omega} \sum\limits_{i=1,i!=k}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x)\dfrac{f(x)}{p_i(x)} p_i(x) dx &#43; \int_{\Omega_0} \dfrac{1}{N_k} \sum\limits_{j=1}^{N_k} w_k(x)\dfrac{f(x)}{p_k(x)} p_k(x) dx \\\\ &amp; = &amp; \Sigma_{i=1, i!=k}^M \int_{\Omega} w_i(x)f(x)dx &#43; \int_{\Omega_0}w_k(x)f(x)dx \\\\ &amp; = &amp; \Sigma_{i=1}^M \int_{\Omega} w_i(x)f(x)dx - \int_{\Omega_1}w_k(x)f(x)dx  \\\\ &amp; = &amp; \int f(x) dx - \int_{\Omega_1}w_k(x)f(x)dx \end{array} $$
 <p>What happens here is that our estimator has an extra cut from the expected value just like the importance sampling blind spot issue mentioned above. And this is exactly why we need to make sure we meet the third condition. If we do meet the third condition, what would happen is that the extra cut will be canceled because $w_k(x)$ is zero, leaving the rest parts precisely what we want. Making the estimator unbiased again.</p>
 <p>As a side note, I would like to point out that in theory, we don&rsquo;t really need to strictly meet the first or third condition to make the algorithm unbiased. There is a more generalized form</p>
 <ul>
@@ -252,9 +286,11 @@ Some work called it real PDF. For consistency, I would call it SIR PDF throughou
 </ul>
 <p>The graph below is a good demonstration of what will happen as M grows. The target distribution (green curve) is defined below.
 For better visual comparison, this target distribution is indeed a normalized distribution. Though it doesn&rsquo;t have to be.</p>
-<p>$p(x) = (sin(x) + 1.5) / (3 Pi)$</p>
+
+$$p(x) = (sin(x) &#43; 1.5) / (3 Pi)$$
 <p>The proposal PDF (yellow curve) is simply</p>
-<p>$p(x) = 1 / (2 Pi)$</p>
+
+$$p(x) = 1 / (2 Pi)$$
 <p>If you try dragging the slider from left you right, meaning more proposal samples are taken, it is obvious that the SIR PDF curve converges to the target distribution we would like to take samples from in the first place.</p>
 
 
@@ -500,7 +536,8 @@ It comes with a complete solution to approximate the integral without any bias, 
 </ul>
 <p>Please be noted that the weight here is slightly different from the previously mentioned weight. This is fine as scaling the target distribution is allowed in both SIR and RIS. But the below function has to skip the 1/M part since it is merged into the weights already.</p>
 <p>The final form of our Monte Carlo estimator would be as below</p>
-<p>$I_{RIS} = \dfrac{1}{N} \Sigma_{i=1}^{N} \dfrac{f(x_i)}{\hat{p}(x_i)} \Sigma_{j=1}^{M} w(x_j)$</p>
+
+$$I_{RIS} = \dfrac{1}{N} \Sigma_{i=1}^{N} \dfrac{f(x_i)}{\hat{p}(x_i)} \Sigma_{j=1}^{M} w(x_j)$$
 <p>Here $x_i$ is only a subset of $x_j$. The way $x_i$ is picked can either be done through a binary search or linear processing like Reservoir algorithm. Binary search would require us to pre-process the proposal samples beforehand, which is not practical in the context of ReStir though.</p>
 <p>There are some requirements for this method as well</p>
 <ul>
@@ -519,7 +556,8 @@ The theory explained in this blog post would also work for cases where multiple 
 <p>Whenever it comes to multiple importance sampling, there are two ways that it could be used with RIS.</p>
 <p>The first option is when taking proposal samples from the proposal PDFs, there is really nothing that prevents us from drawing samples from different PDFs. In the previous section, we mentioned that all the proposal samples are coming from a same proposal PDF. There is no such limitation. We could draw samples from multiple different PDFs if we want to. Though, it is critically important to make sure the conditions of the MIS are met properly.</p>
 <p>As pointed out in the <a href="https://research.nvidia.com/publication/2022-07_generalized-resampled-importance-sampling-foundations-restir">GRIS paper</a>, the weight for each proposal pdf could be generalized to this form</p>
-<p>$w_i(x) = w_{i,mis}(x) \hat{p}(x) / p_i(x)$</p>
+
+$$w_i(x) = w_{i,mis}(x) \hat{p}(x) / p_i(x)$$
 <p>It is not hard to realize that the previous weight is nothing but a special form of this generalized form where the MIS weight is simply uniform weight and the proposal PDF is all the same.
 Since that weight is a MIS weight, it has to make sure it would meet the two conditions involving weight in the MIS algorithm. Otherwise, it could introduce bias.</p>
 <p>Below is a graph demonstrating the workflow for MIS used in RIS.
@@ -539,10 +577,13 @@ There is very clear proof of it mentioned in the appendix of <a href="https://sc
 <p>Rather than repeating his derivation, I would like to put down another slightly different proof, which is similar to what the ReStir DI paper does when it talks about the biasness of the ReStir method.</p>
 <p>Since the original samples come from the proposal PDF(s), target samples are merely a subset of proposal samples without introducing new signals to the evaluation, we would only need to integrate the domain of the proposal samples to get the approximation.</p>
 <p>To simplify our derivation, let&rsquo;s define a few terms first</p>
-<p>$w_i(x) = w_{i,mis}(x) \hat{p}(x) / p_i(x)$</p>
-<p>$W = \Sigma_{i=1}^{M}w_i(x_i)$</p>
+
+$$w_i(x) = w_{i,mis}(x) \hat{p}(x) / p_i(x)$$
+
+$$W = \Sigma_{i=1}^{M}w_i(x_i)$$
 <p>Please notice that without losing generosity, I used different proposal PDFs here. To prove the RIS with same proposal PDF, we simply need to get rid of the subscript of $w_i(x)$.</p>
-<p>$ \begin{array} {lcl} E(\dfrac{f(x)}{\hat{p}(x)} \Sigma_{i=1}^{M}\dfrac{w_{i,mis}(x_i)\hat{p}(x)}{p_i(x)}) &amp; = &amp; E(\dfrac{f(x)}{\hat{p}(x)} W) \\\ \\\ &amp; = &amp; \Sigma_{k=1}^{M} \underset{\text{M}}{\int \dots \int} \dfrac{f(x_k)}{\hat{p}(x_k)} W \dfrac{w_k(x_k)}{W} \Pi_{i=1}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M\ \\\ \\\ &amp; = &amp; \Sigma_{k=1}^{M} \underset{\text{M}}{\int \dots \int} f(x) w_{k,mis}(x_k) \Pi_{i=1, i!=k}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M\ \\\ \\\ &amp; = &amp; \Sigma_{k=1}^{M} \int f(x_k) w_{k,mis}(x_k) dx_k\ \underset{\text{M-1}}{\int \dots \int} \Pi_{i=1, i!=k}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M\ \\\ \\\ &amp; = &amp; \int \Sigma_{k=1}^{M} w_{k,mis}(x) f(x) dx\ \\\ \\\ &amp; = &amp; \int f(x) dx\ \end{array}$</p>
+
+$$ \begin{array} {lcl} E(\dfrac{f(x)}{\hat{p}(x)} \Sigma_{i=1}^{M}\dfrac{w_{i,mis}(x_i)\hat{p}(x)}{p_i(x)}) &amp; = &amp; E(\dfrac{f(x)}{\hat{p}(x)} W) \\\\ &amp; = &amp; \Sigma_{k=1}^{M} \underset{\text{M}}{\int \dots \int} \dfrac{f(x_k)}{\hat{p}(x_k)} W \dfrac{w_k(x_k)}{W} \Pi_{i=1}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M\ \\\\ &amp; = &amp; \Sigma_{k=1}^{M} \underset{\text{M}}{\int \dots \int} f(x) w_{k,mis}(x_k) \Pi_{i=1, i!=k}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M\ \\\\ &amp; = &amp; \Sigma_{k=1}^{M} \int f(x_k) w_{k,mis}(x_k) dx_k\ \underset{\text{M-1}}{\int \dots \int} \Pi_{i=1, i!=k}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M\ \\\\ &amp; = &amp; \int \Sigma_{k=1}^{M} w_{k,mis}(x) f(x) dx\ \\\\ &amp; = &amp; \int f(x) dx\ \end{array}$$
 <p>As we can see from the above derivation, lots of the items cancel, leaving a very simple form, the exact result that we would like to approximate in the first place. With this proof, we can easily see that it doesn&rsquo;t matter if RIS picks proposal samples from different PDFs, this is exactly how MIS works in RIS in the first method I mentioned above.</p>
 <h3 id="nice-properties-of-ris">Nice Properties of RIS</h3>
 <p>Before moving to the next section, let&rsquo;s summarize some of the nice properties of RIS.</p>
@@ -565,7 +606,8 @@ And what makes it even more attractive is that it only requires O(1) space, rath
 <p>An empty reservoir would have none as the current picked sample and 0 as total processed weight.</p>
 <p>Please be noted that these are the only two fields required for WRS algorithm. ReStir DI does require another field, which is the number of samples processed so far. But since this section is all about WRS, the processed sample count is ignored to avoid confusion.</p>
 <p>The basic workflow of WRS goes like this. For an incoming sample, it would either take the sample or ignore the sample depending on a random choice. A random number between 0 and 1 is drawn. If it is larger than a threshold, which is defined this way</p>
-<p>$threshold = W_{new} / (W_{new} + W_{total})$</p>
+
+$$threshold = W_{new} / (W_{new} &#43; W_{total})$$
 <p>The incoming sample will be ignored. Otherwise, the new sample will be picked as the winner replacing the previously picked sample, if existed. Regardless, the total weight will be updated accordingly. A side note here, pay special attention when your random number equals the threshold. This could be problematic depending on how we would like to deal with the incoming sample when it is equal.</p>
 <ul>
 <li>If we would like to pick it when it is equal, there is a non-zero chance to pick incoming samples with zero weight.</li>
@@ -578,17 +620,22 @@ But be sure to deal with this situation when implementing the algorithm to avoid
 <p>To prove how it works, let&rsquo;s start with the first incoming sample with non-zero weight in the WRS algorithm. We don&rsquo;t care about the first few samples with zero weight, we can pretend they don&rsquo;t exist.
 What will happen for sure is that the incoming sample will be taken as the random number will not be larger than the threshold, which is 1.0, forcing the new sample to be picked. And this indeed matches our expectation as if we only have one sample, the probability of this sample being picked is 100%.</p>
 <p>So assuming the algorithm works after processing N incoming samples, this is to assume that after processing N samples, each visited sample stands a chance of being picked that is precisely this</p>
-<p>$p(x_k) = W(x_k) / \Sigma_{i=1}^{N} W(x_i)$</p>
+
+$$p(x_k) = W(x_k) / \Sigma_{i=1}^{N} W(x_i)$$
 <p>As the way WRS works, we do have the denominator nicely recorded in a single variable</p>
-<p>$W_{total} = \Sigma_{i=1}^{N} W(x_i)$</p>
+
+$$W_{total} = \Sigma_{i=1}^{N} W(x_i)$$
 <p>Let&rsquo;s see what would happen when a new sample comes in.
 If the random number is smaller than the threshold mentioned above, the newcomer will be picked.
 This means that the probability of the new sample being picked is</p>
-<p>$p(x_N) = \dfrac{W(x_{N+1})}{W_{total} + W(x_{N+1})} = \dfrac{W(x_{N+1})}{\Sigma_{i=1}^{N+1} W(x_i)}$</p>
+
+$$p(x_N) = \dfrac{W(x_{N&#43;1})}{W_{total} &#43; W(x_{N&#43;1})} = \dfrac{W(x_{N&#43;1})}{\Sigma_{i=1}^{N&#43;1} W(x_i)}$$
 <p>And this probability is exactly what we want for the new sample to be picked. And there is also a chance that the new sample will not be picked, which is</p>
-<p>$1-p(x_N) = \dfrac{\Sigma_{i=1}^{N} W(x_i)}{\Sigma_{i=1}^{N+1} W(x_i)}$</p>
+
+$$1-p(x_N) = \dfrac{\Sigma_{i=1}^{N} W(x_i)}{\Sigma_{i=1}^{N&#43;1} W(x_i)}$$
 <p>So each of the previous samples being picked is reduced by the risk of the new sample could be picked. And the probability goes down by exactly the above factor, leaving each of the previous samples standing a chance of this being picked,</p>
-<p>$p&rsquo;(x_k) = p(x_k) \dfrac{\Sigma_{i=1}^{N} W(x_i)}{\Sigma_{i=1}^{N+1} W(x_i)} = \dfrac{W(x_k)}{\Sigma_{i=1}^{N} W(x_i)} \dfrac{\Sigma_{i=1}^{N} W(x_i)}{\Sigma_{i=1}^{N+1} W(x_i)} = \dfrac{W(x_k)}{\Sigma_{i=1}^{N+1} W(x_i)}$</p>
+
+$$p&#39;(x_k) = p(x_k) \dfrac{\Sigma_{i=1}^{N} W(x_i)}{\Sigma_{i=1}^{N&#43;1} W(x_i)} = \dfrac{W(x_k)}{\Sigma_{i=1}^{N} W(x_i)} \dfrac{\Sigma_{i=1}^{N} W(x_i)}{\Sigma_{i=1}^{N&#43;1} W(x_i)} = \dfrac{W(x_k)}{\Sigma_{i=1}^{N&#43;1} W(x_i)}$$
 <p>And this probability again is also what we want for each of the old samples to hold to be picked.</p>
 <p>At this point, we can easily see that if WRS works for N incoming samples, it would work for N + 1 samples as well. Since we also proved that it indeed works when N is 1, it would mean by thinking it recursively, it would work for any number of incoming samples.</p>
 <h3 id="treating-a-new-sample-as-a-reservoir">Treating a New Sample as a Reservoir</h3>
@@ -598,14 +645,18 @@ From this perspective, there is no individual sample any more, everything is a r
 <p>Fortunately, the answer is yes.
 Let&rsquo;s say the WRS has processed N samples so far and it takes an incoming reservoir as its next input.
 If the incoming reservoir has processed M samples first, each sample in the visited M samples would stand a chance of this of being picked</p>
-<p>$p(y_k) = \dfrac{w(y_k)}{\Sigma_{i=1}^{M} w(y_i)} $</p>
+
+$$p(y_k) = \dfrac{w(y_k)}{\Sigma_{i=1}^{M} w(y_i)} $$
 <p>I purposely used y here to indicate it is a different source of samples. Dropping it in the current reservoir processing, we would have each of the previously visited samples having this chance to be picked</p>
-<p>$p(y_k) = \dfrac{w(y_k)}{\Sigma_{i=1}^{M} w(y_i)} * \dfrac{\Sigma_{i=1}^{M} w(y_i)}{\Sigma_{i=1}^{N} w(x_i) + \Sigma_{i=1}^{M} w(y_i)} = \dfrac{w(y_k)}{\Sigma_{i=1}^{N} w(x_i) + \Sigma_{i=1}^{M} w(y_i)}$</p>
+
+$$p(y_k) = \dfrac{w(y_k)}{\Sigma_{i=1}^{M} w(y_i)} * \dfrac{\Sigma_{i=1}^{M} w(y_i)}{\Sigma_{i=1}^{N} w(x_i) &#43; \Sigma_{i=1}^{M} w(y_i)} = \dfrac{w(y_k)}{\Sigma_{i=1}^{N} w(x_i) &#43; \Sigma_{i=1}^{M} w(y_i)}$$
 <p>So after being processed by the WRS algorithm, each of the previously visited M samples would have the correct probability to be picked as a whole. Even though this is done in two passes, rather than the previously mentioned one-pass algorithm.</p>
 <p>W.r.t the visited N samples, their probability of being picked is also reduced by this factor</p>
-<p>$\dfrac{\Sigma_{i=1}^{N} w(x_i)}{\Sigma_{i=1}^{N} w(x_i) + \Sigma_{i=1}^{M} w(y_i)}$</p>
+
+$$\dfrac{\Sigma_{i=1}^{N} w(x_i)}{\Sigma_{i=1}^{N} w(x_i) &#43; \Sigma_{i=1}^{M} w(y_i)}$$
 <p>Applying this to the existing probability, we will have each visited sample having this chance of being picked</p>
-<p>$p&rsquo;(x_k) = \dfrac{w(x_k)}{\Sigma_{i=1}^{N} w(x_i)} \dfrac{\Sigma_{i=1}^{N} w(x_i)}{\Sigma_{i=1}^{N} w(x_i) + \Sigma_{i=1}^{M} w(y_i)} = \dfrac{w(x_k)}{\Sigma_{i=1}^{N} w(x_i) + \Sigma_{i=1}^{M} w(y_i)}$</p>
+
+$$p&#39;(x_k) = \dfrac{w(x_k)}{\Sigma_{i=1}^{N} w(x_i)} \dfrac{\Sigma_{i=1}^{N} w(x_i)}{\Sigma_{i=1}^{N} w(x_i) &#43; \Sigma_{i=1}^{M} w(y_i)} = \dfrac{w(x_k)}{\Sigma_{i=1}^{N} w(x_i) &#43; \Sigma_{i=1}^{M} w(y_i)}$$
 <p>This nicely matches our expectations as well. So at this point, we can safely draw the conclusion that WRS can be performed in multiple recursive passes, it won&rsquo;t have any impact on the probability of each sample being picked. It is also not hard to see that this recursive process certainly doesn&rsquo;t get limited by two levels.</p>
 <h3 id="nice-properties-of-wrs">Nice Properties of WRS</h3>
 <p>Now we know the math behind this algorithm as well, it is time to summarize what properties we can take advantage later</p>
@@ -624,7 +675,8 @@ If the incoming reservoir has processed M samples first, each sample in the visi
 <li>We could also construct weights by taking some factors into account when picking lights, like the emissive power of the light. As long as those factors are not shading point dependent, we could pre-calculate a table first and use binary search to find a light proporition to the weight. Pbrt 2nd uses this method for sampling a light.</li>
 <li>If the weights are shading point dependent, it commonly means that we would need to iterate through all lights to get a good sample. However, this is clearly a deal breaker for setups with millions of lights, it wouldn&rsquo;t even work for hundreds of lights practically since iterating through all lights is a per-pixel operation.</li>
 </ul>
-<p>Of course, the above methods are the most trivial and fundamental solutions available. There is some existing work exploring different ideas in this domain <a href="">[12]</a> <a href="https://fpsunflower.github.io/ckulla/data/many-lights-hpg2018.pdf">[13]</a> <a href="http://cwyman.org/papers/rtg2-manyLightReGIR.pdf">[14]</a>, etc. Among all of the existing work, ReStir DI scales really well, up to millions of lights. And it is also quite practical to implement on modern graphics hardware, especially Nvidia RTX cards. Strictly speaking, ReStir DI not only finds a good light candidate for shading, but also finds a good light sample. There is still subtle differences between sampling a light and sampling a light sample.</p>
+<p>Of course, the above methods are the most trivial and fundamental solutions available. There is some existing work exploring different ideas in this domain <sup><a href="https://research.nvidia.com/publication/2019-07_dynamic-many-light-sampling-real-time-ray-tracing">[12]</a> <a href="https://fpsunflower.github.io/ckulla/data/many-lights-hpg2018.pdf">[13]</a> <a href="http://cwyman.org/papers/rtg2-manyLightReGIR.pdf">[14]</a></sup>
+, etc. Among all of the existing work, ReStir DI scales really well, up to millions of lights. And it is also quite practical to implement on modern graphics hardware, especially Nvidia RTX cards. Strictly speaking, ReStir DI not only finds a good light candidate for shading, but also finds a good light sample. There is still subtle differences between sampling a light and sampling a light sample.</p>
 <ul>
 <li>The former only cares about picking a light out of many, which would still require us to pick a sample on this light later. And in some situations, it could be quite tricky. For example, when the light is a huge area light and the brdf is very spicky there could be risk in producing lots of fireflies. Some readers may instantly consider MIS for such a case. However, MIS works well only with balanced heuristics or anything similar, which commonly requires all PDFs to be trackable. If for some reason, the way we pick light candidate among all lights is not even trackable, there is no easy way to properly evaluate heuristics, leaving us no choice but to use uniform weight, which would have a huge negative impact on convergence rate.</li>
 <li>On the other hand, sampling a light sample offers enough signal for the rest of the algorithm to simply take over. Since ReStir does pick quality sample in an efficient manner, the aforementioned problem simply doesn&rsquo;t exist in it.</li>
@@ -680,7 +732,8 @@ With lots of confusion like these, I spend quite some time researching related m
 <li>PDF S is used to pick a light sample on the selected light candidate, this is a continuous PDF. It could be different based on light types. It is even different for lights of the same type as the size of the area light could be different or the HDRI could have different radiance distribution.</li>
 </ul>
 <p>The finalized PDF is a product of the two</p>
-<p>$ p(k, s) = p_L(k) p_{S,k}(s) $</p>
+
+$$ p(k, s) = p_L(k) p_{S,k}(s) $$
 <p>k is the id of the picked light candidate and s is the light sample drawn from this light candidate. Even if $p_{S,k}(s)$ could be different per light, the product of the two remains consistent across all RIS&rsquo; execution. By hiding the light candidate id, which we don&rsquo;t really care about much in ReStir, we can use the product PDF as our light sample PDF. And this is already consistent.</p>
 <p>If this is not obvious enough, let&rsquo;s find an example that we are already very familiar with it, the sky importance sampling.
 The method that Pbrt choose is quite a similar case to the light sample sampling in ReStir. In order to take a sample from HDRI sky, we pre-calculate CDFs, each row gets a CDF by accumulating its pixels&rsquo; value in it, and there is one more CDF generated by accumulating the sum of pixel values on each row. In order to take a sample, we first randomly choose a row by binary searching the CDF for all rows. Once a row is picked, its corresponding CDF is used for picking the final sample. The second CDF used is clearly different across different rows, just like our light sample PDF could be different based on the exact instance of light.</p>
@@ -720,11 +773,14 @@ This graph is about pixel A picking its light samples. In the beginning, both A 
 <p>One common misunderstanding of ReStir DI algorithm is that if a neighbor pixel&rsquo;s reservoir has visited 100 samples, by &lsquo;merging&rsquo; the target sample from it, our current pixel&rsquo;s visited samples count will be grown by 100. This was briefly mentioned before, I&rsquo;d like to explain with a bit more text here.</p>
 <p>Let&rsquo;s keep talking about pixel A and B in the above graph. Except this time, for simplicity, we only pretend that each of them generates two proposal samples. For pixel A, its two proposal samples are $x_0$, $x_1$ and for pixel B, they are $y_0$ and $y_1$.</p>
 <p>In order to count the fact that neighbor pixel uses a different target distribution, the new weight for this target sample of pixel B is</p>
-<p>$\dfrac{\hat{p_a}(y)}{\hat{p_b}(y)} {r_b}.w_{sum}$</p>
+
+$$\dfrac{\hat{p_a}(y)}{\hat{p_b}(y)} {r_b}.w_{sum}$$
 <p>Assuming that pixel B picks $y_0$ as its target sample. If we drop this weight in the SIR sampling execution in the pixel of A during the neighbor sampling phase, we would easily see the final total weight for the pixel A would be</p>
-<p>$\dfrac{\hat{p_a}(x_0)}{p(x_0)} + \dfrac{\hat{p_a}(x_1)}{p(x_1)} + \dfrac{\hat{p_a}(y_0)}{p(y_0)} + \dfrac{\hat{p_a}(y_0)}{\hat{p_b}(y_0)}\dfrac{\hat{p_b}(y_1)}{p(y_1)}$</p>
+
+$$\dfrac{\hat{p_a}(x_0)}{p(x_0)} &#43; \dfrac{\hat{p_a}(x_1)}{p(x_1)} &#43; \dfrac{\hat{p_a}(y_0)}{p(y_0)} &#43; \dfrac{\hat{p_a}(y_0)}{\hat{p_b}(y_0)}\dfrac{\hat{p_b}(y_1)}{p(y_1)}$$
 <p>If pixel A visits the four samples by itself, rather than borrowing from its neighbors, the total weight we should see is</p>
-<p>$\dfrac{\hat{p_a}(x_0)}{p(x_0)} + \dfrac{\hat{p_a}(x_1)}{p(x_1)} + \dfrac{\hat{p_a}(y_0)}{p(y_0)} + \dfrac{\hat{p_a}(y_1)}{p(y_1)}$</p>
+
+$$\dfrac{\hat{p_a}(x_0)}{p(x_0)} &#43; \dfrac{\hat{p_a}(x_1)}{p(x_1)} &#43; \dfrac{\hat{p_a}(y_0)}{p(y_0)} &#43; \dfrac{\hat{p_a}(y_1)}{p(y_1)}$$
 <p>This mismatch confused me for quite a while. It doesn&rsquo;t look like borrowing from neighbor pixel B&rsquo;s target sample would result in precisely the same math with iterating through B&rsquo;s proposal samples by itself. My understanding of it is that they are not the same.
 And please be mindful that I purposely removed the subscript to give us an illusion that all proposal PDFs are the same. Again, even if the light sample PDFs are all consistent across the implementation, the SIR PDF&rsquo;s presence easily breaks this assumption. So in reality, the above math could be slightly more complicated.</p>
 <p>The same theory is hidden in the second graph shown the above section as well. The fact that we used B&rsquo;s target distribution can&rsquo;t be changed by the time A tries to merge B&rsquo;s target sample. And RIS doesn&rsquo;t support different target distribution. This is already proof that there is no mathematical basis that pixel A&rsquo;s reservoir would visit any of the proposal samples of pixel B even if it merges B&rsquo;s target sample.</p>
@@ -745,14 +801,17 @@ What is the MIS weight in this case then? Can we use balance heuristics at all?<
 <h2 id="what-is-the-proposal-pdf-for-neighbors-target-sample">What is the Proposal PDF for Neighbors Target Sample?</h2>
 <p>In order to perform RIS algorithm, we would need to know the proposal PDF for each incoming proposal sample. However, there is a particularly tricky problem, the neighbor pixel&rsquo;s SIR PDF is not trackable. There is no easy way to evaluate what the PDF is.</p>
 <p>Luckily enough, the paper does explain that the big W, which is shown below, takes the role of reciprocal of SIR PDF,</p>
-<p>$W(y) = \dfrac{1}{M} \dfrac{1}{\hat{p}(y)}\Sigma_{i=1}^{M}\dfrac{\hat{p}(x_i)}{p_i(x_i)}$</p>
+
+$$W(y) = \dfrac{1}{M} \dfrac{1}{\hat{p}(y)}\Sigma_{i=1}^{M}\dfrac{\hat{p}(x_i)}{p_i(x_i)}$$
 <p>Here $y$ is the lucky winner sample that was eventually picked through WRS.</p>
 <p>To be more mathematical, the expectation of W is precisely the reciprocal of SIR PDF evaluated at the target sample as long as there is no proposal PDF that is zero there. If there is, we can easily avoid bias by adjusting the constant weight as well.</p>
-<p>$E(W(y)) = \dfrac{1}{p_{ris}(y)}$</p>
+
+$$E(W(y)) = \dfrac{1}{p_{ris}(y)}$$
 <p>So even if the SIR PDF is untrackable, we can indeed know the unbiased approximation of the reciprocal of the SIR PDF once a target sample is drawn. This is a very important property that allows us to merge target sample without introducing bias.</p>
 <p>There is one question that needs a bit of clarification. Why can we replace the PDF with this just because the expectation is a match?
 It is actually not difficult to prove this, let&rsquo;s assume that there are only K - 1 proposal samples coming from the lights, there is also a Kth proposal sample borrowed from a neighbor.</p>
-<p>$ \begin{array} {lcl} E(I_{ris}) &amp; = &amp; E(\dfrac{1}{N}\Sigma_{i=1}^{N}(\dfrac{1}{M}\dfrac{f(y)}{\hat{p}(y)} (\Sigma_{k=1}^{M-1}\dfrac{\hat{p}(x_k)}{p_k(x_k)} + \hat{p}(x_M) W(x_M)) \\\ \\\ &amp; = &amp; E(\dfrac{1}{M}\dfrac{f(y)}{\hat{p}(y)} (\Sigma_{k=1}^{M-1}\dfrac{\hat{p}(x_k)}{p_i(x_k)} + \hat{p}(x_M) E(W(x_M))) \\\ \\\ &amp; = &amp; E(\dfrac{1}{M}\dfrac{f(y)}{\hat{p}(y)} (\Sigma_{k=1}^{M-1}\dfrac{\hat{p}(x_k)}{p_k(x)} + \dfrac{\hat{p}(x_M)}{p_M(x_M)})) \\\ \\\ &amp; = &amp; E(\dfrac{1}{M}\dfrac{f(y)}{\hat{p}(y)} \Sigma_{k=1}^{M}\dfrac{\hat{p}(x_k)}{p_k(x_k)}) dx\ \\\ \\\ &amp; = &amp; \int f(x) dx\ \end{array}$</p>
+
+$$ \begin{array} {lcl} E(I_{ris}) &amp; = &amp; E(\dfrac{1}{N}\Sigma_{i=1}^{N}(\dfrac{1}{M}\dfrac{f(y)}{\hat{p}(y)} (\Sigma_{k=1}^{M-1}\dfrac{\hat{p}(x_k)}{p_k(x_k)} &#43; \hat{p}(x_M) W(x_M)) \\\\ &amp; = &amp; E(\dfrac{1}{M}\dfrac{f(y)}{\hat{p}(y)} (\Sigma_{k=1}^{M-1}\dfrac{\hat{p}(x_k)}{p_i(x_k)} &#43; \hat{p}(x_M) E(W(x_M))) \\\\ &amp; = &amp; E(\dfrac{1}{M}\dfrac{f(y)}{\hat{p}(y)} (\Sigma_{k=1}^{M-1}\dfrac{\hat{p}(x_k)}{p_k(x)} &#43; \dfrac{\hat{p}(x_M)}{p_M(x_M)})) \\\\ &amp; = &amp; E(\dfrac{1}{M}\dfrac{f(y)}{\hat{p}(y)} \Sigma_{k=1}^{M}\dfrac{\hat{p}(x_k)}{p_k(x_k)}) dx\ \\\\ &amp; = &amp; \int f(x) dx\ \end{array}$$
 <h2 id="importance-of-neighbors-target-samples">Importance of Neighbors&rsquo; Target Samples</h2>
 <p>Careful readers at this point may have already realized that the weight for the neighbor target sample I showed above doesn&rsquo;t match what the paper used, which is $\hat{p}(x) W(x_M) N$.
 N is the number of visited proposal samples in the neighbor&rsquo;s reservoir execution, either directly or indirectly.
@@ -816,12 +875,15 @@ To begin with, let&rsquo;s start with this graph,</p>
 <li>W -&gt; This is a derived member that merely serves as a cache. It doesn&rsquo;t have any extra signal.</li>
 </ul>
 <p>As a reminder, the big W is defined as</p>
-<p>$W(x) = \dfrac{1}{N} \dfrac{1}{\hat{p}(x)}\Sigma_{i=1}^{N}\dfrac{\hat{p}(y_i)}{p(y_i)}$</p>
+
+$$W(x) = \dfrac{1}{N} \dfrac{1}{\hat{p}(x)}\Sigma_{i=1}^{N}\dfrac{\hat{p}(y_i)}{p(y_i)}$$
 <p>Please be noted that I swapped the notation of x and y here, but it is the same thing, except that x is a subset of y now. And M is swapped with N as well. None of these changes the essential meaning of this equation. One subtle change I made here is the lack of subscripts in proposal PDF, this is fine as the paper does indicate it only uses one single proposal PDF for light sample picking, which we have explained as well.</p>
 <p>If we would start with a brand new empty reservoir, we would need to treat the resolved target light sample with this weight, $\hat{p}&rsquo;(x) W(x) N$. Since the new target distribution is nothing but the original unshadowed target distribution with an extra binary signal on top of it. We have</p>
-<p>$\hat{p}&rsquo;(x) = V \hat{p}(x)$</p>
+
+$$\hat{p}&#39;(x) = V \hat{p}(x)$$
 <p>If we combine the two math equations and drop a new sample generated by SIR method in an empty reservoir, we would have this as its weight for the incoming proposal sample in the execution of this pixel&rsquo;s RIS execution,</p>
-<p>$ \begin{array} {lcl} \hat{p}&rsquo;(x) W(x) N &amp; = &amp; V \hat{p}(x) N \dfrac{1}{N} \dfrac{1}{\hat{p}(x)}\Sigma_{i=1}^{N}\dfrac{\hat{p}(y_i)}{p(y_i)} \\\ \\\ &amp; = &amp; V \Sigma_{i=1}^{N}\dfrac{\hat{p}(y_i)}{p(y_i)} \end{array} $</p>
+
+$$ \begin{array} {lcl} \hat{p}&#39;(x) W(x) N &amp; = &amp; V \hat{p}(x) N \dfrac{1}{N} \dfrac{1}{\hat{p}(x)}\Sigma_{i=1}^{N}\dfrac{\hat{p}(y_i)}{p(y_i)} \\\\ &amp; = &amp; V \Sigma_{i=1}^{N}\dfrac{\hat{p}(y_i)}{p(y_i)} \end{array} $$
 <p>So if we would start from a new reservoir, the weight for the one single sample, which is the resolved target light sample, is exactly the sum of all previous light samples&rsquo; weight, but with an extra visibility term. Please be mindful that the nominator in the sum is the original unshadowed target distribution, rather than the new shadowed one.</p>
 <p>Depending on the occlusion situation, we have two possibilities here,</p>
 <ul>
@@ -851,7 +913,7 @@ Hopefully, this would convince readers that this algorithm is indeed unbiased.</
 [9] <a href="https://scholarsarchive.byu.edu/cgi/viewcontent.cgi?article=1662&amp;context=etd">Importance Resampling for Global Illumination</a><br>
 [10] <a href="https://blog.demofox.org/2022/03/02/sampling-importance-resampling/">Sampling Importance Resampling</a><br>
 [11] <a href="/posts/monte_carlo_integral_with_multiple_importance_sampling/">Monte Carlo Integral with Multiple Importance Sampling</a><br>
-[12] <a href="">Dynamic Many-Light Sampling for Real-Time Ray Tracing</a><br>
+[12] <a href="https://research.nvidia.com/publication/2019-07_dynamic-many-light-sampling-real-time-ray-tracing">Dynamic Many-Light Sampling for Real-Time Ray Tracing</a><br>
 [13] <a href="https://fpsunflower.github.io/ckulla/data/many-lights-hpg2018.pdf">Importance Sampling of Many Lights with Adaptive Tree Splitting</a><br>
 [14] <a href="http://cwyman.org/papers/rtg2-manyLightReGIR.pdf">Rendering Many Lights With Grid-Based Reservoirs</a><br>
 [15] <a href="https://de45xmedrsdbp.cloudfront.net/Resources/files/TemporalAA_small-59732822.pdf">High Quality Temporal SuperSampling</a><br>
@@ -1082,20 +1144,7 @@ Hopefully, this would convince readers that this algorithm is indeed unbiased.</
       </footer>
     </article>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
-    onload="renderMathInElement(document.body,
-      {
-        delimiters: [
-          {left: '$$', right: '$$', display:true},
-          {left: '$', right: '$', display:false},
-          {left: '\\(', right: '\\)', display: false},
-          {left: '\\[', right: '\\]', display: true}
-        ]
-      }
-    );">
-  </script>
+    
   </section>
 
       </div>

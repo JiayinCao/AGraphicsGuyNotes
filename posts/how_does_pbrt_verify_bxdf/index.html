@@ -80,6 +80,32 @@
     
 
     
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$", right: "$", display: false}
+      ]
+    });
+  });
+</script>
+
+<style>
+  .katex-display > .katex {
+    text-align: left !important;
+  }
+</style>
+    
 
     <meta name="generator" content="Hugo 0.108.0">
   </head>
@@ -199,24 +225,32 @@
 <h2 id="final-average-needs-to-converge-to-2pi">Final average needs to converge to 2*PI</h2>
 <p>It is easier to explain why the final has to be 2*PI first, which is a pretty good start for this blog.</p>
 <p>First of all, we can easily derive the following formula, which says that the area of a hemisphere where the radius is one is 2 * PI.</p>
-<p>$ \int_{\Omega} \mathrm{d}w = 2 * PI $</p>
-<p>Although we know it is 2 * PI, but let&rsquo;s assume that we don&rsquo;t so far. In order to evaluate $ \int_{\Omega} \mathrm{d}w $, we can use Monte Carlo to solve it. The estimator is as follow:</p>
-<p>$ \dfrac{1}{N} \sum\limits_{i=1}^{N} \dfrac{1}{p({\omega}_i)} $</p>
+
+$$ \int_{\Omega} \mathrm{d}w = 2 * PI $$
+<p>Although we know it is 2 * PI, but let&rsquo;s assume that we don&rsquo;t so far. In order to evaluate  $ \int_{\Omega} \mathrm{d}w $ 
+, we can use Monte Carlo to solve it. The estimator is as follow:</p>
+
+$$ \dfrac{1}{N} \sum\limits_{i=1}^{N} \dfrac{1}{p({\omega}_i)} $$
 <p>If we look at the source code of this application, this is exactly what the verification does to calculate the final average. It is just a little bit less obvious because it accumulates the result in 100 bins first before calculating the final sum, but it is essentially the same math formula under the hood. In a nutshell, the final average is the estimator in this case.</p>
 <p>Since we already know the value of the integral is 2 * PI. It means that the final average should converge to 2 * PI, with 10000000 samples taken, it could very likely indicate a bug if it doesn&rsquo;t converge there.</p>
 <h2 id="about-each-entry">About each entry</h2>
 <p>This one is a little bit more complex. But the basic idea is quite similar to the above derivation.</p>
 <p>First of all, we need to pay attention to the way the algorithm divides the hemisphere domain. For phi, it is evenly divided into 10 equal-size region. For theta, it is very important to notice that it is the result of cosine theta that is evenly divided, not theta itself. So that said, theta is divided in the following sub-region.</p>
-<p>$ [acos(\dfrac{i}{10}), acos(\dfrac{i+1}{10})) $</p>
+
+$$ [acos(\dfrac{i}{10}), acos(\dfrac{i&#43;1}{10})) $$
 <p>In the above formula, i goes from 0 to 9. For the last sub-region, it is fully inclusive. It may be very confused to see it is divided this way. But if we look at the solid angle extended by each sub-region, we will suddenly understand why it works this way.</p>
-<p>$ \begin{array} {lcl} \int_{{\Omega}<em>{ij}} \mathrm{d}{\omega}  &amp; = &amp; \int</em>{2<em>PI</em>i/10}^{2<em>PI</em>(i+1)/10} \int_{acos({(j+1)/10})}^{acos(j/10)} sin(\theta)\mathrm{d} \theta\mathrm{d} \phi \\\ &amp; = &amp;\int_{2<em>PI</em>i/10}^{2<em>PI</em>(i+1)/10}\mathrm{d} \phi \int_{acos(j/10)}^{acos({(j+1)/10})}\mathrm{d}(cos(\theta)) \\\ &amp; = &amp; 2*PI/100 \end{array} $</p>
+
+$$ \begin{array} {lcl} \int_{{\Omega}_{ij}} \mathrm{d}{\omega}  &amp; = &amp; \int_{2*PI*i/10}^{2*PI*(i&#43;1)/10} \int_{acos({(j&#43;1)/10})}^{acos(j/10)} sin(\theta)\mathrm{d} \theta\mathrm{d} \phi \\\\ &amp; = &amp;\int_{2*PI*i/10}^{2*PI*(i&#43;1)/10}\mathrm{d} \phi \int_{acos(j/10)}^{acos({(j&#43;1)/10})}\mathrm{d}(cos(\theta)) \\\\ &amp; = &amp; 2*PI/100 \end{array} $$
 <p>The size of the solid angle is in-dependent of which sub-region it is casted from. The solid angle extended by the sub-region turns out to be same size!</p>
 <p>Next, let&rsquo;s define a visibility function so that we can focus on a single entry.</p>
-<p>$ V_{i j }(\omega) = \begin{cases} 1&amp;:\theta \in [acos((i+1)/10),acos(i/10))  ,  \phi \in [2<em>PI</em>j/10,2<em>PI</em>(j+1)/10) \\\ 0 &amp;:otherwise \end{cases} $</p>
+
+$$ V_{i j }(\omega) = \begin{cases} 1&amp;:\theta \in [acos((i&#43;1)/10),acos(i/10))  ,  \phi \in [2*PI*j/10,2*PI*(j&#43;1)/10) \\ 0 &amp;:otherwise \end{cases} $$
 <p>This visibility function gives you only the visibility of a single entry, leaving the rest of them as zero so that we can easily focus on one single entry. Since we divide the two-dimentional domain into sub-domain, i and j can identify which sub-domain we are focusing on. We can easily derive the following equation:</p>
-<p>$ \int_{\omega} V_{ij}(\omega) \mathrm{d}(\omega) = \int_{{\Omega}_{ij}} \mathrm{d}{\omega} = 2 * PI / 100 $</p>
+
+$$ \int_{\omega} V_{ij}(\omega) \mathrm{d}(\omega) = \int_{{\Omega}_{ij}} \mathrm{d}{\omega} = 2 * PI / 100 $$
 <p>Again, let&rsquo;s look at the Monte Carlo estimator for the left-most integral in the above equation.</p>
-<p>$ \sum\limits_{k=1}^{N} \dfrac{V_{ij}(\omega)}{p(\omega_k)} $</p>
+
+$$ \sum\limits_{k=1}^{N} \dfrac{V_{ij}(\omega)}{p(\omega_k)} $$
 <p>Basically, it says that if the sample falls in the subdomain defined by i and j, we count the contribution ( 1 / pdf ), otherwise we simply ignore it. N is the number of total samples taken, instead of just the samples falling in the subdomain. If we connect the two equations, we knows that by multiplying the result of the estimator by 100, we should reach 2 * PI. Which is exactly what the verification process does.</p>
 <h1 id="what-does-the-process-verify">What does the process verify</h1>
 <p>Basically, it is most likely to expose a hidden bug in the bxdf implementation if there were something wrong with the following cases:</p>
@@ -409,20 +443,7 @@
       </footer>
     </article>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
-    onload="renderMathInElement(document.body,
-      {
-        delimiters: [
-          {left: '$$', right: '$$', display:true},
-          {left: '$', right: '$', display:false},
-          {left: '\\(', right: '\\)', display: false},
-          {left: '\\[', right: '\\]', display: true}
-        ]
-      }
-    );">
-  </script>
+    
   </section>
 
       </div>

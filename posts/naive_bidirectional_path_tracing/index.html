@@ -80,6 +80,32 @@
     
 
     
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$", right: "$", display: false}
+      ]
+    });
+  });
+</script>
+
+<style>
+  .katex-display > .katex {
+    text-align: left !important;
+  }
+</style>
+    
 
     <meta name="generator" content="Hugo 0.108.0">
   </head>
@@ -227,27 +253,34 @@
 <p>Path tracing generates the most noisy image even if it is scaled down by four times, bidirectional path tracing result is better, however light tracing definitely gets the best result with least noise in it.</p>
 <h1 id="rendering-equation">Rendering Equation</h1>
 <p>Starting from rendering equation:</p>
-<p>$ {L_{o}(\omega_{o}) = L_{e}(\omega_{o}) + \int L_{i}(\omega_{i}) *f( \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i}} $</p>
+
+$$ {L_{o}(\omega_{o}) = L_{e}(\omega_{o}) &#43; \int L_{i}(\omega_{i}) *f( \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i}} $$
 <p>As we can see from this classical equation, L appears at both sides of the equation which makes it a recursive one. By expending this equation for a specific path, we will have something like this:</p>
-<p>$ f_k(x) = {\int&hellip;\int} W_e(x_0) G(x_0 \longleftrightarrow x_1 ) [ \prod_{i=1}^{k-1} \rho_s(x_i)G(x_i\longleftrightarrow x_{i+1} ) ] L_e(x_k) d(x_0) d(x_1) &hellip; d(x_k) $</p>
+
+$$ f_k(x) = {\int...\int} W_e(x_0) G(x_0 \longleftrightarrow x_1 ) [ \prod_{i=1}^{k-1} \rho_s(x_i)G(x_i\longleftrightarrow x_{i&#43;1} ) ] L_e(x_k) d(x_0) d(x_1) ... d(x_k) $$
 <p>That is the equation considering a specific path with length of k+1 vertices between light and eye. Starting from where is really a matter of taste, traditional path tracing generates rays from eye point. Light tracing tries to solve it in a manner that is more similar to how nature works, generating rays from light. Bidirectional path tracing generates rays from both sides and connects those two path somehow.</p>
 <h2 id="path-tracing">Path tracing</h2>
 <p>I&rsquo;ve talked about path tracing in this <a href="/posts/basics_about_path_tracing/">blog</a>, those path are generated with regard to the bsdf. This time we will put it the other way. Since we already have the equation to be integrated, we only need to know the pdf of the specific path to evaluate the integral with Monte Carlo method.</p>
 <p>Suppose all of the vertices are generated w.r.t the area instead of solid angle, we have a pdf of this:</p>
-<p>$ p_k(x) = \prod_{i=0}^{k} p_a(x_i) $</p>
+
+$$ p_k(x) = \prod_{i=0}^{k} p_a(x_i) $$
 <p>However generating vertices in this manner is extremely inefficient and it is no path tracing we are talking about. A path tracer generates rays from eye point recursively. Forget about the aperture with finite size. The first vertex apart from the camera one is already decided by the camera, so no pdf is needed here. Each of the others will be generated based on the pdf w.r.t (projected) solid angle, we have a relationship between them:</p>
-<p>$ p_a(x_i) = p_{w^{\bot}}(x_{i-2} \rightarrow x_{i-1} \rightarrow x_i) G(x_{i-1}\longleftrightarrow x_i ) $</p>
+
+$$ p_a(x_i) = p_{w^{\bot}}(x_{i-2} \rightarrow x_{i-1} \rightarrow x_i) G(x_{i-1}\longleftrightarrow x_i ) $$
 <p>Dropping this into the P_k equation, we will have this:</p>
-<p>$ p_k(x) = \prod_{i=2}^{k}(p_{w^{\bot}}(x_{i-2} \rightarrow x_{i-1} \rightarrow x_i) G(x_{i-1}\longleftrightarrow x_i )) $</p>
+
+$$ p_k(x) = \prod_{i=2}^{k}(p_{w^{\bot}}(x_{i-2} \rightarrow x_{i-1} \rightarrow x_i) G(x_{i-1}\longleftrightarrow x_i )) $$
 <p>Also filling this into the extended rendering equation, we will have something like this:</p>
-<p>$ f(x)=L_e(x_k\rightarrow x_{k-1})\prod_{i=2}^{k}(bxdf(x_{i-2}\rightarrow x_{i-1}\rightarrow x_i)/p_{w^{\bot}}(x_{i-2} \rightarrow x_{i-1} \rightarrow x_i))$</p>
+
+$$ f(x)=L_e(x_k\rightarrow x_{k-1})\prod_{i=2}^{k}(bxdf(x_{i-2}\rightarrow x_{i-1}\rightarrow x_i)/p_{w^{\bot}}(x_{i-2} \rightarrow x_{i-1} \rightarrow x_i))$$
 <p>We have less computation here because the g term has been cancelled with the components in the denominator.</p>
 <p>In a real practical path tracer, we usually use multiple importance sampling to sample both bsdf and light sources at the end of each path, instead of relying on bsdf alone which is highly inefficient for small light sources. The pdf may need to change correspondingly.</p>
 <p>One minor detail that used to confuse me so far is where is the g-term connecting the first vertex and eye point going? Why don&rsquo;t we take the pdf of primary ray into account? Please refer to this <a href="/posts/the_missing_primary_ray_pdf_in_path_tracing/">post</a> for an explanation.</p>
 <h2 id="light-tracing">Light Tracing</h2>
 <p>Light tracing is the reverse version of path tracing. Instead of starting from the eye point, light tracing path origins from light sources. For a path tracer, it may be acceptable without special handling with MIS sampling both bsdf and light sources if light sources are big enough. However light tracing must connect light path vertices to the camera point explicitly, even if light aperture has a size in the scene, its small area will make light tracing converging in an extreme slow manner.</p>
 <p>Similarly we have the pdf of a specific light path in the following way:</p>
-<p>$ p_k(x)=p_a(x_k)p_{w^\bot}(x_k\rightarrow x_{k-1})G(x_k\rightarrow x_{k-1})\prod_{i=3}^{k}(p_{w^{\bot}}(x_{i}\rightarrow x_{i-1}\rightarrow x_{i-2})G(x_{i-1}\rightarrow x_{i-2})$</p>
+
+$$ p_k(x)=p_a(x_k)p_{w^\bot}(x_k\rightarrow x_{k-1})G(x_k\rightarrow x_{k-1})\prod_{i=3}^{k}(p_{w^{\bot}}(x_{i}\rightarrow x_{i-1}\rightarrow x_{i-2})G(x_{i-1}\rightarrow x_{i-2})$$
 <p>Note that it is only part of the whole pdf, because we haven&rsquo;t consider eye vertex yet. As I mentioned above, in a light tracing algorithm we usually connect eye vertex with light tracing vertices as we progress in the light path, trying to hit the camera aperture with light rays is just not practical, not to mention it won&rsquo;t work for pinhole camera at all.</p>
 <p>To connect eye point with light tracing vertices, we need to be clear with the importance function. For a detailed description of how to calculate it, I suggest my <a href="/posts/the_missing_primary_ray_pdf_in_path_tracing/">other post</a>.</p>
 <p>Although we can make the path contribute to the pixel we are trying to calculate, it is very inefficient way of doing light tracing because most path will fail resulting into an extreme slow convergence rate. Instead, we usually allow all path to contribute to any pixels in the target image we are rendering.</p>
@@ -455,20 +488,7 @@
       </footer>
     </article>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
-    onload="renderMathInElement(document.body,
-      {
-        delimiters: [
-          {left: '$$', right: '$$', display:true},
-          {left: '$', right: '$', display:false},
-          {left: '\\(', right: '\\)', display: false},
-          {left: '\\[', right: '\\]', display: true}
-        ]
-      }
-    );">
-  </script>
+    
   </section>
 
       </div>

@@ -80,6 +80,32 @@
     
 
     
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$", right: "$", display: false}
+      ]
+    });
+  });
+</script>
+
+<style>
+  .katex-display > .katex {
+    text-align: left !important;
+  }
+</style>
+    
 
     <meta name="generator" content="Hugo 0.108.0">
   </head>
@@ -401,9 +427,11 @@ $('.ba-slider'+"1d9792c1cdd84287b704ca1876c4de13").beforeAfter();
 <p>As we can easily see from the comparison, subsurface scattering shows a more waxy feeling, it feels more transparent than the Lambert BRDF.
 In a nutshell, subsurface scattering means the incoming light penetrates through the surface of an object and leaves from another position that may not be the same as the position where it enters the surface. The most common example in our everyday life is human skin.
 So the question is, what makes it a difficult challenge in computer graphics? If we get back to the rendering equation,</p>
-<p>$ {L_{o}(p_{o},\omega_{o}) = L_{e}(p_o, \omega_{o}) + \int_{\Omega} L_{i}(p_o, \omega_{i}) *f(p_o, \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i}} $</p>
+
+$$ {L_{o}(p_{o},\omega_{o}) = L_{e}(p_o, \omega_{o}) &#43; \int_{\Omega} L_{i}(p_o, \omega_{i}) *f(p_o, \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i}} $$
 <p>It is not hard to notice that there is no support for subsurface scattering in this equation at all since the whole integral is just about one single position. When we talk about BRDF, it is a simplified version of BSSRDF. We can treat BRDF as a delta function version of BSSRDF. If we look at the rendering equation in a more generalized way, it can be written like this,</p>
-<p>$ {L_{o}(p_{o},\omega_{o}) = L_{e}(p_o, \omega_{o}) + \int_A \int_{\Omega} L_{i}(p_o, \omega_{i}) *f(p_o, p_i, \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i} dA } $</p>
+
+$$ {L_{o}(p_{o},\omega_{o}) = L_{e}(p_o, \omega_{o}) &#43; \int_A \int_{\Omega} L_{i}(p_o, \omega_{i}) *f(p_o, p_i, \omega_{i}, \omega_{o} ) *cos(\theta_{i}) d\omega_{i} dA } $$
 <p>As we can see, we gained two more dimensions by considering subsurface scattering. In other words, instead of just considering light coming from all directions at a single point on the surface, we also need to evaluate the contribution of light coming from all other positions. The direction domain is an isolated domain that is generally not affected by other factors. However, the same thing doesn&rsquo;t go true for positions, which highly depends on the shape of the geometry, meaning accurate importance sampling position is a lot harder than sampling directions like what we used to do in BRDF evaluation.</p>
 <p>And even if we have a good importance sampling algorithm, integrating the implementation with the existed path tracing algorithm that used to only consider BRDF also requires close attention to avoid mistakes that could accidentally introduce bias. A practical render engine also supports multiple layers of BSSRDFs, like Cycles. I also implemented the algorithm to support multiple layers of BSSRDF so that there is more flexibility of asset authoring.</p>
 <h1 id="basic-idea-of-sss">Basic Idea of SSS</h1>
@@ -416,21 +444,28 @@ For a deeper understanding of the way it works, PBRT has a few chapters that hav
 <p>This <a href="https://graphics.stanford.edu/papers/bssrdf/bssrdf.pdf">paper</a> first introduced the model of separable BSSRDF to make things manageable.
 It achieved so by decoupling factors from each other.
 PBRT&rsquo;s work is based on top of it.</p>
-<p>$ S(p_o, p_i, \omega_o, \omega_i) \approx ( 1 - F_r(cos\theta_o) ) \space S_p(p_o, p_i) \space S_w(w_i)$</p>
+
+$$ S(p_o, p_i, \omega_o, \omega_i) \approx ( 1 - F_r(cos\theta_o) ) \space S_p(p_o, p_i) \space S_w(w_i)$$
 <p>With three parts in this model, the first part is responsible for accounting for the energy loss during light leaving the surface from inside.
-$ S_p(p_o, p_i) $ is mainly responsible for approximating the falloff factor due to the distance between $ p_o $ and $ p_i $.
+ $ S_p(p_o, p_i) $ 
+  is mainly responsible for approximating the falloff factor due to the distance between  $ p_o $ 
+ and  $ p_i $ 
+ .
 Like the first part, the last one is for evaluating light energy loss due to light coming in through the surface.</p>
 <p>The complexity of the simplified function is already a lot simpler with the approximation.
-To simplify things even more, $ S_p(p_o, p_i) $ will only consider the distance of the two input points instead of the relative positions with each other on the surface of the object.
+To simplify things even more,  $ S_p(p_o, p_i) $ 
+  will only consider the distance of the two input points instead of the relative positions with each other on the surface of the object.
 This greatly reduces the complexity of the problem again since BSSRDF will need no knowledge of the specific shape of the object, where the two points are lying on, to be evaluated.
 And this is what we usually call &lsquo;diffusion profile&rsquo;.
 A way to visualize it is to shoot a lazer thin ray on a totally flat surface with subsurface scattering.
 One nice thing about this simplification is that the model is independent of the specific model of diffusion profile, which means that we can choose whatever we want as long as it is normalized.
 Mathematically, the equation below needs to hold true,</p>
-<p>$ \int_0^{2\pi} \int_0^{\infty} S_p(r) \space r \space dr \space d\theta = 1$</p>
+
+$$ \int_0^{2\pi} \int_0^{\infty} S_p(r) \space r \space dr \space d\theta = 1$$
 <h2 id="importance-sampling">Importance Sampling</h2>
 <p>Importance sampling of BSSRDF involves two things, sampling an incoming direction and sampling a position where the incoming light enters the volume of the SSS object from the surface.
-Sampling a direction is no different from sampling a direction using BRDF. As a matter of fact, PBRT uses a wrapper BXDF to hide the $ S_w $ part.
+Sampling a direction is no different from sampling a direction using BRDF. As a matter of fact, PBRT uses a wrapper BXDF to hide the  $ S_w $ 
+ part.
 And with the BRDF setup, it easily reuses existed code infrastructure to sample it.</p>
 <p>Taking a sample around the point to be shaded is a bit more complex than taking a random direction around the same point since it depends on the shape of the geometry.
 There are numerous methods that can help to take samples. For example, in PBRT 2nd edition, they construct a KD-Tree for saving randomly generated points on the surface of the geometry.
@@ -442,9 +477,11 @@ The intersection of the short ray with the original geometry will be the sampled
 <figure><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/projection.png" width="550"/>
 </figure>
 
-<p>In the above image, $r_{max}$ is decided by the diffusion profile. And r is a random sample based on the chosen pdf.
+<p>In the above image,  $r_{max}$ 
+ is decided by the diffusion profile. And r is a random sample based on the chosen pdf.
 Luckily enough, the diffusion profile Disney offers in their <a href="https://graphics.pixar.com/library/ApproxBSSRDF/paper.pdf">paper</a> already has a perfect pdf.
-One detail to be noted here is that we should have three $r_{max}$ because the diffusion profile has three channels. Here I assume we are not doing the real spectrum rendering.
+One detail to be noted here is that we should have three  $r_{max}$ 
+ because the diffusion profile has three channels. Here I assume we are not doing the real spectrum rendering.
 It is needed to pick one channel randomly first and having it taken into account eventually when evaluating its pdf.</p>
 <p>The problem is more than what it appears to be in the above image. Whenever there is an assumption that breaks, problems arise.
 Of course, the geometries won&rsquo;t be flat most of the time.
@@ -547,7 +584,8 @@ Following is the code snippet of &lt;&lt;&lt; Handle BSSRDF &gt;&gt;&gt;.</p>
 <li>It first takes a sampled position near the shading point. The importance sampling of the diffusion profile happens under the hood.
 One important detail to be noted here is that the interface <strong>sample_s</strong> will silently add a fake brdf in the bsdf of the intersection for importance sampling the ray direction of the next iteration in the loop.</li>
 <li>If nothing is found, it will simply bail. This will be a source of bias and it is why SSS evaluation tends to tint with a different color at the thin parts of the object.</li>
-<li>Update the throughput, this line will count the attenuation caused by the distance between the shading point and sampled point. It is essentially $ S_p(\omega_i, \omega_o) $ mentioned previously. Please note that the first Fresnel part is already handled in the BXDF right before the condition.</li>
+<li>Update the throughput, this line will count the attenuation caused by the distance between the shading point and sampled point. It is essentially  $ S_p(\omega_i, \omega_o) $ 
+  mentioned previously. Please note that the first Fresnel part is already handled in the BXDF right before the condition.</li>
 <li>Starting from here, we need to evaluate both direct illumination and indirect illumination to take both into account.
 <ul>
 <li>Direct illumination evaluation is fairly simple in the way that we can take advantage of the existed code infrastructure.</li>
@@ -1050,8 +1088,13 @@ Following is a demonstration of what could happen inside the volume of the outer
 Of course, there are no three parallel surfaces in the outer ball mesh, but it does lead to rays bouncing between its surfaces, so this representation doesn&rsquo;t lose its generality.
 Upon the first intersection of the primary ray, it will pick three samples on the surface of the objects, some of which happen to be inside the volume and is kind of unfortunate.
 It is unfortunate because the next sample it picks will also be from the exact same material with SSS.
-As we can see from the path $ P_0 \rightarrow P_{11} \rightarrow P_{2} \rightarrow P_{31} \rightarrow P_{4} \rightarrow P_{5} \rightarrow P_{63}$, which is essentially three bounces.
-Please be noted that the transition from $ P_0 $ to $ P_{11} $ is not considered a bounce, it is just taking a sample of BSSRDF. Same goes true about the transition from $ P_5 $ to $ P_{63} $.
+As we can see from the path  $ P_0 \rightarrow P_{11} \rightarrow P_{2} \rightarrow P_{31} \rightarrow P_{4} \rightarrow P_{5} \rightarrow P_{63}$ 
+ , which is essentially three bounces.
+Please be noted that the transition from  $ P_0 $ 
+ to  $ P_{11} $ 
+ is not considered a bounce, it is just taking a sample of BSSRDF. Same goes true about the transition from  $ P_5 $ 
+ to  $ P_{63} $ 
+ .
 The real problem behind this is that every single path is trying to make its way out, while only a very minority group of lucky paths will make it.
 However, the ones made out will make an excessive amount of contribution to the evaluation since their PDF is extremely low.
 In practice, the situation is way worse than just a few bounces.
@@ -1064,7 +1107,9 @@ There is also no easy solution for this one. It because is those bold assumption
 <li>Importance sampling does not always stick to the target function, which is the distance profile.
 Although the Disney distance profile can be analytically sampled with a perfect PDF, the unknown shape of geometry easily makes the sampling algorithm less efficient. We will cover it later.</li>
 </ul>
-<p>Replacing SSS with lambert if the previous material has SSS will almost prevent this from happening. Because the path will be blocked when going from $ P_{11} $ to $ P_2 $.
+<p>Replacing SSS with lambert if the previous material has SSS will almost prevent this from happening. Because the path will be blocked when going from  $ P_{11} $ 
+ to  $ P_2 $ 
+ .
 Rays won&rsquo;t bounce between complex meshes with SSS materials.
 Of course, light does bounce between complex shapes with SSS materials in reality, but without a good importance sampling algorithm and distance profile, this will easily lead to fireflies.
 And considering the multi-bounces inside SSS materials don&rsquo;t have the biggest impact on the final visual, I chose to ignore it by replacing SSS with lambert if necessary.</p>
@@ -1074,7 +1119,8 @@ And considering the multi-bounces inside SSS materials don&rsquo;t have the bigg
 <h4 id="the-catch-of-replacing-sss-with-lambert">The Catch of Replacing SSS with Lambert</h4>
 <p>Given a specific path, depending on the direction of evaluation, the end result of rendering equation evaluation could be different.
 Imagine there is a path like this
-$ E \rightarrow A \rightarrow B \rightarrow L $,
+ $ E \rightarrow A \rightarrow B \rightarrow L $ 
+ ,
 where <strong>E</strong> stands for eye, <strong>A</strong> and <strong>B</strong> stand for two points on surfaces with SSS, <strong>L</strong> represents light. If the direction of evaluation is from the eye to the light, <strong>A</strong> will be evaluated with SSS model, but <strong>B</strong> will be a lambert model.
 While if the direction of the evaluation goes the other way, <strong>B</strong> will be evaluated with SSS, and <strong>A</strong> will be simplified with lambert model. This clearly introduces some bias between path evaluation from different directions.
 This might not be a problem at all for unidirectional path tracing or light tracing, where evaluation is always one direction. For algorithms like bidirectional path tracing, this will introduce an extra layer of bias.
@@ -1093,7 +1139,8 @@ Like we mentioned before, there is a possibility that the projection ray will hi
 In these cases, PBRT will choose to uniformly pick one random intersection and divide the diffusion profile PDF by the number of intersections that the short ray hits in total.
 This essentially adds a weighting factor for the original pdf.
 Mathematically, the final pdf should be as below,</p>
-<p>$ P(X,R) = P_{Disney}(R) * P_{uniform}(X|R=r)$</p>
+
+$$ P(X,R) = P_{Disney}(R) * P_{uniform}(X|R=r)$$
 <p>R is the distance between the sampled point on the disk to the center of the disk.
 X is the index of the point it picks among all intersections.
 So we can clearly see from this equation, the Disney importance sampling pdf is just one part of the final pdf we have. The second pdf uniformly takes one intersection among all randomly, it is a conditional probability distribution.
@@ -1340,7 +1387,8 @@ $('.ba-slider'+"a83234c266e188debc03a310fe6b6382").beforeAfter();
 <p>It is common that renderers will introduce a coating layer to simulate a glossy surface with SSS under it to deliver a wax-like feeling. PBRT uses fresnel to pursue better physically-based accuracy. But it is also not uncommon to see articles mentioning SSS without the fresnel part. Strictly speaking, subsurface scattering should have no connection with the coating layer since they are not tightly couple all the time.
 Also, because I have my plan to support flexible blending between bssrdf and bxdf in my material system, which will be covered later in this blog, I can totally approximate the fresnel part in my shader, instead of hardcode it in the bssrdf.</p>
 <p>Ideally, my goal here is to make sure I can guarantee this equation,</p>
-<p>$ \lim\limits_{s \rightarrow 0} \int_A \int_{\Omega} L(p_i, \omega_i) \space bssrdf( s, \omega_i, \omega_o ) cos(\theta_i) d\omega_i dA = \int_{\Omega} L(\omega_i) \space brdf_{lambert}(\omega_i, \omega_o) cos(\theta_i) d\omega_i$</p>
+
+$$ \lim\limits_{s \rightarrow 0} \int_A \int_{\Omega} L(p_i, \omega_i) \space bssrdf( s, \omega_i, \omega_o ) cos(\theta_i) d\omega_i dA = \int_{\Omega} L(\omega_i) \space brdf_{lambert}(\omega_i, \omega_o) cos(\theta_i) d\omega_i$$
 <p>The benefit of securing such an equation is that it allows me to have a proper transition between sss and lambert model without introducing a noticeable boundary in between.
 This doesn&rsquo;t sound like a big deal, but it does offer a bit more flexibility of data authoring.
 For example, the shots below clearly demonstrate the differences. The mean free path goes to zero gradually as the position goes lower, eventually reaching zero somewhere around the neck of the monkey head. It is not too obvious, but we can notice the line at the bottom of the monkey head by taking a closer look. This is because the above equation is not true for the original implementation.</p>
@@ -1565,12 +1613,16 @@ $('.ba-slider'+"0662fea70917668a921a23d43c10e1da").beforeAfter();
 </script>
 
 
-<p>The way I achieve this smooth transition is by killing the two Fresnel parts and adding a denominator of $\pi$. So the equation of my BSSRDF goes like this,</p>
-<p>$ S(p_o, p_i, \omega_o, \omega_i) \approx \dfrac{S_p(p_o, p_i)}{\pi} $</p>
-<p>As the mean free path length approaches to zero, the $S_p(p_o, p_i)$ becomes linearly proportional to <a href="https://en.wikipedia.org/wiki/Dirac_delta_function">dirac-delta</a> function. Also, as we know, a dirac-delta function will simplify integral in Monta Carlo estimation by dropping one dimension. The constant factor is what we need to figure out here. Since the pdf, which is proportional to this BSSRDF, the only difference between this BSSRDF and the pdf is the color tint part. Because when the mean free path approaches zero, it is very likely there is only one single intersection. This means that we don&rsquo;t need to take the conditional probability density function into account. So the pdf and bssrdf have this connection</p>
-<p>$ S_p(p_o, p_i) = A * p(p_o,p_i) $</p>
+<p>The way I achieve this smooth transition is by killing the two Fresnel parts and adding a denominator of $ \pi $. So the equation of my BSSRDF goes like this,</p>
+
+$$ S(p_o, p_i, \omega_o, \omega_i) \approx \dfrac{S_p(p_o, p_i)}{\pi} $$
+<p>As the mean free path length approaches to zero, the  $S_p(p_o, p_i)$ 
+ becomes linearly proportional to <a href="https://en.wikipedia.org/wiki/Dirac_delta_function">dirac-delta</a> function. Also, as we know, a dirac-delta function will simplify integral in Monta Carlo estimation by dropping one dimension. The constant factor is what we need to figure out here. Since the pdf, which is proportional to this BSSRDF, the only difference between this BSSRDF and the pdf is the color tint part. Because when the mean free path approaches zero, it is very likely there is only one single intersection. This means that we don&rsquo;t need to take the conditional probability density function into account. So the pdf and bssrdf have this connection</p>
+
+$$ S_p(p_o, p_i) = A * p(p_o,p_i) $$
 <p>By taking a look at the Monte Carlo estimation, we got this</p>
-<p>$ \lim\limits_{s \rightarrow 0} S(p_o, p_i, \omega_o, \omega_i) \approx \lim\limits_{s \rightarrow 0} \Sigma {\dfrac{S_p(p_o, p_i)}{p(p_o,p_i)}} = \dfrac{A}{\pi} $</p>
+
+$$ \lim\limits_{s \rightarrow 0} S(p_o, p_i, \omega_o, \omega_i) \approx \lim\limits_{s \rightarrow 0} \Sigma {\dfrac{S_p(p_o, p_i)}{p(p_o,p_i)}} = \dfrac{A}{\pi} $$
 <p>And dropping this equation back to the one we want to fulfill, it is obvious that this is a perfect match, which is also proved by the above shot.</p>
 <h2 id="avoid-finding-intersection-with-other-meshes">Avoid Finding Intersection with other Meshes</h2>
 <p>One detail in SSS implementation is to tell whether an intersection is a valid one during importance sampling of nearby positions.
@@ -2336,20 +2388,7 @@ Apart from the common subsurface scattering materials, like skin, wax, this algo
       </footer>
     </article>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
-    onload="renderMathInElement(document.body,
-      {
-        delimiters: [
-          {left: '$$', right: '$$', display:true},
-          {left: '$', right: '$', display:false},
-          {left: '\\(', right: '\\)', display: false},
-          {left: '\\[', right: '\\]', display: true}
-        ]
-      }
-    );">
-  </script>
+    
   </section>
 
       </div>

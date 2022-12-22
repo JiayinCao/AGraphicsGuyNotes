@@ -83,6 +83,32 @@ When the term first came out, I was totally no idea what this new stuff is. And 
     
 
     
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$", right: "$", display: false}
+      ]
+    });
+  });
+</script>
+
+<style>
+  .katex-display > .katex {
+    text-align: left !important;
+  }
+</style>
+    
 
     <meta name="generator" content="Hugo 0.108.0">
   </head>
@@ -170,7 +196,8 @@ When the term first came out, I was totally no idea what this new stuff is. And 
 <p>When the term first came out, I was totally no idea what this new stuff is. And it took me quite a while to get some basic idea on it because there are so many materials and some of them are a little confusing. I can&rsquo;t say that I fully understand all of the theory simply because I don&rsquo;t, however I would still like to write something that I knew and list something useful that I found in this blog. Hopefully it can be helpful for someone.</p>
 <h1 id="physically-based-shading">Physically Based Shading</h1>
 <p>Basically physically based shading performs shading operation in a more physical accurate way than the old common &lsquo;ad-hoc&rsquo; model, which is usually Phong or any modified version. Here is the basic form of Phong model (note that it is shading model listed below, not BRDF):</p>
-<p>$ I_p=\sum_{m\in lights}(k_dm_d(L_m\cdot N)+k_sm_s(R\cdot V)^\alpha)$</p>
+
+$$ I_p=\sum_{m\in lights}(k_dm_d(L_m\cdot N)&#43;k_sm_s(R\cdot V)^\alpha)$$
 <p>Ambient term is dropped since it is not involved in this topic. R is the reflected vector of the incident direction around normal. It has many parameters for artist to tune and special care needs to be taken in certain aspect to avoid unnatural look. Although this model is used ever since fixed function graphics hardware, it is apparently out-dated comparing with more advanced model like &lsquo;microfacet&rsquo; model.</p>
 <h2 id="diffuse-and-specular">Diffuse and Specular</h2>
 <p>Generally there are two categories of reflection, diffuse and specular. In the following diagram, the yellow ones are specular reflection and the rest are diffuse reflection.</p>
@@ -188,7 +215,8 @@ When the term first came out, I was totally no idea what this new stuff is. And 
 </figure>
 
 <p>Unlike diffuse reflection, specular happens right at the surface being shaded. And its reflected direction is highly dependent on the incident angle. Take an extreme case, mirror will reflect viewing angle into exact one direction. Microfacet model is the most commonly used bxdf for specular lighting. It assumes that the surface is composed of many small micro facets, each one among them is a pure specular surface or in other words, perfect mirror. Only micro facets with normal exactly the same with the half angle between incident and reflected direction will contribute. It is the aggregate behavior defines what the surface actually looks like. The more uniform those microfacet normals are, the smoother the surface is, vice versa. Here is the microfacet brdf:</p>
-<p>$ f(\omega_i,\omega_o,x) = \dfrac{F(\omega_i , h) G(\omega_i,\omega_o,h) D(h)}{4 cos(\theta_i) cos(\theta_o)} $</p>
+
+$$ f(\omega_i,\omega_o,x) = \dfrac{F(\omega_i , h) G(\omega_i,\omega_o,h) D(h)}{4 cos(\theta_i) cos(\theta_o)} $$
 <p>F is the fresnel term which will be mentioned later. D is the distribution term defining where these microfacets face, here is more information on it. G is a shadowing factor for masking and it is usually a less dominant term in this bxdf.</p>
 <figure><img src="/img/posts/physically_based_shading_in_games/mf.png" width="600"/>
 </figure>
@@ -197,7 +225,8 @@ When the term first came out, I was totally no idea what this new stuff is. And 
 <p>In term of diffuse reflection, they are the same. Both use lambert bxdf. However it is microfacet bxdf model which delivers much better result than the phong model. And another subtle difference is the way pbs model blends diffuse and specular.</p>
 <h1 id="energy-conservation">Energy Conservation</h1>
 <p>Energy conservation is one of the basic rules for every physical correct bxdf to obey. It says that the total amount of reflected energy of light can&rsquo;t not be larger than received unless it is emissive material. It makes perfect sense. From a mathematics perspective, it can be expressed this way:</p>
-<p>$ \int_{\Omega}f_r(p,\omega_o,\omega_i) cos\theta_i d\omega_i \le 1$</p>
+
+$$ \int_{\Omega}f_r(p,\omega_o,\omega_i) cos\theta_i d\omega_i \le 1$$
 <p>Unfortunately bxdf of phong totally ignores this rule, forwarding the responsibility to artists in their workflow, which usually costs them a lot of time.</p>
 <h2 id="specular-bxdf">Specular bxdf</h2>
 <p>Let&rsquo;s focus on the specular part first. Two things deserve our attention, reflection intensity and the high light shape. In the phong model, we have two parameters controlling each of these, which used to be defined as &ldquo;Specular Color&rdquo; and &ldquo;Specular Power&rdquo;.  Unfortunately, it is quite easy to break the rule of energy conservation because these two terms should be related to each other in order to preserve it. Simply put it, phong brdf is just not a normalized brdf.</p>
@@ -218,7 +247,8 @@ When the term first came out, I was totally no idea what this new stuff is. And 
 <h2 id="blend-between-diffuse-and-specular">Blend between Diffuse and Specular</h2>
 <p>Besides the unnormalized feature of phong model, the other ugly thing that breaks energy conservation is the way it blends diffuse and specular. As a matter of fact, it doesn&rsquo;t even blend them, it just add them together which makes little sense in a physical manner. From a micro perspective, photons either reflect at the surface or penetrate into it, they can do both at the same time. That said the total energy reflected by diffuse and specular should obey the rule of energy conservation. Obviously phong fails to keep it again.</p>
 <p>The right way of blending these two is to make sure the following equation goes right:</p>
-<p>$ m_d + m_s \le 1 $</p>
+
+$$ m_d &#43; m_s \le 1 $$
 <p>UE4 uses a specific parameter called Mettalic to lerp between diffuse and specular. One minor detail in UE4 material system to be noticed is that even if metallic is zero, 8% percent specular reflection will still be present. Another paramter called specular is introduced to remove this 8% for some special materials. Here is an image showing a sphere with different metallic value. There is no diffuse reflection for surfaces with 1 as metallic parameter, that makes sense because metal doesn&rsquo;t show any diffuse reflection in our real life.</p>
 <figure><img src="/img/posts/physically_based_shading_in_games/diffusetospecular.png" width="800"/>
 </figure>
@@ -229,7 +259,8 @@ When the term first came out, I was totally no idea what this new stuff is. And 
 </figure>
 
 <p>For a real time solution for fresnel equation, Schlick&rsquo;s approximation is enough most of the time.</p>
-<p>$ R = R(0) + ( 1 - R(0) ) ( 1 - cos\theta)^5$</p>
+
+$$ R = R(0) &#43; ( 1 - R(0) ) ( 1 - cos\theta)^5$$
 <p>It is relatively easy to see from this image that when at grazing angle, fresnel value will approach 1 no matter what value R(0) is provided in the material system. That is exactly why we are seeing bright reflection around the contour of this sphere. One can also check <a href="https://seblagarde.wordpress.com/2013/04/29/memo-on-fresnel-equations/">here</a> for further information.</p>
 <p>Valuable resources</p>
 <p>Here are the courses on pbs at each year siggraph:</p>
