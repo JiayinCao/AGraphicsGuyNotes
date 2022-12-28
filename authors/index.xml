@@ -2,9 +2,9 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Authors on A Graphics Guy&#39;s Note</title>
-    <link>/authors/</link>
+    <link>https://agraphicsguynotes.com/authors/</link>
     <description>Recent content in Authors on A Graphics Guy&#39;s Note</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en</language><atom:link href="/authors/index.xml" rel="self" type="application/rss+xml" />
+    <language>en</language><atom:link href="https://agraphicsguynotes.com/authors/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>

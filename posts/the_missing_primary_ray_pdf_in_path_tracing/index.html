@@ -19,7 +19,7 @@
     <meta property="og:title" content="The Missing Primary Ray PDF in Path Tracing" />
 <meta property="og:description" content="I was always wondering why don&rsquo;t we take the PDF of primary ray into account in a path tracer. Sadly there aren&rsquo;t many resources available explaining it. I guess the book Physically based rendering 3rd will provide some explanation, however it is not released yet. After some searching on the internet, I finally got something to explain it. It actually gets cancelled with the terms in importance function and LTE. It gets cancelled in a very elegant way that we don&rsquo;t need to put any resources on it at all, which is why many open-source ray tracer don&rsquo;t consider it in the first place." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/posts/the_missing_primary_ray_pdf_in_path_tracing/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
+<meta property="og:url" content="https://agraphicsguynotes.com/posts/the_missing_primary_ray_pdf_in_path_tracing/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2016-02-04T00:00:00+00:00" />
 <meta property="article:modified_time" content="2016-02-04T00:00:00+00:00" />
 
@@ -29,7 +29,7 @@
 </title>
 
     
-      <link rel="canonical" href="/posts/the_missing_primary_ray_pdf_in_path_tracing/">
+      <link rel="canonical" href="https://agraphicsguynotes.com/posts/the_missing_primary_ray_pdf_in_path_tracing/">
     
 
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
@@ -212,7 +212,7 @@ $$ pdf_a = \dfrac{1}{area_{aperture}} $$
 <p>The second thing we need to be clear with is what is stored in a pixel. In a very naive ray tracer, it is usually the generated radiance. However it is much more complex if we consider more. Here is a precise equation showing pixel information:</p>
 
 $$ I = \int_{A_{pixel}}\int_A W_e(p_0\rightarrow p_1)L(p_1\rightarrow p_0) G( p_0 \longleftrightarrow p_1 ) dA(p_0) dA(p_1) $$
-<p>I won&rsquo;t show derivation of the equation since it is well out of the scope of this post, I suggest the book Physically based rendering 2rd for further detail on it. However in this book, &lsquo;We&rsquo; is assumed to be a dirac delta function, which is actually not. And we are focusing on things before the first intersection, so there is no need to expend the radiance term, we&rsquo;ll just assume that it is already known. How to get the radiance value correctly is already mentioned in my previous <a href="/posts/basics_about_path_tracing/">post</a>.</p>
+<p>I won&rsquo;t show derivation of the equation since it is well out of the scope of this post, I suggest the book Physically based rendering 2rd for further detail on it. However in this book, &lsquo;We&rsquo; is assumed to be a dirac delta function, which is actually not. And we are focusing on things before the first intersection, so there is no need to expend the radiance term, we&rsquo;ll just assume that it is already known. How to get the radiance value correctly is already mentioned in my previous <a href="https://agraphicsguynotes.com/posts/basics_about_path_tracing/">post</a>.</p>
 <p>Understanding this equation is very important for implementing something like path tracing and light tracing, especially when DOF is also considered. We&rsquo;ve already been familiar with the radiance, G term and primary ray pdf, figuring out what &lsquo;We&rsquo; is is all left to do.</p>
 <h2 id="importance-function">Importance Function</h2>
 <p>The &lsquo;We&rsquo; term is also called importance function. Unfortunately, I&rsquo;m not 100% sure that my derivation is a correct one. Since it works pretty well in my renderer, so I decided to go with it until I get a better understanding on it from somewhere else.</p>

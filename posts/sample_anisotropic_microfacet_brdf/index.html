@@ -19,7 +19,7 @@
     <meta property="og:title" content="Sampling Anisotropic Microfacet BRDF" />
 <meta property="og:description" content="I am working on material system in my renderer recently. My old implementation of microfacet models only supports isotropic BRDF, as a result of which, it can&rsquo;t render something like brushed metals in my renderer. After spending three days in my spare time to extend the system to support anisotropic microfacet BRDF, I easily noticed how much mathematics that it needs to understand all the importance sampling methods. The fact that $ \theta $ and $ \phi $ are somewhat correlated makes the importance sampling a lot more complex than isotropic model." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/posts/sample_anisotropic_microfacet_brdf/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
+<meta property="og:url" content="https://agraphicsguynotes.com/posts/sample_anisotropic_microfacet_brdf/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2018-07-18T00:00:00+00:00" />
 <meta property="article:modified_time" content="2018-07-18T00:00:00+00:00" />
 
@@ -29,7 +29,7 @@
 </title>
 
     
-      <link rel="canonical" href="/posts/sample_anisotropic_microfacet_brdf/">
+      <link rel="canonical" href="https://agraphicsguynotes.com/posts/sample_anisotropic_microfacet_brdf/">
     
 
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
@@ -186,7 +186,7 @@
       
       <div>
         
-        <p>I am working on material system in my renderer recently. My old implementation of microfacet models only supports isotropic BRDF, as a result of which, it can&rsquo;t render something like brushed metals in my renderer. After spending three days in my spare time to extend the system to support anisotropic microfacet BRDF, I easily noticed how much mathematics that it needs to understand all the importance sampling methods. The fact that $ \theta $ and $ \phi $ are somewhat correlated makes the importance sampling a lot more complex than isotropic model. For a detailed derivation of isotropic microfacet importance sampling, please check out my previous <a href="/posts/sample_microfacet_brdf/">blog</a>. I strongly suggest checking it out if the math formula in this blog confuses you because there are a lot of basics that I won&rsquo;t mention in this blog.</p>
+        <p>I am working on material system in my renderer recently. My old implementation of microfacet models only supports isotropic BRDF, as a result of which, it can&rsquo;t render something like brushed metals in my renderer. After spending three days in my spare time to extend the system to support anisotropic microfacet BRDF, I easily noticed how much mathematics that it needs to understand all the importance sampling methods. The fact that $ \theta $ and $ \phi $ are somewhat correlated makes the importance sampling a lot more complex than isotropic model. For a detailed derivation of isotropic microfacet importance sampling, please check out my previous <a href="https://agraphicsguynotes.com/posts/sample_microfacet_brdf/">blog</a>. I strongly suggest checking it out if the math formula in this blog confuses you because there are a lot of basics that I won&rsquo;t mention in this blog.</p>
 <p>It is gonna be very boring to go through the whole blog. In case you are already bored, here is what you can achieve with the BRDF model. Hopefully, this image can convince you reading through it.</p>
 <figure><a href="/img/posts/sample_anisotropic_microfacet_brdf/anisotropic_brdf.png"><img src="/img/posts/sample_anisotropic_microfacet_brdf/anisotropic_brdf.png" width="700"/></a>
 </figure>
@@ -334,7 +334,7 @@ $$ \theta = arccos\Big( \epsilon ^ { \small \dfrac{1}{cos^2(\phi) * e_u &#43; si
 [7] <a href="http://www.irisa.fr/prive/kadi/Lopez/ashikhmin00anisotropic.pdf">An Anisotropic Phong BRDF Model</a><br>
 [8] <a href="http://simonstechblog.blogspot.com/2011/12/microfacet-brdf.html">Microfacet BRDF</a><br>
 [9] <a href="http://www.farbrausch.de/~fg/stuff/phong.pdf">Phong Normalization Factor derivation</a><br>
-[10] <a href="/posts/sample_microfacet_brdf/">Sampling Microfacet BRDF</a></p>
+[10] <a href="https://agraphicsguynotes.com/posts/sample_microfacet_brdf/">Sampling Microfacet BRDF</a></p>
 
       </div>
 

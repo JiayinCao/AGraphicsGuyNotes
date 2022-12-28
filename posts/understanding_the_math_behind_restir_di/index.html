@@ -22,7 +22,7 @@ The original papers are clearly the best resources to learn the tech. Due to the
 <meta property="og:description" content="Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReStir (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like ReStir DI, ReStir GI, ReStir PT, Volumetric ReStir, etc.
 The original papers are clearly the best resources to learn the tech. Due to the complexity of the algorithm, understanding the theory and math remains challenging for graphics programmers who are not very familiar with sampling methods." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/posts/understanding_the_math_behind_restir_di/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
+<meta property="og:url" content="https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_di/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2022-12-05T00:00:00+00:00" />
 <meta property="article:modified_time" content="2022-12-05T00:00:00+00:00" />
 
@@ -32,7 +32,7 @@ The original papers are clearly the best resources to learn the tech. Due to the
 </title>
 
     
-      <link rel="canonical" href="/posts/understanding_the_math_behind_restir_di/">
+      <link rel="canonical" href="https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_di/">
     
 
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
@@ -203,7 +203,7 @@ The original papers are clearly the best resources to learn the tech. Due to the
 <li>Drop the N samples in the Monte Carlo estimator<br>
 $I=\dfrac{1}{N} \Sigma_{i=1}^N f(x_i)/p(x_i)$</li>
 </ul>
-<p>It is so easy to prove this that I would skip the math. If you would like to know how, check out my previous post <a href="/posts/monte_carlo_integral_with_multiple_importance_sampling/">here</a>.</p>
+<p>It is so easy to prove this that I would skip the math. If you would like to know how, check out my previous post <a href="https://agraphicsguynotes.com/posts/monte_carlo_integral_with_multiple_importance_sampling/">here</a>.</p>
 <p>However, I would like to point out an important condition here.
 The domain of p(x) has to cover the whole domain of f(x). If it doesn&rsquo;t, this can&rsquo;t work.</p>
 <p>To prove it, let&rsquo;s say there is a subdomain in the f(x)&rsquo;s domain $\Omega$ that is not covered by p(x), naming it $\Omega_1$.
@@ -255,7 +255,7 @@ $\int_{\Omega_1} w_k(x) f(x) dx = 0$</li>
 <p>Here I&rsquo;d like to point out a few commonly used weight</p>
 <ul>
 <li>Balance Heuristic<br>
-This is the most commonly used weight function in MIS. The mathematical form of the weight is quite simple, $ w_k(x) = N_k p_k(x) / \Sigma_{i=1}^{M} N_i p_i(x)$ . If we pay attention to the details, we would notice that it automatically fulfills the first and third conditions, which is very nice. Even though the weight looks quite simple, sometimes it can get quite complicated, like in the algorithm of <a href="/posts/practical_implementation_of_mis_in_bidirectional_path_tracing/">Bidirectional Path Tracing</a>.   What is even worse is that sometimes the PDFs are not even trackable, making it impossible to use this method.</li>
+This is the most commonly used weight function in MIS. The mathematical form of the weight is quite simple, $ w_k(x) = N_k p_k(x) / \Sigma_{i=1}^{M} N_i p_i(x)$ . If we pay attention to the details, we would notice that it automatically fulfills the first and third conditions, which is very nice. Even though the weight looks quite simple, sometimes it can get quite complicated, like in the algorithm of <a href="https://agraphicsguynotes.com/posts/practical_implementation_of_mis_in_bidirectional_path_tracing/">Bidirectional Path Tracing</a>.   What is even worse is that sometimes the PDFs are not even trackable, making it impossible to use this method.</li>
 <li>Power Heuristic<br>
 This weight is sort of similar to the balance heuristic, except it adds a power on top of each element in the nominator and denominator, leaving the math form like this $ w_k(x) = (N_k p_k(x))^\beta / \Sigma_{i=1}^{M} (N_i p_i(x))^{\beta}$. We can easily tell here that the balance heuristic is nothing but a special form of power heuristic when $\beta$ is simply one. And this weight also meets the first and third conditions as well. It is less commonly used compared with the balance heuristic, but it is indeed used in some cases for better sampling efficiency.</li>
 <li>Uniform Weight<br>
@@ -766,8 +766,8 @@ This graph is about pixel A picking its light samples. In the beginning, both A 
 <figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReStir_3.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReStir_3.png"/></a>
 </figure>
 
-<p>Please take a look at the first graph in <a href="/posts/understanding_the_math_behind_restir_di/#mis-used-with-ris">this section</a> again, I think it should be quite clear that we are essentially just using MIS in RIS. To further explain it, it treats the target sample from its neighbors as a proposal sample here and the proposal PDF for this sample is the SIR PDF from its neighbors. As we mentioned in the previous sections, RIS does allow different proposal PDFs to co-exist together as long as the target distribution is consistent.</p>
-<p>At this point, it is clear how we can answer the question of this section. The behavior of borrowing neighbor pixels&rsquo; target sample is essentially introducing a new PDF that is different than the light sample PDF. And this mathematically is totally fine and introduces no bias at all as <a href="/posts/understanding_the_math_behind_restir_di/#math-proof-of-ris">proved</a> before. This is precisely why even if neighbor pixels have their own target distributions the algorithm is still unbiased.</p>
+<p>Please take a look at the first graph in <a href="https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_di/#mis-used-with-ris">this section</a> again, I think it should be quite clear that we are essentially just using MIS in RIS. To further explain it, it treats the target sample from its neighbors as a proposal sample here and the proposal PDF for this sample is the SIR PDF from its neighbors. As we mentioned in the previous sections, RIS does allow different proposal PDFs to co-exist together as long as the target distribution is consistent.</p>
+<p>At this point, it is clear how we can answer the question of this section. The behavior of borrowing neighbor pixels&rsquo; target sample is essentially introducing a new PDF that is different than the light sample PDF. And this mathematically is totally fine and introduces no bias at all as <a href="https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_di/#math-proof-of-ris">proved</a> before. This is precisely why even if neighbor pixels have their own target distributions the algorithm is still unbiased.</p>
 <p>One subtle thing that deserves our attention is that ReStir DI really uses different proposal PDFs even if all light samples are drawn from the same light sample PDF. This is because the target samples from neighbors, which are treated as proposal samples, all come from different SIR PDFs.</p>
 <h2 id="the-proposal-samples-visited-by-ris">The Proposal Samples Visited by RIS</h2>
 <p>One common misunderstanding of ReStir DI algorithm is that if a neighbor pixel&rsquo;s reservoir has visited 100 samples, by &lsquo;merging&rsquo; the target sample from it, our current pixel&rsquo;s visited samples count will be grown by 100. This was briefly mentioned before, I&rsquo;d like to explain with a bit more text here.</p>
@@ -796,7 +796,7 @@ What is the MIS weight in this case then? Can we use balance heuristics at all?<
 <li>And since each balanced heuristic weight would require knowing all proposal PDFs during its evaluation, this would mean that the set of proposal PDFs would be known even during the first samples evaluating its MIS weight, breaking the streaming nature of the ReStir algorithm.</li>
 </ul>
 <p>At this point, it is not hard to imagine why the paper&rsquo;s implementation went for a uniform weight as it can easily be isolated out and doesn&rsquo;t have the problems mentioned above.</p>
-<p>However, uniform weight comes at a cost here. As previously explained, the third condition in <a href="/posts/understanding_the_math_behind_restir_di/#multiple-importance-sampling">MIS</a> is not met by the uniform weight. And this is precisely the essential root cause of why ReStir DI would introduce bias. The paper does explain why it is biased, but seeing the same problem from another perspective commonly offers us a bit deeper understanding. And the solution the paper proposed does exactly the method explained metioned in the constant weight section before.</p>
+<p>However, uniform weight comes at a cost here. As previously explained, the third condition in <a href="https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_di/#multiple-importance-sampling">MIS</a> is not met by the uniform weight. And this is precisely the essential root cause of why ReStir DI would introduce bias. The paper does explain why it is biased, but seeing the same problem from another perspective commonly offers us a bit deeper understanding. And the solution the paper proposed does exactly the method explained metioned in the constant weight section before.</p>
 <p>Strictly speaking, there is chances to use balance heuristics by using the target distribution rather than the untrackable SIR PDF. However, even if this tackles the first problem, the two remaining issues could still be a performance bottleneck. Besides, the balanced heuristic commonly requires each PDF to be normalized, while the target distribution may not necessarily be normalized, which will cause no bias, but inefficiency in terms of convergence rate.</p>
 <h2 id="what-is-the-proposal-pdf-for-neighbors-target-sample">What is the Proposal PDF for Neighbors Target Sample?</h2>
 <p>In order to perform RIS algorithm, we would need to know the proposal PDF for each incoming proposal sample. However, there is a particularly tricky problem, the neighbor pixel&rsquo;s SIR PDF is not trackable. There is no easy way to evaluate what the PDF is.</p>
@@ -909,10 +909,10 @@ Hopefully, this would convince readers that this algorithm is indeed unbiased.</
 [5] <a href="http://www.zyanidelab.com/how-to-add-thousands-of-lights-to-your-renderer/">How to add thousands of lights to your renderer and not die in the process</a><br>
 [6] <a href="https://gamehacker1999.github.io/posts/restir/">Spatiotemporal Reservoir Resampling (ReSTIR) - Theory and Basic Implementation</a><br>
 [7] <a href="https://graphics.stanford.edu/papers/veach_thesis/thesis.pdf">Robust Monte Carlo Methods For Light Transport Simulation</a><br>
-[8] <a href="/posts/practical_implementation_of_mis_in_bidirectional_path_tracing/">Practical implementation of MIS in Bidirectional Path Tracing</a><br>
+[8] <a href="https://agraphicsguynotes.com/posts/practical_implementation_of_mis_in_bidirectional_path_tracing/">Practical implementation of MIS in Bidirectional Path Tracing</a><br>
 [9] <a href="https://scholarsarchive.byu.edu/cgi/viewcontent.cgi?article=1662&amp;context=etd">Importance Resampling for Global Illumination</a><br>
 [10] <a href="https://blog.demofox.org/2022/03/02/sampling-importance-resampling/">Sampling Importance Resampling</a><br>
-[11] <a href="/posts/monte_carlo_integral_with_multiple_importance_sampling/">Monte Carlo Integral with Multiple Importance Sampling</a><br>
+[11] <a href="https://agraphicsguynotes.com/posts/monte_carlo_integral_with_multiple_importance_sampling/">Monte Carlo Integral with Multiple Importance Sampling</a><br>
 [12] <a href="https://research.nvidia.com/publication/2019-07_dynamic-many-light-sampling-real-time-ray-tracing">Dynamic Many-Light Sampling for Real-Time Ray Tracing</a><br>
 [13] <a href="https://fpsunflower.github.io/ckulla/data/many-lights-hpg2018.pdf">Importance Sampling of Many Lights with Adaptive Tree Splitting</a><br>
 [14] <a href="http://cwyman.org/papers/rtg2-manyLightReGIR.pdf">Rendering Many Lights With Grid-Based Reservoirs</a><br>

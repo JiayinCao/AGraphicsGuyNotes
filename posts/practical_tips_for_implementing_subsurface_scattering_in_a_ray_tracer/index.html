@@ -19,7 +19,7 @@
     <meta property="og:title" content="Practical Tips for Implementing Subsurface Scattering in a Ray Tracer" />
 <meta property="og:description" content="This blog is about the iterations I made during implementing subsurface scattering in my renderer." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/sss_dragon.png" /><meta property="article:section" content="posts" />
+<meta property="og:url" content="https://agraphicsguynotes.com/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/sss_dragon.png" /><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2020-11-13T00:00:00+00:00" />
 <meta property="article:modified_time" content="2020-11-13T00:00:00+00:00" />
 
@@ -29,7 +29,7 @@
 </title>
 
     
-      <link rel="canonical" href="/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/">
+      <link rel="canonical" href="https://agraphicsguynotes.com/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/">
     
 
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
@@ -490,7 +490,7 @@ And also sometimes, when the projection ray is almost perpendicular to the geome
 Those problems are addressed in PBRT 3rd edition. Please check <a href="http://www.pbr-book.org/3ed-2018/Light_Transport_II_Volume_Rendering/Sampling_Subsurface_Reflection_Functions.html">here</a> for further detail.</p>
 <h2 id="how-does-it-fit-in-a-path-tracing-algorithm">How Does It Fit in a Path Tracing Algorithm</h2>
 <p>In order to figure out how to integrate SSS implementation in a path tracer, it is necessary to know how a barebone path tracer works in general.
-My previous <a href="/posts/basics_about_path_tracing/">blog post</a> mentioned some basics about it.
+My previous <a href="https://agraphicsguynotes.com/posts/basics_about_path_tracing/">blog post</a> mentioned some basics about it.
 Below is the pseudo-code of a minimal path tracer algorithm with BSSRDF in it.</p>
 <div class="highlight"><pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>color li(scene, ray, max_bounce_cnt){
 </span></span><span style="display:flex;"><span>    color ret(<span style="color:#ff0;font-weight:bold">0.0f</span>);
@@ -2178,7 +2178,7 @@ Apart from the common subsurface scattering materials, like skin, wax, this algo
 [8] <a href="https://graphics.stanford.edu/papers/bssrdf/bssrdf.pdf">A Practical Model for Subsurface Light Transport</a><br>
 [9] <a href="https://therealmjp.github.io/posts/sss-intro/">An Introduction To Real-Time Subsurface Scattering</a><br>
 [10] <a href="http://advances.realtimerendering.com/s2018/Efficient%20screen%20space%20subsurface%20scattering%20Siggraph%202018.pdf">Efficient Screen-Space Subsurface Scattering Using Burley&rsquo;s Normalization Diffusion in Real-Time</a><br>
-[11] <a href="/posts/basics_about_path_tracing/">Basics about path tracing</a><br>
+[11] <a href="https://agraphicsguynotes.com/posts/basics_about_path_tracing/">Basics about path tracing</a><br>
 [12] <a href="http://cseweb.ucsd.edu/~viscomp/classes/cse274/wi18/readings/veach_thesis.pdf">Robust Monte Carlo Methods For Light Transport Simulation</a></p>
 
       </div>

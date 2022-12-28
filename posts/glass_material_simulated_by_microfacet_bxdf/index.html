@@ -22,7 +22,7 @@ The above image is generated with my renderer."/>
 <meta property="og:description" content="Microfacet model can not only be used for rough metal, it can also be used to simulate rough glass material. This blog is about rendering glass material with microfacet model. Basically all of the theory comes from this paper. Different from the pure refraction model mentioned in my previous blog, the bxdf mentioned here can also refract a single incident ray into multiple directions instead of just one.
 The above image is generated with my renderer." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/posts/glass_material_simulated_by_microfacet_bxdf/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
+<meta property="og:url" content="https://agraphicsguynotes.com/posts/glass_material_simulated_by_microfacet_bxdf/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2015-11-11T00:00:00+00:00" />
 <meta property="article:modified_time" content="2015-11-11T00:00:00+00:00" />
 
@@ -32,7 +32,7 @@ The above image is generated with my renderer." />
 </title>
 
     
-      <link rel="canonical" href="/posts/glass_material_simulated_by_microfacet_bxdf/">
+      <link rel="canonical" href="https://agraphicsguynotes.com/posts/glass_material_simulated_by_microfacet_bxdf/">
     
 
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
@@ -259,7 +259,7 @@ $$ L_{o}(\omega_{o}) = L_e(\omega_i) &#43; \int_{\Omega} L_{i}(\omega_{i}) *f( \
 $$ f(\omega_{i}, \omega_{o} ) = \dfrac{F_r(T(\omega_o),\omega_o) \delta( \omega_i - R(\omega_o) )}{|cos(\theta_{i})|} $$
 
 $$ f(\omega_i , \omega_o) = ( 1 - F_r(\omega_i,\omega_o) ) \dfrac{{\eta_o}^2}{{\eta_i}^2}\dfrac{\delta( \omega_i - T(\omega_o) )}{|cos(\theta_{i})|} $$
-<p>Btdf for pure refraction is the same with <a href="/posts/derivation_of_pure_specular_reflection_brdf/">previous blog post</a>. However a subtle difference for pure reflection brdf definitely deserves our attention, it is the transmittance direction, instead of reflected direction, that we use to evaluate fresnel term. In special case, which total inner reflection happens, fresnel term should be exactly one. Although it makes sense, I&rsquo;ve no much idea how to prove these with mathematics, however that&rsquo;s how other renderers do it. And I&rsquo;m gonna stick to their solution.</p>
+<p>Btdf for pure refraction is the same with <a href="https://agraphicsguynotes.com/posts/derivation_of_pure_specular_reflection_brdf/">previous blog post</a>. However a subtle difference for pure reflection brdf definitely deserves our attention, it is the transmittance direction, instead of reflected direction, that we use to evaluate fresnel term. In special case, which total inner reflection happens, fresnel term should be exactly one. Although it makes sense, I&rsquo;ve no much idea how to prove these with mathematics, however that&rsquo;s how other renderers do it. And I&rsquo;m gonna stick to their solution.</p>
 <h1 id="microfacet-for-rough-glass-material">Microfacet for Rough Glass Material</h1>
 <p>Microfacet model is usually used for simulating metal surfaces in realtime rendering. It assumes the macro surface composes many small micro flat surfaces, each one uses perfect mirror reflection bxdf. With a simple change in this assumption that micro surfaces are not perfect mirror reflection surfaces but perfect transmittance surfaces, the same theory can be used to simulate rough glass. Here is an image with three monkeys, each with a different value of roughness.</p>
 <figure><img src="/img/posts/glass_material_simulated_by_microfacet_bxdf/different_roughness.png" width="800"/>
@@ -277,7 +277,7 @@ $$ f(\omega_i,\omega_o,x) = \dfrac{|\omega_i \cdot h| |\omega_o \cdot h|}{|\omeg
 <p>Another big difference for transmittance ray is that $ \dfrac{\omega_h}{\omega_o} $ is different.</p>
 
 $$ |\dfrac{\omega_h}{\omega_o}| = \dfrac{{\eta_o}^2 | \omega_o \cdot h |}{(\eta_i (\omega_i \cdot h) &#43; \eta_o (\omega_o \cdot h))^2}$$
-<p>Sampling refracted ray direction is similar to the method method <a href="/posts/sample_microfacet_brdf/">here</a>. First a normal needs to be sampled respecting to a given pdf and then choose between reflected and refracted direction by fresnel term, finally evaluate the corresponding bxdf with the generated ray.</p>
+<p>Sampling refracted ray direction is similar to the method method <a href="https://agraphicsguynotes.com/posts/sample_microfacet_brdf/">here</a>. First a normal needs to be sampled respecting to a given pdf and then choose between reflected and refracted direction by fresnel term, finally evaluate the corresponding bxdf with the generated ray.</p>
 <h1 id="reference">Reference</h1>
 <p>[1] <a href="https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.html">Microfacet Models for Refraction through Rough Surfaces</a><br>
 [2] <a href="https://en.wikipedia.org/wiki/Snell%27s_law">Snell&rsquo;s Law</a></p>
