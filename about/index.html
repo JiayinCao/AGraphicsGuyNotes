@@ -131,6 +131,13 @@ This is the place for me to take some notes that I regard as useful. Since I’m
   </section>
 </nav>
 
+      <script>
+        
+        document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+          const isdarkmode = !document.body.classList.contains("colorscheme-dark");
+          localStorage.setItem("pref-theme", isdarkmode ? 'dark_dimmed' : 'light');
+        });
+      </script>
 
       <div class="content">
         

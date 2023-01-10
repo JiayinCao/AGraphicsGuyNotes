@@ -125,6 +125,13 @@
   </section>
 </nav>
 
+      <script>
+        
+        document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+          const isdarkmode = !document.body.classList.contains("colorscheme-dark");
+          localStorage.setItem("pref-theme", isdarkmode ? 'dark_dimmed' : 'light');
+        });
+      </script>
 
       <div class="content">
         

@@ -154,6 +154,13 @@
   </section>
 </nav>
 
+      <script>
+        
+        document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+          const isdarkmode = !document.body.classList.contains("colorscheme-dark");
+          localStorage.setItem("pref-theme", isdarkmode ? 'dark_dimmed' : 'light');
+        });
+      </script>
 
       <div class="content">
         
@@ -489,13 +496,7 @@ $$ max( \dfrac{1}{|x_1-x_2|} - g_{clamp} , 0 ) dA(x_2) = max( 1 - \dfrac{g_{clam
         <script>
     
     function updateThemeToMatchDarkMode(isdarkmode) {
-      if (!isdarkmode) {
-          document.body.classList.remove('dark');
-          localStorage.setItem("pref-theme", 'light');
-      } else {
-          document.body.classList.add('dark');
-          localStorage.setItem("pref-theme", 'dark');
-      }
+      localStorage.setItem("pref-theme", isdarkmode ? 'dark_dimmed' : 'light');
 
       
       const iframe = document.querySelector('iframe.giscus-frame');

@@ -157,6 +157,13 @@ I really want to render something different using my ray tracer, however it does
   </section>
 </nav>
 
+      <script>
+        
+        document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+          const isdarkmode = !document.body.classList.contains("colorscheme-dark");
+          localStorage.setItem("pref-theme", isdarkmode ? 'dark_dimmed' : 'light');
+        });
+      </script>
 
       <div class="content">
         
@@ -442,13 +449,7 @@ $$ { L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) &#43; P(0) &#43; P(1) &#43; P(2
         <script>
     
     function updateThemeToMatchDarkMode(isdarkmode) {
-      if (!isdarkmode) {
-          document.body.classList.remove('dark');
-          localStorage.setItem("pref-theme", 'light');
-      } else {
-          document.body.classList.add('dark');
-          localStorage.setItem("pref-theme", 'dark');
-      }
+      localStorage.setItem("pref-theme", isdarkmode ? 'dark_dimmed' : 'light');
 
       
       const iframe = document.querySelector('iframe.giscus-frame');
