@@ -464,6 +464,31 @@ $$ R = R(0) &#43; ( 1 - R(0) ) ( 1 - cos\theta)^5$$
     crossorigin="anonymous"
     async>
   </script>
+  <script>
+    function sendGiscusMessage(message) {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (!iframe) return;
+      iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+    }
+
+    function updateThemeToMatchDarkMode(isdarkmode)
+    {
+      sendGiscusMessage({
+        setConfig: {
+          theme: isdarkmode ? 'dark' : 'light'
+        }
+      });
+    }
+
+    document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+      updateThemeToMatchDarkMode(!document.body.classList.contains("colorscheme-dark"));
+    });
+
+    window.onload = () => {
+      updateThemeToMatchDarkMode(document.body.classList.contains("colorscheme-dark"));
+    };
+
+  </script>
         
         
       </footer>
@@ -496,7 +521,7 @@ $$ R = R(0) &#43; ( 1 - R(0) ) ( 1 - cos\theta)^5$$
         
           2015 -
         
-        2022
+        2023
          Jiayin Cao 
       
       

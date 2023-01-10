@@ -483,6 +483,31 @@ $$ p_k(x)=p_a(x_k)p_{w^\bot}(x_k\rightarrow x_{k-1})G(x_k\rightarrow x_{k-1})\pr
     crossorigin="anonymous"
     async>
   </script>
+  <script>
+    function sendGiscusMessage(message) {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (!iframe) return;
+      iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+    }
+
+    function updateThemeToMatchDarkMode(isdarkmode)
+    {
+      sendGiscusMessage({
+        setConfig: {
+          theme: isdarkmode ? 'dark' : 'light'
+        }
+      });
+    }
+
+    document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+      updateThemeToMatchDarkMode(!document.body.classList.contains("colorscheme-dark"));
+    });
+
+    window.onload = () => {
+      updateThemeToMatchDarkMode(document.body.classList.contains("colorscheme-dark"));
+    };
+
+  </script>
         
         
       </footer>
@@ -502,7 +527,7 @@ $$ p_k(x)=p_a(x_k)p_{w^\bot}(x_k\rightarrow x_{k-1})G(x_k\rightarrow x_{k-1})\pr
         
           2015 -
         
-        2022
+        2023
          Jiayin Cao 
       
       

@@ -505,6 +505,31 @@ $$ \begin{array} {lcl} color &amp;=&amp; dot( normal , basis[0] )^2 * lightmap\_
     crossorigin="anonymous"
     async>
   </script>
+  <script>
+    function sendGiscusMessage(message) {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (!iframe) return;
+      iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+    }
+
+    function updateThemeToMatchDarkMode(isdarkmode)
+    {
+      sendGiscusMessage({
+        setConfig: {
+          theme: isdarkmode ? 'dark' : 'light'
+        }
+      });
+    }
+
+    document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+      updateThemeToMatchDarkMode(!document.body.classList.contains("colorscheme-dark"));
+    });
+
+    window.onload = () => {
+      updateThemeToMatchDarkMode(document.body.classList.contains("colorscheme-dark"));
+    };
+
+  </script>
         
         
       </footer>
@@ -524,7 +549,7 @@ $$ \begin{array} {lcl} color &amp;=&amp; dot( normal , basis[0] )^2 * lightmap\_
         
           2015 -
         
-        2022
+        2023
          Jiayin Cao 
       
       

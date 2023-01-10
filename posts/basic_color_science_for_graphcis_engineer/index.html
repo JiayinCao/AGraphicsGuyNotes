@@ -510,6 +510,31 @@ $$ \begin{bmatrix} X \\ Y \\ Z \end{bmatrix} = { \begin{bmatrix} 0.6369580 &amp;
     crossorigin="anonymous"
     async>
   </script>
+  <script>
+    function sendGiscusMessage(message) {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (!iframe) return;
+      iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+    }
+
+    function updateThemeToMatchDarkMode(isdarkmode)
+    {
+      sendGiscusMessage({
+        setConfig: {
+          theme: isdarkmode ? 'dark' : 'light'
+        }
+      });
+    }
+
+    document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+      updateThemeToMatchDarkMode(!document.body.classList.contains("colorscheme-dark"));
+    });
+
+    window.onload = () => {
+      updateThemeToMatchDarkMode(document.body.classList.contains("colorscheme-dark"));
+    };
+
+  </script>
         
         
       </footer>
@@ -529,7 +554,7 @@ $$ \begin{bmatrix} X \\ Y \\ Z \end{bmatrix} = { \begin{bmatrix} 0.6369580 &amp;
         
           2015 -
         
-        2022
+        2023
          Jiayin Cao 
       
       

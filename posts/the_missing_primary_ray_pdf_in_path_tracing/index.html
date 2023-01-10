@@ -419,6 +419,31 @@ $$ \begin{array}{lcl}I&amp;=&amp;\dfrac{W_e(p_0\rightarrow p_1)G(p_0\longleftrig
     crossorigin="anonymous"
     async>
   </script>
+  <script>
+    function sendGiscusMessage(message) {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (!iframe) return;
+      iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+    }
+
+    function updateThemeToMatchDarkMode(isdarkmode)
+    {
+      sendGiscusMessage({
+        setConfig: {
+          theme: isdarkmode ? 'dark' : 'light'
+        }
+      });
+    }
+
+    document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+      updateThemeToMatchDarkMode(!document.body.classList.contains("colorscheme-dark"));
+    });
+
+    window.onload = () => {
+      updateThemeToMatchDarkMode(document.body.classList.contains("colorscheme-dark"));
+    };
+
+  </script>
         
         
       </footer>
@@ -438,7 +463,7 @@ $$ \begin{array}{lcl}I&amp;=&amp;\dfrac{W_e(p_0\rightarrow p_1)G(p_0\longleftrig
         
           2015 -
         
-        2022
+        2023
          Jiayin Cao 
       
       
