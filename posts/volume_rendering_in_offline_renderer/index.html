@@ -66,8 +66,6 @@ In case someone is not familiar with what volume rendering is, the above texture
     <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
 
     
-      <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
-    
 
     
     
@@ -118,7 +116,7 @@ In case someone is not familiar with what volume rendering is, the above texture
     
   
   <body class="colorscheme-auto"
-        onload=" twemoji.parse(document.body); "
+        onload=""
   >
     <main class="wrapper">
       <nav class="navigation">
@@ -500,45 +498,61 @@ $$  L(p(0)) = \int_0^{\infty} e^{- \int_{0}^{t} \sigma (p)dt&#39;} S(p) = \int_
         
 
 
-        <script src="https://giscus.app/client.js"
-    data-repo="JiayinCao/AGraphicsGuyNotes"
-    data-repo-id="MDEwOlJlcG9zaXRvcnkzMDQ5MjAzMDg="
-    data-category="Giscus-Comments"
-    data-category-id="DIC_kwDOEiy29M4CTFTj"
-    data-strict="1"
-    data-mapping="pathname"
-    data-reactions-enabled="0"
-    data-emit-metadata="0"
-    data-input-position="bottom"
-    data-theme="dark_dimmed"
-    data-lang="en"
-    crossorigin="anonymous"
-    async>
-  </script>
-  <script>
-    function sendGiscusMessage(message) {
+        <script>
+    
+    function updateThemeToMatchDarkMode(isdarkmode) {
+      if (!isdarkmode) {
+          document.body.classList.remove('dark');
+          localStorage.setItem("pref-theme", 'light');
+      } else {
+          document.body.classList.add('dark');
+          localStorage.setItem("pref-theme", 'dark');
+      }
+
+      
       const iframe = document.querySelector('iframe.giscus-frame');
-      if (!iframe) return;
-      iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      if(iframe) {
+        const message = { setConfig: { theme: isdarkmode ? 'dark_dimmed' : 'light' } };
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
     }
 
-    function updateThemeToMatchDarkMode(isdarkmode)
-    {
-      sendGiscusMessage({
-        setConfig: {
-          theme: isdarkmode ? 'dark' : 'light'
-        }
-      });
-    }
-
+    
     document.getElementById('dark-mode-toggle').addEventListener('click', () => {
-      updateThemeToMatchDarkMode(!document.body.classList.contains("colorscheme-dark"));
+      const isdarkmode = !document.body.classList.contains("colorscheme-dark");
+      updateThemeToMatchDarkMode(isdarkmode);
     });
 
+    
     window.onload = () => {
-      updateThemeToMatchDarkMode(document.body.classList.contains("colorscheme-dark"));
+      const isdarkmode = document.body.classList.contains("colorscheme-dark");
+      updateThemeToMatchDarkMode(isdarkmode);
     };
 
+    
+    {
+      let giscusTheme = localStorage.getItem("pref-theme");
+      let giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo": "JiayinCao\/AGraphicsGuyNotes",
+        "data-repo-id": "MDEwOlJlcG9zaXRvcnkzMDQ5MjAzMDg=",
+        "data-category": "Giscus-Comments",
+        "data-category-id": "DIC_kwDOEiy29M4CTFTj",
+        "data-strict" : "1",
+        "data-mapping": "pathname",
+        "data-reactions-enabled": "0",
+        "data-emit-metadata": "0",
+        "data-input-position": "bottom",
+        "data-theme": giscusTheme === null ? "dark_dimmed" : giscusTheme,
+        "data-lang": "en",
+        "crossorigin": "anonymous",
+        "async": "",
+      };
+      
+      let giscusScript = document.createElement("script");
+      Object.entries(giscusAttributes).forEach(([key, value]) => giscusScript.setAttribute(key, value));
+      document.getElementsByTagName("article")[0].appendChild(giscusScript);
+    }
   </script>
         
         
