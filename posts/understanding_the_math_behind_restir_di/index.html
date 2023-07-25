@@ -536,13 +536,13 @@ It comes with a complete solution to approximate the integral without any bias, 
 <li>Find a proposal pdf p(x) that is easy to draw samples from and draw M samples using this PDF.</li>
 <li>Find a target distribution $\hat{p}(x)$ that suits the function well</li>
 <li>For each proposal sample, assign a weight for it, $w(x)=\hat{p}(x)/(p(x) M)$</li>
-<li>Draw N samples from the proposal sample set with replacement, the probability of each proposal sample being taken should be proportional to its weight. Replacement means that the N samples taken out of the proposal sample set could be duplicated. This simplifies the problem into taking one sample based on the weights and repeating the process N times.</li>
-<li>Then we use the N samples to evaluate the integral approximation, but with a bias correction factor, which is $\Sigma_{i=1}^{M} w_i(x)$</li>
+<li>Draw N samples (y) from the proposal sample set (x) with replacement, the probability of each proposal sample being taken should be proportional to its weight. Replacement means that the N samples taken out of the proposal sample set could be duplicated. This simplifies the problem into taking one sample based on the weights and repeating the process N times.</li>
+<li>Then we use the N samples to evaluate the integral approximation, but with a bias correction factor, which is $\Sigma_{i=1}^{M} w_i(x_i)$</li>
 </ul>
 <p>Please be noted that the weight here is slightly different from the previously mentioned weight. This is fine as scaling the target distribution is allowed in both SIR and RIS. But the below function has to skip the 1/M part since it is merged into the weights already.</p>
 <p>The final form of our Monte Carlo estimator would be as below</p>
 
-$$I_{RIS} = \dfrac{1}{N} \Sigma_{i=1}^{N} \dfrac{f(x_i)}{\hat{p}(x_i)} \Sigma_{j=1}^{M} w(x_j)$$
+$$I_{RIS} = \dfrac{1}{N} \Sigma_{i=1}^{N} \dfrac{f(y_i)}{\hat{p}(y_i)} \Sigma_{j=1}^{M} w(x_j)$$
 <p>Here $x_i$ is only a subset of $x_j$. The way $x_i$ is picked can either be done through a binary search or linear processing like Reservoir algorithm. Binary search would require us to pre-process the proposal samples beforehand, which is not practical in the context of ReStir though.</p>
 <p>There are some requirements for this method as well</p>
 <ul>
@@ -588,7 +588,7 @@ $$w_i(x) = w_{i,mis}(x) \hat{p}(x) / p_i(x)$$
 $$W = \Sigma_{i=1}^{M}w_i(x_i)$$
 <p>Please notice that without losing generosity, I used different proposal PDFs here. To prove the RIS with same proposal PDF, we simply need to get rid of the subscript of $w_i(x)$.</p>
 
-$$ \begin{array} {lcl} E(\dfrac{f(x)}{\hat{p}(x)} \Sigma_{i=1}^{M}\dfrac{w_{i,mis}(x_i)\hat{p}(x)}{p_i(x)}) &amp; = &amp; E(\dfrac{f(x)}{\hat{p}(x)} W) \\\\ &amp; = &amp; \Sigma_{k=1}^{M} \underset{\text{M}}{\int \dots \int} \dfrac{f(x_k)}{\hat{p}(x_k)} W \dfrac{w_k(x_k)}{W} \Pi_{i=1}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M\ \\\\ &amp; = &amp; \Sigma_{k=1}^{M} \underset{\text{M}}{\int \dots \int} f(x) w_{k,mis}(x_k) \Pi_{i=1, i!=k}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M\ \\\\ &amp; = &amp; \Sigma_{k=1}^{M} \int f(x_k) w_{k,mis}(x_k) dx_k\ \underset{\text{M-1}}{\int \dots \int} \Pi_{i=1, i!=k}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M\ \\\\ &amp; = &amp; \int \Sigma_{k=1}^{M} w_{k,mis}(x) f(x) dx\ \\\\ &amp; = &amp; \int f(x) dx\ \end{array}$$
+$$ \begin{array} {lcl} E(\dfrac{f(y)}{\hat{p}(y)} \Sigma_{i=1}^{M}\dfrac{w_{i,mis}(x_i)\hat{p}(x)}{p_i(x)}) &amp; = &amp; E(\dfrac{f(y)}{\hat{p}(y)} W) \\\\ &amp; = &amp; \Sigma_{k=1}^{M} \underset{\text{M}}{\int \dots \int} \dfrac{f(x_k)}{\hat{p}(x_k)} W \dfrac{w_k(x_k)}{W} \Pi_{i=1}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M\ \\\\ &amp; = &amp; \Sigma_{k=1}^{M} \underset{\text{M}}{\int \dots \int} f(x) w_{k,mis}(x_k) \Pi_{i=1, i!=k}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M\ \\\\ &amp; = &amp; \Sigma_{k=1}^{M} \int f(x_k) w_{k,mis}(x_k) dx_k\ \underset{\text{M-1}}{\int \dots \int} \Pi_{i=1, i!=k}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M\ \\\\ &amp; = &amp; \int \Sigma_{k=1}^{M} w_{k,mis}(x) f(x) dx\ \\\\ &amp; = &amp; \int f(x) dx\ \end{array}$$
 <p>As we can see from the above derivation, lots of the items cancel, leaving a very simple form, the exact result that we would like to approximate in the first place. With this proof, we can easily see that it doesn&rsquo;t matter if RIS picks proposal samples from different PDFs, this is exactly how MIS works in RIS in the first method I mentioned above.</p>
 <h3 id="nice-properties-of-ris">Nice Properties of RIS</h3>
 <p>Before moving to the next section, let&rsquo;s summarize some of the nice properties of RIS.</p>
