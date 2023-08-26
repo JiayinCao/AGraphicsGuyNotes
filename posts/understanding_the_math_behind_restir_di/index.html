@@ -622,7 +622,8 @@ $$threshold = W_{new} / (W_{new} &#43; W_{total})$$
 <p>The incoming sample will be ignored. Otherwise, the new sample will be picked as the winner replacing the previously picked sample, if existed. Regardless, the total weight will be updated accordingly. A side note here, pay special attention when your random number equals the threshold. This could be problematic depending on how we would like to deal with the incoming sample when it is equal.</p>
 <ul>
 <li>If we would like to pick it when it is equal, there is a non-zero chance to pick incoming samples with zero weight.</li>
-<li>If we would like to ignore it when it is equal, there is a non-zero chance that we would ignore the first sample, which should have always been picked. Of course, if the first sample has zero weight, it is even trickier.</li>
+<li>If we would like to ignore it when it is equal, there is a non-zero chance that we would ignore the first sample, which should have always been picked.</li>
+<li>If the first sample has zero weight, which is totally possible, accepting this sample or not is a choice of personal preference then.</li>
 </ul>
 <p>How to deal with this sort of corner case is left to the readers as an exercise as this is not exactly what this post is about.
 But be sure to deal with this situation when implementing the algorithm to avoid weight bugs.</p>
@@ -911,7 +912,7 @@ $$ \begin{array} {lcl} \hat{p}&#39;(x) W(x) N &amp; = &amp; V \hat{p}(x) N \dfra
 Hopefully, this would convince readers that this algorithm is indeed unbiased.</p>
 <h1 id="summary">Summary</h1>
 <p>In this blog post, I summarized my understanding of the original ReStir algorithm. I dug into the mathematical details and explained why the algorithm is unbiased. This blog is what I collected during my learning process. I put it down here in the hope that it could be helpful to those people who have similar confusion like myself. Hopefully, this could be helpful for someone to get a deeper understanding of the tech.</p>
-<p>This blog doesn&rsquo;t mention any engineering problems that we could face during implementing ReStir, like memory catch issue when sampling millions of lights, floating point precision overflow issue after a few iterations, etc. For more details about that part, I would recommend watching this <a href="https://developer.nvidia.com/blog/new-video-light-resampling-in-practice-with-rtxdi/">talk</a> or taking a look at the source code of <a href="https://developer.nvidia.com/rtx/ray-tracing/rtxdi">RTX DI</a>.</p>
+<p>This blog doesn&rsquo;t mention any engineering problems that we could face during implementing ReStir, like memory cache issue when sampling millions of lights, floating point precision overflow issue after a few iterations, etc. For more details about that part, I would recommend watching this <a href="https://developer.nvidia.com/blog/new-video-light-resampling-in-practice-with-rtxdi/">talk</a> or taking a look at the source code of <a href="https://developer.nvidia.com/rtx/ray-tracing/rtxdi">RTX DI</a>.</p>
 <h1 id="reference">Reference</h1>
 <p>[1] <a href="https://research.nvidia.com/publication/2020-07_spatiotemporal-reservoir-resampling-real-time-ray-tracing-dynamic-direct">Spatiotemporal reservoir resampling for real-time ray tracing with dynamic direct lighting</a><br>
 [2] <a href="https://research.nvidia.com/publication/2021-06_restir-gi-path-resampling-real-time-path-tracing">ReSTIR GI: Path Resampling for Real-Time Path Tracing</a><br>

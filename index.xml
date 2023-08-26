@@ -6,7 +6,17 @@
     <description>Recent content on A Graphics Guy&#39;s Note</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 05 Dec 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://agraphicsguynotes.com/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 26 Aug 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://agraphicsguynotes.com/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Fiber in C&#43;&#43;: Understanding the Basics</title>
+      <link>https://agraphicsguynotes.com/posts/fiber_in_cpp_understanding_the_basics/</link>
+      <pubDate>Sat, 26 Aug 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://agraphicsguynotes.com/posts/fiber_in_cpp_understanding_the_basics/</guid>
+      <description>Fiber, a less known concept compared with coroutine, is a pretty powerful addition to cooperative multitasking. As a graphics programmer in game industry, I totally appreciate the great flexibility that fiber brings on the table. As a matter of fact, I feel the tech is a little bit underappreciated due to the lack of sufficient public materials talking about fibers.
+In this blog post, I will put down some of my learnings about fiber basics.</description>
+    </item>
+    
     <item>
       <title>Understanding The Math Behind ReStir DI</title>
       <link>https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_di/</link>
