@@ -216,25 +216,25 @@ $I=\dfrac{1}{N} \Sigma_{i=1}^N f(x_i)/p(x_i)$</li>
 </ul>
 <p>It is so easy to prove this that I would skip the math. If you would like to know how, check out my previous post <a href="https://agraphicsguynotes.com/posts/monte_carlo_integral_with_multiple_importance_sampling/">here</a>.</p>
 <p>However, I would like to point out an important condition here.
-The domain of p(x) has to cover the whole domain of f(x). If it doesn&rsquo;t, this can&rsquo;t work.</p>
-<p>To prove it, let&rsquo;s say there is a subdomain in the f(x)&rsquo;s domain $\Omega$ that is not covered by p(x), naming it $\Omega_1$.
-This introduces a blind spot in the sampling domain. Clearly, we have</p>
+The support of p(x) has to cover the whole support of f(x). If it doesn&rsquo;t, this can&rsquo;t work.</p>
+<p>To prove it, let&rsquo;s say there is a sub-support in the f(x)&rsquo;s support $\Omega$ that is not covered by p(x), naming it $\Omega_1$.
+This introduces a blind spot in the sampling&rsquo;s support. Clearly, we have</p>
 
 $$ \Omega = \Omega_0 &#43; \Omega_1 $$
 <p>Working out the math here</p>
 
 $$ \begin{array} {lcl} E[I] &amp; = &amp; \dfrac{1}{N} E[ \sum\limits_{i=1}^N \dfrac{f(x_{i})}{p(x_{i})}] \\\\ &amp; = &amp; \dfrac{1}{N} \int_{\Omega_0} \sum\limits_{i=1}^N \dfrac{f(x)}{p(x)} p(x) dx \\\\ &amp; = &amp; \int_{\Omega_0} f(x) dx \\\\ &amp; = &amp; \int_{\Omega} f(x)dx - \int_{\Omega_1} f(x) dx \end{array} $$
-<p>As we can see, we have a cut from the expected result. Intuitively explaining, this is because the estimator is no longer a function of any signal inside the domain $\Omega_1$ anymore, while the target is a function of it. If anything is different inside that domain, it would cause a different result integral while this change can&rsquo;t be detected by the estimator as the PDF is unable to capture any signal there. Mathematically speaking, we can see that as long as $\int_{\Omega_1} f(x) dx$ is not zero, the result won&rsquo;t be what we want. And it is almost not zero all the time. As a matter of fact, if we know beforehand, f(x) integrates to 0 over the domain of $\Omega_1$, we would only need to evaluate the integral of the function in the domain of $\Omega_0$ in the first place.</p>
+<p>As we can see, we have a cut from the expected result. Intuitively explaining, this is because the estimator is no longer a function of any signal inside the support $\Omega_1$ anymore, while the target is a function of it. If anything is different inside that support, it would cause a different result integral while this change can&rsquo;t be detected by the estimator as the PDF is unable to capture any signal there. Mathematically speaking, we can see that as long as $\int_{\Omega_1} f(x) dx$ is not zero, the result won&rsquo;t be what we want. And it is almost not zero all the time. As a matter of fact, if we know beforehand, f(x) integrates to 0 over the support of $\Omega_1$, we would only need to evaluate the integral of the function in the support of $\Omega_0$ in the first place.</p>
 <h2 id="multiple-importance-sampling">Multiple Importance Sampling</h2>
 <p>MIS is a common technique to improve sampling efficiency by taking multiple samples from different sources of PDFs, rather than just one.
 This method commonly improves sampling efficiency and can deal with integrals that are hard to approximate with one single source of PDF.</p>
 
 $$ I_{mis}^{M,N} = \Sigma_{i=1}^M \dfrac{1}{N_i} \Sigma_{j=1}^{N_i} w_i(x_{ij}) \dfrac{f(x_{ij})}{p_i(x_{ij})} $$
 <p>For MIS to be mathematically unbiased, it has to meet a few requirements.
-In the domain of f(x),</p>
+In the support of f(x),</p>
 <ul>
 <li>We must have $ \Sigma_{i=1}^M w_i(x) = 1 $</li>
-<li>The union of the domains of all source PDFs must cover the domain of f(x)</li>
+<li>The union of the supports of all source PDFs must cover the support of f(x)</li>
 <li>$w_i(x)$ must be 0 whenever $p_i(x) = 0$</li>
 </ul>
 <p>Since this post is about explaining ReStir, I would only put down some details that matter to ReStir. Other characteristics of MIS would be skipped. For a deeper explanation of MIS, please check out <a href="https://graphics.stanford.edu/papers/veach_thesis/thesis.pdf">Eric Veach&rsquo;s Thesis</a>.</p>
@@ -245,12 +245,12 @@ $$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; E[ \sum\limits_{i=1}^M \df
 <p>It is obvious that as long as it meets the first condition ($ \Sigma_{i=1}^M w_i(x) = 1 $), we would have an unbiased approximation of the integral of our interest.</p>
 
 $$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; \int \sum\limits_{i=1}^M w_i(x) f(x) dx \\\\ &amp; = &amp; \int f(x) dx \end{array} $$
-<p>For the second requirement, since it is less relevant to ReStir, I would only put down some intuitive explanation here, leaving the math as a practice to readers (The proof should be fairly similar to what I showed in the previous section, but slightly more complicated). Same as the importance sampling blind spot issue mentioned above, if none of the PDF covers a sub-domain of the target function, it won&rsquo;t pick up any changes in that domain either, while changes in that domain will indeed cause changes in the final result. This easily makes the estimate not accurate anymore.</p>
-<p>However, this is by no means to say that all source PDF&rsquo;s domains would have to cover the domain of the function to be integrated. For any sub-domain, as long as one of them covers it, it is good enough. Though there is one important condition, which is the third one mentioned above. Since it is slightly trickier to understand, I&rsquo;ll put down the math proof here,</p>
-<p>Let&rsquo;s imagine for one PDF $p_k$, it has zero probability of taking a sample in a sub-domain, $\Omega_1$. We can then divide the domain of the function $\Omega$ into two parts $\Omega_0$ and $\Omega_1$. So we have</p>
+<p>For the second requirement, since it is less relevant to ReStir, I would only put down some intuitive explanation here, leaving the math as a practice to readers (The proof should be fairly similar to what I showed in the previous section, but slightly more complicated). Same as the importance sampling blind spot issue mentioned above, if none of the PDF covers a sub-support of the target function, it won&rsquo;t pick up any changes in that support either, while changes in that support will indeed cause changes in the final result. This easily makes the estimate not accurate anymore.</p>
+<p>However, this is by no means to say that all source PDF&rsquo;s supports would have to cover the support of the function to be integrated. For any sub-support, as long as one of them covers it, it is good enough. Though there is one important condition, which is the third one mentioned above. Since it is slightly trickier to understand, I&rsquo;ll put down the math proof here,</p>
+<p>Let&rsquo;s imagine for one PDF $p_k$, it has zero probability of taking a sample in a sub-support, $\Omega_1$. We can then divide the support of the function $\Omega$ into two parts $\Omega_0$ and $\Omega_1$. So we have</p>
 
 $$ \Omega = \Omega_0 &#43; \Omega_1 $$
-<p>So let&rsquo;s divide the previous MIS proof into two domains and see what happens,</p>
+<p>So let&rsquo;s divide the previous MIS proof into two supports and see what happens,</p>
 
 $$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; E[ \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x_{ij})\dfrac{f(x_{ij})}{p_i(x_{ij})}] \\\\ &amp; = &amp; E[ \sum\limits_{i=1, i!=k}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x_{ij})\dfrac{f(x_{ij})}{p_i(x_{ij})} &#43; \dfrac{1}{N_k} \sum\limits_{j=1}^{N_k} w_k(x_{kj})\dfrac{f(x_{kj})}{p_k(x_{kj})}] \\\\ &amp; = &amp; \int_{\Omega} \sum\limits_{i=1,i!=k}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x)\dfrac{f(x)}{p_i(x)} p_i(x) dx &#43; \int_{\Omega_0} \dfrac{1}{N_k} \sum\limits_{j=1}^{N_k} w_k(x)\dfrac{f(x)}{p_k(x)} p_k(x) dx \\\\ &amp; = &amp; \Sigma_{i=1, i!=k}^M \int_{\Omega} w_i(x)f(x)dx &#43; \int_{\Omega_0}w_k(x)f(x)dx \\\\ &amp; = &amp; \Sigma_{i=1}^M \int_{\Omega} w_i(x)f(x)dx - \int_{\Omega_1}w_k(x)f(x)dx  \\\\ &amp; = &amp; \int f(x) dx - \int_{\Omega_1}w_k(x)f(x)dx \end{array} $$
 <p>What happens here is that our estimator has an extra cut from the expected value just like the importance sampling blind spot issue mentioned above. And this is exactly why we need to make sure we meet the third condition. If we do meet the third condition, what would happen is that the extra cut will be canceled because $w_k(x)$ is zero, leaving the rest parts precisely what we want. Making the estimator unbiased again.</p>
@@ -523,7 +523,7 @@ $$p(x) = 1 / (2 Pi)$$
 <ul>
 <li>Unlike inversion sampling, which is one of the most widely used methods, we do not need any knowledge about the target distribution, apart from that we must be able to evaluate it given a sample. This alone gives us a lot of flexibility in choosing the target PDF.</li>
 <li>What makes the algorithm even more attractive is that we can even add a constant scaling factor on the target PDF as the algorithm would be the same. A relative scaling factor on all weights would mean no scaling factor applied at all. To explain it a bit, imagine we have two proposal samples with their corresponding weights being 2.0 and 8.0. The chance of picking the first sample are 20%. If we scale the target distribution by 5.0, the weights will be 10.0 and 40.0, resulting in exactly the same chances of picking each sample as well.<br>
-This offers an extra level of freedom for us to choose our target PDF as a lot of the time we can&rsquo;t really normalize our target PDF. This opens the door for us to choose literally any function we would like to use, rather than a PDF that has to integrate to 1 in its domain.<br>
+This offers an extra level of freedom for us to choose our target PDF as a lot of the time we can&rsquo;t really normalize our target PDF. This opens the door for us to choose literally any function we would like to use, rather than a PDF that has to integrate to 1 in its support.<br>
 To be more precise, I would call this target distribution from now on as it is not a traditional sense PDF that we used to know. Strictly speaking, it is not really a PDF, it is a distribution function.</li>
 </ul>
 <p>With all these limitations gone, it is not hard to imagine the value of SIR. It offers us a powerful tool to draw samples from distributions that we couldn&rsquo;t sample with other methods, for example, the rendering equation itself. If we can take samples from a PDF that is proportional to $L(w_i) f_r(w_i, w_o) cos(\theta_i)$, we really just need one single sample to solve the rendering equation without any noise. This is really hard for traditional methods, like inversion sampling and rejection sampling. Because the distribution is not even a PDF, there is no easy way to normalize the distribution. Normalizing the distribution requires us to evaluate the integral in the first place, this is a chicken and egg problem itself. However, just because we can&rsquo;t draw samples from this distribution doesn&rsquo;t prevent us from approximating drawing a sample from it using SIR. This is exactly what ReStir GI does.</p>
@@ -554,8 +554,8 @@ $$I_{RIS} = \dfrac{1}{N} \Sigma_{i=1}^{N} \dfrac{f(y_i)}{\hat{p}(y_i)} \Sigma_{j
 <ul>
 <li>M and N have to be both larger than 0.<br>
 It is quite easy to understand this. If either the proposal sample count or the target sample count is zero, we are not really doing anything here.</li>
-<li>In the domain of f(x), both $\hat{p}(x)$ and p(x) have to be larger than zero as well.<br>
-This is not hard to understand as well. If either of the PDFs is zero in a subdomain, what happens is that the SIR method would have no chance to pick samples from that domain at all. And this is precisely the blind spot issue mentioned above in the Importance Sampling section.</li>
+<li>In the support of f(x), both $\hat{p}(x)$ and p(x) have to be larger than zero as well.<br>
+This is not hard to understand as well. If either of the PDFs is zero in a sub-support, what happens is that the SIR method would have no chance to pick samples from that support at all. And this is precisely the blind spot issue mentioned above in the Importance Sampling section.</li>
 </ul>
 <p>To Make it a bit easier to understand the workflow below is a graph demonstrating how it works
 <figure><a href="/img/posts/understanding_the_math_behind_restir_di/RIS.png"><img src="/img/posts/understanding_the_math_behind_restir_di/RIS.png" width="500"/></a>
@@ -586,7 +586,7 @@ However, there is one tricky thing to point out, as balance heuristics would req
 <p>For those readers who don&rsquo;t like taking things for granted, to fully understand the RIS method, it is necessary to understand why it is unbiased.
 There is very clear proof of it mentioned in the appendix of <a href="https://scholarsarchive.byu.edu/cgi/viewcontent.cgi?article=1662&amp;context=etd">Talbot&rsquo;s paper</a>.</p>
 <p>Rather than repeating his derivation, I would like to put down another slightly different proof, which is similar to what the ReStir DI paper does when it talks about the biasness of the ReStir method.</p>
-<p>Since the original samples come from the proposal PDF(s), target samples are merely a subset of proposal samples without introducing new signals to the evaluation, we would only need to integrate the domain of the proposal samples to get the approximation.</p>
+<p>Since the original samples come from the proposal PDF(s), target samples are merely a subset of proposal samples without introducing new signals to the evaluation, we would only need to integrate the support of the proposal samples to get the approximation.</p>
 <p>To simplify our derivation, let&rsquo;s define a few terms first</p>
 
 $$w_i(x) = w_{i,mis}(x) \hat{p}(x) / p_i(x)$$
@@ -599,10 +599,10 @@ $$ \begin{array} {lcl} E(\dfrac{f(y)}{\hat{p}(y)} \Sigma_{i=1}^{M}\dfrac{w_{i,mi
 <h3 id="nice-properties-of-ris">Nice Properties of RIS</h3>
 <p>Before moving to the next section, let&rsquo;s summarize some of the nice properties of RIS.</p>
 <ul>
-<li>There isn&rsquo;t that much needed between the proposal PDF and target distribution, offering a lot of flexibility in terms of choosing the best PDF/distribution for your application. The only thing that is required is that they have to both cover the domain of target function f(x). To be more specific, if we are sampling from different proposal PDFs, the union of the domains of all proposal PDFs would need to cover the whole target function domain. If one of the proposal PDFs doesn&rsquo;t cover the full target function domain, it is fine as long as the MIS weight is properly adjusted.</li>
+<li>There isn&rsquo;t that much needed between the proposal PDF and target distribution, offering a lot of flexibility in terms of choosing the best PDF/distribution for your application. The only thing that is required is that they have to both cover the support of target function f(x). To be more specific, if we are sampling from different proposal PDFs, the union of the supports of all proposal PDFs would need to cover the whole target function&rsquo;s support. If one of the proposal PDFs doesn&rsquo;t cover the full target function&rsquo;s support, it is fine as long as the MIS weight is properly adjusted.</li>
 <li>This was mentioned in the previous section. I would like to emphasize it again since it is something important. The target distribution used in RIS doesn&rsquo;t need to be a normalized PDF at all.  It can literally be anything. As a matter of fact, ReStir DI algorithm uses the unshadowed light contribution, $L(w_i)f_r(w_o,w_i)cos(\theta_i)$, as target function. With traditional sampling methods, it is very hard as this distribution is hardly a PDF itself.<br>
 To see how it works in math, in the previous derivation, we can easily notice that the value of $W/\hat{p}(x)$ does not change when we scale target distribution since it is both in the denominator and nominator.</li>
-<li>As we mentioned before, the domains of the target distribution and proposal PDF both cover the domain of f(x). We can take advantage of this fact to predict if the SIR PDF is zero by inspecting target distribution and proposal PDF even if SIR PDF is intractable. This is a useful feature that we would take advantage to counter the bias in ReStir DI.</li>
+<li>As we mentioned before, the supports of the target distribution and proposal PDF both cover the support of f(x). We can take advantage of this fact to predict if the SIR PDF is zero by inspecting target distribution and proposal PDF even if SIR PDF is intractable. This is a useful feature that we would take advantage to counter the bias in ReStir DI.</li>
 </ul>
 <h2 id="weighted-reservoir-sampling-wrs">Weighted Reservoir Sampling (WRS)</h2>
 <p>The second step of SIR algorithm requires us to pick a sample from all proposal samples and each sample&rsquo;s probability of being picked is proportional to its weight. This application easily reminds us of a binary search algorithm with a prefix sum table. However, even if the time complexity is only O(lg(N)), the preprocessing step&rsquo;s time complexity is still O(N). It would be suitable for cases where data is more static and can be preprocessed and used multiple times later, like HDRI sky importance sampling. In a more dynamic environment, it is less practical as the bottleneck will be O(N) during preprocessing. And it also requires O(N) space as well, which is another deal breaker for efficient SIR sampling. All these issues require us to seek an alternative solution, which is where WRS chimes in.</p>
