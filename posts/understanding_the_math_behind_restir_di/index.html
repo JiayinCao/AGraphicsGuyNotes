@@ -229,22 +229,22 @@ $$ \begin{array} {lcl} E[I] &amp; = &amp; \dfrac{1}{N} E[ \sum\limits_{i=1}^N \d
 <p>MIS is a common technique to improve sampling efficiency by taking multiple samples from different sources of PDFs, rather than just one.
 This method commonly improves sampling efficiency and can deal with integrals that are hard to approximate with one single source of PDF.</p>
 
-$$ I_{mis}^{M,N} = \Sigma_{i=1}^M \dfrac{1}{N_i} \Sigma_{j=1}^{N_i} w_i(x_{ij}) \dfrac{f(x_{ij})}{p_i(x_{ij})} $$
+$$ I_{mis}^{M,N} = \Sigma_{i=1}^M \dfrac{1}{N_i} \Sigma_{j=1}^{N_i} m_i(x_{ij}) \dfrac{f(x_{ij})}{p_i(x_{ij})} $$
 <p>For MIS to be mathematically unbiased, it has to meet a few requirements.
 In the support of f(x),</p>
 <ul>
-<li>We must have $ \Sigma_{i=1}^M w_i(x) = 1 $</li>
-<li>$w_i(x)$ must be 0 whenever $p_i(x) = 0$</li>
+<li>We must have $ \Sigma_{i=1}^M m_i(x) = 1 $</li>
+<li>$m_i(x)$ must be 0 whenever $p_i(x) = 0$</li>
 </ul>
 <p>A hidden condition that is already implied by the above two conditions is that the union of the supports of all source PDFs must cover the support of f(x)</p>
 <p>Since this post is about explaining ReStir, I would only put down some details that matter to ReStir. Other characteristics of MIS would be skipped. For a deeper explanation of MIS, please check out <a href="https://graphics.stanford.edu/papers/veach_thesis/thesis.pdf">Eric Veach&rsquo;s Thesis</a>.</p>
 <h3 id="mathematical-proof-of-mis">Mathematical Proof of MIS</h3>
 <p>In order to have a deeper understanding of this, let&rsquo;s see how the math works under the hood first.</p>
 
-$$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; E[ \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x_{ij})\dfrac{f(x_{ij})}{p_i(x_{ij})}] \\\\ &amp; = &amp; \int \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x)\dfrac{f(x)}{p_i(x)} p_i(x) dx \\\\ &amp; = &amp; \int \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x) f(x) dx \\\\ &amp; = &amp; \int \sum\limits_{i=1}^M w_i(x) f(x) dx \end{array} $$
-<p>It is obvious that as long as it meets the first condition ($ \Sigma_{i=1}^M w_i(x) = 1 $), we would have an unbiased approximation of the integral of our interest.</p>
+$$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; E[ \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} m_i(x_{ij})\dfrac{f(x_{ij})}{p_i(x_{ij})}] \\\\ &amp; = &amp; \int \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} m_i(x)\dfrac{f(x)}{p_i(x)} p_i(x) dx \\\\ &amp; = &amp; \int \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} m_i(x) f(x) dx \\\\ &amp; = &amp; \int \sum\limits_{i=1}^M m_i(x) f(x) dx \end{array} $$
+<p>It is obvious that as long as it meets the first condition ($ \Sigma_{i=1}^M m_i(x) = 1 $), we would have an unbiased approximation of the integral of our interest.</p>
 
-$$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; \int \sum\limits_{i=1}^M w_i(x) f(x) dx \\\\ &amp; = &amp; \int f(x) dx \end{array} $$
+$$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; \int \sum\limits_{i=1}^M m_i(x) f(x) dx \\\\ &amp; = &amp; \int f(x) dx \end{array} $$
 <p>For the implied requirement, since it is less relevant to ReStir, I would only put down some intuitive explanation here, leaving the math as a practice to readers (The proof should be fairly similar to what I showed in the previous section, but slightly more complicated). Same as the importance sampling blind spot issue mentioned above, if none of the PDF covers a sub-support of the target function, it won&rsquo;t pick up any changes in that support either, while changes in that support will indeed cause changes in the final result. This easily makes the estimate not accurate anymore.</p>
 <p>However, this is by no means to say that all source PDF&rsquo;s supports would have to cover the support of the function to be integrated. For any sub-support, as long as one of them covers it, it is good enough. Though there is one important condition, which is the second one mentioned above. Since it is slightly trickier to understand, I&rsquo;ll put down the math proof here,</p>
 <p>Let&rsquo;s imagine for one PDF $p_k$, it has zero probability of taking a sample in a sub-support, $\Omega_1$. We can then divide the support of the function $\Omega$ into two parts $\Omega_0$ and $\Omega_1$. So we have</p>
@@ -252,25 +252,25 @@ $$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; \int \sum\limits_{i=1}^M w
 $$ \Omega = \Omega_0 &#43; \Omega_1 $$
 <p>So let&rsquo;s divide the previous MIS proof into two supports and see what happens,</p>
 
-$$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; E[ \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x_{ij})\dfrac{f(x_{ij})}{p_i(x_{ij})}] \\\\ &amp; = &amp; E[ \sum\limits_{i=1, i!=k}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x_{ij})\dfrac{f(x_{ij})}{p_i(x_{ij})} &#43; \dfrac{1}{N_k} \sum\limits_{j=1}^{N_k} w_k(x_{kj})\dfrac{f(x_{kj})}{p_k(x_{kj})}] \\\\ &amp; = &amp; \int_{\Omega} \sum\limits_{i=1,i!=k}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} w_i(x)\dfrac{f(x)}{p_i(x)} p_i(x) dx &#43; \int_{\Omega_0} \dfrac{1}{N_k} \sum\limits_{j=1}^{N_k} w_k(x)\dfrac{f(x)}{p_k(x)} p_k(x) dx \\\\ &amp; = &amp; \Sigma_{i=1, i!=k}^M \int_{\Omega} w_i(x)f(x)dx &#43; \int_{\Omega_0}w_k(x)f(x)dx \\\\ &amp; = &amp; \Sigma_{i=1}^M \int_{\Omega} w_i(x)f(x)dx - \int_{\Omega_1}w_k(x)f(x)dx  \\\\ &amp; = &amp; \int f(x) dx - \int_{\Omega_1}w_k(x)f(x)dx \end{array} $$
-<p>What happens here is that our estimator has an extra cut from the expected value just like the importance sampling blind spot issue mentioned above. And this is exactly why we need to make sure we meet the second condition. If we do meet the second condition, what would happen is that the extra cut will be canceled because $w_k(x)$ is zero, leaving the rest parts precisely what we want. Making the estimator unbiased again.</p>
+$$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; E[ \sum\limits_{i=1}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} m_i(x_{ij})\dfrac{f(x_{ij})}{p_i(x_{ij})}] \\\\ &amp; = &amp; E[ \sum\limits_{i=1, i!=k}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} m_i(x_{ij})\dfrac{f(x_{ij})}{p_i(x_{ij})} &#43; \dfrac{1}{N_k} \sum\limits_{j=1}^{N_k} m_k(x_{kj})\dfrac{f(x_{kj})}{p_k(x_{kj})}] \\\\ &amp; = &amp; \int_{\Omega} \sum\limits_{i=1,i!=k}^M \dfrac{1}{N_i} \sum\limits_{j=1}^{N_i} m_i(x)\dfrac{f(x)}{p_i(x)} p_i(x) dx &#43; \int_{\Omega_0} \dfrac{1}{N_k} \sum\limits_{j=1}^{N_k} m_k(x)\dfrac{f(x)}{p_k(x)} p_k(x) dx \\\\ &amp; = &amp; \Sigma_{i=1, i!=k}^M \int_{\Omega} m_i(x)f(x)dx &#43; \int_{\Omega_0}m_k(x)f(x)dx \\\\ &amp; = &amp; \Sigma_{i=1}^M \int_{\Omega} m_i(x)f(x)dx - \int_{\Omega_1}m_k(x)f(x)dx  \\\\ &amp; = &amp; \int f(x) dx - \int_{\Omega_1}m_k(x)f(x)dx \end{array} $$
+<p>What happens here is that our estimator has an extra cut from the expected value just like the importance sampling blind spot issue mentioned above. And this is exactly why we need to make sure we meet the second condition. If we do meet the second condition, what would happen is that the extra cut will be canceled because $m_k(x)$ is zero, leaving the rest parts precisely what we want. Making the estimator unbiased again.</p>
 <p>As a side note, I would like to point out that in theory, we don&rsquo;t really need to strictly meet the first or second condition to make the algorithm unbiased. There is a more generalized form</p>
 <ul>
 <li>First condition<br>
 $\int \Sigma_{i=1}^M w(x) f(x) dx = \int f(x) dx$</li>
-<li>Second condition<br>
-$\int_{\Omega_1} w_k(x) f(x) dx = 0$</li>
+<li>Second condition, assuming $\Omega_1$ is where $p_k$ is 0<br>
+$\int_{\Omega_1} m_k(x) f(x) dx = 0$</li>
 </ul>
 <p>However, in almost all contexts, it is a lot more tricky to meet this requirement without meeting the special form of them mentioned above. So this is rarely mentioned in most materials.</p>
 <h3 id="commonly-used-mis-weight">Commonly Used MIS Weight</h3>
 <p>Here I&rsquo;d like to point out a few commonly used weight</p>
 <ul>
 <li>Balance Heuristic<br>
-This is the most commonly used weight function in MIS. The mathematical form of the weight is quite simple, $ w_k(x) = N_k p_k(x) / \Sigma_{i=1}^{M} N_i p_i(x)$ . If we pay attention to the details, we would notice that it automatically fulfills the MIS conditions, which is very nice. Even though the weight looks quite simple, sometimes it can get quite complicated, like in the algorithm of <a href="https://agraphicsguynotes.com/posts/practical_implementation_of_mis_in_bidirectional_path_tracing/">Bidirectional Path Tracing</a>.   What is even worse is that sometimes the PDFs are not even tractable, making it impossible to use this method.</li>
+This is the most commonly used weight function in MIS. The mathematical form of the weight is quite simple, $ m_k(x) = N_k p_k(x) / \Sigma_{i=1}^{M} N_i p_i(x)$ . If we pay attention to the details, we would notice that it automatically fulfills the MIS conditions, which is very nice. Even though the weight looks quite simple, sometimes it can get quite complicated, like in the algorithm of <a href="https://agraphicsguynotes.com/posts/practical_implementation_of_mis_in_bidirectional_path_tracing/">Bidirectional Path Tracing</a>.   What is even worse is that sometimes the PDFs are not even tractable, making it impossible to use this method.</li>
 <li>Power Heuristic<br>
-This weight is sort of similar to the balance heuristic, except it adds a power on top of each element in the nominator and denominator, leaving the math form like this $ w_k(x) = (N_k p_k(x))^\beta / \Sigma_{i=1}^{M} (N_i p_i(x))^{\beta}$. We can easily tell here that the balance heuristic is nothing but a special form of power heuristic when $\beta$ is simply one. And this weight also meets the MIS conditions as well. It is less commonly used compared with the balance heuristic, but it is indeed used in some cases for better sampling efficiency.</li>
+This weight is sort of similar to the balance heuristic, except it adds a power on top of each element in the nominator and denominator, leaving the math form like this $ m_k(x) = (N_k p_k(x))^\beta / \Sigma_{i=1}^{M} (N_i p_i(x))^{\beta}$. We can easily tell here that the balance heuristic is nothing but a special form of power heuristic when $\beta$ is simply one. And this weight also meets the MIS conditions as well. It is less commonly used compared with the balance heuristic, but it is indeed used in some cases for better sampling efficiency.</li>
 <li>Uniform Weight<br>
-As its name implies, it is the same across all samples. Since it is constant and it has to meet the first condition, we can easily imagine what the weight is, it should simply be $ w_k(x) = {1}/{N_k} $.<br>
+As its name implies, it is the same across all samples. Since it is constant and it has to meet the first condition, we can easily imagine what the weight is, it should simply be $ m_k(x) = {1}/{N_k} $.<br>
 Not really meeting the second condition makes this weight seems to be pretty ridiculous at the beginning. As a matter of fact, if we use this weight, it possibly won&rsquo;t reduce the fireflies at all, making this weight very unattractive. However, in the case where the PDFs are not even tractable, this is the only weight that we can consider using when it comes to MIS. And special attention is needed to make sure the method is unbiased. To counter the bias, we would need to count the number of PDFs that are non-zero at any specific sample and use that as the denominator, it would correct the bias then. Readers can try this idea in the math proof, it should be pretty easy to understand how it works.</li>
 </ul>
 <h2 id="sample-importance-resampling-sir">Sample Importance Resampling (SIR)</h2>
@@ -548,8 +548,8 @@ It comes with a complete solution to approximate the integral without any bias, 
 <p>Please be noted that the weight here is slightly different from the previously mentioned weight. This is fine as scaling the target distribution is allowed in both SIR and RIS. But the below function has to skip the 1/M part since it is merged into the weights already.</p>
 <p>The final form of our Monte Carlo estimator would be as below</p>
 
-$$I_{RIS} = \dfrac{1}{N} \Sigma_{i=1}^{N} \dfrac{f(y_i)}{\hat{p}(y_i)} \Sigma_{j=1}^{M} w(x_j)$$
-<p>Here $x_i$ is only a subset of $x_j$. The way $x_i$ is picked can either be done through a binary search or linear processing like Reservoir algorithm. Binary search would require us to pre-process the proposal samples beforehand, which is not practical in the context of ReStir though.</p>
+$$I_{RIS} = \dfrac{1}{N} \Sigma_{i=1}^{N} \dfrac{f(y_i)}{\hat{p}(y_i)} \Sigma_{j=1}^{M} w(x_{ij})$$
+<p>Here $y_i$ is only a subset of $x_{ij}$. The way $y_i$ is picked can either be done through a binary search or linear processing like Reservoir algorithm. Binary search would require us to pre-process the proposal samples beforehand, which is not practical in the context of ReStir though.</p>
 <p>There are some requirements for this method as well</p>
 <ul>
 <li>M and N have to be both larger than 0.<br>
@@ -568,7 +568,7 @@ The theory explained in this blog post would also work for cases where multiple 
 <p>The first option is when taking proposal samples from the proposal PDFs, there is really nothing that prevents us from drawing samples from different PDFs. In the previous section, we mentioned that all the proposal samples are coming from a same proposal PDF. There is no such limitation. We could draw samples from multiple different PDFs if we want to. Though, it is critically important to make sure the conditions of the MIS are met properly.</p>
 <p>As pointed out in the <a href="https://research.nvidia.com/publication/2022-07_generalized-resampled-importance-sampling-foundations-restir">GRIS paper</a>, the weight for each proposal pdf could be generalized to this form</p>
 
-$$w_i(x) = w_{i,mis}(x) \hat{p}(x) / p_i(x)$$
+$$w_i(x) = m_i(x) \dfrac{\hat{p}(x)}{p_i(x)}$$
 <p>It is not hard to realize that the previous weight is nothing but a special form of this generalized form where the MIS weight is simply uniform weight and the proposal PDF is all the same.
 Since that weight is a MIS weight, it has to make sure it would meet the two conditions involving weight in the MIS algorithm. Otherwise, it could introduce bias.</p>
 <p>Below is a graph demonstrating the workflow for MIS used in RIS.
@@ -589,12 +589,20 @@ There is very clear proof of it mentioned in the appendix of <a href="https://sc
 <p>Since the original samples come from the proposal PDF(s), target samples are merely a subset of proposal samples without introducing new signals to the evaluation, we would only need to integrate the support of the proposal samples to get the approximation.</p>
 <p>To simplify our derivation, let&rsquo;s define a few terms first</p>
 
-$$w_i(x) = w_{i,mis}(x) \hat{p}(x) / p_i(x)$$
+$$w_i(x) = m_i(x) \hat{p}(x) / p_i(x)$$
 
 $$W = \Sigma_{i=1}^{M}w_i(x_i)$$
 <p>Please notice that without losing generosity, I used different proposal PDFs here. To prove the RIS with same proposal PDF, we simply need to get rid of the subscript of $w_i(x)$.</p>
 
-$$ \begin{array} {lcl} E(\dfrac{f(y)}{\hat{p}(y)} \Sigma_{i=1}^{M}\dfrac{w_{i,mis}(x_i)\hat{p}(x_i)}{p_i(x_i)}) &amp; = &amp; E(\dfrac{f(y)}{\hat{p}(y)} W) \\\\ &amp; = &amp; \Sigma_{k=1}^{M} \underset{\text{M}}{\int \dots \int} \dfrac{f(x_k)}{\hat{p}(x_k)} W \dfrac{w_{k,mis}(x_k)}{W} \Pi_{i=1}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M\ \\\\ &amp; = &amp; \Sigma_{k=1}^{M} \underset{\text{M}}{\int \dots \int} f(x_k) w_{k,mis}(x_k) \Pi_{i=1, i!=k}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M\ \\\\ &amp; = &amp; \Sigma_{k=1}^{M} \int f(x_k) w_{k,mis}(x_k) dx_k\ \underset{\text{M-1}}{\int \dots \int} \Pi_{i=1, i!=k}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M\ \\\\ &amp; = &amp; \int \Sigma_{k=1}^{M} w_{k,mis}(x) f(x) dx\ \\\\ &amp; = &amp; \int f(x) dx\ \end{array}$$
+$$ \begin{array} {lcl} 
+E(\dfrac{1}{N} \Sigma_{i=1}^{N} \dfrac{f(y_i)}{\hat{p}(y_i)} \Sigma_{j=1}^{M} w_j(x_{ij})) &amp; = &amp; 
+           \dfrac{1}{N} \Sigma_{i=1}^{N} E(\dfrac{f(y)}{\hat{p}(y)} \Sigma_{j=1}^{M} w_j(x_j)) \\\\ &amp; = &amp; E(\dfrac{f(y)}{\hat{p}(y)} W) 
+\\\\ &amp; = &amp; \Sigma_{k=1}^{M} \underset{\text{M}}{\int \dots \int} \dfrac{f(x_k)}{\hat{p}(x_k)} W \dfrac{w_k(x_k)}{W} \Pi_{i=1}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M
+\\\\ &amp; = &amp; \Sigma_{k=1}^{M} \underset{\text{M}}{\int \dots \int} f(x_k) m_k(x_k) \Pi_{i=1, i!=k}^{M} (p_i(x_i)) \space dx_1\ \dots dx_M
+\\\\ &amp; = &amp; \Sigma_{k=1}^{M} \int f(x_k) m_k(x_k) dx_k\ \underset{\text{M-1}}{\int \dots \int} \Pi_{i=1, i!=k}^{M} (p_i(x_i)) \underbrace{\space dx_1\ \dots dx_M}_{x_1\, to\, x_M\, except\, x_k}
+\\\\ &amp; = &amp; \int \Sigma_{k=1}^{M} m_k(x) f(x) dx\ 
+\\\\ &amp; = &amp; \int f(x) dx\ 
+\end{array}$$
 <p>As we can see from the above derivation, lots of the items cancel, leaving a very simple form, the exact result that we would like to approximate in the first place. With this proof, we can easily see that it doesn&rsquo;t matter if RIS picks proposal samples from different PDFs, this is exactly how MIS works in RIS in the first method I mentioned above.</p>
 <h3 id="nice-properties-of-ris">Nice Properties of RIS</h3>
 <p>Before moving to the next section, let&rsquo;s summarize some of the nice properties of RIS.</p>
