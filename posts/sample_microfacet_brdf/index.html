@@ -205,7 +205,7 @@ The left monkey has pure reflection brdf which is mentioned in my previous blog 
 <figure><a href="/img/posts/sample_microfacet_brdf/oldsampling.png"><img src="/img/posts/sample_microfacet_brdf/oldsampling.png" width="700"/></a>
 </figure>
 
-<p>The left monkey has pure reflection brdf which is mentioned in my previous blog <a href="http://localhost:1313/posts/derivation_of_pure_specular_reflection_brdf/">post</a>, the right one uses the microfacet model with zero as roughness value. I was expecting similar result for both of the monkeys while things turned out to be wrong here, we can barely see the reflection from the monkey. Actually there is nothing wrong, the fact is that the convergence rate of default sampling the microfacet model with 0 roughness is extremely low. As long as there are enough samples, it will reach the appearance similar to the left one. However the number of samples being enough can be arbitrarily high depending on how spiky your brdf is.</p>
+<p>The left monkey has pure reflection brdf which is mentioned in my previous blog <a href="https://agraphicsguynotes.com/posts/derivation_of_pure_specular_reflection_brdf/">post</a>, the right one uses the microfacet model with zero as roughness value. I was expecting similar result for both of the monkeys while things turned out to be wrong here, we can barely see the reflection from the monkey. Actually there is nothing wrong, the fact is that the convergence rate of default sampling the microfacet model with 0 roughness is extremely low. As long as there are enough samples, it will reach the appearance similar to the left one. However the number of samples being enough can be arbitrarily high depending on how spiky your brdf is.</p>
 <p>The right way of sampling microfacet brdf is mentioned in this <a href="https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.html">paper</a>. What I want to write down in this blog is how these conclusions are derived from the original microfacet model. Using these better sampling methods, we will get similar result for those two monkeys eventually.</p>
 <h1 id="why-default-sampling-method-is-inefficient">Why Default Sampling Method is Inefficient</h1>
 <p>So why is this default sampling method inefficient for mirror like brdf model. First of all, the default sampling method goes with the following pdf:</p>
@@ -766,7 +766,7 @@ $('.ba-slider'+"10b97b22b77d4af64917b9b2ab6df72b").beforeAfter();
         
           2015 -
         
-        2023
+        2024
          Jiayin Cao 
       
       
