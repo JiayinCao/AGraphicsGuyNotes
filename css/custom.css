@@ -1,0 +1,14 @@
+.custom-figure {
+  margin: 0;
+  padding: 0;
+}
+
+.custom-figure img {
+  display: block;
+  margin: 0;
+}
+
+.custom-figure-caption {
+  font-size: 0.85em; /* smaller than 0.85em */
+  margin-top: 0.5rem;
+}

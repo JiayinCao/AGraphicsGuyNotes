@@ -24,7 +24,6 @@
 <meta property="article:modified_time" content="2018-07-18T00:00:00+00:00" />
 
 
-
     <title>
   Sampling Anisotropic Microfacet BRDF · A Graphics Guy&#39;s Note
 </title>
@@ -53,6 +52,8 @@
       
     
 
+    
+      <link rel="stylesheet" href="/css/custom.css" />
     
 
     
@@ -112,7 +113,9 @@
 </style>
     
 
-    <meta name="generator" content="Hugo 0.120.4">
+    <meta name="generator" content="Hugo 0.117.0">
+
+    <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
 
   
@@ -336,7 +339,7 @@ $$ \theta = arccos\Big( \epsilon ^ { \small \dfrac{1}{cos^2(\phi) * e_u &#43; si
 <p>Importance sampling is always importance for a ray tracer. With the above method, a ray tracer should be able to reach relative noise-free image with reasonalely enough sample taken per pixel.</p>
 <p>There is also some future work improving the efficiency of importance sampling for the microfacet model, like sampling visible normal. And it is also the default method for PBRT microfacet model sampling.</p>
 <p>If someone is interested in the detailed implementation, they can check it out in my github project <a href="https://github.com/JiayinCao/SORT/blob/master/src/scatteringevent/bsdf/microfacet.cpp">here</a> .</p>
-<h1 id="reference">Reference:</h1>
+<h1 id="references">References</h1>
 <p>[1] <a href="https://www.statlect.com/glossary/marginal-probability-density-function">Marginal probability density function</a><br>
 [2] <a href="https://en.wikipedia.org/wiki/Conditional_probability_distribution">Conditional probability distribution</a><br>
 [3] <a href="http://www.pbrt.org/">Physically Based Rendering</a><br>
@@ -443,7 +446,7 @@ $$ \theta = arccos\Big( \epsilon ^ { \small \dfrac{1}{cos^2(\phi) * e_u &#43; si
     <li><a href="#sampling-beckmann">Sampling Beckmann</a></li>
     <li><a href="#sampling-blinn">Sampling Blinn</a></li>
     <li><a href="#summary">Summary</a></li>
-    <li><a href="#reference">Reference:</a></li>
+    <li><a href="#references">References</a></li>
   </ul>
 </nav>
 </div>
@@ -573,7 +576,7 @@ $$ \theta = arccos\Big( \epsilon ^ { \small \dfrac{1}{cos^2(\phi) * e_u &#43; si
         
           2015 -
         
-        2024
+        2025
          Jiayin Cao 
       
       

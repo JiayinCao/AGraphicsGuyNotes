@@ -7,19 +7,19 @@
     <meta http-equiv="Content-Language" content="en">
 
     <meta name="author" content="Jiayin Cao">
-    <meta name="description" content="Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReStir (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like ReStir DI, ReStir GI, ReStir PT, Volumetric ReStir, etc.
+    <meta name="description" content="Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReSTIR (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like ReSTIR DI, ReSTIR GI, ReSTIR PT, Volumetric ReSTIR, etc.
 The original papers are clearly the best resources to learn the tech. Due to the complexity of the algorithm, understanding the theory and math remains challenging for graphics programmers who are not very familiar with sampling methods.">
     <meta name="keywords" content="blog,developer,personal">
 
     <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://agraphicsguynotes.com/img/cover.png"/>
 
-<meta name="twitter:title" content="Understanding The Math Behind ReStir DI"/>
-<meta name="twitter:description" content="Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReStir (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like ReStir DI, ReStir GI, ReStir PT, Volumetric ReStir, etc.
+<meta name="twitter:title" content="Understanding The Math Behind ReSTIR DI"/>
+<meta name="twitter:description" content="Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReSTIR (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like ReSTIR DI, ReSTIR GI, ReSTIR PT, Volumetric ReSTIR, etc.
 The original papers are clearly the best resources to learn the tech. Due to the complexity of the algorithm, understanding the theory and math remains challenging for graphics programmers who are not very familiar with sampling methods."/>
 
-    <meta property="og:title" content="Understanding The Math Behind ReStir DI" />
-<meta property="og:description" content="Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReStir (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like ReStir DI, ReStir GI, ReStir PT, Volumetric ReStir, etc.
+    <meta property="og:title" content="Understanding The Math Behind ReSTIR DI" />
+<meta property="og:description" content="Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReSTIR (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like ReSTIR DI, ReSTIR GI, ReSTIR PT, Volumetric ReSTIR, etc.
 The original papers are clearly the best resources to learn the tech. Due to the complexity of the algorithm, understanding the theory and math remains challenging for graphics programmers who are not very familiar with sampling methods." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_di/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
@@ -27,9 +27,8 @@ The original papers are clearly the best resources to learn the tech. Due to the
 <meta property="article:modified_time" content="2022-12-05T00:00:00+00:00" />
 
 
-
     <title>
-  Understanding The Math Behind ReStir DI · A Graphics Guy&#39;s Note
+  Understanding The Math Behind ReSTIR DI · A Graphics Guy&#39;s Note
 </title>
 
     
@@ -56,6 +55,8 @@ The original papers are clearly the best resources to learn the tech. Due to the
       
     
 
+    
+      <link rel="stylesheet" href="/css/custom.css" />
     
 
     
@@ -115,7 +116,9 @@ The original papers are clearly the best resources to learn the tech. Due to the
 </style>
     
 
-    <meta name="generator" content="Hugo 0.120.4">
+    <meta name="generator" content="Hugo 0.117.0">
+
+    <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
 
   
@@ -178,7 +181,7 @@ The original papers are clearly the best resources to learn the tech. Due to the
     <article>
       <header>
         <div class="post-title">
-          <h1 class="title">Understanding The Math Behind ReStir DI</h1>
+          <h1 class="title">Understanding The Math Behind ReSTIR DI</h1>
         </div>
         <div class="post-meta">
           <div class="date">
@@ -201,12 +204,12 @@ The original papers are clearly the best resources to learn the tech. Due to the
       
       <div>
         
-        <p>Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReStir (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like <a href="https://research.nvidia.com/publication/2020-07_spatiotemporal-reservoir-resampling-real-time-ray-tracing-dynamic-direct">ReStir DI</a>, <a href="https://research.nvidia.com/publication/2021-06_restir-gi-path-resampling-real-time-path-tracing">ReStir GI</a>, <a href="https://research.nvidia.com/publication/2022-07_generalized-resampled-importance-sampling-foundations-restir">ReStir PT</a>, <a href="https://graphics.cs.utah.edu/research/projects/volumetric-restir/">Volumetric ReStir</a>, etc.</p>
+        <p>Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReSTIR (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like <a href="https://research.nvidia.com/publication/2020-07_spatiotemporal-reservoir-resampling-real-time-ray-tracing-dynamic-direct">ReSTIR DI</a>, <a href="https://research.nvidia.com/publication/2021-06_restir-gi-path-resampling-real-time-path-tracing">ReSTIR GI</a>, <a href="https://research.nvidia.com/publication/2022-07_generalized-resampled-importance-sampling-foundations-restir">ReSTIR PT</a>, <a href="https://graphics.cs.utah.edu/research/projects/volumetric-restir/">Volumetric ReSTIR</a>, etc.</p>
 <p>The original papers are clearly the best resources to learn the tech. Due to the complexity of the algorithm, understanding the theory and math remains challenging for graphics programmers who are not very familiar with sampling methods. There are also a few blog posts <sup><a href="http://www.zyanidelab.com/how-to-add-thousands-of-lights-to-your-renderer/">[5]</a> <a href="https://gamehacker1999.github.io/posts/restir/">[6]</a></sup>
- available. However, there are still some fundamental mathematical questions not answered in the posts, which are fairly important for us to understand why the math works the way it does in ReStir.</p>
-<p>In this blog post, rather than talking about the different variations of ReStir, I would like to talk about the very original method, ReStir DI. Different from existing blog posts, I would not mention any implementation details. The whole blog will be focusing on the mathematics behind the original ReStir, with more in-depth analysis of why it works. This should be a complementary reading of the original ReStir DI paper. It is highly recommended to go through the original <a href="https://research.nvidia.com/publication/2020-07_spatiotemporal-reservoir-resampling-real-time-ray-tracing-dynamic-direct">paper</a> first before start reading this post. Hopefully, after reading this post, readers would have a deeper understanding of how ReStir DI works mathematically.</p>
+ available. However, there are still some fundamental mathematical questions not answered in the posts, which are fairly important for us to understand why the math works the way it does in ReSTIR.</p>
+<p>In this blog post, rather than talking about the different variations of ReSTIR, I would like to talk about the very original method, ReSTIR DI. Different from existing blog posts, I would not mention any implementation details. The whole blog will be focusing on the mathematics behind the original ReSTIR, with more in-depth analysis of why it works. This should be a complementary reading of the original ReSTIR DI paper. It is highly recommended to go through the original <a href="https://research.nvidia.com/publication/2020-07_spatiotemporal-reservoir-resampling-real-time-ray-tracing-dynamic-direct">paper</a> first before start reading this post. Hopefully, after reading this post, readers would have a deeper understanding of how ReSTIR DI works mathematically.</p>
 <h1 id="preliminary-reading">Preliminary Reading</h1>
-<p>Since ReStir DI is not an easy algorithm to understand and lots of the details rely on some really basic theory. I think it makes a lot of sense to go through the basics first before starting to explain ReStir. So the first half of the post will be mainly about reviewing some fundamental concepts so that we would have a solid understanding of what is needed to understand ReStir.</p>
+<p>Since ReSTIR DI is not an easy algorithm to understand and lots of the details rely on some really basic theory. I think it makes a lot of sense to go through the basics first before starting to explain ReSTIR. So the first half of the post will be mainly about reviewing some fundamental concepts so that we would have a solid understanding of what is needed to understand ReSTIR.</p>
 <h2 id="importance-sampling">Importance Sampling</h2>
 <p>This is the most fundamental concept in evaluating the rendering equation. Most of the details will be skipped as I would assume readers already have a decent understanding of it.</p>
 <p>To evaluate the integral of $\int f(x) dx$, we would need to</p>
@@ -238,7 +241,7 @@ In the support of f(x),</p>
 <li>$m_i(x)$ must be 0 whenever $p_i(x) = 0$</li>
 </ul>
 <p>A hidden condition that is already implied by the above two conditions is that the union of the supports of all source PDFs must cover the support of f(x)</p>
-<p>Since this post is about explaining ReStir, I would only put down some details that matters to ReStir. Other characteristics of MIS would be skipped. For a deeper explanation of MIS, please check out <a href="https://graphics.stanford.edu/papers/veach_thesis/thesis.pdf">Eric Veach&rsquo;s Thesis</a>.</p>
+<p>Since this post is about explaining ReSTIR, I would only put down some details that matters to ReSTIR. Other characteristics of MIS would be skipped. For a deeper explanation of MIS, please check out <a href="https://graphics.stanford.edu/papers/veach_thesis/thesis.pdf">Eric Veach&rsquo;s Thesis</a>.</p>
 <h3 id="mathematical-proof-of-mis">Mathematical Proof of MIS</h3>
 <p>In order to have a deeper understanding of this, let&rsquo;s see how the math works under the hood first.</p>
 
@@ -246,7 +249,7 @@ $$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; E[ \sum\limits_{i=1}^M \df
 <p>It is obvious that as long as it meets the first condition ($ \Sigma_{i=1}^M m_i(x) = 1 $), we would have an unbiased approximation of the integral of our interest.</p>
 
 $$ \begin{array} {lcl} E[I_{mis}^{M,N}] &amp; = &amp; \int \sum\limits_{i=1}^M m_i(x) f(x) dx \\\\ &amp; = &amp; \int f(x) dx \end{array} $$
-<p>For the implied requirement, since it is less relevant to ReStir, I would only put down some intuitive explanation here, leaving the math as a practice to readers (The proof should be fairly similar to what I showed in the previous section, but slightly more complicated). Same as the importance sampling blind spot issue mentioned above, if none of the PDF covers a sub-support of the integrand, it won&rsquo;t pick up any changes in that support either, while changes in that support will indeed cause changes in the final result. This easily makes the estimate not accurate anymore.</p>
+<p>For the implied requirement, since it is less relevant to ReSTIR, I would only put down some intuitive explanation here, leaving the math as a practice to readers (The proof should be fairly similar to what I showed in the previous section, but slightly more complicated). Same as the importance sampling blind spot issue mentioned above, if none of the PDF covers a sub-support of the integrand, it won&rsquo;t pick up any changes in that support either, while changes in that support will indeed cause changes in the final result. This easily makes the estimate not accurate anymore.</p>
 <p>However, this is by no means to say that all source PDF&rsquo;s supports would have to cover the support of the function to be integrated. For any sub-support, as long as one of them covers it, it is good enough. Though there is one important condition, which is the second one mentioned above. Since it is slightly trickier to understand, I&rsquo;ll put down the math proof here,</p>
 <p>Let&rsquo;s imagine for one PDF $p_k$, it has zero probability of taking a sample in a sub-support, $\Omega_1$. We can then divide the support of the function $\Omega$ into two parts $\Omega_0$ and $\Omega_1$. So we have</p>
 
@@ -288,7 +291,7 @@ $ w(x) = {\hat{p}(x)}/{p(x)}$</li>
 <ul>
 <li>Proposal PDF<br>
 This is what we use to draw samples from in the first place. It should be tractable and cheap enough to take samples from as we would take multiple proposal samples from this PDF.
-I also want to point out that if this proposal PDF is expensive, it won&rsquo;t have any impact on the unbiasedness of the algorithm though, except that it would need some extra treatment to avoid the cost. For example, in the work of <a href="https://research.nvidia.com/publication/2021-06_restir-gi-path-resampling-real-time-path-tracing">ReStir GI</a>, in order to generate a proposal sample, a ray needs to be shot, making it expensive, forcing the algorithm to take a lot less number of proposal samples compared with other variations of ReStir. The paper distributes the proposal samples across frames to achieve good performance.</li>
+I also want to point out that if this proposal PDF is expensive, it won&rsquo;t have any impact on the unbiasedness of the algorithm though, except that it would need some extra treatment to avoid the cost. For example, in the work of <a href="https://research.nvidia.com/publication/2021-06_restir-gi-path-resampling-real-time-path-tracing">ReSTIR GI</a>, in order to generate a proposal sample, a ray needs to be shot, making it expensive, forcing the algorithm to take a lot less number of proposal samples compared with other variations of ReSTIR. The paper distributes the proposal samples across frames to achieve good performance.</li>
 <li>Target PDF<br>
 We don&rsquo;t really have the target pdf in SIR a lot of the times. What we have is target function. Target pdf is commonly recognized as normalized target function. Even though target function is what we used to assign the weight, it is not essentially different from using target pdf since a constant weight of the weights, the target function normalization factor, won&rsquo;t have impact on SIR. Ideally, it shouldn&rsquo;t be expensive either. Just like the proposal PDF, it could be.<br>
 It is a nice property that we can use target function in place of target pdf, even if the target function is not normalized. Later we will see how this restriction doesn&rsquo;t apply in target pdf.</li>
@@ -525,13 +528,13 @@ $$p(x) = 1 / (2 Pi)$$
 <li>What makes the algorithm even more attractive is that we can even add a constant scaling factor on the target PDF as the algorithm would be the same. A relative scaling factor on all weights would mean no scaling factor applied at all. To explain it a bit, imagine we have two proposal samples with their corresponding weights being 2.0 and 8.0. The chance of picking the first sample are 20%. If we scale the target pdf by 5.0, the weights will be 10.0 and 40.0, resulting in exactly the same chances of picking each sample as well.<br>
 This offers an extra level of freedom for us to choose our target PDF as a lot of the time we can&rsquo;t really normalize our target PDF. This opens the door for us to choose literally any function we would like to use, rather than a PDF that has to integrate to 1 in its support.</li>
 </ul>
-<p>With all these limitations gone, it is not hard to imagine the value of SIR. It offers us a powerful tool to draw samples from distributions that we couldn&rsquo;t sample with other methods, for example, the rendering equation itself. If we can take samples from a PDF that is proportional to $L(w_i) f_r(w_i, w_o) cos(\theta_i)$, we really just need one single sample to solve the rendering equation without any noise. This is really hard for traditional methods, like inversion sampling and rejection sampling. Because the distribution is not even a PDF, there is no easy way to normalize the distribution. Normalizing the distribution requires us to evaluate the integral in the first place, this is a chicken and egg problem itself. However, just because we can&rsquo;t draw samples from this distribution doesn&rsquo;t prevent us from approximating drawing a sample from it using SIR. This is exactly what ReStir GI does.</p>
+<p>With all these limitations gone, it is not hard to imagine the value of SIR. It offers us a powerful tool to draw samples from distributions that we couldn&rsquo;t sample with other methods, for example, the rendering equation itself. If we can take samples from a PDF that is proportional to $L(w_i) f_r(w_i, w_o) cos(\theta_i)$, we really just need one single sample to solve the rendering equation without any noise. This is really hard for traditional methods, like inversion sampling and rejection sampling. Because the distribution is not even a PDF, there is no easy way to normalize the distribution. Normalizing the distribution requires us to evaluate the integral in the first place, this is a chicken and egg problem itself. However, just because we can&rsquo;t draw samples from this distribution doesn&rsquo;t prevent us from approximating drawing a sample from it using SIR. This is exactly what ReSTIR GI does.</p>
 <p>With these limitations gone, it seems that we have the power to sample from any distribution now. However, there are clearly some downsides of this algorithm as well</p>
 <ul>
 <li>The biggest downside of this SIR method is that it is unfortunately intractable. To be more specific, it means that we don&rsquo;t really have a closed form of the SIR pdf that we take samples from given a specific M, proposal PDF, and target function.</li>
 <li>There is a big issue because of the intractable nature of the SIR PDF. Given a random sample taken from somewhere else, we can&rsquo;t easily know the probability of taking this given sample with this SIR method.<br>
 To illustrate why it matters, if we take a re-visit of the previous MIS balance heuristic weight mentioned above. We can quickly realize that balance heuristic is not possible as long as one single PDF is a SIR pdf, meaning we take one single sample with this SIR method as the samples in MIS, balance heuristic is not an option anymore.</li>
-<li>Sometimes it would require a big number of proposal samples to achieve a good approximation of sampling the target pdf. This could be a deal breaker as generating a huge number of proposal samples doesn&rsquo;t sound cheap itself. ReStir solves this problem by reusing sample signals from temporal history and neighbors, which greatly reduces the number of real proposal samples needed to be taken per-pixel.</li>
+<li>Sometimes it would require a big number of proposal samples to achieve a good approximation of sampling the target pdf. This could be a deal breaker as generating a huge number of proposal samples doesn&rsquo;t sound cheap itself. ReSTIR solves this problem by reusing sample signals from temporal history and neighbors, which greatly reduces the number of real proposal samples needed to be taken per-pixel.</li>
 </ul>
 <h2 id="resampled-importance-sampling-ris">Resampled Importance Sampling (RIS)</h2>
 <p>RIS is a technique that takes advantage of SIR to approximate the integral in an unbiased manner.
@@ -548,7 +551,7 @@ It comes with a complete solution to approximate the integral without any bias, 
 <p>The final form of our Monte Carlo estimator would be as below</p>
 
 $$I_{RIS} = \dfrac{1}{N} \Sigma_{i=1}^{N} \dfrac{f(y_i)}{\hat{p}(y_i)} \Sigma_{j=1}^{M} w(x_{ij})$$
-<p>Here $y_i$ is only a subset of $x_{ij}$. The way $y_i$ is picked can either be done through a binary search or linear processing like Reservoir algorithm. Binary search would require us to pre-process the proposal samples beforehand, which is not practical in the context of ReStir though.</p>
+<p>Here $y_i$ is only a subset of $x_{ij}$. The way $y_i$ is picked can either be done through a binary search or linear processing like Reservoir algorithm. Binary search would require us to pre-process the proposal samples beforehand, which is not practical in the context of ReSTIR though.</p>
 <p>There are some requirements for this method as well</p>
 <ul>
 <li>M and N have to be both larger than 0.<br>
@@ -584,7 +587,7 @@ However, there is one tricky thing to point out, as balance heuristics would req
 <h3 id="math-proof-of-ris">Math Proof of RIS</h3>
 <p>For those readers who don&rsquo;t like taking things for granted, to fully understand the RIS method, it is necessary to understand why it is unbiased.
 There is very clear proof of it mentioned in the appendix of <a href="https://scholarsarchive.byu.edu/cgi/viewcontent.cgi?article=1662&amp;context=etd">Talbot&rsquo;s paper</a>.</p>
-<p>Rather than repeating his derivation, I would like to put down another slightly different proof, which is similar to what the ReStir DI paper does when it talks about the biasness of the ReStir method.</p>
+<p>Rather than repeating his derivation, I would like to put down another slightly different proof, which is similar to what the ReSTIR DI paper does when it talks about the biasness of the ReSTIR method.</p>
 <p>Since the original samples come from the proposal PDF(s), target samples are merely a subset of proposal samples without introducing new signals to the evaluation, we would only need to integrate the support of the proposal samples to get the approximation.</p>
 <p>To simplify our derivation, let&rsquo;s define a few terms first</p>
 
@@ -607,22 +610,22 @@ E(\dfrac{1}{N} \Sigma_{i=1}^{N} \dfrac{f(y_i)}{\hat{p}(y_i)} \Sigma_{j=1}^{M} w_
 <p>Before moving to the next section, let&rsquo;s summarize some of the nice properties of RIS.</p>
 <ul>
 <li>There isn&rsquo;t that much needed between the proposal PDF and target function, offering a lot of flexibility in terms of choosing the best PDF/distribution for your application. The only thing that is required is that they have to both cover the support of target function f(x). To be more specific, if we are sampling from different proposal PDFs, the union of the supports of all proposal PDFs would need to cover the whole target function&rsquo;s support. If one of the proposal PDFs doesn&rsquo;t cover the full target function&rsquo;s support, it is fine as long as the MIS weight is properly adjusted. Of course, the target function&rsquo;s support should be a superset of the integrand&rsquo;s support as well.</li>
-<li>This was mentioned in the previous section. I would like to emphasize it again since it is something important. The target function used in RIS doesn&rsquo;t need to be a normalized PDF at all.  It can literally be anything. As a matter of fact, ReStir DI algorithm uses the unshadowed light contribution, $L(w_i)f_r(w_o,w_i)cos(\theta_i)$, as target function. With traditional sampling methods, it is very hard as this distribution is hardly a PDF itself.<br>
+<li>This was mentioned in the previous section. I would like to emphasize it again since it is something important. The target function used in RIS doesn&rsquo;t need to be a normalized PDF at all.  It can literally be anything. As a matter of fact, ReSTIR DI algorithm uses the unshadowed light contribution, $L(w_i)f_r(w_o,w_i)cos(\theta_i)$, as target function. With traditional sampling methods, it is very hard as this distribution is hardly a PDF itself.<br>
 To see how it works in math, in the previous derivation, we can easily notice that the value of $W/\hat{p}(x)$ does not change when we scale target function since it is both in the denominator and nominator.</li>
-<li>As we mentioned before, the supports of the target function and proposal PDF both cover the support of f(x). We can take advantage of this fact to predict if the SIR PDF is zero by inspecting target function and proposal PDF even if SIR PDF is intractable. This is a useful feature that we would take advantage to counter the bias in ReStir DI.</li>
+<li>As we mentioned before, the supports of the target function and proposal PDF both cover the support of f(x). We can take advantage of this fact to predict if the SIR PDF is zero by inspecting target function and proposal PDF even if SIR PDF is intractable. This is a useful feature that we would take advantage to counter the bias in ReSTIR DI.</li>
 </ul>
 <h2 id="weighted-reservoir-sampling-wrs">Weighted Reservoir Sampling (WRS)</h2>
 <p>The second step of SIR algorithm requires us to pick a sample from all proposal samples and each sample&rsquo;s probability of being picked is proportional to its weight. This application easily reminds us of a binary search algorithm with a prefix sum table. However, even if the time complexity is only O(lg(N)), the preprocessing step&rsquo;s time complexity is still O(N). It would be suitable for cases where data is more static and can be preprocessed and used multiple times later, like HDRI sky importance sampling. In a more dynamic environment, it is less practical as the bottleneck will be O(N) during preprocessing. And it also requires O(N) space as well, which is another deal breaker for efficient SIR sampling. All these issues require us to seek an alternative solution, which is where WRS chimes in.</p>
 <p>Weighted reservoir sampling is an elegant algorithm that draws a sample from a stream of samples without pre-existed knowledge about how many samples are coming. Each sample in the stream would stand a chance that is proportional to its weight to be picked as the winner. For example, if we have three samples A, B, C, with their corresponding weight as 1.0, 2.0, 5.0, there will be 12.5% chance that A will be picked, 25% chance that B will be picked and 62.5% chance that C will be picked. Besides, if there is a fourth sample D coming even if after the WRS is executed, the algorithm is flexible enough to take the fourth sample in without breaking the rule that each sample would have a chance proportional to its weight of being picked.
 And what makes it even more attractive is that it only requires O(1) space, rather than linear space. There are certainly more attractive properties of this algorithm, which we would mention at the end of this section after learning how the math works first.</p>
-<p>To be clear, there are certainly variations of WRS existed. For example, the algorithm could actually pick multiple samples rather than just one of them among the set. However, this is the only version we care about in ReStir DI as ReStir DI requires sampling proposal sample set with replacement. So all we need to do is to repeat the above algorithm multiple times. Though, there may be a more optimized algorithm existing to pick samples with replacement. But this is out of the scope of the topic in this post.</p>
+<p>To be clear, there are certainly variations of WRS existed. For example, the algorithm could actually pick multiple samples rather than just one of them among the set. However, this is the only version we care about in ReSTIR DI as ReSTIR DI requires sampling proposal sample set with replacement. So all we need to do is to repeat the above algorithm multiple times. Though, there may be a more optimized algorithm existing to pick samples with replacement. But this is out of the scope of the topic in this post.</p>
 <p>In order to implement the algorithm, we would need to define a reservoir structure with a few necessary fields</p>
 <ul>
 <li>Current picked sample</li>
 <li>Total processed weight</li>
 </ul>
 <p>An empty reservoir would have none as the current picked sample and 0 as total processed weight.</p>
-<p>Please be noted that these are the only two fields required for WRS algorithm. ReStir DI does require another field, which is the number of samples processed so far. But since this section is all about WRS, the processed sample count is ignored to avoid confusion.</p>
+<p>Please be noted that these are the only two fields required for WRS algorithm. ReSTIR DI does require another field, which is the number of samples processed so far. But since this section is all about WRS, the processed sample count is ignored to avoid confusion.</p>
 <p>The basic workflow of WRS goes like this. For an incoming sample, it would either take the sample or ignore the sample depending on a random choice. A random number between 0 and 1 is drawn. If it is larger than a threshold, which is defined this way</p>
 
 $$threshold = W_{new} / (W_{new} &#43; W_{total})$$
@@ -684,21 +687,21 @@ $$p&#39;(x_k) = \dfrac{w(x_k)}{\Sigma_{i=1}^{N} w(x_i)} \dfrac{\Sigma_{i=1}^{N} 
 <li>WRS has O(1) space requirement even if the processed samples could be millions. It also requires only O(1) time to process each input, even if the input is a reservoir with millions of samples processed.</li>
 <li>WRS supports divide and concur. Imagine there is a source of a million samples, we can first divide them into multiple trunks and process each trunk on a different CPU thread. The order of each trunk being processed is irrelevant. After every thread is finished, we can resolve the result with a final gather pass. How and when we divide won&rsquo;t have any impact on the probabilities at all.</li>
 </ul>
-<h1 id="restir-di-introduction">ReStir DI Introduction</h1>
-<p>With all the above context explained, we are now in a good position to move forward to discuss the detailed choices made by ReStir DI.</p>
-<p>Before doing it, I would like to give a brief introduction of what ReStir DI is and what problem it tries to tackle. It is highly recommended to read the original ReStir paper to get all the details.</p>
+<h1 id="restir-di-introduction">ReSTIR DI Introduction</h1>
+<p>With all the above context explained, we are now in a good position to move forward to discuss the detailed choices made by ReSTIR DI.</p>
+<p>Before doing it, I would like to give a brief introduction of what ReSTIR DI is and what problem it tries to tackle. It is highly recommended to read the original ReSTIR paper to get all the details.</p>
 <h2 id="targeted-problem">Targeted Problem</h2>
-<p>The original ReStir DI algorithm focuses on tackling the many light problem. More specifically, whenever an intersection is found and shading operation is needed, we would first need to pick a light among all light candidates to take samples from. There are several obvious options for toy renderers,</p>
+<p>The original ReSTIR DI algorithm focuses on tackling the many light problem. More specifically, whenever an intersection is found and shading operation is needed, we would first need to pick a light among all light candidates to take samples from. There are several obvious options for toy renderers,</p>
 <ul>
 <li>The most straightforward algorithm to pick a light is to randomly pick one light with equal probability for each light. Even though it doesn&rsquo;t sound very promising, it can be done in O(1) time and requires almost no pre-processing.</li>
 <li>We could also construct weights by taking some factors into account when picking lights, like the emissive power of the light. As long as those factors are not shading point dependent, we could pre-calculate a table first and use binary search to find a light proporition to the weight. Pbrt 2nd uses this method for sampling a light.</li>
 <li>If the weights are shading point dependent, it commonly means that we would need to iterate through all lights to get a good sample. However, this is clearly a deal breaker for setups with millions of lights, it wouldn&rsquo;t even work for hundreds of lights practically since iterating through all lights is a per-pixel operation.</li>
 </ul>
 <p>Of course, the above methods are the most trivial and fundamental solutions available. There is some existing work exploring different ideas in this domain <sup><a href="https://research.nvidia.com/publication/2019-07_dynamic-many-light-sampling-real-time-ray-tracing">[12]</a> <a href="https://fpsunflower.github.io/ckulla/data/many-lights-hpg2018.pdf">[13]</a> <a href="http://cwyman.org/papers/rtg2-manyLightReGIR.pdf">[14]</a></sup>
-, etc. Among all of the existing work, ReStir DI scales really well, up to millions of lights. And it is also quite practical to implement on modern graphics hardware, especially Nvidia RTX cards. Strictly speaking, ReStir DI not only finds a good light candidate for shading, but also finds a good light sample. There is still subtle differences between sampling a light and sampling a light sample.</p>
+, etc. Among all of the existing work, ReSTIR DI scales really well, up to millions of lights. And it is also quite practical to implement on modern graphics hardware, especially Nvidia RTX cards. Strictly speaking, ReSTIR DI not only finds a good light candidate for shading, but also finds a good light sample. There is still subtle differences between sampling a light and sampling a light sample.</p>
 <ul>
 <li>The former only cares about picking a light out of many, which would still require us to pick a sample on this light later. And in some situations, it could be quite tricky. For example, when the light is a huge area light and the brdf is very spicky there could be risk in producing lots of fireflies.</li>
-<li>On the other hand, sampling a light sample offers enough signal for the rest of the algorithm to simply take over. Since ReStir does pick quality sample in an efficient manner, the aforementioned problem simply doesn&rsquo;t exist in it.</li>
+<li>On the other hand, sampling a light sample offers enough signal for the rest of the algorithm to simply take over. Since ReSTIR does pick quality sample in an efficient manner, the aforementioned problem simply doesn&rsquo;t exist in it.</li>
 </ul>
 <h2 id="basic-algorithm-workflow">Basic Algorithm Workflow</h2>
 <p>The algorithm works for rendering 2D images. It works so efficiently that it could render in real time. Each pixel would keep track of its own reservoir across frames.</p>
@@ -706,7 +709,7 @@ $$p&#39;(x_k) = \dfrac{w(x_k)}{\Sigma_{i=1}^{N} w(x_i)} \dfrac{\Sigma_{i=1}^{N} 
 <ul>
 <li>
 <p>For every pixel on the screen, it first takes multiple initial light samples (M = 32 in their implementations). These light samples are treated as the proposal samples, which would later be used in RIS algorithm.<br>
-In order to take the proposal samples, ReStir DI first pick a light randomly with the probability of each light being picked proportional to its emissive power. If there is HDRI sky, a 25% probability is given to it by default. As mentioned before, since the probability is proportional to its weight not the shading point, the algorithm could use the traditional binary search method for picking a light. And once the light is picked, a corresponding method is used for generating a random light sample on the light source based on whether it is a HDRI light or an area light.<br>
+In order to take the proposal samples, ReSTIR DI first pick a light randomly with the probability of each light being picked proportional to its emissive power. If there is HDRI sky, a 25% probability is given to it by default. As mentioned before, since the probability is proportional to its weight not the shading point, the algorithm could use the traditional binary search method for picking a light. And once the light is picked, a corresponding method is used for generating a random light sample on the light source based on whether it is a HDRI light or an area light.<br>
 All of the proposal samples will be processed in RIS algorithm through weighted reservoir sampling. The target function is unshadowed light contribution. Mathematically, it is $L(w_i,w_o) f_r(w_o,w_i) cos(\theta_i)$, except that we don&rsquo;t know if the light is visible to the shaded point or not.</p>
 </li>
 <li>
@@ -731,7 +734,7 @@ This is where the number of <strong>indirectly visited proposal samples</strong>
 </ul>
 <p>This same process is repeated every frame. As frame goes, each pixel essentially visits millions of proposal samples in their RIS algorithm eventually resulting in drawing samples quite close to the target pdf, the unshadowed light contribution.</p>
 <p>The above explanation really serves as a review of the algorithm to readers who read the paper. It could be a bit confusing for people who don&rsquo;t know the algorithm.</p>
-<h1 id="common-confusion-in-understanding-restir">Common Confusion in Understanding ReStir</h1>
+<h1 id="common-confusion-in-understanding-restir">Common Confusion in Understanding ReSTIR</h1>
 <p>After my first time reading through the paper, I had a lot of confusion.</p>
 <ul>
 <li>The math in the paper assumes the proposal PDFs are all the same. Even if the PDF for taking light candidate is exactly the same for all pixels&rsquo; RIS execution, the PDF of taking initial light samples is the product of the PDF of picking a light candidate and the PDF of taking a light sample from the light candidate, the latter of which is not the same for all pixels. So does the implementation really uses one single PDF to take light samples?</li>
@@ -743,8 +746,8 @@ This is where the number of <strong>indirectly visited proposal samples</strong>
 <p>Above are just some examples of my early confusion, it doesn&rsquo;t cover everything.
 With lots of confusion like these, I spend quite some time researching related materials and eventually got fully convinced that this algorithm is indeed unbiased. The following sections of this blog will be explaining my confusion, I hope this could be helpful to those who have similar confusion as well.</p>
 <h2 id="same-light-proposal-pdf">Same Light Proposal PDF?</h2>
-<p>It is a bit complicated when it comes to the proposal PDF used in ReStir. We would have to go through the following sections before answering this question. However, it is not that difficult to tell whether we are using the same proposal light sample PDF. The short answer is yes, it indeed uses exactly the same PDF even if there could be multiple types of light sources, like triangle area light and sky light mentioned in the paper.</p>
-<p>Even if it is the same PDF used in ReStir DI, it is by no means simply the discretized PDF used to pick a light candidate.</p>
+<p>It is a bit complicated when it comes to the proposal PDF used in ReSTIR. We would have to go through the following sections before answering this question. However, it is not that difficult to tell whether we are using the same proposal light sample PDF. The short answer is yes, it indeed uses exactly the same PDF even if there could be multiple types of light sources, like triangle area light and sky light mentioned in the paper.</p>
+<p>Even if it is the same PDF used in ReSTIR DI, it is by no means simply the discretized PDF used to pick a light candidate.</p>
 <p>To understand it, we would have to realize that there are two categories of PDFs involved in this sampling process</p>
 <ul>
 <li>PDF L is used to pick a light canidates, this is also a discretized PDF. In the paper&rsquo;s implementation, this is consistent across all pixels&rsquo; execution of RIS algorithm.</li>
@@ -753,23 +756,23 @@ With lots of confusion like these, I spend quite some time researching related m
 <p>The finalized PDF is a product of the two</p>
 
 $$ p(k, s) = p_L(k) p_{S,k}(s) $$
-<p>k is the id of the picked light candidate and s is the light sample drawn from this light candidate. Even if $p_{S,k}(s)$ could be different per light, the product of the two remains consistent across all RIS&rsquo; execution. By hiding the light candidate id, which we don&rsquo;t really care about much in ReStir, we can use the product PDF as our light sample PDF. And this is already consistent.</p>
+<p>k is the id of the picked light candidate and s is the light sample drawn from this light candidate. Even if $p_{S,k}(s)$ could be different per light, the product of the two remains consistent across all RIS&rsquo; execution. By hiding the light candidate id, which we don&rsquo;t really care about much in ReSTIR, we can use the product PDF as our light sample PDF. And this is already consistent.</p>
 <p>If this is not obvious enough, let&rsquo;s find an example that we are already very familiar with it, the sky importance sampling.
-The method that Pbrt chooses is quite a similar case to the light sample sampling in ReStir. In order to take a sample from HDRI sky, we pre-calculate CDFs, each row gets a CDF by accumulating its pixels&rsquo; value in it, and there is one more CDF generated by accumulating the sum of pixel values on each row. In order to take a sample, we first randomly choose a row by binary searching the CDF for all rows. Once a row is picked, its corresponding CDF is used for picking the final sample. The second CDF used is clearly different across different rows, just like our light sample PDF could be different based on the exact instance of light.</p>
+The method that Pbrt chooses is quite a similar case to the light sample sampling in ReSTIR. In order to take a sample from HDRI sky, we pre-calculate CDFs, each row gets a CDF by accumulating its pixels&rsquo; value in it, and there is one more CDF generated by accumulating the sum of pixel values on each row. In order to take a sample, we first randomly choose a row by binary searching the CDF for all rows. Once a row is picked, its corresponding CDF is used for picking the final sample. The second CDF used is clearly different across different rows, just like our light sample PDF could be different based on the exact instance of light.</p>
 <p>To relate the two use cases, we can notice that both take samples through a two steps process. In the light sample case, it picks a light candidate first, in the HDRI sky importance sampling case, it picks a row. Once the first phase is done, both would choose to take a finalized sample with a conditional PDF, the only minor difference between the two is that it is a continuous PDF in the case of light sampling while it is discretized in the other application.</p>
-<p>We almost never doubt that the sky importance sampling PDF is different based on row picking. This clearly indicates that the light sample picking in ReStir is also consistent across all pixels as well.</p>
+<p>We almost never doubt that the sky importance sampling PDF is different based on row picking. This clearly indicates that the light sample picking in ReSTIR is also consistent across all pixels as well.</p>
 <p>Luckily, the complexity of the proposal light sample PDF is pretty much independent from the rest of the algorithm.</p>
 <h2 id="what-exactly-is-neighbor-sampling">What Exactly is Neighbor Sampling?</h2>
 <p>By neighbor sampling, I mean the process to take samples from its neighbors&rsquo; reservoirs. I think lots of readers would have confusion similar to mine as well. Since the neighbor pixels don&rsquo;t share exactly the same target function, there seems no theoretical basis for taking samples from neighbors. The truth is it can take signals from its neighbors and it is also unbiased. In order to understand why, let&rsquo;s draw a graph first</p>
-<figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReStir_1.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReStir_1.png"/></a>
+<figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReSTIR_1.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReSTIR_1.png"/></a>
 </figure>
 
 <p>Let&rsquo;s observe two pixels, on the left, there is pixel A and on the right, it is pixel B.
 This graph is about pixel A picking its light samples. In the beginning, both A and B would pick their own proposal samples generated by the light PDF. For pixel A, it would pick neighbors for more signals as well. In this case, let&rsquo;s assume it picks one of its neighbors, B. Once B is picked, B&rsquo;s target samples would be fed into A&rsquo;s weighted reservoir sampling algorithm. And for pixel A, it would use its own target function to pick one winner sample between the winner sample in the proposal light samples that belong to pixel A and the neighbor&rsquo;s target sample. Eventually, A&rsquo;s finalized target sample will be fed into the RIS estimator for evaluating rendering equation.</p>
 <p>There are a few things I would like to point out in this graph</p>
 <ul>
-<li>For simplicity purposes, this graph is only for the very first frame of rendering with ReStir. Later frames will be more complicated, but they are essentially doing the same thing. It would be a lot easier to understand it once we know how this graph works mathematically.</li>
-<li>Since it is the first frame, there is no temporal reuse as there is no valid history for it to read. Of course, the graph for the whole ReStir DI algorithm would be a bit more complicated.</li>
+<li>For simplicity purposes, this graph is only for the very first frame of rendering with ReSTIR. Later frames will be more complicated, but they are essentially doing the same thing. It would be a lot easier to understand it once we know how this graph works mathematically.</li>
+<li>Since it is the first frame, there is no temporal reuse as there is no valid history for it to read. Of course, the graph for the whole ReSTIR DI algorithm would be a bit more complicated.</li>
 <li>Only one neighbor pixel&rsquo;s reservoir is borrowed in this graph. Borrowing multiple neighbor&rsquo;s target samples is not essentially different from this one. And the iteration in the neighbor sampling is skipped as well.</li>
 </ul>
 <p>With so much simplification, we can still see the complexity of this graph is still beyond the two graphs we showed before. Specifically, how MIS can be used in RIS. If we take a look at the previous two graphs, we would find that it is not immediately obvious if this is MIS + RIS. In order to simplify things, let&rsquo;s further simplify the graph by taking advantage of the facts of WRS algorithm that were explained before,</p>
@@ -778,18 +781,18 @@ This graph is about pixel A picking its light samples. In the beginning, both A 
 <li>Since divide and concur works in WRS as well, it means we can also choose to combine separate WRS executions as well by going the other way around.</li>
 </ul>
 <p>So if we combine the two WRS algorithm execution for pixel A in the previous graph, we would have this new simplified graph then</p>
-<figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReStir_2.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReStir_2.png"/></a>
+<figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReSTIR_2.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReSTIR_2.png"/></a>
 </figure>
 
 <p>By observing this graph, it is still not obvious if this is MIS with RIS. But we can quickly notice one important thing here, the target sample generated by neighbor pixel is essentially a SIR algorithm itself. As previously mentioned, SIR is an algorithm that approximates drawing samples from a target pdf. So if we swap the top right corner graph with a single PDF, which is essentially a SIR PDF, we would have this graph then.</p>
-<figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReStir_3.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReStir_3.png"/></a>
+<figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReSTIR_3.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReSTIR_3.png"/></a>
 </figure>
 
 <p>Please take a look at the first graph in <a href="https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_di/#mis-used-with-ris">this section</a> again, I think it should be quite clear that we are essentially just using MIS in RIS. To further explain it, it treats the target sample from its neighbors as a proposal sample here and the proposal PDF for this sample is the SIR PDF from its neighbors. As we mentioned in the previous sections, RIS does allow different proposal PDFs to co-exist together.</p>
 <p>At this point, it is clear how we can answer the question of this section. The behavior of borrowing neighbor pixels&rsquo; target sample is essentially introducing a new PDF that is different than the light sample PDF. And mathematically this is totally fine and introduces no bias at all as <a href="https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_di/#math-proof-of-ris">proved</a> before. This is precisely why even if neighbor pixels have their own target functions the algorithm is still unbiased.</p>
-<p>One subtle thing that deserves our attention is that ReStir DI really uses different proposal PDFs even if all light samples are drawn from the same light sample PDF. This is because the target samples from neighbors, which are treated as proposal samples, all come from different SIR PDFs.</p>
+<p>One subtle thing that deserves our attention is that ReSTIR DI really uses different proposal PDFs even if all light samples are drawn from the same light sample PDF. This is because the target samples from neighbors, which are treated as proposal samples, all come from different SIR PDFs.</p>
 <h2 id="the-proposal-samples-visited-by-ris">The Proposal Samples Visited by RIS</h2>
-<p>One common misunderstanding of ReStir DI algorithm is that if a neighbor pixel&rsquo;s reservoir has visited 100 samples, by &lsquo;merging&rsquo; the target sample from it, our current pixel&rsquo;s visited samples count will be grown by 100. This was briefly mentioned before, I&rsquo;d like to explain with a bit more text here.</p>
+<p>One common misunderstanding of ReSTIR DI algorithm is that if a neighbor pixel&rsquo;s reservoir has visited 100 samples, by &lsquo;merging&rsquo; the target sample from it, our current pixel&rsquo;s visited samples count will be grown by 100. This was briefly mentioned before, I&rsquo;d like to explain with a bit more text here.</p>
 <p>Let&rsquo;s keep talking about pixel A and B in the above graph. Except this time, for simplicity, we only pretend that each of them generates two proposal samples. For pixel A, its two proposal samples are $x_0$, $x_1$ and for pixel B, they are $y_0$ and $y_1$.</p>
 <p>In order to count the fact that neighbor pixel uses a different target function, the new weight for this target sample of pixel B is</p>
 
@@ -812,10 +815,10 @@ What is the MIS weight in this case then? Can we use balance heuristics at all?<
 <ul>
 <li>The SIR PDF of neighbor&rsquo;s sampling method is not even tractable. This doesn&rsquo;t meet the need for balance heuristics in the first place and is a clear deal breaker.</li>
 <li>Assuming there is N samples to be processed, the time complexity for evaluating balance heuristics for all of them will be $O(N^2)$. This may not sound that crazy at the beginning if we only have 32 initial samples along with a few neighbor target samples. Besides the time complexity, there is also storage requirement that will be O(N) as well.</li>
-<li>And since each balanced heuristic weight would require knowing all proposal PDFs during its evaluation, this would mean that the set of proposal PDFs would be known even during the first samples evaluating its MIS weight, breaking the streaming nature of the ReStir algorithm.</li>
+<li>And since each balanced heuristic weight would require knowing all proposal PDFs during its evaluation, this would mean that the set of proposal PDFs would be known even during the first samples evaluating its MIS weight, breaking the streaming nature of the ReSTIR algorithm.</li>
 </ul>
 <p>At this point, it is not hard to imagine why the paper&rsquo;s implementation went for a uniform weight as it can easily be isolated out and doesn&rsquo;t have the problems mentioned above.</p>
-<p>However, uniform weight comes at a cost here. As previously explained, the second condition in <a href="https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_di/#multiple-importance-sampling">MIS</a> is not met by the uniform weight. And this is precisely the essential root cause of why ReStir DI would introduce bias. The paper does explain why it is biased, but seeing the same problem from another perspective commonly offers us a bit deeper understanding. And the solution the paper proposed does exactly the method explained metioned in the constant weight section before.</p>
+<p>However, uniform weight comes at a cost here. As previously explained, the second condition in <a href="https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_di/#multiple-importance-sampling">MIS</a> is not met by the uniform weight. And this is precisely the essential root cause of why ReSTIR DI would introduce bias. The paper does explain why it is biased, but seeing the same problem from another perspective commonly offers us a bit deeper understanding. And the solution the paper proposed does exactly the method explained metioned in the constant weight section before.</p>
 <p>Strictly speaking, there is chances to use balance heuristics by using the target function rather than the intractable SIR PDF. However, even if this tackles the first problem, the two remaining issues could still be a performance bottleneck. Besides, the balanced heuristic commonly requires each PDF to be normalized, while the target function may not necessarily be normalized, which will cause no bias, but inefficiency in terms of convergence rate.</p>
 <h2 id="what-is-the-proposal-pdf-for-neighbors-target-sample">What is the Proposal PDF for Neighbors Target Sample?</h2>
 <p>In order to perform RIS algorithm, we would need to know the proposal PDF for each incoming proposal sample. However, there is a particularly tricky problem, the neighbor pixel&rsquo;s SIR PDF is not tractable. There is no easy way to evaluate what the PDF is.</p>
@@ -860,30 +863,30 @@ So where does this N fit in the math?</p>
 <p>Please notice that the 4th line re-update the M of the reservoir even if it is already updated in the update function on the 3rd line already. It actually overrides that. The M is bumped by one in the update function as it assumes the incoming input sample is only one sample. However, as we essentially treat each target sample as it has multiple duplications and feed them multiple times, we would need to update the visited sample count properly.</p>
 <h2 id="temporal-reuse">Temporal Reuse</h2>
 <p>At this point, it is not hard to guess that the temporal reuse is nothing but a new target sample treated as a proposal sample. The only requirement for keeping the unbiased nature when merging neighbor pixels is correctly counting the denominator, only count the ones with higher than zero probability. So even if the previous frame&rsquo;s corresponding pixel is not quite accurate, this is not a problem. It would some negative impact on the convergence, but not the unbiasness nature of the algorithm.</p>
-<p>Below is a graph looping all processes ReStir DI does for a pixel, though it doesn&rsquo;t count the repetitive loop of neighbor sampling.</p>
-<figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReStir_4.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReStir_4.png"/></a>
+<p>Below is a graph looping all processes ReSTIR DI does for a pixel, though it doesn&rsquo;t count the repetitive loop of neighbor sampling.</p>
+<figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReSTIR_4.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReSTIR_4.png"/></a>
 </figure>
 
-<p>To answer the previous question, why TAA is biased while ReStir temporal reuse is unbiased. In TAA, the lighting signal sampled in the previous frame is already evaluated, which could be incorrect in this frame because of lots of factors, like lighting, animation, occlusion, etc. While in the temporal reuse of ReStir, it only just takes samples, the evaluation hasn&rsquo;t happened yet. The worst thing that could happen is that it takes a bad sample from some unrelated pixel, but it won&rsquo;t introduce bias mathematically.</p>
-<h2 id="correcting-the-bias-in-restir">Correcting the Bias in ReStir</h2>
+<p>To answer the previous question, why TAA is biased while ReSTIR temporal reuse is unbiased. In TAA, the lighting signal sampled in the previous frame is already evaluated, which could be incorrect in this frame because of lots of factors, like lighting, animation, occlusion, etc. While in the temporal reuse of ReSTIR, it only just takes samples, the evaluation hasn&rsquo;t happened yet. The worst thing that could happen is that it takes a bad sample from some unrelated pixel, but it won&rsquo;t introduce bias mathematically.</p>
+<h2 id="correcting-the-bias-in-restir">Correcting the Bias in ReSTIR</h2>
 <p>In order to correct bias for uniform MIS weight, we would need to evaluate how many PDFs would have non-zero contribution at a specific sample position. Once again, we encounter the same problem as before, the SIR PDF is not tractable.</p>
 <p>However, what we need from the SIR PDF is really whether it is large than zero or not, it is a binary information. We don&rsquo;t really need to know what exactly the value it is. In order to predict that, as we previously mentioned, we can choose to use target function and proposal PDF to predict if SIR PDF is zero. If either of them is zero, the SIR PDF will be zero. On the other hand, if both of them are not zero, the SIR PDF is larger than zero. And we can also take advantage of the fact that any proposal sample positions to be evaluated for bias correction is already on a light source because they originally came in as an initial light sample. Either through direct light proposal PDF or SIR PDF, they indeed made it this far, meaning their proposal PDF is already larger than zero. So all we need to do is to test if the target function is larger than zero or now, which is exactly what the paper does.</p>
 <h2 id="visibility-reuse">Visibility Reuse</h2>
 <p>This is the last topic I would like to explain.
 I almost had myself convinced it was a biased solution for quite a while until recently when I realized it is not.
 To begin with, let&rsquo;s start with this graph,</p>
-<figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReStir_5.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReStir_5.png"/></a>
+<figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReSTIR_5.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReSTIR_5.png"/></a>
 </figure>
 
-<p>Compared with the first ReStir graph we showed, this simply adds a visibility check (purple diamond shape) before even merging the samples. If it is occluded, it would ignore this sample. If we regard the visibility to be part of the target function, we would simplify the graph this way</p>
-<figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReStir_6.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReStir_6.png"/></a>
+<p>Compared with the first ReSTIR graph we showed, this simply adds a visibility check (purple diamond shape) before even merging the samples. If it is occluded, it would ignore this sample. If we regard the visibility to be part of the target function, we would simplify the graph this way</p>
+<figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReSTIR_6.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReSTIR_6.png"/></a>
 </figure>
 
 <p>As a matter of fact, RIS does allow per-initial sample target function. So using different target functions for the current pixel in RIS is not a big concern. However, I&rsquo;d like to explain the theory through another way by pretending that RIS doesn&rsquo;t allow per-initial sample target function.</p>
 <p>For the top left part of the graph, for quite a while, I thought the algorithm should have checked visibilitiy for each proposal light sample, rather than only the winner light sample to make sure the target function is consistent for this pixel&rsquo;s RIS algorithm.</p>
 <p>However, it turns out that we don&rsquo;t necessarily need to do it even if it is not a wrong thing to do. Just like we regard the whole top right part as a single execution of RIS. We could think about the light samples exactly the same way. One way to understand it is that the current pixel&rsquo;s reservoir never sees the individual light proposal samples when visibility reuse is used, it sees a target sample drawn from a SIR method with unshadowed light contribution as target function. Just like a neighbor target sample is drawn from a different target function, this simply uses another target function for its own mini RIS execution.</p>
 <p>With this explanation, the above graph boils down to this simplified form that we are very familiar with</p>
-<figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReStir_7.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReStir_7.png"/></a>
+<figure><a href="/img/posts/understanding_the_math_behind_restir_di/ReSTIR_7.png"><img src="/img/posts/understanding_the_math_behind_restir_di/ReSTIR_7.png"/></a>
 </figure>
 
 <p>Needless to explain at this point, this is just MIS used in RIS, something we have visited a few times in this blog. The key observation here is that with visibility reuse, the current pixel&rsquo;s reservoir no longer sees the light proposal samples anymore and this is why we can use different a target function to filter samples as the later RIS execution sees only one sample drawn from a SIR method, it doesn&rsquo;t care what target function it uses.</p>
@@ -920,9 +923,9 @@ $$ \begin{array} {lcl} \hat{p}&#39;(x) W(x) N &amp; = &amp; V \hat{p}(x) N \dfra
 <p>So now we can see that the paper does indeed implement the same thing if we take a deeper look at the math.
 Hopefully, this would convince readers that this algorithm is indeed unbiased.</p>
 <h1 id="summary">Summary</h1>
-<p>In this blog post, I summarized my understanding of the original ReStir algorithm. I dug into the mathematical details and explained why the algorithm is unbiased. This blog is what I collected during my learning process. I put it down here in the hope that it could be helpful to those people who have similar confusion like myself. Hopefully, this could be helpful for someone to get a deeper understanding of the tech.</p>
-<p>This blog doesn&rsquo;t mention any engineering problems that we could face during implementing ReStir, like memory cache issue when sampling millions of lights, floating point precision overflow issue after a few iterations, etc. For more details about that part, I would recommend watching this <a href="https://developer.nvidia.com/blog/new-video-light-resampling-in-practice-with-rtxdi/">talk</a> or taking a look at the source code of <a href="https://developer.nvidia.com/rtx/ray-tracing/rtxdi">RTX DI</a>.</p>
-<h1 id="reference">Reference</h1>
+<p>In this blog post, I summarized my understanding of the original ReSTIR algorithm. I dug into the mathematical details and explained why the algorithm is unbiased. This blog is what I collected during my learning process. I put it down here in the hope that it could be helpful to those people who have similar confusion like myself. Hopefully, this could be helpful for someone to get a deeper understanding of the tech.</p>
+<p>This blog doesn&rsquo;t mention any engineering problems that we could face during implementing ReSTIR, like memory cache issue when sampling millions of lights, floating point precision overflow issue after a few iterations, etc. For more details about that part, I would recommend watching this <a href="https://developer.nvidia.com/blog/new-video-light-resampling-in-practice-with-rtxdi/">talk</a> or taking a look at the source code of <a href="https://developer.nvidia.com/rtx/ray-tracing/rtxdi">RTX DI</a>.</p>
+<h1 id="references">References</h1>
 <p>[1] <a href="https://research.nvidia.com/publication/2020-07_spatiotemporal-reservoir-resampling-real-time-ray-tracing-dynamic-direct">Spatiotemporal reservoir resampling for real-time ray tracing with dynamic direct lighting</a><br>
 [2] <a href="https://research.nvidia.com/publication/2021-06_restir-gi-path-resampling-real-time-path-tracing">ReSTIR GI: Path Resampling for Real-Time Path Tracing</a><br>
 [3] <a href="https://research.nvidia.com/publication/2022-07_generalized-resampled-importance-sampling-foundations-restir">Generalized Resampled Importance Sampling: Foundations of ReSTIR</a><br>
@@ -1064,13 +1067,13 @@ Hopefully, this would convince readers that this algorithm is indeed unbiased.</
         </li>
       </ul>
     </li>
-    <li><a href="#restir-di-introduction">ReStir DI Introduction</a>
+    <li><a href="#restir-di-introduction">ReSTIR DI Introduction</a>
       <ul>
         <li><a href="#targeted-problem">Targeted Problem</a></li>
         <li><a href="#basic-algorithm-workflow">Basic Algorithm Workflow</a></li>
       </ul>
     </li>
-    <li><a href="#common-confusion-in-understanding-restir">Common Confusion in Understanding ReStir</a>
+    <li><a href="#common-confusion-in-understanding-restir">Common Confusion in Understanding ReSTIR</a>
       <ul>
         <li><a href="#same-light-proposal-pdf">Same Light Proposal PDF?</a></li>
         <li><a href="#what-exactly-is-neighbor-sampling">What Exactly is Neighbor Sampling?</a></li>
@@ -1079,12 +1082,12 @@ Hopefully, this would convince readers that this algorithm is indeed unbiased.</
         <li><a href="#what-is-the-proposal-pdf-for-neighbors-target-sample">What is the Proposal PDF for Neighbors Target Sample?</a></li>
         <li><a href="#importance-of-neighbors-target-samples">Importance of Neighbors&rsquo; Target Samples</a></li>
         <li><a href="#temporal-reuse">Temporal Reuse</a></li>
-        <li><a href="#correcting-the-bias-in-restir">Correcting the Bias in ReStir</a></li>
+        <li><a href="#correcting-the-bias-in-restir">Correcting the Bias in ReSTIR</a></li>
         <li><a href="#visibility-reuse">Visibility Reuse</a></li>
       </ul>
     </li>
     <li><a href="#summary">Summary</a></li>
-    <li><a href="#reference">Reference</a></li>
+    <li><a href="#references">References</a></li>
   </ul>
 </nav>
 </div>
@@ -1214,7 +1217,7 @@ Hopefully, this would convince readers that this algorithm is indeed unbiased.</
         
           2015 -
         
-        2024
+        2025
          Jiayin Cao 
       
       

@@ -24,7 +24,6 @@
 <meta property="article:modified_time" content="2020-11-13T00:00:00+00:00" />
 
 
-
     <title>
   Practical Tips for Implementing Subsurface Scattering in a Ray Tracer · A Graphics Guy&#39;s Note
 </title>
@@ -53,6 +52,8 @@
       
     
 
+    
+      <link rel="stylesheet" href="/css/custom.css" />
     
 
     
@@ -112,7 +113,9 @@
 </style>
     
 
-    <meta name="generator" content="Hugo 0.120.4">
+    <meta name="generator" content="Hugo 0.117.0">
+
+    <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
 
   
@@ -222,219 +225,187 @@ Most of this blog will be talking about the iterations that I made to make it mo
 
 
 
-
-
-
-
-
-
-
+ 
+ 
+ 
+ 
 
 
 
 
 <style>
-    .ba-slider1d9792c1cdd84287b704ca1876c4de13 {
-        position: relative;
-        overflow: hidden;
-        width: 100%;
-         
-    }
-    
-    .ba-slider1d9792c1cdd84287b704ca1876c4de13 img {
-        width: 100%;
-        display:block;
-        max-width:none;
-    }
-    
-    .ba-slider1d9792c1cdd84287b704ca1876c4de13 .resize {
-        position: absolute;
-        top:0;
-        left: 0;
-        height: 100%;
-        width: 50%;
-        overflow: hidden;
-    }
+.ba-slider1d9792c1cdd84287b704ca1876c4de13 {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    margin: auto;
+    background-color: #FFFFFF;  
+}
 
-    .ba-slider1d9792c1cdd84287b704ca1876c4de13 .handle {  
-        position:absolute; 
-        left:50%;
-        top:0;
-        bottom:0;
-        width:2px;
-         
-        
-        background: rgba(0,0,0,.4);
-        cursor: ew-resize;
-    }
-    
-    .ba-slider1d9792c1cdd84287b704ca1876c4de13 .handle:after {   
-        position: absolute;
-        top: 50%;
-        width: 10px;
-        height: 64px;
-        margin: -32px 0 0 -4px;
-    
-        content:' ';
-        color:white;
-        font-weight:bold;
-        font-size:1px;
-        text-align:center;
-        line-height:64px;
-    
-        background: rgb(128, 128, 128, 0.7);
-        border-radius: 0%;
-    }
+.ba-slider1d9792c1cdd84287b704ca1876c4de13 img {
+    width: 100%;
+    display: block;
+    max-width: none;
+}
 
-     
-    .ba-container1d9792c1cdd84287b704ca1876c4de13 {
-        position: relative;
-        text-align: center;
-        color: white;
-    }
+.ba-slider1d9792c1cdd84287b704ca1876c4de13 .resize {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 50%;  
+    overflow: hidden;
+}
 
-     
-    .ba-bottom-left1d9792c1cdd84287b704ca1876c4de13 {
-        position: absolute;
-        bottom: 8px;
-        left: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;;
-    }
+.ba-slider1d9792c1cdd84287b704ca1876c4de13 .handle {
+    position: absolute;
+    left: 50%;  
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(0, 0, 0, 0.4);
+    cursor: ew-resize;
+    z-index: 20;
+    transition: background-color 0.3s ease;
+}
+.ba-slider1d9792c1cdd84287b704ca1876c4de13 .handle:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    margin-top: -32px;
+    margin-left: -4px;
+    width: 10px;
+    height: 64px;
+    background: #808080;
+}
 
-     
-    .ba-top-left1d9792c1cdd84287b704ca1876c4de13 {
-        position: absolute;
-        top: 8px;
-        left: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;;
-    }
+.ba-container1d9792c1cdd84287b704ca1876c4de13 {
+    position: relative;
+    text-align: center;
+}
 
-     
-    .ba-top-right1d9792c1cdd84287b704ca1876c4de13 {
-        position: absolute;
-        top: 8px;
-        right: 16px;
-        font-weight: bold;
-        white-space: nowrap;
-        color: white;
-    }
+.ba-bottom-left1d9792c1cdd84287b704ca1876c4de13,
+.ba-bottom-right1d9792c1cdd84287b704ca1876c4de13 {
+    position: absolute;
+    bottom: 8px;
+    font-weight: bold;
+    white-space: nowrap;
+}
 
-     
-    .ba-bottom-right1d9792c1cdd84287b704ca1876c4de13 {
-        position: absolute;
-        bottom: 8px;
-        right: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;
-    }
+.ba-bottom-left1d9792c1cdd84287b704ca1876c4de13 {
+    left: 16px;
+    color: #FFFFFF;  
+}
+.ba-bottom-right1d9792c1cdd84287b704ca1876c4de13 {
+    right: 16px;
+    color: #FFFFFF;  
+}
 
-     
-    .ba-centered1d9792c1cdd84287b704ca1876c4de13 {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
+ 
+
 </style>
 
-<div class="ba-slider1d9792c1cdd84287b704ca1876c4de13" style="margin: auto;">
-    <div class="ba-container1d9792c1cdd84287b704ca1876c4de13">
-        <img src=/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/regular_dragon.png><img>
-        <div class="ba-bottom-right1d9792c1cdd84287b704ca1876c4de13"></div>
-    </div>
-    <div class="resize">
-        <img src=/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/sss_dragon.png>
-        <div class="ba-bottom-left1d9792c1cdd84287b704ca1876c4de13"></div>
-    </div>
-    <span class="handle"></span>
-</div>
+<figure class="custom-compare">
+    <div class="ba-slider1d9792c1cdd84287b704ca1876c4de13" id="ba-slider-1d9792c1cdd84287b704ca1876c4de13">
+        <div class="ba-container1d9792c1cdd84287b704ca1876c4de13">
+            <img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/regular_dragon.png">
+            <div class="ba-bottom-right1d9792c1cdd84287b704ca1876c4de13"></div>
+        </div>
+        <div class="resize">
+            <img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/sss_dragon.png">
+            <div class="ba-bottom-left1d9792c1cdd84287b704ca1876c4de13"></div>
+        </div>
+        <span class="handle"></span>
 
-
+        
+        
+    </div>
     
-    <script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" crossorigin="anonymous"></script>
+</figure>
+
+
+<script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" crossorigin="anonymous"></script>
 
 
 <script>
 (function($) {
   function drags(dragElement, resizeElement, container) {
-    
-    
-    dragElement.on('mousedown.ba-events touchstart.ba-events', function(e) {
-      
+    dragElement.on('mousedown.ba touchstart.ba', function(e) {
       dragElement.addClass('ba-draggable');
       resizeElement.addClass('ba-resizable');
-      
-      
-      var startX = (e.pageX) ? e.pageX : e.originalEvent.touches[0].pageX;
-      
-      
+
+      var startX = e.pageX || e.originalEvent.touches[0].pageX;
       var dragWidth = dragElement.outerWidth(),
           posX = dragElement.offset().left + dragWidth - startX,
           containerOffset = container.offset().left,
           containerWidth = container.outerWidth();
-   
-      
-      minLeft = containerOffset + 10;
-      maxLeft = containerOffset + containerWidth - dragWidth - 10;
-      
-      
-      dragElement.parents().on("mousemove.ba-events touchmove.ba-events", function(e) {
-        
-        
-        var moveX = (e.pageX) ? e.pageX : e.originalEvent.touches[0].pageX;
-        
-        leftValue = moveX + posX - dragWidth;
-        
-        
-        if ( leftValue < minLeft) {
-          leftValue = minLeft;
-        } else if (leftValue > maxLeft) {
-          leftValue = maxLeft;
-        }
-        
-        
-        widthValue = (leftValue + dragWidth/2 - containerOffset)*100/containerWidth+'%';
-        
-        
-        $('.ba-draggable').css('left', widthValue);
-        $('.ba-resizable').css('width', widthValue);
-      
-      }).on('mouseup.ba-events touchend.ba-events touchcancel.ba-events', function(){
+
+      var minLeft = containerOffset + 10;
+      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+
+      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
+        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
+        var leftValue = moveX + posX - dragWidth;
+
+        if (leftValue < minLeft) leftValue = minLeft;
+        else if (leftValue > maxLeft) leftValue = maxLeft;
+
+        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+
+        dragElement.css('left', percentage);
+        resizeElement.css('width', percentage);
+
+        updateLinks(container, dragElement);
+      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
         dragElement.removeClass('ba-draggable');
         resizeElement.removeClass('ba-resizable');
-        
-        $(this).off('.ba-events'); 
+        $(this).off('.ba');
       });
+
       e.preventDefault();
     });
   }
 
-  
-  $.fn.beforeAfter = function() {
-    var cur = this;
-    
-    var width = cur.width()+'px';
-    cur.find('.resize img').css('width', width);
-    
-    drags(cur.find('.handle'), cur.find('.resize'), cur);
+  function updateLinks(container, handle) {
+    var containerWidth = container.outerWidth();
+    var handleLeft = handle.position().left;
 
-    
-    
-    $(window).resize(function(){
-      var width = cur.width()+'px';
-      cur.find('.resize img').css('width', width);
+    var leftLink = container.find('.ba-link-left1d9792c1cdd84287b704ca1876c4de13');
+    var rightLink = container.find('.ba-link-right1d9792c1cdd84287b704ca1876c4de13');
+
+    var deadZone = 20; 
+
+    leftLink.css({
+      width: Math.max(0, handleLeft - deadZone) + 'px'
+    });
+
+    rightLink.css({
+      width: Math.max(0, containerWidth - handleLeft - deadZone) + 'px',
+      left: (handleLeft + deadZone) + 'px'
     });
   }
-}(jQuery));
 
-$('.ba-slider'+"1d9792c1cdd84287b704ca1876c4de13").beforeAfter();
+  $.fn.beforeAfter = function() {
+    var container = $(this);
+    var handle = container.find('.handle');
+    var resize = container.find('.resize');
+
+    var width = container.width();
+    resize.find('img').css('width', width + 'px');
+
+    drags(handle, resize, container);
+    updateLinks(container, handle);
+
+    $(window).on('resize', function() {
+      var width = container.width();
+      resize.find('img').css('width', width + 'px');
+      updateLinks(container, handle);
+    });
+  }
+})(jQuery);
+
+$('#ba-slider-1d9792c1cdd84287b704ca1876c4de13').beforeAfter();
 </script>
-
 
 <p>As we can easily see from the comparison, subsurface scattering shows a more waxy feeling, it feels more transparent than the Lambert BRDF.
 In a nutshell, subsurface scattering means the incoming light penetrates through the surface of an object and leaves from another position that may not be the same as the position where it enters the surface. The most common example in our everyday life is human skin.
@@ -643,219 +614,187 @@ It is worth mentioning that I clamped pixels with high radiance value to avoid f
 
 
 
-
-
-
-
-
-
-
+ 
+ 
+ 
+ 
 
 
 
 
 <style>
-    .ba-slidera88c3b9bbf4073074127b0afa2b16857 {
-        position: relative;
-        overflow: hidden;
-        width: 100%;
-         
-    }
-    
-    .ba-slidera88c3b9bbf4073074127b0afa2b16857 img {
-        width: 100%;
-        display:block;
-        max-width:none;
-    }
-    
-    .ba-slidera88c3b9bbf4073074127b0afa2b16857 .resize {
-        position: absolute;
-        top:0;
-        left: 0;
-        height: 100%;
-        width: 50%;
-        overflow: hidden;
-    }
+.ba-slidera88c3b9bbf4073074127b0afa2b16857 {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    margin: auto;
+    background-color: #FFFFFF;  
+}
 
-    .ba-slidera88c3b9bbf4073074127b0afa2b16857 .handle {  
-        position:absolute; 
-        left:50%;
-        top:0;
-        bottom:0;
-        width:2px;
-         
-        
-        background: rgba(0,0,0,.4);
-        cursor: ew-resize;
-    }
-    
-    .ba-slidera88c3b9bbf4073074127b0afa2b16857 .handle:after {   
-        position: absolute;
-        top: 50%;
-        width: 10px;
-        height: 64px;
-        margin: -32px 0 0 -4px;
-    
-        content:' ';
-        color:white;
-        font-weight:bold;
-        font-size:1px;
-        text-align:center;
-        line-height:64px;
-    
-        background: rgb(128, 128, 128, 0.7);
-        border-radius: 0%;
-    }
+.ba-slidera88c3b9bbf4073074127b0afa2b16857 img {
+    width: 100%;
+    display: block;
+    max-width: none;
+}
 
-     
-    .ba-containera88c3b9bbf4073074127b0afa2b16857 {
-        position: relative;
-        text-align: center;
-        color: white;
-    }
+.ba-slidera88c3b9bbf4073074127b0afa2b16857 .resize {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 50%;  
+    overflow: hidden;
+}
 
-     
-    .ba-bottom-lefta88c3b9bbf4073074127b0afa2b16857 {
-        position: absolute;
-        bottom: 8px;
-        left: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;;
-    }
+.ba-slidera88c3b9bbf4073074127b0afa2b16857 .handle {
+    position: absolute;
+    left: 50%;  
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(0, 0, 0, 0.4);
+    cursor: ew-resize;
+    z-index: 20;
+    transition: background-color 0.3s ease;
+}
+.ba-slidera88c3b9bbf4073074127b0afa2b16857 .handle:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    margin-top: -32px;
+    margin-left: -4px;
+    width: 10px;
+    height: 64px;
+    background: #808080;
+}
 
-     
-    .ba-top-lefta88c3b9bbf4073074127b0afa2b16857 {
-        position: absolute;
-        top: 8px;
-        left: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;;
-    }
+.ba-containera88c3b9bbf4073074127b0afa2b16857 {
+    position: relative;
+    text-align: center;
+}
 
-     
-    .ba-top-righta88c3b9bbf4073074127b0afa2b16857 {
-        position: absolute;
-        top: 8px;
-        right: 16px;
-        font-weight: bold;
-        white-space: nowrap;
-        color: white;
-    }
+.ba-bottom-lefta88c3b9bbf4073074127b0afa2b16857,
+.ba-bottom-righta88c3b9bbf4073074127b0afa2b16857 {
+    position: absolute;
+    bottom: 8px;
+    font-weight: bold;
+    white-space: nowrap;
+}
 
-     
-    .ba-bottom-righta88c3b9bbf4073074127b0afa2b16857 {
-        position: absolute;
-        bottom: 8px;
-        right: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;
-    }
+.ba-bottom-lefta88c3b9bbf4073074127b0afa2b16857 {
+    left: 16px;
+    color: #FFFFFF;  
+}
+.ba-bottom-righta88c3b9bbf4073074127b0afa2b16857 {
+    right: 16px;
+    color: #FFFFFF;  
+}
 
-     
-    .ba-centereda88c3b9bbf4073074127b0afa2b16857 {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
+ 
+
 </style>
 
-<div class="ba-slidera88c3b9bbf4073074127b0afa2b16857" style="margin: auto;">
-    <div class="ba-containera88c3b9bbf4073074127b0afa2b16857">
-        <img src=/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/regular_sss.png><img>
-        <div class="ba-bottom-righta88c3b9bbf4073074127b0afa2b16857">Allow SSS to SSS bounces</div>
-    </div>
-    <div class="resize">
-        <img src=/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/disconnect_sss.png>
-        <div class="ba-bottom-lefta88c3b9bbf4073074127b0afa2b16857">Disallow SSS to SSS bounces</div>
-    </div>
-    <span class="handle"></span>
-</div>
+<figure class="custom-compare">
+    <div class="ba-slidera88c3b9bbf4073074127b0afa2b16857" id="ba-slider-a88c3b9bbf4073074127b0afa2b16857">
+        <div class="ba-containera88c3b9bbf4073074127b0afa2b16857">
+            <img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/regular_sss.png">
+            <div class="ba-bottom-righta88c3b9bbf4073074127b0afa2b16857">Allow SSS to SSS bounces</div>
+        </div>
+        <div class="resize">
+            <img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/disconnect_sss.png">
+            <div class="ba-bottom-lefta88c3b9bbf4073074127b0afa2b16857">Disallow SSS to SSS bounces</div>
+        </div>
+        <span class="handle"></span>
 
-
+        
+        
+    </div>
     
-    <script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" crossorigin="anonymous"></script>
+</figure>
+
+
+<script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" crossorigin="anonymous"></script>
 
 
 <script>
 (function($) {
   function drags(dragElement, resizeElement, container) {
-    
-    
-    dragElement.on('mousedown.ba-events touchstart.ba-events', function(e) {
-      
+    dragElement.on('mousedown.ba touchstart.ba', function(e) {
       dragElement.addClass('ba-draggable');
       resizeElement.addClass('ba-resizable');
-      
-      
-      var startX = (e.pageX) ? e.pageX : e.originalEvent.touches[0].pageX;
-      
-      
+
+      var startX = e.pageX || e.originalEvent.touches[0].pageX;
       var dragWidth = dragElement.outerWidth(),
           posX = dragElement.offset().left + dragWidth - startX,
           containerOffset = container.offset().left,
           containerWidth = container.outerWidth();
-   
-      
-      minLeft = containerOffset + 10;
-      maxLeft = containerOffset + containerWidth - dragWidth - 10;
-      
-      
-      dragElement.parents().on("mousemove.ba-events touchmove.ba-events", function(e) {
-        
-        
-        var moveX = (e.pageX) ? e.pageX : e.originalEvent.touches[0].pageX;
-        
-        leftValue = moveX + posX - dragWidth;
-        
-        
-        if ( leftValue < minLeft) {
-          leftValue = minLeft;
-        } else if (leftValue > maxLeft) {
-          leftValue = maxLeft;
-        }
-        
-        
-        widthValue = (leftValue + dragWidth/2 - containerOffset)*100/containerWidth+'%';
-        
-        
-        $('.ba-draggable').css('left', widthValue);
-        $('.ba-resizable').css('width', widthValue);
-      
-      }).on('mouseup.ba-events touchend.ba-events touchcancel.ba-events', function(){
+
+      var minLeft = containerOffset + 10;
+      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+
+      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
+        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
+        var leftValue = moveX + posX - dragWidth;
+
+        if (leftValue < minLeft) leftValue = minLeft;
+        else if (leftValue > maxLeft) leftValue = maxLeft;
+
+        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+
+        dragElement.css('left', percentage);
+        resizeElement.css('width', percentage);
+
+        updateLinks(container, dragElement);
+      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
         dragElement.removeClass('ba-draggable');
         resizeElement.removeClass('ba-resizable');
-        
-        $(this).off('.ba-events'); 
+        $(this).off('.ba');
       });
+
       e.preventDefault();
     });
   }
 
-  
-  $.fn.beforeAfter = function() {
-    var cur = this;
-    
-    var width = cur.width()+'px';
-    cur.find('.resize img').css('width', width);
-    
-    drags(cur.find('.handle'), cur.find('.resize'), cur);
+  function updateLinks(container, handle) {
+    var containerWidth = container.outerWidth();
+    var handleLeft = handle.position().left;
 
-    
-    
-    $(window).resize(function(){
-      var width = cur.width()+'px';
-      cur.find('.resize img').css('width', width);
+    var leftLink = container.find('.ba-link-lefta88c3b9bbf4073074127b0afa2b16857');
+    var rightLink = container.find('.ba-link-righta88c3b9bbf4073074127b0afa2b16857');
+
+    var deadZone = 20; 
+
+    leftLink.css({
+      width: Math.max(0, handleLeft - deadZone) + 'px'
+    });
+
+    rightLink.css({
+      width: Math.max(0, containerWidth - handleLeft - deadZone) + 'px',
+      left: (handleLeft + deadZone) + 'px'
     });
   }
-}(jQuery));
 
-$('.ba-slider'+"a88c3b9bbf4073074127b0afa2b16857").beforeAfter();
+  $.fn.beforeAfter = function() {
+    var container = $(this);
+    var handle = container.find('.handle');
+    var resize = container.find('.resize');
+
+    var width = container.width();
+    resize.find('img').css('width', width + 'px');
+
+    drags(handle, resize, container);
+    updateLinks(container, handle);
+
+    $(window).on('resize', function() {
+      var width = container.width();
+      resize.find('img').css('width', width + 'px');
+      updateLinks(container, handle);
+    });
+  }
+})(jQuery);
+
+$('#ba-slider-a88c3b9bbf4073074127b0afa2b16857').beforeAfter();
 </script>
-
 
 <p>Clearly, this will avoid some importance sampling of BSSRDF and converts a BSSRDF to a simple lambert model.
 Most BXDF importance sampling algorithms are commonly done locally without the knowledge of the surroundings.
@@ -872,219 +811,187 @@ However, the biggest gain in terms of performance is that it opens a door for ou
 
 
 
-
-
-
-
-
-
-
+ 
+ 
+ 
+ 
 
 
 
 
 <style>
-    .ba-sliderdc405557b70643524e0e792520a81a8c {
-        position: relative;
-        overflow: hidden;
-        width: 70%;
-         
-    }
-    
-    .ba-sliderdc405557b70643524e0e792520a81a8c img {
-        width: 100%;
-        display:block;
-        max-width:none;
-    }
-    
-    .ba-sliderdc405557b70643524e0e792520a81a8c .resize {
-        position: absolute;
-        top:0;
-        left: 0;
-        height: 100%;
-        width: 50%;
-        overflow: hidden;
-    }
+.ba-sliderdc405557b70643524e0e792520a81a8c {
+    position: relative;
+    overflow: hidden;
+    width: 70%;
+    margin: auto;
+    background-color: #FFFFFF;  
+}
 
-    .ba-sliderdc405557b70643524e0e792520a81a8c .handle {  
-        position:absolute; 
-        left:50%;
-        top:0;
-        bottom:0;
-        width:2px;
-         
-        
-        background: rgba(0,0,0,.4);
-        cursor: ew-resize;
-    }
-    
-    .ba-sliderdc405557b70643524e0e792520a81a8c .handle:after {   
-        position: absolute;
-        top: 50%;
-        width: 10px;
-        height: 64px;
-        margin: -32px 0 0 -4px;
-    
-        content:' ';
-        color:white;
-        font-weight:bold;
-        font-size:1px;
-        text-align:center;
-        line-height:64px;
-    
-        background: rgb(128, 128, 128, 0.7);
-        border-radius: 0%;
-    }
+.ba-sliderdc405557b70643524e0e792520a81a8c img {
+    width: 100%;
+    display: block;
+    max-width: none;
+}
 
-     
-    .ba-containerdc405557b70643524e0e792520a81a8c {
-        position: relative;
-        text-align: center;
-        color: white;
-    }
+.ba-sliderdc405557b70643524e0e792520a81a8c .resize {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 50%;  
+    overflow: hidden;
+}
 
-     
-    .ba-bottom-leftdc405557b70643524e0e792520a81a8c {
-        position: absolute;
-        bottom: 8px;
-        left: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;;
-    }
+.ba-sliderdc405557b70643524e0e792520a81a8c .handle {
+    position: absolute;
+    left: 50%;  
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(0, 0, 0, 0.4);
+    cursor: ew-resize;
+    z-index: 20;
+    transition: background-color 0.3s ease;
+}
+.ba-sliderdc405557b70643524e0e792520a81a8c .handle:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    margin-top: -32px;
+    margin-left: -4px;
+    width: 10px;
+    height: 64px;
+    background: #808080;
+}
 
-     
-    .ba-top-leftdc405557b70643524e0e792520a81a8c {
-        position: absolute;
-        top: 8px;
-        left: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;;
-    }
+.ba-containerdc405557b70643524e0e792520a81a8c {
+    position: relative;
+    text-align: center;
+}
 
-     
-    .ba-top-rightdc405557b70643524e0e792520a81a8c {
-        position: absolute;
-        top: 8px;
-        right: 16px;
-        font-weight: bold;
-        white-space: nowrap;
-        color: white;
-    }
+.ba-bottom-leftdc405557b70643524e0e792520a81a8c,
+.ba-bottom-rightdc405557b70643524e0e792520a81a8c {
+    position: absolute;
+    bottom: 8px;
+    font-weight: bold;
+    white-space: nowrap;
+}
 
-     
-    .ba-bottom-rightdc405557b70643524e0e792520a81a8c {
-        position: absolute;
-        bottom: 8px;
-        right: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;
-    }
+.ba-bottom-leftdc405557b70643524e0e792520a81a8c {
+    left: 16px;
+    color: #FFFFFF;  
+}
+.ba-bottom-rightdc405557b70643524e0e792520a81a8c {
+    right: 16px;
+    color: #FFFFFF;  
+}
 
-     
-    .ba-centereddc405557b70643524e0e792520a81a8c {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
+ 
+
 </style>
 
-<div class="ba-sliderdc405557b70643524e0e792520a81a8c" style="margin: auto;">
-    <div class="ba-containerdc405557b70643524e0e792520a81a8c">
-        <img src=/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/iteration1.png><img>
-        <div class="ba-bottom-rightdc405557b70643524e0e792520a81a8c">After</div>
-    </div>
-    <div class="resize">
-        <img src=/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/iteration0.png>
-        <div class="ba-bottom-leftdc405557b70643524e0e792520a81a8c">Before</div>
-    </div>
-    <span class="handle"></span>
-</div>
+<figure class="custom-compare">
+    <div class="ba-sliderdc405557b70643524e0e792520a81a8c" id="ba-slider-dc405557b70643524e0e792520a81a8c">
+        <div class="ba-containerdc405557b70643524e0e792520a81a8c">
+            <img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/iteration1.png">
+            <div class="ba-bottom-rightdc405557b70643524e0e792520a81a8c">After</div>
+        </div>
+        <div class="resize">
+            <img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/iteration0.png">
+            <div class="ba-bottom-leftdc405557b70643524e0e792520a81a8c">Before</div>
+        </div>
+        <span class="handle"></span>
 
-
+        
+        
+    </div>
     
-    <script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" crossorigin="anonymous"></script>
+</figure>
+
+
+<script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" crossorigin="anonymous"></script>
 
 
 <script>
 (function($) {
   function drags(dragElement, resizeElement, container) {
-    
-    
-    dragElement.on('mousedown.ba-events touchstart.ba-events', function(e) {
-      
+    dragElement.on('mousedown.ba touchstart.ba', function(e) {
       dragElement.addClass('ba-draggable');
       resizeElement.addClass('ba-resizable');
-      
-      
-      var startX = (e.pageX) ? e.pageX : e.originalEvent.touches[0].pageX;
-      
-      
+
+      var startX = e.pageX || e.originalEvent.touches[0].pageX;
       var dragWidth = dragElement.outerWidth(),
           posX = dragElement.offset().left + dragWidth - startX,
           containerOffset = container.offset().left,
           containerWidth = container.outerWidth();
-   
-      
-      minLeft = containerOffset + 10;
-      maxLeft = containerOffset + containerWidth - dragWidth - 10;
-      
-      
-      dragElement.parents().on("mousemove.ba-events touchmove.ba-events", function(e) {
-        
-        
-        var moveX = (e.pageX) ? e.pageX : e.originalEvent.touches[0].pageX;
-        
-        leftValue = moveX + posX - dragWidth;
-        
-        
-        if ( leftValue < minLeft) {
-          leftValue = minLeft;
-        } else if (leftValue > maxLeft) {
-          leftValue = maxLeft;
-        }
-        
-        
-        widthValue = (leftValue + dragWidth/2 - containerOffset)*100/containerWidth+'%';
-        
-        
-        $('.ba-draggable').css('left', widthValue);
-        $('.ba-resizable').css('width', widthValue);
-      
-      }).on('mouseup.ba-events touchend.ba-events touchcancel.ba-events', function(){
+
+      var minLeft = containerOffset + 10;
+      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+
+      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
+        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
+        var leftValue = moveX + posX - dragWidth;
+
+        if (leftValue < minLeft) leftValue = minLeft;
+        else if (leftValue > maxLeft) leftValue = maxLeft;
+
+        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+
+        dragElement.css('left', percentage);
+        resizeElement.css('width', percentage);
+
+        updateLinks(container, dragElement);
+      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
         dragElement.removeClass('ba-draggable');
         resizeElement.removeClass('ba-resizable');
-        
-        $(this).off('.ba-events'); 
+        $(this).off('.ba');
       });
+
       e.preventDefault();
     });
   }
 
-  
-  $.fn.beforeAfter = function() {
-    var cur = this;
-    
-    var width = cur.width()+'px';
-    cur.find('.resize img').css('width', width);
-    
-    drags(cur.find('.handle'), cur.find('.resize'), cur);
+  function updateLinks(container, handle) {
+    var containerWidth = container.outerWidth();
+    var handleLeft = handle.position().left;
 
-    
-    
-    $(window).resize(function(){
-      var width = cur.width()+'px';
-      cur.find('.resize img').css('width', width);
+    var leftLink = container.find('.ba-link-leftdc405557b70643524e0e792520a81a8c');
+    var rightLink = container.find('.ba-link-rightdc405557b70643524e0e792520a81a8c');
+
+    var deadZone = 20; 
+
+    leftLink.css({
+      width: Math.max(0, handleLeft - deadZone) + 'px'
+    });
+
+    rightLink.css({
+      width: Math.max(0, containerWidth - handleLeft - deadZone) + 'px',
+      left: (handleLeft + deadZone) + 'px'
     });
   }
-}(jQuery));
 
-$('.ba-slider'+"dc405557b70643524e0e792520a81a8c").beforeAfter();
+  $.fn.beforeAfter = function() {
+    var container = $(this);
+    var handle = container.find('.handle');
+    var resize = container.find('.resize');
+
+    var width = container.width();
+    resize.find('img').css('width', width + 'px');
+
+    drags(handle, resize, container);
+    updateLinks(container, handle);
+
+    $(window).on('resize', function() {
+      var width = container.width();
+      resize.find('img').css('width', width + 'px');
+      updateLinks(container, handle);
+    });
+  }
+})(jQuery);
+
+$('#ba-slider-dc405557b70643524e0e792520a81a8c').beforeAfter();
 </script>
-
 
 <p>The above two shots are rendered both with 1024 samples per pixel. We can easily notice that the optimization turns out to be very effective in terms of reducing fireflies, which was my primary reason for considering implementing it at the cost of slightly extra biased results.
 Even with the SPPs bumped to 8k, the fireflies still doesn&rsquo;t go away in the original implementation.
@@ -1180,219 +1087,187 @@ It is worth noting that instead of having the same spp this time, I choose to co
 
 
 
-
-
-
-
-
-
-
+ 
+ 
+ 
+ 
 
 
 
 
 <style>
-    .ba-slidera83234c266e188debc03a310fe6b6382 {
-        position: relative;
-        overflow: hidden;
-        width: 70%;
-         
-    }
-    
-    .ba-slidera83234c266e188debc03a310fe6b6382 img {
-        width: 100%;
-        display:block;
-        max-width:none;
-    }
-    
-    .ba-slidera83234c266e188debc03a310fe6b6382 .resize {
-        position: absolute;
-        top:0;
-        left: 0;
-        height: 100%;
-        width: 50%;
-        overflow: hidden;
-    }
+.ba-slidera83234c266e188debc03a310fe6b6382 {
+    position: relative;
+    overflow: hidden;
+    width: 70%;
+    margin: auto;
+    background-color: #FFFFFF;  
+}
 
-    .ba-slidera83234c266e188debc03a310fe6b6382 .handle {  
-        position:absolute; 
-        left:50%;
-        top:0;
-        bottom:0;
-        width:2px;
-         
-        
-        background: rgba(0,0,0,.4);
-        cursor: ew-resize;
-    }
-    
-    .ba-slidera83234c266e188debc03a310fe6b6382 .handle:after {   
-        position: absolute;
-        top: 50%;
-        width: 10px;
-        height: 64px;
-        margin: -32px 0 0 -4px;
-    
-        content:' ';
-        color:white;
-        font-weight:bold;
-        font-size:1px;
-        text-align:center;
-        line-height:64px;
-    
-        background: rgb(128, 128, 128, 0.7);
-        border-radius: 0%;
-    }
+.ba-slidera83234c266e188debc03a310fe6b6382 img {
+    width: 100%;
+    display: block;
+    max-width: none;
+}
 
-     
-    .ba-containera83234c266e188debc03a310fe6b6382 {
-        position: relative;
-        text-align: center;
-        color: white;
-    }
+.ba-slidera83234c266e188debc03a310fe6b6382 .resize {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 50%;  
+    overflow: hidden;
+}
 
-     
-    .ba-bottom-lefta83234c266e188debc03a310fe6b6382 {
-        position: absolute;
-        bottom: 8px;
-        left: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;;
-    }
+.ba-slidera83234c266e188debc03a310fe6b6382 .handle {
+    position: absolute;
+    left: 50%;  
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(0, 0, 0, 0.4);
+    cursor: ew-resize;
+    z-index: 20;
+    transition: background-color 0.3s ease;
+}
+.ba-slidera83234c266e188debc03a310fe6b6382 .handle:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    margin-top: -32px;
+    margin-left: -4px;
+    width: 10px;
+    height: 64px;
+    background: #808080;
+}
 
-     
-    .ba-top-lefta83234c266e188debc03a310fe6b6382 {
-        position: absolute;
-        top: 8px;
-        left: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;;
-    }
+.ba-containera83234c266e188debc03a310fe6b6382 {
+    position: relative;
+    text-align: center;
+}
 
-     
-    .ba-top-righta83234c266e188debc03a310fe6b6382 {
-        position: absolute;
-        top: 8px;
-        right: 16px;
-        font-weight: bold;
-        white-space: nowrap;
-        color: white;
-    }
+.ba-bottom-lefta83234c266e188debc03a310fe6b6382,
+.ba-bottom-righta83234c266e188debc03a310fe6b6382 {
+    position: absolute;
+    bottom: 8px;
+    font-weight: bold;
+    white-space: nowrap;
+}
 
-     
-    .ba-bottom-righta83234c266e188debc03a310fe6b6382 {
-        position: absolute;
-        bottom: 8px;
-        right: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;
-    }
+.ba-bottom-lefta83234c266e188debc03a310fe6b6382 {
+    left: 16px;
+    color: #FFFFFF;  
+}
+.ba-bottom-righta83234c266e188debc03a310fe6b6382 {
+    right: 16px;
+    color: #FFFFFF;  
+}
 
-     
-    .ba-centereda83234c266e188debc03a310fe6b6382 {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
+ 
+
 </style>
 
-<div class="ba-slidera83234c266e188debc03a310fe6b6382" style="margin: auto;">
-    <div class="ba-containera83234c266e188debc03a310fe6b6382">
-        <img src=/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/iteration2.png><img>
-        <div class="ba-bottom-righta83234c266e188debc03a310fe6b6382">After</div>
-    </div>
-    <div class="resize">
-        <img src=/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/iteration1.png>
-        <div class="ba-bottom-lefta83234c266e188debc03a310fe6b6382">Before</div>
-    </div>
-    <span class="handle"></span>
-</div>
+<figure class="custom-compare">
+    <div class="ba-slidera83234c266e188debc03a310fe6b6382" id="ba-slider-a83234c266e188debc03a310fe6b6382">
+        <div class="ba-containera83234c266e188debc03a310fe6b6382">
+            <img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/iteration2.png">
+            <div class="ba-bottom-righta83234c266e188debc03a310fe6b6382">After</div>
+        </div>
+        <div class="resize">
+            <img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/iteration1.png">
+            <div class="ba-bottom-lefta83234c266e188debc03a310fe6b6382">Before</div>
+        </div>
+        <span class="handle"></span>
 
-
+        
+        
+    </div>
     
-    <script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" crossorigin="anonymous"></script>
+</figure>
+
+
+<script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" crossorigin="anonymous"></script>
 
 
 <script>
 (function($) {
   function drags(dragElement, resizeElement, container) {
-    
-    
-    dragElement.on('mousedown.ba-events touchstart.ba-events', function(e) {
-      
+    dragElement.on('mousedown.ba touchstart.ba', function(e) {
       dragElement.addClass('ba-draggable');
       resizeElement.addClass('ba-resizable');
-      
-      
-      var startX = (e.pageX) ? e.pageX : e.originalEvent.touches[0].pageX;
-      
-      
+
+      var startX = e.pageX || e.originalEvent.touches[0].pageX;
       var dragWidth = dragElement.outerWidth(),
           posX = dragElement.offset().left + dragWidth - startX,
           containerOffset = container.offset().left,
           containerWidth = container.outerWidth();
-   
-      
-      minLeft = containerOffset + 10;
-      maxLeft = containerOffset + containerWidth - dragWidth - 10;
-      
-      
-      dragElement.parents().on("mousemove.ba-events touchmove.ba-events", function(e) {
-        
-        
-        var moveX = (e.pageX) ? e.pageX : e.originalEvent.touches[0].pageX;
-        
-        leftValue = moveX + posX - dragWidth;
-        
-        
-        if ( leftValue < minLeft) {
-          leftValue = minLeft;
-        } else if (leftValue > maxLeft) {
-          leftValue = maxLeft;
-        }
-        
-        
-        widthValue = (leftValue + dragWidth/2 - containerOffset)*100/containerWidth+'%';
-        
-        
-        $('.ba-draggable').css('left', widthValue);
-        $('.ba-resizable').css('width', widthValue);
-      
-      }).on('mouseup.ba-events touchend.ba-events touchcancel.ba-events', function(){
+
+      var minLeft = containerOffset + 10;
+      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+
+      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
+        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
+        var leftValue = moveX + posX - dragWidth;
+
+        if (leftValue < minLeft) leftValue = minLeft;
+        else if (leftValue > maxLeft) leftValue = maxLeft;
+
+        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+
+        dragElement.css('left', percentage);
+        resizeElement.css('width', percentage);
+
+        updateLinks(container, dragElement);
+      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
         dragElement.removeClass('ba-draggable');
         resizeElement.removeClass('ba-resizable');
-        
-        $(this).off('.ba-events'); 
+        $(this).off('.ba');
       });
+
       e.preventDefault();
     });
   }
 
-  
-  $.fn.beforeAfter = function() {
-    var cur = this;
-    
-    var width = cur.width()+'px';
-    cur.find('.resize img').css('width', width);
-    
-    drags(cur.find('.handle'), cur.find('.resize'), cur);
+  function updateLinks(container, handle) {
+    var containerWidth = container.outerWidth();
+    var handleLeft = handle.position().left;
 
-    
-    
-    $(window).resize(function(){
-      var width = cur.width()+'px';
-      cur.find('.resize img').css('width', width);
+    var leftLink = container.find('.ba-link-lefta83234c266e188debc03a310fe6b6382');
+    var rightLink = container.find('.ba-link-righta83234c266e188debc03a310fe6b6382');
+
+    var deadZone = 20; 
+
+    leftLink.css({
+      width: Math.max(0, handleLeft - deadZone) + 'px'
+    });
+
+    rightLink.css({
+      width: Math.max(0, containerWidth - handleLeft - deadZone) + 'px',
+      left: (handleLeft + deadZone) + 'px'
     });
   }
-}(jQuery));
 
-$('.ba-slider'+"a83234c266e188debc03a310fe6b6382").beforeAfter();
+  $.fn.beforeAfter = function() {
+    var container = $(this);
+    var handle = container.find('.handle');
+    var resize = container.find('.resize');
+
+    var width = container.width();
+    resize.find('img').css('width', width + 'px');
+
+    drags(handle, resize, container);
+    updateLinks(container, handle);
+
+    $(window).on('resize', function() {
+      var width = container.width();
+      resize.find('img').css('width', width + 'px');
+      updateLinks(container, handle);
+    });
+  }
+})(jQuery);
+
+$('#ba-slider-a83234c266e188debc03a310fe6b6382').beforeAfter();
 </script>
-
 
 <p>Given the result of the shot, I can hardly tell any firefly in it. This is already a firefly free solution to me.</p>
 <h2 id="no-fresnel-above-sss-material">No Fresnel above SSS material</h2>
@@ -1411,219 +1286,187 @@ For example, the shots below clearly demonstrate the differences. The mean free 
 
 
 
-
-
-
-
-
-
-
+ 
+ 
+ 
+ 
 
 
 
 
 <style>
-    .ba-slider0662fea70917668a921a23d43c10e1da {
-        position: relative;
-        overflow: hidden;
-        width: 70%;
-         
-    }
-    
-    .ba-slider0662fea70917668a921a23d43c10e1da img {
-        width: 100%;
-        display:block;
-        max-width:none;
-    }
-    
-    .ba-slider0662fea70917668a921a23d43c10e1da .resize {
-        position: absolute;
-        top:0;
-        left: 0;
-        height: 100%;
-        width: 50%;
-        overflow: hidden;
-    }
+.ba-slider0662fea70917668a921a23d43c10e1da {
+    position: relative;
+    overflow: hidden;
+    width: 70%;
+    margin: auto;
+    background-color: #FFFFFF;  
+}
 
-    .ba-slider0662fea70917668a921a23d43c10e1da .handle {  
-        position:absolute; 
-        left:50%;
-        top:0;
-        bottom:0;
-        width:2px;
-         
-        
-        background: rgba(0,0,0,.4);
-        cursor: ew-resize;
-    }
-    
-    .ba-slider0662fea70917668a921a23d43c10e1da .handle:after {   
-        position: absolute;
-        top: 50%;
-        width: 10px;
-        height: 64px;
-        margin: -32px 0 0 -4px;
-    
-        content:' ';
-        color:white;
-        font-weight:bold;
-        font-size:1px;
-        text-align:center;
-        line-height:64px;
-    
-        background: rgb(128, 128, 128, 0.7);
-        border-radius: 0%;
-    }
+.ba-slider0662fea70917668a921a23d43c10e1da img {
+    width: 100%;
+    display: block;
+    max-width: none;
+}
 
-     
-    .ba-container0662fea70917668a921a23d43c10e1da {
-        position: relative;
-        text-align: center;
-        color: white;
-    }
+.ba-slider0662fea70917668a921a23d43c10e1da .resize {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 50%;  
+    overflow: hidden;
+}
 
-     
-    .ba-bottom-left0662fea70917668a921a23d43c10e1da {
-        position: absolute;
-        bottom: 8px;
-        left: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;;
-    }
+.ba-slider0662fea70917668a921a23d43c10e1da .handle {
+    position: absolute;
+    left: 50%;  
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(0, 0, 0, 0.4);
+    cursor: ew-resize;
+    z-index: 20;
+    transition: background-color 0.3s ease;
+}
+.ba-slider0662fea70917668a921a23d43c10e1da .handle:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    margin-top: -32px;
+    margin-left: -4px;
+    width: 10px;
+    height: 64px;
+    background: #808080;
+}
 
-     
-    .ba-top-left0662fea70917668a921a23d43c10e1da {
-        position: absolute;
-        top: 8px;
-        left: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;;
-    }
+.ba-container0662fea70917668a921a23d43c10e1da {
+    position: relative;
+    text-align: center;
+}
 
-     
-    .ba-top-right0662fea70917668a921a23d43c10e1da {
-        position: absolute;
-        top: 8px;
-        right: 16px;
-        font-weight: bold;
-        white-space: nowrap;
-        color: white;
-    }
+.ba-bottom-left0662fea70917668a921a23d43c10e1da,
+.ba-bottom-right0662fea70917668a921a23d43c10e1da {
+    position: absolute;
+    bottom: 8px;
+    font-weight: bold;
+    white-space: nowrap;
+}
 
-     
-    .ba-bottom-right0662fea70917668a921a23d43c10e1da {
-        position: absolute;
-        bottom: 8px;
-        right: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;
-    }
+.ba-bottom-left0662fea70917668a921a23d43c10e1da {
+    left: 16px;
+    color: #FFFFFF;  
+}
+.ba-bottom-right0662fea70917668a921a23d43c10e1da {
+    right: 16px;
+    color: #FFFFFF;  
+}
 
-     
-    .ba-centered0662fea70917668a921a23d43c10e1da {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
+ 
+
 </style>
 
-<div class="ba-slider0662fea70917668a921a23d43c10e1da" style="margin: auto;">
-    <div class="ba-container0662fea70917668a921a23d43c10e1da">
-        <img src=/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/transition0.png><img>
-        <div class="ba-bottom-right0662fea70917668a921a23d43c10e1da">Smooth Transition</div>
-    </div>
-    <div class="resize">
-        <img src=/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/transition1.png>
-        <div class="ba-bottom-left0662fea70917668a921a23d43c10e1da">No Smooth Transition</div>
-    </div>
-    <span class="handle"></span>
-</div>
+<figure class="custom-compare">
+    <div class="ba-slider0662fea70917668a921a23d43c10e1da" id="ba-slider-0662fea70917668a921a23d43c10e1da">
+        <div class="ba-container0662fea70917668a921a23d43c10e1da">
+            <img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/transition0.png">
+            <div class="ba-bottom-right0662fea70917668a921a23d43c10e1da">Smooth Transition</div>
+        </div>
+        <div class="resize">
+            <img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/transition1.png">
+            <div class="ba-bottom-left0662fea70917668a921a23d43c10e1da">No Smooth Transition</div>
+        </div>
+        <span class="handle"></span>
 
-
+        
+        
+    </div>
     
-    <script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" crossorigin="anonymous"></script>
+</figure>
+
+
+<script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" crossorigin="anonymous"></script>
 
 
 <script>
 (function($) {
   function drags(dragElement, resizeElement, container) {
-    
-    
-    dragElement.on('mousedown.ba-events touchstart.ba-events', function(e) {
-      
+    dragElement.on('mousedown.ba touchstart.ba', function(e) {
       dragElement.addClass('ba-draggable');
       resizeElement.addClass('ba-resizable');
-      
-      
-      var startX = (e.pageX) ? e.pageX : e.originalEvent.touches[0].pageX;
-      
-      
+
+      var startX = e.pageX || e.originalEvent.touches[0].pageX;
       var dragWidth = dragElement.outerWidth(),
           posX = dragElement.offset().left + dragWidth - startX,
           containerOffset = container.offset().left,
           containerWidth = container.outerWidth();
-   
-      
-      minLeft = containerOffset + 10;
-      maxLeft = containerOffset + containerWidth - dragWidth - 10;
-      
-      
-      dragElement.parents().on("mousemove.ba-events touchmove.ba-events", function(e) {
-        
-        
-        var moveX = (e.pageX) ? e.pageX : e.originalEvent.touches[0].pageX;
-        
-        leftValue = moveX + posX - dragWidth;
-        
-        
-        if ( leftValue < minLeft) {
-          leftValue = minLeft;
-        } else if (leftValue > maxLeft) {
-          leftValue = maxLeft;
-        }
-        
-        
-        widthValue = (leftValue + dragWidth/2 - containerOffset)*100/containerWidth+'%';
-        
-        
-        $('.ba-draggable').css('left', widthValue);
-        $('.ba-resizable').css('width', widthValue);
-      
-      }).on('mouseup.ba-events touchend.ba-events touchcancel.ba-events', function(){
+
+      var minLeft = containerOffset + 10;
+      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+
+      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
+        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
+        var leftValue = moveX + posX - dragWidth;
+
+        if (leftValue < minLeft) leftValue = minLeft;
+        else if (leftValue > maxLeft) leftValue = maxLeft;
+
+        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+
+        dragElement.css('left', percentage);
+        resizeElement.css('width', percentage);
+
+        updateLinks(container, dragElement);
+      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
         dragElement.removeClass('ba-draggable');
         resizeElement.removeClass('ba-resizable');
-        
-        $(this).off('.ba-events'); 
+        $(this).off('.ba');
       });
+
       e.preventDefault();
     });
   }
 
-  
-  $.fn.beforeAfter = function() {
-    var cur = this;
-    
-    var width = cur.width()+'px';
-    cur.find('.resize img').css('width', width);
-    
-    drags(cur.find('.handle'), cur.find('.resize'), cur);
+  function updateLinks(container, handle) {
+    var containerWidth = container.outerWidth();
+    var handleLeft = handle.position().left;
 
-    
-    
-    $(window).resize(function(){
-      var width = cur.width()+'px';
-      cur.find('.resize img').css('width', width);
+    var leftLink = container.find('.ba-link-left0662fea70917668a921a23d43c10e1da');
+    var rightLink = container.find('.ba-link-right0662fea70917668a921a23d43c10e1da');
+
+    var deadZone = 20; 
+
+    leftLink.css({
+      width: Math.max(0, handleLeft - deadZone) + 'px'
+    });
+
+    rightLink.css({
+      width: Math.max(0, containerWidth - handleLeft - deadZone) + 'px',
+      left: (handleLeft + deadZone) + 'px'
     });
   }
-}(jQuery));
 
-$('.ba-slider'+"0662fea70917668a921a23d43c10e1da").beforeAfter();
+  $.fn.beforeAfter = function() {
+    var container = $(this);
+    var handle = container.find('.handle');
+    var resize = container.find('.resize');
+
+    var width = container.width();
+    resize.find('img').css('width', width + 'px');
+
+    drags(handle, resize, container);
+    updateLinks(container, handle);
+
+    $(window).on('resize', function() {
+      var width = container.width();
+      resize.find('img').css('width', width + 'px');
+      updateLinks(container, handle);
+    });
+  }
+})(jQuery);
+
+$('#ba-slider-0662fea70917668a921a23d43c10e1da').beforeAfter();
 </script>
-
 
 <p>The way I achieve this smooth transition is by killing the two Fresnel parts and adding a denominator of $ \pi $. So the equation of my BSSRDF goes like this,</p>
 
@@ -1676,219 +1519,187 @@ For anyone, who is interested, <a href="https://github.com/JiayinCao/SORT/blob/m
 
 
 
-
-
-
-
-
-
-
+ 
+ 
+ 
+ 
 
 
 
 
 <style>
-    .ba-sliderade1b6f1ca02a923b999c7d0c1bbb77d {
-        position: relative;
-        overflow: hidden;
-        width: 100%;
-         
-    }
-    
-    .ba-sliderade1b6f1ca02a923b999c7d0c1bbb77d img {
-        width: 100%;
-        display:block;
-        max-width:none;
-    }
-    
-    .ba-sliderade1b6f1ca02a923b999c7d0c1bbb77d .resize {
-        position: absolute;
-        top:0;
-        left: 0;
-        height: 100%;
-        width: 50%;
-        overflow: hidden;
-    }
+.ba-sliderade1b6f1ca02a923b999c7d0c1bbb77d {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    margin: auto;
+    background-color: #FFFFFF;  
+}
 
-    .ba-sliderade1b6f1ca02a923b999c7d0c1bbb77d .handle {  
-        position:absolute; 
-        left:50%;
-        top:0;
-        bottom:0;
-        width:2px;
-         
-        
-        background: rgba(0,0,0,.4);
-        cursor: ew-resize;
-    }
-    
-    .ba-sliderade1b6f1ca02a923b999c7d0c1bbb77d .handle:after {   
-        position: absolute;
-        top: 50%;
-        width: 10px;
-        height: 64px;
-        margin: -32px 0 0 -4px;
-    
-        content:' ';
-        color:white;
-        font-weight:bold;
-        font-size:1px;
-        text-align:center;
-        line-height:64px;
-    
-        background: rgb(128, 128, 128, 0.7);
-        border-radius: 0%;
-    }
+.ba-sliderade1b6f1ca02a923b999c7d0c1bbb77d img {
+    width: 100%;
+    display: block;
+    max-width: none;
+}
 
-     
-    .ba-containerade1b6f1ca02a923b999c7d0c1bbb77d {
-        position: relative;
-        text-align: center;
-        color: white;
-    }
+.ba-sliderade1b6f1ca02a923b999c7d0c1bbb77d .resize {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 50%;  
+    overflow: hidden;
+}
 
-     
-    .ba-bottom-leftade1b6f1ca02a923b999c7d0c1bbb77d {
-        position: absolute;
-        bottom: 8px;
-        left: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;;
-    }
+.ba-sliderade1b6f1ca02a923b999c7d0c1bbb77d .handle {
+    position: absolute;
+    left: 50%;  
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(0, 0, 0, 0.4);
+    cursor: ew-resize;
+    z-index: 20;
+    transition: background-color 0.3s ease;
+}
+.ba-sliderade1b6f1ca02a923b999c7d0c1bbb77d .handle:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    margin-top: -32px;
+    margin-left: -4px;
+    width: 10px;
+    height: 64px;
+    background: #808080;
+}
 
-     
-    .ba-top-leftade1b6f1ca02a923b999c7d0c1bbb77d {
-        position: absolute;
-        top: 8px;
-        left: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;;
-    }
+.ba-containerade1b6f1ca02a923b999c7d0c1bbb77d {
+    position: relative;
+    text-align: center;
+}
 
-     
-    .ba-top-rightade1b6f1ca02a923b999c7d0c1bbb77d {
-        position: absolute;
-        top: 8px;
-        right: 16px;
-        font-weight: bold;
-        white-space: nowrap;
-        color: white;
-    }
+.ba-bottom-leftade1b6f1ca02a923b999c7d0c1bbb77d,
+.ba-bottom-rightade1b6f1ca02a923b999c7d0c1bbb77d {
+    position: absolute;
+    bottom: 8px;
+    font-weight: bold;
+    white-space: nowrap;
+}
 
-     
-    .ba-bottom-rightade1b6f1ca02a923b999c7d0c1bbb77d {
-        position: absolute;
-        bottom: 8px;
-        right: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;
-    }
+.ba-bottom-leftade1b6f1ca02a923b999c7d0c1bbb77d {
+    left: 16px;
+    color: #FFFFFF;  
+}
+.ba-bottom-rightade1b6f1ca02a923b999c7d0c1bbb77d {
+    right: 16px;
+    color: #FFFFFF;  
+}
 
-     
-    .ba-centeredade1b6f1ca02a923b999c7d0c1bbb77d {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
+ 
+
 </style>
 
-<div class="ba-sliderade1b6f1ca02a923b999c7d0c1bbb77d" style="margin: auto;">
-    <div class="ba-containerade1b6f1ca02a923b999c7d0c1bbb77d">
-        <img src=/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/digital_emily_1.png><img>
-        <div class="ba-bottom-rightade1b6f1ca02a923b999c7d0c1bbb77d">Multiple SSS</div>
-    </div>
-    <div class="resize">
-        <img src=/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/digital_emily_0.png>
-        <div class="ba-bottom-leftade1b6f1ca02a923b999c7d0c1bbb77d">Single SSS</div>
-    </div>
-    <span class="handle"></span>
-</div>
+<figure class="custom-compare">
+    <div class="ba-sliderade1b6f1ca02a923b999c7d0c1bbb77d" id="ba-slider-ade1b6f1ca02a923b999c7d0c1bbb77d">
+        <div class="ba-containerade1b6f1ca02a923b999c7d0c1bbb77d">
+            <img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/digital_emily_1.png">
+            <div class="ba-bottom-rightade1b6f1ca02a923b999c7d0c1bbb77d">Multiple SSS</div>
+        </div>
+        <div class="resize">
+            <img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/digital_emily_0.png">
+            <div class="ba-bottom-leftade1b6f1ca02a923b999c7d0c1bbb77d">Single SSS</div>
+        </div>
+        <span class="handle"></span>
 
-
+        
+        
+    </div>
     
-    <script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" crossorigin="anonymous"></script>
+</figure>
+
+
+<script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" crossorigin="anonymous"></script>
 
 
 <script>
 (function($) {
   function drags(dragElement, resizeElement, container) {
-    
-    
-    dragElement.on('mousedown.ba-events touchstart.ba-events', function(e) {
-      
+    dragElement.on('mousedown.ba touchstart.ba', function(e) {
       dragElement.addClass('ba-draggable');
       resizeElement.addClass('ba-resizable');
-      
-      
-      var startX = (e.pageX) ? e.pageX : e.originalEvent.touches[0].pageX;
-      
-      
+
+      var startX = e.pageX || e.originalEvent.touches[0].pageX;
       var dragWidth = dragElement.outerWidth(),
           posX = dragElement.offset().left + dragWidth - startX,
           containerOffset = container.offset().left,
           containerWidth = container.outerWidth();
-   
-      
-      minLeft = containerOffset + 10;
-      maxLeft = containerOffset + containerWidth - dragWidth - 10;
-      
-      
-      dragElement.parents().on("mousemove.ba-events touchmove.ba-events", function(e) {
-        
-        
-        var moveX = (e.pageX) ? e.pageX : e.originalEvent.touches[0].pageX;
-        
-        leftValue = moveX + posX - dragWidth;
-        
-        
-        if ( leftValue < minLeft) {
-          leftValue = minLeft;
-        } else if (leftValue > maxLeft) {
-          leftValue = maxLeft;
-        }
-        
-        
-        widthValue = (leftValue + dragWidth/2 - containerOffset)*100/containerWidth+'%';
-        
-        
-        $('.ba-draggable').css('left', widthValue);
-        $('.ba-resizable').css('width', widthValue);
-      
-      }).on('mouseup.ba-events touchend.ba-events touchcancel.ba-events', function(){
+
+      var minLeft = containerOffset + 10;
+      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+
+      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
+        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
+        var leftValue = moveX + posX - dragWidth;
+
+        if (leftValue < minLeft) leftValue = minLeft;
+        else if (leftValue > maxLeft) leftValue = maxLeft;
+
+        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+
+        dragElement.css('left', percentage);
+        resizeElement.css('width', percentage);
+
+        updateLinks(container, dragElement);
+      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
         dragElement.removeClass('ba-draggable');
         resizeElement.removeClass('ba-resizable');
-        
-        $(this).off('.ba-events'); 
+        $(this).off('.ba');
       });
+
       e.preventDefault();
     });
   }
 
-  
-  $.fn.beforeAfter = function() {
-    var cur = this;
-    
-    var width = cur.width()+'px';
-    cur.find('.resize img').css('width', width);
-    
-    drags(cur.find('.handle'), cur.find('.resize'), cur);
+  function updateLinks(container, handle) {
+    var containerWidth = container.outerWidth();
+    var handleLeft = handle.position().left;
 
-    
-    
-    $(window).resize(function(){
-      var width = cur.width()+'px';
-      cur.find('.resize img').css('width', width);
+    var leftLink = container.find('.ba-link-leftade1b6f1ca02a923b999c7d0c1bbb77d');
+    var rightLink = container.find('.ba-link-rightade1b6f1ca02a923b999c7d0c1bbb77d');
+
+    var deadZone = 20; 
+
+    leftLink.css({
+      width: Math.max(0, handleLeft - deadZone) + 'px'
+    });
+
+    rightLink.css({
+      width: Math.max(0, containerWidth - handleLeft - deadZone) + 'px',
+      left: (handleLeft + deadZone) + 'px'
     });
   }
-}(jQuery));
 
-$('.ba-slider'+"ade1b6f1ca02a923b999c7d0c1bbb77d").beforeAfter();
+  $.fn.beforeAfter = function() {
+    var container = $(this);
+    var handle = container.find('.handle');
+    var resize = container.find('.resize');
+
+    var width = container.width();
+    resize.find('img').css('width', width + 'px');
+
+    drags(handle, resize, container);
+    updateLinks(container, handle);
+
+    $(window).on('resize', function() {
+      var width = container.width();
+      resize.find('img').css('width', width + 'px');
+      updateLinks(container, handle);
+    });
+  }
+})(jQuery);
+
+$('#ba-slider-ade1b6f1ca02a923b999c7d0c1bbb77d').beforeAfter();
 </script>
-
 
 <p>Above is an example that uses this feature to implement a skin shader. The comparison is single subsurface scattering versus multiple subsurface scattering.
 The difference is very subtle, but it is visible in the dark area on her face.
@@ -1946,219 +1757,187 @@ I can&rsquo;t say I care too much about the brighter bounce, but I definitely do
 
 
 
-
-
-
-
-
-
-
+ 
+ 
+ 
+ 
 
 
 
 
 <style>
-    .ba-slider5d0af1e7f834029ae9f0b50b5b49da21 {
-        position: relative;
-        overflow: hidden;
-        width: 70%;
-         
-    }
-    
-    .ba-slider5d0af1e7f834029ae9f0b50b5b49da21 img {
-        width: 100%;
-        display:block;
-        max-width:none;
-    }
-    
-    .ba-slider5d0af1e7f834029ae9f0b50b5b49da21 .resize {
-        position: absolute;
-        top:0;
-        left: 0;
-        height: 100%;
-        width: 50%;
-        overflow: hidden;
-    }
+.ba-slider5d0af1e7f834029ae9f0b50b5b49da21 {
+    position: relative;
+    overflow: hidden;
+    width: 70%;
+    margin: auto;
+    background-color: #FFFFFF;  
+}
 
-    .ba-slider5d0af1e7f834029ae9f0b50b5b49da21 .handle {  
-        position:absolute; 
-        left:50%;
-        top:0;
-        bottom:0;
-        width:2px;
-         
-        
-        background: rgba(0,0,0,.4);
-        cursor: ew-resize;
-    }
-    
-    .ba-slider5d0af1e7f834029ae9f0b50b5b49da21 .handle:after {   
-        position: absolute;
-        top: 50%;
-        width: 10px;
-        height: 64px;
-        margin: -32px 0 0 -4px;
-    
-        content:' ';
-        color:white;
-        font-weight:bold;
-        font-size:1px;
-        text-align:center;
-        line-height:64px;
-    
-        background: rgb(128, 128, 128, 0.7);
-        border-radius: 0%;
-    }
+.ba-slider5d0af1e7f834029ae9f0b50b5b49da21 img {
+    width: 100%;
+    display: block;
+    max-width: none;
+}
 
-     
-    .ba-container5d0af1e7f834029ae9f0b50b5b49da21 {
-        position: relative;
-        text-align: center;
-        color: white;
-    }
+.ba-slider5d0af1e7f834029ae9f0b50b5b49da21 .resize {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 50%;  
+    overflow: hidden;
+}
 
-     
-    .ba-bottom-left5d0af1e7f834029ae9f0b50b5b49da21 {
-        position: absolute;
-        bottom: 8px;
-        left: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;;
-    }
+.ba-slider5d0af1e7f834029ae9f0b50b5b49da21 .handle {
+    position: absolute;
+    left: 50%;  
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(0, 0, 0, 0.4);
+    cursor: ew-resize;
+    z-index: 20;
+    transition: background-color 0.3s ease;
+}
+.ba-slider5d0af1e7f834029ae9f0b50b5b49da21 .handle:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    margin-top: -32px;
+    margin-left: -4px;
+    width: 10px;
+    height: 64px;
+    background: #808080;
+}
 
-     
-    .ba-top-left5d0af1e7f834029ae9f0b50b5b49da21 {
-        position: absolute;
-        top: 8px;
-        left: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;;
-    }
+.ba-container5d0af1e7f834029ae9f0b50b5b49da21 {
+    position: relative;
+    text-align: center;
+}
 
-     
-    .ba-top-right5d0af1e7f834029ae9f0b50b5b49da21 {
-        position: absolute;
-        top: 8px;
-        right: 16px;
-        font-weight: bold;
-        white-space: nowrap;
-        color: white;
-    }
+.ba-bottom-left5d0af1e7f834029ae9f0b50b5b49da21,
+.ba-bottom-right5d0af1e7f834029ae9f0b50b5b49da21 {
+    position: absolute;
+    bottom: 8px;
+    font-weight: bold;
+    white-space: nowrap;
+}
 
-     
-    .ba-bottom-right5d0af1e7f834029ae9f0b50b5b49da21 {
-        position: absolute;
-        bottom: 8px;
-        right: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;
-    }
+.ba-bottom-left5d0af1e7f834029ae9f0b50b5b49da21 {
+    left: 16px;
+    color: #FFFFFF;  
+}
+.ba-bottom-right5d0af1e7f834029ae9f0b50b5b49da21 {
+    right: 16px;
+    color: #FFFFFF;  
+}
 
-     
-    .ba-centered5d0af1e7f834029ae9f0b50b5b49da21 {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
+ 
+
 </style>
 
-<div class="ba-slider5d0af1e7f834029ae9f0b50b5b49da21" style="margin: auto;">
-    <div class="ba-container5d0af1e7f834029ae9f0b50b5b49da21">
-        <img src=/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/cornell_sss_wrong.png><img>
-        <div class="ba-bottom-right5d0af1e7f834029ae9f0b50b5b49da21">No SSS after Lambert</div>
-    </div>
-    <div class="resize">
-        <img src=/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/cornell_sss.png>
-        <div class="ba-bottom-left5d0af1e7f834029ae9f0b50b5b49da21">Regular</div>
-    </div>
-    <span class="handle"></span>
-</div>
+<figure class="custom-compare">
+    <div class="ba-slider5d0af1e7f834029ae9f0b50b5b49da21" id="ba-slider-5d0af1e7f834029ae9f0b50b5b49da21">
+        <div class="ba-container5d0af1e7f834029ae9f0b50b5b49da21">
+            <img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/cornell_sss_wrong.png">
+            <div class="ba-bottom-right5d0af1e7f834029ae9f0b50b5b49da21">No SSS after Lambert</div>
+        </div>
+        <div class="resize">
+            <img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/cornell_sss.png">
+            <div class="ba-bottom-left5d0af1e7f834029ae9f0b50b5b49da21">Regular</div>
+        </div>
+        <span class="handle"></span>
 
-
+        
+        
+    </div>
     
-    <script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" crossorigin="anonymous"></script>
+</figure>
+
+
+<script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" crossorigin="anonymous"></script>
 
 
 <script>
 (function($) {
   function drags(dragElement, resizeElement, container) {
-    
-    
-    dragElement.on('mousedown.ba-events touchstart.ba-events', function(e) {
-      
+    dragElement.on('mousedown.ba touchstart.ba', function(e) {
       dragElement.addClass('ba-draggable');
       resizeElement.addClass('ba-resizable');
-      
-      
-      var startX = (e.pageX) ? e.pageX : e.originalEvent.touches[0].pageX;
-      
-      
+
+      var startX = e.pageX || e.originalEvent.touches[0].pageX;
       var dragWidth = dragElement.outerWidth(),
           posX = dragElement.offset().left + dragWidth - startX,
           containerOffset = container.offset().left,
           containerWidth = container.outerWidth();
-   
-      
-      minLeft = containerOffset + 10;
-      maxLeft = containerOffset + containerWidth - dragWidth - 10;
-      
-      
-      dragElement.parents().on("mousemove.ba-events touchmove.ba-events", function(e) {
-        
-        
-        var moveX = (e.pageX) ? e.pageX : e.originalEvent.touches[0].pageX;
-        
-        leftValue = moveX + posX - dragWidth;
-        
-        
-        if ( leftValue < minLeft) {
-          leftValue = minLeft;
-        } else if (leftValue > maxLeft) {
-          leftValue = maxLeft;
-        }
-        
-        
-        widthValue = (leftValue + dragWidth/2 - containerOffset)*100/containerWidth+'%';
-        
-        
-        $('.ba-draggable').css('left', widthValue);
-        $('.ba-resizable').css('width', widthValue);
-      
-      }).on('mouseup.ba-events touchend.ba-events touchcancel.ba-events', function(){
+
+      var minLeft = containerOffset + 10;
+      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+
+      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
+        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
+        var leftValue = moveX + posX - dragWidth;
+
+        if (leftValue < minLeft) leftValue = minLeft;
+        else if (leftValue > maxLeft) leftValue = maxLeft;
+
+        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+
+        dragElement.css('left', percentage);
+        resizeElement.css('width', percentage);
+
+        updateLinks(container, dragElement);
+      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
         dragElement.removeClass('ba-draggable');
         resizeElement.removeClass('ba-resizable');
-        
-        $(this).off('.ba-events'); 
+        $(this).off('.ba');
       });
+
       e.preventDefault();
     });
   }
 
-  
-  $.fn.beforeAfter = function() {
-    var cur = this;
-    
-    var width = cur.width()+'px';
-    cur.find('.resize img').css('width', width);
-    
-    drags(cur.find('.handle'), cur.find('.resize'), cur);
+  function updateLinks(container, handle) {
+    var containerWidth = container.outerWidth();
+    var handleLeft = handle.position().left;
 
-    
-    
-    $(window).resize(function(){
-      var width = cur.width()+'px';
-      cur.find('.resize img').css('width', width);
+    var leftLink = container.find('.ba-link-left5d0af1e7f834029ae9f0b50b5b49da21');
+    var rightLink = container.find('.ba-link-right5d0af1e7f834029ae9f0b50b5b49da21');
+
+    var deadZone = 20; 
+
+    leftLink.css({
+      width: Math.max(0, handleLeft - deadZone) + 'px'
+    });
+
+    rightLink.css({
+      width: Math.max(0, containerWidth - handleLeft - deadZone) + 'px',
+      left: (handleLeft + deadZone) + 'px'
     });
   }
-}(jQuery));
 
-$('.ba-slider'+"5d0af1e7f834029ae9f0b50b5b49da21").beforeAfter();
+  $.fn.beforeAfter = function() {
+    var container = $(this);
+    var handle = container.find('.handle');
+    var resize = container.find('.resize');
+
+    var width = container.width();
+    resize.find('img').css('width', width + 'px');
+
+    drags(handle, resize, container);
+    updateLinks(container, handle);
+
+    $(window).on('resize', function() {
+      var width = container.width();
+      resize.find('img').css('width', width + 'px');
+      updateLinks(container, handle);
+    });
+  }
+})(jQuery);
+
+$('#ba-slider-5d0af1e7f834029ae9f0b50b5b49da21').beforeAfter();
 </script>
-
 
 <p>Even if I would like to implement it, there is another problem. It is not entirely straightforward to categorize materials based on how rough they are.
 PBRT has a hardcoded category for each of its BRDF. However, the ones like measured BRDF, will be very difficult to be hardcoded.
@@ -2179,7 +1958,7 @@ Apart from the common subsurface scattering materials, like skin, wax, this algo
 <li>Subsurface scattering is not supported in my bidirectional path tracing algorithm. Adding support to it does sound challenging since bdpt is not an easy algorithm to start with. Making sure all MIS weights are correct while adding sss would be difficult.</li>
 <li>There are also numerous other methods for rendering subsurface scattering, like random walk sss. It would be fun to dive into the other algorithms and know the trade-off of these algorithms too.</li>
 </ul>
-<h1 id="references">References</h1>
+<h1 id="referencess">Referencess</h1>
 <p>[1] <a href="https://graphics.pixar.com/library/ApproxBSSRDF/paper.pdf">Approximate Reflectance Profiles for Efficient Subsurface Scattering</a><br>
 [2] <a href="http://library.imageworks.com/pdfs/imageworks-library-BSSRDF-sampling.pdf">BSSRDF Importance Sampling</a><br>
 [3] <a href="https://pbrt.org/">Physically based rendering</a><br>
@@ -2319,7 +2098,7 @@ Apart from the common subsurface scattering materials, like skin, wax, this algo
     </li>
     <li><a href="#a-failed-attempt">A Failed Attempt</a></li>
     <li><a href="#summary">Summary</a></li>
-    <li><a href="#references">References</a></li>
+    <li><a href="#referencess">Referencess</a></li>
   </ul>
 </nav>
 </div>
@@ -2449,7 +2228,7 @@ Apart from the common subsurface scattering materials, like skin, wax, this algo
         
           2015 -
         
-        2024
+        2025
          Jiayin Cao 
       
       

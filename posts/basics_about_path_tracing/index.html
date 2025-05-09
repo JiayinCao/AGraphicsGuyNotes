@@ -27,7 +27,6 @@ I really want to render something different using my ray tracer, however it does
 <meta property="article:modified_time" content="2015-07-20T00:00:00+00:00" />
 
 
-
     <title>
   Basics about path tracing · A Graphics Guy&#39;s Note
 </title>
@@ -56,6 +55,8 @@ I really want to render something different using my ray tracer, however it does
       
     
 
+    
+      <link rel="stylesheet" href="/css/custom.css" />
     
 
     
@@ -115,7 +116,9 @@ I really want to render something different using my ray tracer, however it does
 </style>
     
 
-    <meta name="generator" content="Hugo 0.120.4">
+    <meta name="generator" content="Hugo 0.117.0">
+
+    <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
 
   
@@ -282,7 +285,7 @@ $$ { L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) &#43; P(0) &#43; P(1) &#43; P(2
 <h2 id="multi-threaded-optimization">Multi-threaded Optimization</h2>
 <p>Instead of modifying the algorithm itself, hardware resources are also valuable if used well. So I implemented multi-threading ray tracing to accelerate the whole process. The general idea is quite simple, divide the image into a number of tiles of the same size. Generate a task for each tile and push it into a task queue. Each thread picks a task once it is idle. If the queue is empty, it just terminates itself. The number of tiles should not be exactly the same with the number of thread allocated for best performance because some of them may idle if they finish their task first.</p>
 <p>It turned out a simple multi-threading model will boost the performance by more than five times on my Intel CPU, which is Xeon(R) E3-1230 v3.</p>
-<h1 id="reference">Reference</h1>
+<h1 id="references">References</h1>
 <p>[1] <a href="http://pbrt.org/">Physically Based Rendering, second edition</a><br>
 [2] <a href="http://www.cs.columbia.edu/~keenan/Projects/Other/BiasInRendering.pdf">Bias in Rendering</a><br>
 [3] <a href="http://www.kevinbeason.com/smallpt/">smallpt: Blobal Illumination in 99 lines of C++</a><br>
@@ -392,7 +395,7 @@ $$ { L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) &#43; P(0) &#43; P(1) &#43; P(2
         <li><a href="#multi-threaded-optimization">Multi-threaded Optimization</a></li>
       </ul>
     </li>
-    <li><a href="#reference">Reference</a></li>
+    <li><a href="#references">References</a></li>
   </ul>
 </nav>
 </div>
@@ -522,7 +525,7 @@ $$ { L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) &#43; P(0) &#43; P(1) &#43; P(2
         
           2015 -
         
-        2024
+        2025
          Jiayin Cao 
       
       

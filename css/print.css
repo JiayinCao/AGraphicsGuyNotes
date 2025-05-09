@@ -1,0 +1,17 @@
+@media print {
+  img {
+    max-width: 100%;
+    height: auto;
+    page-break-inside: avoid;
+  }
+
+  /* Optional: adjust font sizes or layout for print */
+  body {
+    font-size: 12pt;
+  }
+
+  h1, h2, h3 {
+    page-break-after: avoid;
+    page-break-before: avoid;
+  }
+}

@@ -1,0 +1,2093 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+
+    <meta name="author" content="Jiayin Cao">
+    <meta name="description" content="Recently, I had the pleasure of contributing to Nvidia’s Zorah project, the flagship demo for the RTX 50 Series GPUs. My primary role was to provide technical support for light transport in Zorah, which included collaborating with my colleague Daqi Lin to implement a brand new ReSTIR-based global illumination solution, specifically, ReSTIR PT[1], within the NvRTX branch of Unreal Engine.
+A GDC presentation video on Zorah was released a few weeks ago.">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://agraphicsguynotes.com/img/posts/understanding_the_math_behind_restir_gi/restirgi.png"/>
+
+<meta name="twitter:title" content="Understanding The Math Behind ReSTIR GI"/>
+<meta name="twitter:description" content="Recently, I had the pleasure of contributing to Nvidia’s Zorah project, the flagship demo for the RTX 50 Series GPUs. My primary role was to provide technical support for light transport in Zorah, which included collaborating with my colleague Daqi Lin to implement a brand new ReSTIR-based global illumination solution, specifically, ReSTIR PT[1], within the NvRTX branch of Unreal Engine.
+A GDC presentation video on Zorah was released a few weeks ago."/>
+
+    <meta property="og:title" content="Understanding The Math Behind ReSTIR GI" />
+<meta property="og:description" content="Recently, I had the pleasure of contributing to Nvidia’s Zorah project, the flagship demo for the RTX 50 Series GPUs. My primary role was to provide technical support for light transport in Zorah, which included collaborating with my colleague Daqi Lin to implement a brand new ReSTIR-based global illumination solution, specifically, ReSTIR PT[1], within the NvRTX branch of Unreal Engine.
+A GDC presentation video on Zorah was released a few weeks ago." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_gi/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/posts/understanding_the_math_behind_restir_gi/restirgi.png" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2025-04-11T00:00:00+00:00" />
+<meta property="article:modified_time" content="2025-04-11T00:00:00+00:00" />
+
+
+    <title>
+  Understanding The Math Behind ReSTIR GI · A Graphics Guy&#39;s Note
+</title>
+
+    
+      <link rel="canonical" href="https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_gi/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.1.7/css/fork-awesome.min.css" integrity="sha256-gsmEoJAws/Kd3CjuOQzLie5Q3yshhvmo7YNtBG7aaEY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.9836c03fe5c87d102278a33e86d0591ef36c89b1e17e8e547ebf84c05cee010e.css" integrity="sha256-mDbAP&#43;XIfRAieKM&#43;htBZHvNsibHhfo5Ufr&#43;EwFzuAQ4=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="/css/coder-dark.min.717236c74e0a5208ef73964a9f44c6b443b689a95b270d8b2a40d0c012460dac.css" integrity="sha256-cXI2x04KUgjvc5ZKn0TGtEO2ialbJw2LKkDQwBJGDaw=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+      <link rel="stylesheet" href="/css/custom.css" />
+    
+
+    
+      
+      
+        
+        <link rel="stylesheet" href="/main.min.c6871eec105836f05025bd3d682a4f431abfdb83d740febdda8f8be50661a7de.css" integrity="sha256-xoce7BBYNvBQJb09aCpPQxq/24PXQP692o&#43;L5QZhp94=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+
+    
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-7T6R55SCY1"></script>
+      <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-7T6R55SCY1');
+      </script>
+    
+
+    
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$", right: "$", display: false}
+      ]
+    });
+  });
+</script>
+
+<style>
+  .katex-display > .katex {
+    text-align: left !important;
+  }
+</style>
+    
+
+    <meta name="generator" content="Hugo 0.117.0">
+
+    <link rel="stylesheet" href="/css/print.css" media="print">
+  </head>
+
+  
+  
+    
+  
+  <body class="colorscheme-auto"
+        onload=""
+  >
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      A Graphics Guy&#39;s Note
+    </a>
+    
+      
+        <span id="dark-mode-toggle" class="float-right">
+          <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+        </span>
+      
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+        
+        
+        
+          <li class="navigation-item separator">
+            <span>|</span>
+          </li>
+        
+      </ul>
+    
+  </section>
+</nav>
+
+      <script>
+        
+        document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+          const isdarkmode = !document.body.classList.contains("colorscheme-dark");
+          localStorage.setItem("pref-theme", isdarkmode ? 'dark_dimmed' : 'light');
+        });
+      </script>
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Understanding The Math Behind ReSTIR GI</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2025-04-11T00:00:00Z'>
+                April 11, 2025
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              55-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+      
+      <div>
+        
+        <!-- raw HTML omitted -->
+<p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</p>
+<!-- raw HTML omitted -->
+<p>Recently, I had the pleasure of contributing to Nvidia’s Zorah project, the flagship demo for the RTX 50 Series GPUs. My primary role was to provide technical support for light transport in Zorah, which included collaborating with my colleague <a href="https://research.nvidia.com/person/daqi-lin">Daqi Lin</a> to implement a brand new ReSTIR-based global illumination solution, specifically, ReSTIR PT<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup>, within the <a href="https://developer.nvidia.com/game-engines/unreal-engine/rtx-branch">NvRTX branch</a> of Unreal Engine.</p>
+<p>A GDC presentation video on Zorah was released a few weeks ago. If it slipped past your radar, here it is for your convenience.</p>
+
+
+<figure class="custom-figure">
+  <div class="custom-youtube-container">
+    <iframe
+      width="560"
+      height="315"
+      src="https://www.youtube.com/embed/5wbpuD-EMnk"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen>
+    </iframe>
+  </div>
+  <figcaption class="custom-figure-caption">Official NVIDIA Zorah Video for GDC 2025</figcaption>
+</figure>
+
+<style>
+  .custom-youtube-container {
+    position: relative;
+    padding-bottom: 56.25%;  
+    height: 0;
+    overflow: hidden;
+    max-width: 100%;
+  }
+
+  .custom-youtube-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+</style>
+
+<p>Hopefully, this video will spark some interest and motivate readers to dive into this lengthy post.
+All light bounces shown in the demo are dynamically evaluated in real time. Even though I had been working on this project for months, I was still blown away when I saw it in action for the first time. It was a powerful reminder of the advancements in real-time path traced global illumination technology.</p>
+<p>A heads-up before moving forward: technical details related to the engineering aspects of the Zorah project will not be covered in this blog post. This post actually has nothing to do with the Zorah project itself. Instead, it&rsquo;s focused on explaining the theory behind ReSTIR GI<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restir_gi" style="text-decoration: none;">[2]</a></sup>, rather than the engineering challenges we faced in Zorah or the theory behind ReSTIR PT.
+Since our ReSTIR PT implementation is built on top of an existing ReSTIR GI implementation<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__mk_rptltge" style="text-decoration: none;">[3]</a></sup> on NvRTX branch, running ReSTIR GI in the scenes shown above would already produce an indirect diffuse GI signal that’s on par with ReSTIR PT. The main improvement introduced in ReSTIR PT is mirror reflection.</p>
+<p>So yes, showing the video here is a bit of a cheat, as it isn’t strictly about ReSTIR GI. But it’s still by far the best visual I can share to demonstrate what ReSTIR GI is capable of when focusing solely on diffuse GI. That’s why I feel it makes sense to include it here.</p>
+<p>For readers interested in the engineering side of the implementation, we have a GDC presentation<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__ptniz" style="text-decoration: none;">[4]</a></sup> available online, where we go into detail about how we approached the solution in Zorah. Alternatively, you can check out the open-source code in the <a href="https://developer.nvidia.com/game-engines/unreal-engine/rtx-branch">nvrtx-5.4 branch</a>.</p>
+<p>Below is a screenshot captured from one of our levels, the Greenhouse level. The GI signal is produced by ReSTIR GI, rather than ReSTIR PT. If you’re interested in trying it out yourself, <a href="https://developer.nvidia.com/rtx-kit?sortBy=developer_learning_library%2Fsort%2Ftitle%3Aasc">here</a> is the link for download. You’ll also need the <a href="https://developer.nvidia.com/game-engines/unreal-engine/rtx-branch">NvRTX Experimental Branch</a> to run this demo, as it’s required to enable Megageo (the ray tracing Nanite feature).</p>
+
+
+<figure class="custom-figure">
+  
+    <a href="/img/posts/understanding_the_math_behind_restir_gi/restirgi.png" target="_blank">
+      <img src="/img/posts/understanding_the_math_behind_restir_gi/restirgi.png" alt="Image">
+    </a>
+  
+  
+    <figcaption class="custom-figure-caption">Image courtesy of NVIDIA</figcaption>
+  
+</figure>
+
+
+<h1 id="introduction">Introduction</h1>
+<p>About two and a half years ago, I shared a blog post<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__utmbrd" style="text-decoration: none;">[5]</a></sup> discussing the fundamental mathematical theory behind ReSTIR DI<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restir_di" style="text-decoration: none;">[6]</a></sup>. It aimed to explain the core theory behind the ReSTIR DI algorithm, the simplest form of ReSTIR.
+As I continued exploring various variants of this sampling approach, I gained deeper insights into how ReSTIR works. In this blog post, I’d like to share some of my thoughts in the hope of shedding light on some of the more subtle aspects of ReSTIR GI, a variant of ReSTIR designed to tackle the global illumination problem, rather than the many-light problem.</p>
+<p>It’s important to read the original ReSTIR GI paper first, as this post won’t explain how the algorithm works. Instead, it focuses on a few mathematical aspects that can be confusing if not carefully thought through.
+Readers are also strongly encouraged to review the mathematical foundation of ReSTIR beforehand, as the content here may be quite confusing otherwise. Without a solid understanding of how ReSTIR works in general, it may be difficult to fully grasp the math discussed in this post.</p>
+<h1 id="preliminary-reading">Preliminary Reading</h1>
+<p>Similar to my previous post, let’s first go through some preliminary knowledge that is essential for understanding the math behind ReSTIR GI before diving into the explanation.</p>
+<h2 id="rendering-equation">Rendering Equation</h2>
+<p>As global illumination is a more complicated topic than direct illumination, let&rsquo;s start with rendering equation since we are talking about GI this time.</p>
+
+
+<div>$$
+\tag{1}
+
+L(\omega_{o}) = L_{e}(x, \omega_{o}) + \int_{\Omega} L(\omega_{i}) f(x, \omega_{i}, \omega_{o}) cos(\theta_{i}) \mathrm{d}\omega_{i}
+
+$$
+
+</div>
+
+<p>Strictly speaking, game engines split the rendering equation into several categories, such as emissive surfaces, direct illumination, indirect diffuse illumination, indirect smooth specular illumination, indirect rough specular illumination. It is worth noting that game engines may also have their own split based on light types as well. For example, direct illumination contribution from sky light can be evaluated in Unreal Engine&rsquo;s Lumen GI system<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__lumen" style="text-decoration: none;">[7]</a></sup>. But for simplicity, we assume this is split into three parts as it is sufficient for our discussion in this post.</p>
+<ul>
+<li>Emissive surfaces that are directly visible in primary view</li>
+<li>Direct illumination</li>
+<li>Global illumination</li>
+</ul>
+<p>Let&rsquo;s simply make the split here so that we are more clear about what exactly our problem set is when we talk about ReSTIR GI. Here we assume $x$ is the primary visible vertex.</p>
+<p>Emissive surfaces are pretty easy to understand, it is area light sources (including sky light) that we can see directly in primary view. Throughout this whole blog post, we will make an assumption that the evaluation of light radiance given a light sample is deterministic and can be done in O(1) time, which is largely true in most game engines. Such a signal can simply be represented by $L_e(x, w_o)$. As we can easily notice from this form, with the above assumption, this is not even an integral estimation. There is no Monte Carlo approximation going on in real time emissive signal evaluation, hence this process will produce zero noise and commonly is not a major technical challenge in game rendering.</p>
+<p>For our convenience, let&rsquo;s define the non-emissive term explicitly. The subscript $l$ stands for light here, which is not super precise, but it is ok since we just need a term to identify the rendering equation&rsquo;s integral part.</p>
+
+
+<div>$$
+\tag{2}
+
+{L_l(\omega) = L(\omega) - L_{e}(\omega)}
+
+$$
+
+</div>
+
+<p>Regarding direct illumination, below is the equation for it.
+
+
+<div id="eq_re_di">$$
+\tag{3}
+
+L_{DI}(\omega_{o}) = \int_{\Omega} L_e(\omega_{i}) f( x, \omega_{i}, \omega_{o} ) cos(\theta_{i}) \mathrm{d}\omega_{i}
+
+$$
+
+</div>
+</p>
+<p>This starts getting more interesting as some of the light sources, such as area light or sky light, may introduce Monte Carlo approximation. This is to support both soft shadow and the overall contribution of light sources towards a specific shading point. As long as the light source is not a Dirac delta function, this dimensionality of integral will need Monte Carlo approximation, which commonly means efficient sampling approach is needed to suppress noise to an acceptable level. And ReSTIR DI is specifically designed for it.</p>
+<p>For the global illumination problem, below is the correct form of its math representation.
+
+
+<div id="eq_re_gi">$$
+\tag{4}
+
+L_{GI}(\omega_{o}) = \int_{\Omega} L_l(\omega_{i}) f( x, \omega_{i}, \omega_{o} ) cos(\theta_{i}) \mathrm{d}\omega_{i}
+
+$$
+
+</div>
+</p>
+<p>Things get a lot more complicated here. It all starts from the fact that $L_l$ doesn&rsquo;t have a closed form solution in most cases, unlike $L_e$ which we assume can be evaluated in O(1) time in deterministic manner. Or put it another way, this equation requires higher dimensional integral than the DI integral. As a matter of fact, this equation is an integral of infinite dimensions.
+Clearly, the GI problem is a much more complicated problem compared with DI, which largely thanks to the $L_l(w_i)$ lacks a deterministic evaluation. The truth is approximating $L_l(w_i)$ is equally challenging as solving the rendering equation in the first place as it expands to a rendering equation without the emissive term.</p>
+<p>With such a complicated problem, native sampling approach based on BRDF PDF for drawing continuation ray with NEE samples may lose its efficiency in some cases. Algorithms like path guiding <sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__pguide0" style="text-decoration: none;">[8</a>, <a href="#ref-ref_tag__pguide1" style="text-decoration: none;">9]</a></sup> are designed for improved sampling efficiecny. Unlike path guiding, without requiring complex data structure, ReSTIR GI also aims to effectively improve the sampling efficiency for <span style="white-space: nowrap;"><a href="#eq_re_gi">equation 4</a></span>.</p>
+<h2 id="primary-sample-space">Primary Sample Space</h2>
+<p>Primary sample space, or PSS for short, is critical for us to understand ReSTIR GI, later we will see its application in it. To understand how it works in a path tracer, readers can take a look at the S3 section of GRIS paper&rsquo;s supplementary material<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup>.</p>
+<p>For your convenience, I&rsquo;d also like to put down some explaination here. Different from the supplemental material, I&rsquo;d like to explain PSS without assuming any graphics context. Imagine we are estimating the following integral with Monte Carlo method.
+
+
+<div id="eq_integrand">$$
+\tag{5}
+
+I = \int_{\Omega_x} f(x) \mathrm{d}x
+
+$$
+
+</div>
+</p>
+<p>This is pretty basic. Here are the common steps to approximate it with Monte Carlo method.</p>
+<ol>
+<li>Produce a random number  $u_i$ that is uniformly distributed between 0 and 1</li>
+<li>Draw a sample $x_i$ with some sampling PDF with the the random number $u_i$</li>
+<li>Throw this sample $x_i$ in $f(x)$ and accumulate a sum with $f(x_i)/p_x(x_i)$</li>
+<li>Go back to step 1 until we hit here N times</li>
+<li>Divide the accumulted result by N</li>
+</ol>
+<p>The Monte Carlo estimator for this integral is simply this</p>
+
+
+<div>$$
+\tag{6}
+
+\hat{I}_N = \dfrac{1}{N} \Sigma_{i=1}^{N} \dfrac{f(x_i)}{p_x(x_i)}
+
+$$
+
+</div>
+
+<p>I added a subscript $x$ for $p(x)$ just to indicate samples are drawn in $x$&rsquo;s domain.
+The same goes true for all $x_i$ within $\hat{I}_N$, which means it is an estimator based on drawing samples in $x$&rsquo;s domain.</p>
+<p>The whole sampling process starts with a uniformly distributed random number between 0 and 1. We can actually see $x$ as a function of $u$, which is essentially what it is. With this mental shift, we can rewrite the above estimator this way under the condition that each $u$ only maps to a unique $x$</p>
+
+
+<div id="eq_estimator">$$
+\tag{7}
+
+\hat{I}_N = \dfrac{1}{N} \Sigma_{i=1}^{N} \dfrac{f(x(u_i))}{p_x(x(u_i))}
+
+$$
+
+</div>
+
+<p>I&rsquo;d like to bring up another fact here that the PDF for $u$ is simply 1. Or put it in simple math</p>
+
+
+<div id="eq_u_pdf">$$
+\tag{8}
+
+p_u(u) = 1
+
+$$
+
+</div>
+
+<p>Combine <span style="white-space: nowrap;"><a href="#eq_estimator">equation 7</a></span> and <span style="white-space: nowrap;"><a href="#eq_u_pdf">equation 8</a></span>, we can rewrite <span style="white-space: nowrap;"><a href="#eq_estimator">equation 7</a></span> this way</p>
+
+
+<div id="eq_final_est">$$
+\tag{9}
+
+\hat{I}_N  = \dfrac{1}{N} \Sigma_{i=1}^{N} \dfrac{(\dfrac{f(x(u_i))}{p_x(x(u_i))})}{p_u(u)}
+
+$$
+
+</div>
+
+<p>This looks unnecessarily complicated given that we haven&rsquo;t changed anything for real. But now, let&rsquo;s put <span style="white-space: nowrap;"><a href="#eq_final_est">estimator 9</a></span> on hold for a short while and try to Monte Carlo sample the integral below next.</p>
+
+
+<div id="eq_integrand_pss">$$
+\tag{10}
+
+I' = \int_{\Omega_u} \dfrac{f(x(u))}{p_x(x(u))} \mathrm{d}u
+
+$$
+
+</div>
+
+<p>Don&rsquo;t be intimidated by $\dfrac{f(x(u))}{p_x(x(u))}$, you can simply regard it as a new function of $u$. And this $\Omega_u$ is essentially is a high dimensional cube. Applying the same steps mentioned above, except this time our samples are merely random numbers from 0 to 1, we have this Monte Carlo estimator for this integral.</p>
+
+
+<div>$$
+\tag{11}
+
+\hat{I}_{u,N}  = \dfrac{1}{N} \Sigma_{i=1}^{N} \dfrac{(\dfrac{f(x(u_i))}{p_x(x(u_i))})}{p_u(u)}
+
+$$
+
+</div>
+
+<p>Taking one step back, this happens to be exactly the same thing as <span style="white-space: nowrap;"><a href="#eq_final_est">estimator 9</a></span>, which is what we can use to approximate the <span style="white-space: nowrap;"><a href="#eq_integrand">integral 5</a></span>. Now we can see, with one single estimator, we can approximate the value of two seemingly different integrals in an unbiased and consistent manner. This safely gives us a simple conclusion.</p>
+
+
+<div>$$
+\tag{12}
+
+\int_{\Omega_x} f(x) \mathrm{d}x = \int_{\Omega_u} \dfrac{f(x(u))}{p_x(x(u))} \mathrm{d}u
+
+$$
+
+</div>
+
+<p>Putting it in another way, in order to approximate the integral over $x$&rsquo;s domain for $f(x)$, we can simply integrate over a high dimensional (equal dimension with $x$) unit cube domain and use the latter integral (<span style="white-space: nowrap;"><a href="#eq_integrand_pss">integral 10</a></span>) instead as long as we have a PDF method in our mind that we can use to draw sample $x$ from.</p>
+<p>In case anyone is still curious why this can magically happen, the following derivation will uncover the mystery.</p>
+
+
+<div id="eq_pss_proof">$$
+\tag{13}
+
+\begin{array} {lcl} \int_{\Omega_u} \dfrac{f(x(u))}{p_x(x(u))} \mathrm{d}u & = & \int_{\Omega_u} \dfrac{f(x(u))}{p_u(u) / |x'(u)|} \mathrm{d}u \\\\ & = & \int_{\Omega_u} f(x(u)) |x'(u)| \mathrm{d}u \\\\ & = & \int_{\Omega_x} f(x) \mathrm{d}x \end{array}
+
+$$
+
+</div>
+
+<p>If anyone has trouble in figuring out how $p_x(x(u))$ is converted to $p_u(u) / |x&rsquo;(u)|$, please check <a href="https://www.pbr-book.org/3ed-2018/Monte_Carlo_Integration/Transforming_between_Distributions">this chapter</a> in pbrt<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__pbrt" style="text-decoration: none;">[10]</a></sup>. I won&rsquo;t put down that simple derivation here to save some text.</p>
+<p>The above derivation works with both scalar inputs and vector inputs, both $x$ and $u$ can be a multi-dimentional input, rather than a scalar. With vectors as inputs, the first way we prove PSS doesn&rsquo;t change at all, while we need to swap the derivation $f&rsquo;(x)$ by Jacobian in second proof in <span style="white-space: nowrap;"><a href="#eq_pss_proof">derivation 13</a></span>.</p>
+<h2 id="per-initial-candidate-target-function-in-ris">Per Initial Candidate Target Function in RIS</h2>
+<p>Resampled importance sampling is a sampling method to draw higher quality samples based on a bunch of lower quality  candidate samples drawn from proposal PDFs<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__ris" style="text-decoration: none;">[11]</a></sup>. It provides an unbiased Monte Carlo approximation of an integral by approximating generating samples based on some target function distribution, which doesn&rsquo;t have to be normalized. Its realized PDF is intractable, but we know it approaches to normalized target function with growing number of proposal candidates. Let&rsquo;s briefly go over how RIS works.</p>
+<p>To approximate the integral of $f(x)$ over a specific domain, here is what we need to do with RIS</p>
+<ul>
+<li>Produces a bunch of proposal candidates $x_i$ based on some proposal PDF. We could draw proposal candidates from multiple different proposal PDFs, rather than just one.</li>
+<li>Define a target function $\hat{p}(x_i)$, which ideally should match the integrand well. A constant scaling factor on the target function shouldn&rsquo;t matter, meaning this target function doesn&rsquo;t have to be normalized.</li>
+<li>For each proposal candidate, we assign a resampling weight, which is $w_i(x_i) = m_i(x_i) \hat{p}(x_i) / p_i(x_i) $. Here, $m_i(x_i)$ is the MIS weight<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__ev_thesis" style="text-decoration: none;">[12]</a></sup>.</li>
+<li>Draw a sample by streaming in the proposal candidates. Each proposal candidate can be chosen based on their resampling weight. Specifically, the probablity of them being chosen is proportional to the resampling weight. This process is commonly done through an algorithm called weighted reservoir sampling<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__wrs" style="text-decoration: none;">[13]</a></sup>.</li>
+<li>The unbiased approximation of the reciprocal of the PDF producing this final sample is the combined resampling weights of visited proposal candidates divided by the target function value evaluated at the chosen sample. This is called unbiased contribution weight<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__gentle_restir" style="text-decoration: none;">[14]</a></sup>, UCW for short.</li>
+</ul>
+<p>At this point, with the unbiased contribution weight, we should be able to throw the RIS sample in a Monte Carlo estimator for approximating the integral.</p>
+<p>The GRIS paper provides a fairly in-depth analysis of how to generalize RIS<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup>. The paper points it out that proposal candidates drawn from different proposal PDFs don&rsquo;t have to be in the same domain. It could be in different domains. Upon resampling, we should apply a shift mapping to convert the sample to the current domain of our interest and a Jacobian to the proposal PDF or UCW. Essentially, this is the theoritical foundation for ReSTIR GI as well, except that this GRIS idea was not published by the time ReSTIR GI paper was out. We can treat ReSTIR GI as one use case of GRIS theory. Without introducing the complexity in this post, I will try explaining how this is done without going through the details in this GRIS paper in the following section. However, readers are strongly recommended to go through it<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup> and the Siggraph course<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__gentle_restir" style="text-decoration: none;">[14]</a></sup> to gain a deeper understanding of this.</p>
+<p>Our interest in this section is about target function. After some careful derivation, it turns out that a different target function can be applied to each initial candidate. To clarify, the choice of using a different or the same target function is completely independent of whether the proposal candidates are drawn from the same proposal PDF or not. It is rarely mentioned in most sources that target function can be per proposal candidate, which gives us an impression that target function has to be the same for RIS process. And this is certainly not true. In order to prove so, let&rsquo;s define resampling weight with the revised version as below.</p>
+<p>
+
+<div id="eq_new_ris">$$
+\tag{14}
+
+w_i(x_i) = m_i(x_i) \hat{p}_i(x_i) / p_i(x_i)
+
+$$
+
+</div>
+
+
+
+<div>$$
+\tag{15}
+
+w^* = \Sigma_{i=1}^N w_i(x_i)
+
+$$
+
+</div>
+</p>
+
+
+<div>$$
+\tag{16}
+
+y = x_s
+
+$$
+
+</div>
+
+<p>To be clear, $y$ is the chosen sample and $s$ is the index of the chosen sample.
+Please be mindful that in the above <span style="white-space: nowrap;"><a href="#eq_new_ris">equation 14</a></span>, we put a subscript at $\hat{p}_i$ to indicate it is per candidate now. This means we now allow different target functions to be applied during RIS. Below is the derivation of the revised algorithm.</p>
+
+
+<div id="eq_ris_proof">$$
+\tag{17}
+
+\begin{array} {lcl} 
+E\left(\dfrac{1}{N} \Sigma_{i=1}^{N} \dfrac{f(y_i)}{\hat{p}_{is}(y_i)} \Sigma_{j=1}^{M} w_{ij}(x_{ij})\right) & = & \dfrac{1}{N} \Sigma_{i=1}^{N} E\left( \dfrac{f(y_i)}{\hat{p}_{is}(y_i)} \Sigma_{j=1}^{M} w_{ij}(x_{ij}) \right) \\\\ & = & E \left( \dfrac{f(y)}{\hat{p}_{s}(y)} w_i^* \right) 
+\\\\ & = & \Sigma_{s=1}^{M} \underset{\text{M}}{\int \dots \int} \dfrac{f(x_s)}{\hat{p}_{s}(x_s)} w_i^* \dfrac{w_s(x_s)}{w_i^*} \Pi_{i=1}^{M} (p_i(x_i)) \space \mathrm{d}x_1\ \dots \mathrm{d}x_M
+\\\\ & = & \Sigma_{s=1}^{M} \underset{\text{M}}{\int \dots \int} f(x_s) m_s(x_s) \Pi_{i=1, i!=s}^{M} (p_i(x_i)) \space \mathrm{d}x_1\ \dots \mathrm{d}x_M
+\\\\ & = & \Sigma_{s=1}^{M} \int f(x_s) m_s(x_s) dx_s\ \underset{\text{M-1}}{\int \dots \int} \Pi_{i=1, i!=s}^{M} (p_i(x_i)) \underbrace{\space \mathrm{d}x_1\ \dots \mathrm{d}x_M}_{x_1\, to\, x_M\, except\, x_s}
+\\\\ & = & \int \Sigma_{s=1}^{M} m_s(x) f(x) \mathrm{d}x\ 
+\\\\ & = & \int f(x) \mathrm{d}x\ 
+\end{array}
+
+$$
+
+</div>
+
+<p>The whole derivation still stands even if there is a different target function for each proposal candidate. This may sound useless at the beginning as we won&rsquo;t know what the RIS sample PDF will converge to. But not having the restriction that we have to use a same target function throughout the whole process is certainly a welcome flexibility. In my previous blog post<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__utmbrd" style="text-decoration: none;">[5]</a></sup>, I explained in detail in a section visibility reuse why mixing target function with and without visibility check could be valid in ReSTIR DI. Back then, I didn&rsquo;t realize target function has this flexibility. With the above derivation, a much easier way to explain it is we simply can do so thanks to the per initial candidate target function flexibility allowed in RIS.</p>
+<h1 id="restir-gi-details">ReSTIR GI Details</h1>
+<p>A typical structure of ReSTIR implementation looks like this</p>
+<figure><img src="/img/posts/understanding_the_math_behind_restir_gi/restir.drawio.png"/>
+</figure>
+
+<p>This goes true for both ReSTIR DI and ReSTIR GI. Please be mindful that sometimes for performance reason, initial sampling and temporal resampling pass may be fused together to save some bandwidth cost. But the general logical structure remains the same.</p>
+<p>ReSTIR, as its name implies, is a combination of temporal and spatial resampling algorithm. Without strict definition, the common sense is initial sampling pass is also part of ReSTIR. There is a decent amount of content in the original ReSTIR DI paper that is about how to apply RIS in the initial sampling pass. In ReSTIR PT, it needs to resample one single path from a path tree in the initial sampling pass for it to work. (A path tree is the union of all paths of different depth produced by a single sample)</p>
+<p>On a side note, we can apply this structure to lots of other sampling problems as long as there is some form of coherence, in the case of ReSTIR GI it is temporal coherence between frames and spatial coherence between pixels on screen. The problem to be sampled doesn&rsquo;t need to be graphics relevant. To some degree, ReSTIR is essentially a generic importance sampling algorithm that helps produce high quality samples for Monte Carlo method.</p>
+<p>We commonly see the green passes as the core of ReSTIR. The general structure of ReSTIR is fairly similar between ReSTIR DI and ReSTIR GI. Even the implementation of ReSTIR (temporal + spatial) is largely similar. As we can see, the exact problem ReSTIR solves heavily depends on what the concept of initial candidate is in the initial sampling pass and what integral we try to approximate in the final evaluation pass. Clearly, the concept of initial candidate and final integrand has to match to make sense.</p>
+<p>In ReSTIR DI, it is fairly simple and clear what initial candidate is.
+It is nothing but a sample (point) on light sources. And the integral is simply <span style="white-space: nowrap;"><a href="#eq_re_di">integral 3</a></span>. W.r.t ReSTIR GI, the problem set seems to be <span style="white-space: nowrap;"><a href="#eq_re_gi">integral 4</a></span> and I also mention initial candidate is a path tree in my presentation<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__ptniz" style="text-decoration: none;">[4]</a></sup>, which is not wrong, but not very precise either. I had to explain it that way due to time limitation in our talk. There was certainly not enough time in our sharing for me to go through the math that we will mention in this blog post next. Hopefully, the following explanation in this post will fill in the gap. Understanding these details is the key to get ReSTIR GI implemented done right.</p>
+<h2 id="initial-candidates-in-restir-gi">Initial Candidates in ReSTIR GI</h2>
+<p>There are a few items needed to be cleared before we put our hands on an actual implementation of ReSTIR GI.</p>
+<ul>
+<li>What exactly is the problem we are trying to solve</li>
+<li>What target function should we use to weight samples during resampling</li>
+<li>What is the precise definition of initial candidate concept</li>
+<li>What is the proposal PDF of producing this initial candidate</li>
+</ul>
+<p>The least interesting topic is the second one, there are two mentioned in the paper, one of which is the radiance from $x_2$ (secondary bounce) to $x_1$ (primary bounce), the other one is simply $L_l(\omega_{i}) f( x_1, \omega_{i}, \omega_{o} ) cos(\theta_{i})$. As a matter of fact, choice of target function, as long as it meets certain condition, won&rsquo;t have impact on the unbiasness of the approximation, though they will indeed have impact on how fast the approximation converges. Even though we will not primarily focus on this topic in the following sections, we will still revise this later to be more precise.</p>
+<h3 id="a-possible-solution">A Possible Solution?</h3>
+<p>Our particular interest are the other three items. At the end of last section, we mentioned that the problem could be <span style="white-space: nowrap;"><a href="#eq_re_gi">integral 4</a></span>. The initial candidate could be a path tree, which is defined as the combination of paths of all depth as mentioned earlier. And to be clear, our path tree concept excludes DI path since it is not part of ReSTIR GI. This seemingly well-made decision will not work well once we consider the proposal PDF of producing the path tree next.</p>
+<p>If our initial candidate is a path tree, the proposal PDF would be the PDF of producing the whole path tree. To reveal the problem, let&rsquo;s expand <span style="white-space: nowrap;"><a href="#eq_re_gi">equation 4</a></span> next, except this time, we will use a different representation of rendering equation for clarity.</p>
+
+
+<div id="eq_re1-&gt;0">$$
+\tag{18}
+
+L_{GI}(x_1 \rightarrow x_0) = \int_{\mathcal{A}} L_l(x_2 \rightarrow x_1) f( x_2 \rightarrow x_1 \rightarrow x_0 ) G(x_1, x_2) \mathrm{d} x_2
+
+$$
+
+</div>
+
+
+
+<div id="eq_gterm">$$
+\tag{19}
+
+G(x_1, x_2) = \dfrac{cos(\theta_{x_1 \rightarrow x_2}) cos(\theta_{x_2 \rightarrow x_1})}{(x_1 - x_2)^2} V(x_1, x_2)
+
+$$
+
+</div>
+
+<p>This is essentially the same as <span style="white-space: nowrap;"><a href="#eq_re_gi">equation 4</a></span>, except that we are integrating over area rather than solid angle now. $V(x_1, x_2)$ is the binary visibility result between the two vertices. $\theta_{x_1 \rightarrow x_2}$ is the cosine value of the angle formed by the normal at $x_1$ and the direction from $x_1$ to $x_2$. The other $\theta$ should be pretty explanatory now. As we can easily notice, $L_l(x_2 \rightarrow x_1)$ itself is a recursive integral. Let&rsquo;s expand it for a few times.</p>
+
+
+<div id="eq_re2-&gt;1">$$
+\tag{20}
+
+L_{l}(x_2 \rightarrow x_1) = \int_{\mathcal{A}} L(x_3 \rightarrow x_2) f( x_3 \rightarrow x_2 \rightarrow x_1 ) G(x_2, x_3) \mathrm{d} x_3
+
+$$
+
+</div>
+
+
+
+<div id="eq_re3-&gt;2">$$
+\tag{21}
+
+L(x_3 \rightarrow x_2) = L_e(x_3 \rightarrow x_2) + \int_{\mathcal{A}} L(x_4 \rightarrow x_3) f( x_4 \rightarrow x_3 \rightarrow x_2 ) G(x_3, x_4) \mathrm{d} x_4
+
+$$
+
+</div>
+
+<p>Let&rsquo;s define the path depth as the number of bounces per path, where we count the light vertex(sample) as a bounce as well. For example, a path like this [$x_0 \rightarrow x_1 \rightarrow x_2 \rightarrow x_3$] has a depth of 3. Please be noted path depth definition may very likely be defined differently in other sources, which is fine as long as it is consistent in this post. Here $x_3$ should be either on emissive surface or a light source, including dirac delta light sources. Strictly speaking, in the context of discussion, $x_3$ won&rsquo;t be dirac delta light sources, such as point or spot light, without NEE samples<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__nee" style="text-decoration: none;">[15]</a></sup> as continuation ray won&rsquo;t hit them. Though, most path tracers draw NEE or BRDF samples for paths of each depth for faster convergence. To make things simpler, we assume our path tree don&rsquo;t have those samples unless explicitly mentioned. With or without light samples, all of our theory in this post stands regardless. We will still call it a path tree without losing generality.</p>
+<p>We can easily notice another $L$ in the <span style="white-space: nowrap;"><a href="#eq_re3-%3e2">equation 21</a></span>, which means we can expand it similarly. And the process goes on without an end, which is why rendering equation involves an integral of infinite dimensions.  Let&rsquo;s define $L_k$ where $k$ is the only path depth we consider in the light evaluation. For example, if we only care about contributions from path of depth 3, we can simplify $L_3$ by combining <span style="white-space: nowrap;"><a href="#eq_re1-%3e0">equation 18</a></span>, <span style="white-space: nowrap;"><a href="#eq_re2-%3e1">equation 20</a></span> and <span style="white-space: nowrap;"><a href="#eq_re3-%3e2">equation 21</a></span>.</p>
+
+
+<div>$$
+\tag{22}
+
+L_3(x_1 \rightarrow x_0) = \int_{\mathcal{A}} \int_{\mathcal{A}} L_e(x_3 \rightarrow x_2) f(x_3 \rightarrow x_2 \rightarrow x_1) G(x_3, x_2) f(x_2 \rightarrow x_1 \rightarrow x_0) G(x_2, x_1) \mathrm{d}x_3 \mathrm{d}x_2
+
+$$
+
+</div>
+
+<p>Correspondingly, we can figure out</p>
+
+
+<div id="eq_lpc">$$
+\tag{23}
+
+L_k(x_1 \rightarrow x_0) = \underbrace{\int_{\mathcal{A}} \dots \int_{\mathcal{A}}}_{k-1} L_e(x_k \rightarrow x_{k-1}) \prod_{i=2}^{k} ( f(x_i \rightarrow x_{i-1} \rightarrow x_{i-2}) G(x_i, x_{i-1}) ) \mathrm{d}x_2\ \dots \mathrm{d}x_k
+
+$$
+
+</div>
+
+<p>For our convenience of later discussion, let&rsquo;s isolate the integrand here.</p>
+
+
+<div id="eq_lpc_integrand">$$
+\tag{24}
+
+\ell_k(x_0, \dots, x_k) = L_e(x_k \rightarrow x_{k-1}) \prod_{i=2}^{k} ( f(x_i \rightarrow x_{i-1} \rightarrow x_{i-2}) G(x_i, x_{i-1}) )
+
+$$
+
+</div>
+
+<p>With <span style="white-space: nowrap;"><a href="#eq_lpc">equation 23</a></span>, we can rewrite <span style="white-space: nowrap;"><a href="#eq_re_gi">equation 4</a></span> as below</p>
+
+
+<div>$$
+\tag{25}
+
+L_{GI}(x_1 \rightarrow x_0) = \Sigma_{k=3}^\infty L_k(x_0, x_1)
+
+$$
+
+</div>
+
+<p>If you are curious about why we can have inifite integrals in rendering equation with limited computing power, it is handled by Russian Roulette. We don&rsquo;t really need to produce infinite number of paths if we stochastically choose to terminate after certain depth, which is what all path tracers do. It is also common for game engines to setup a max depth for paths so that there won&rsquo;t be an infinite long tail thread tanking perf in corner cases. For simplicity of our discussion, let&rsquo;s assume we have a max allowed depth $M$ and ignore Russian Roulette just to make our discussion a bit simpler. Of course, all of the theory below still holds when Russian Roulette is applied.
+With this simplification, our rendering equation for GI becomes</p>
+
+
+<div id="eq_re_gi_2">$$
+\tag{26}
+
+L_{GI}(x_1 \rightarrow x_0) = \Sigma_{k=3}^M L_k(x_0, x_1)
+
+$$
+
+</div>
+
+<p>What <span style="white-space: nowrap;"><a href="#eq_re_gi_2">equation 26</a></span> says is quite straight forward, the global illumination signal is essentially the combination of contribution from all paths whose depth are larger than 2. We purposely drop the arrow in $L_k$ here since it is not needed anymore, all we care about now is $L_k$ is a function of $x_0$ and $x_1$. A sample for Monte Carlo approximation of $L_k$ is as below.</p>
+
+
+<div>$$
+\tag{27}
+
+\bar{\mathcal{X}}_k = ( x_2, x_3, ... , x_{k-1}, x_k )
+
+$$
+
+</div>
+
+<p>ReSTIR GI only resamples everything from $x_2$, which is why we don&rsquo;t count $x_0$ and $x_1$ in $\bar{\mathcal{X}}_k$. With the above context, we can define our initial candidate $\mathbb{T}$ in a more mathematical way now</p>
+
+
+<div id="eq_isample">$$
+\tag{28}
+
+\mathbb{T} = \bigcup_{k=3}^{M} \{\bar{\mathcal{X}}_k\}
+
+$$
+
+</div>
+
+<p>Here is an important detail to point out. With our derivation here, there is actually a strong correlation between paths of different depth. Specifically, path of depth k is a sub path of path of depth k+1. Even though not drawing NEE or BRDF samples is rare, it is typical to see path tracers reuse the earlier path when producing longer path so that the time complexity of producing $M$ paths of different depth remains O($M$), rather than O($M^2$).</p>
+<p>The PDF of producing a single path of depth $k$ is simply the product of all PDFs of producing each bounce. Here $p_a$ means the PDF w.r.t area.</p>
+
+
+<div id="eq_proposal_pdf_singlepath">$$
+\tag{29}
+
+P(\bar{\mathcal{X}}_k) = \prod_{i=2}^k p_a(x_i)
+
+$$
+
+</div>
+
+<p>In our context, the PDF of producing the whole path tree is simply the PDF of producing the longest path since we don&rsquo;t have NEE or BRDF samples.</p>
+
+
+<div id="eq_proposal_pdf">$$
+\tag{30}
+
+P(\mathbb{T}) = P(\bar{\mathcal{X}}_M) = \prod_{k=2}^M p_a(x_k) 
+
+$$
+
+</div>
+
+<p>At this point, we have defined the exact form of our problem, which is <span style="white-space: nowrap;"><a href="#eq_re_gi_2">equation 26</a></span>. We also have a precise definition of our initial candidate in <span style="white-space: nowrap;"><a href="#eq_isample">equation 28</a></span> and proposal PDF in <span style="white-space: nowrap;"><a href="#eq_proposal_pdf">equation 30</a></span>. It seems that we could simply drop them in a regular Monte Carlo estimator ($\ell_k$ is defined in <span style="white-space: nowrap;"><a href="#eq_lpc_integrand">equation 24</a></span>))</p>
+
+
+<div id="eq_mistaken_est">$$
+\tag{31}
+
+\hat{I}_N = \dfrac{1}{N} \Sigma_{i=1}^N  \dfrac{\Sigma_{k=3}^{M} \ell_k(x_{0i}, \dots, x_{ki})}{P(\mathbb{T}_{i})}
+
+$$
+
+</div>
+
+<p>If we could have done so, the exact form of our proposal PDF is crystal clear and intuitive then. It would be $P(\mathbb{T})$. However, with a slightly deeper dive into the math, we can quickly notice a problem here.</p>
+
+
+<div id="eq_pdf_division">$$
+\tag{32}
+
+  \begin{array} {lcl} E(\hat{I}_N) & = & E(\dfrac{1}{N} \Sigma_{i=1}^N \dfrac{\Sigma_{k=3}^{M} \ell_k(x_{0i}, \dots, x_{ki})}{P(\mathbb{T}_{i})})  \\\\ & \neq & E(\dfrac{1}{N} \Sigma_{i=1}^N \Sigma_{k=3}^{M} \dfrac{\ell_k(x_{0i}, \dots, x_{ki})}{P(\bar{\mathcal{X}}_{ki}) }) \\\\ & = & L(x_1 \rightarrow x_0) \end{array}
+
+$$
+
+</div>
+
+<p>Empirically, when we evaluate the unbiased light contribution of paths with a specific depth, we do not need to divide by the PDF of producing the whole path tree, we only care about the PDF of producing the paths with the specific depth.
+To see why <span style="white-space: nowrap;"><a href="#eq_pdf_division">equation 32</a></span> tells the truth more easily, let&rsquo;s come up with a simpler example for now. Imagine we have the following integral of our interest.</p>
+
+
+<div>$$
+\tag{33}
+
+  I_{simple} = \int (f_1(x) + f_2(x)) \mathrm{d}x
+
+$$
+
+</div>
+
+<p>We can easily come up with a Monte Carlo estimator like this</p>
+
+
+<div id="eq_I_est">$$
+\tag{34}
+
+  \hat{I}_{simple} = \dfrac{1}{N}\Sigma_{i=1}^N \dfrac{f_1(x_i)}{p_1(x_i)} + \dfrac{1}{N}\Sigma_{i=1}^N \dfrac{f_2(y_i)}{p_2(y_i)}
+
+$$
+
+</div>
+
+<p>This is so simple that I&rsquo;ll skip the proof that <span style="white-space: nowrap;"><a href="#eq_I_est">estimator 34</a></span> is both unbiased and consistent. But one thing that we so get used to is to divide by each sample&rsquo;s own PDF in their own integral approximation. An analogue of the same mistake in <span style="white-space: nowrap;"><a href="#eq_mistaken_est">equation 31</a></span> is to approximate $I_{simple}$ with the below estimator.</p>
+
+
+<div>$$
+\tag{35}
+
+  \hat{I}'_{simple} = \dfrac{1}{N} \Sigma_{i=1}^N \dfrac{f_1(x_i)}{p_1(x_i)p_2(x_i)} + \dfrac{1}{N} \Sigma_{i=1}^N \dfrac{f_2(y_i)}{p_1(y_i)p_2(y_i)}
+
+$$
+
+</div>
+
+<p>Here is a quick proof of why it is wrong.</p>
+
+
+<div>$$
+\tag{36}
+
+  \begin{array} {lcl} E(\hat{I}'_{simple}) 
+  & = & E(\dfrac{1}{N} \Sigma_{i=1}^N \dfrac{f_1(x_i)}{p_1(x_i)p_2(x_i)} + \dfrac{1}{N} \Sigma_{i=1}^N \dfrac{f_2(y_i)}{p_1(y_i)p_2(y_i)}) \\\\ 
+  & = & E(\dfrac{1}{N} \Sigma_{i=1}^N \dfrac{f_1(x_i)}{p_1(x_i)p_2(x_i)}) + E(\dfrac{1}{N} \Sigma_{i=1}^N \dfrac{f_2(y_i)}{p_1(y_i)p_2(y_i)}) \\\\ 
+  & = & \dfrac{1}{N} \Sigma_{i=1}^N E(\dfrac{f_1(x_i)}{p_1(x_i)p_2(x_i)}) + \dfrac{1}{N} \Sigma_{i=1}^N E(\dfrac{f_2(y_i)}{p_1(y_i)p_2(y_i)}) \\\\
+  & = & \int \frac{f_1(x)}{p_2(x)} \mathrm{d}x + \int \frac{f_2(y)}{p_1(y)} \mathrm{d}y \\\\
+  & \neq & \int (f_1(x) + f_2(x)) \mathrm{d}x \\\\
+  & = & I_{simple}
+  \end{array}
+
+$$
+
+</div>
+
+<p>Back to our own topic on <span style="white-space: nowrap;"><a href="#eq_pdf_division">equation 32</a></span>, our problem here is not exactly the same as this simpler sample, but somewhat similar since they all divide extra PDFs. The idea is the same, we shouldn&rsquo;t divide more PDF than we are supposed to. And we can easily derive the proof that the latter sum  is the way to go, which means the former part clearly divides more PDF terms than necessary. To save some text, proof of this is left as a practice for readers.</p>
+<p>If our initial candidates and proposal PDF won&rsquo;t even work with naive form of Monte Carlo approximation, there is no theorical foundation for it to work in RIS or ReSTR anymore. We are hitting a deadend here with path tree being the initial candidate, we need to figure out an alternative solution next.</p>
+<h3 id="primary-sample-space-initial-candidate">Primary Sample Space Initial Candidate?</h3>
+<p>The main problem in the above solution is that we divided extra PDF terms in each item of the sum in <span style="white-space: nowrap;"><a href="#eq_mistaken_est">equation 31</a></span>. To work around the problem, we must find a way to bake the corresponding path PDF in the approximation of each path contribution integral alone, rather than their sum. And we can try solving this by sampling in primary sample space. To see how it works, we need to redefine <span style="white-space: nowrap;"><a href="#eq_lpc">equation 23</a></span>, except this time, we integrate over primary sample space.</p>
+
+
+<div>$$
+\tag{37}
+
+y_{pss,k} = \begin{cases} x_k &: k < 2 \\\\ x_k(u_k) &: x >= 2 \end{cases}
+
+$$
+
+</div>
+
+
+
+<div id="eq_lp_pss_integrand">$$
+\tag{38}
+
+\begin{aligned}
+\ell_{pss,k}(x_0, x_1, u_2, \dots, u_k) &= L_e(y_{pss,k} \rightarrow y_{pss,k-1}))  \prod_{i=2}^{k} \frac{f(y_{pss,i} \rightarrow y_{pss,i-1} \rightarrow y_{pss,i-2}) G(y_{pss,i}, y_{pss,i-1})}{p_a(y_{pss,i})}
+\end{aligned}
+
+$$
+
+</div>
+
+
+
+<div id="eq_lp_pss">$$
+\tag{39}
+
+\begin{aligned}
+L_{pss,k}(x_1 \rightarrow x_0) &= \underbrace{{\int_{\mathcal{U}} \dots \int_{\mathcal{U}}}}_{k-1} \ell_{pss,k}(x_0, x_1, u_2, \dots, u_k) \mathrm{d}u_2 \dots \mathrm{d}u_k
+\end{aligned}
+
+$$
+
+</div>
+
+<p>Earlier we learned, the above revised form is exactly the same with the previous form that integrates over path domain in <span style="white-space: nowrap;"><a href="#eq_lpc">integral 23</a></span>. Moving next, the input to the integrand in <span style="white-space: nowrap;"><a href="#eq_lp_pss">integral 39</a></span> will be the sample for one integral approximation in <span style="white-space: nowrap;"><a href="#eq_re_gi_2">equation 26</a></span>, which is simply a vector of ($u_2, \dots, u_k$),</p>
+
+
+<div id="eq_pss_sample_k">$$
+\tag{40}
+
+\bar{\mathcal{U}}_k = (u_2, u_3, \dots, u_{k-1}, u_k)
+
+$$
+
+</div>
+
+<p>We can think of the union of all such samples as the initial candidate. It is sort of a path tree, but in primary sample space. Precisely speaking, it is not a path tree anymore, it is merely a point in a high dimensional unit cube.</p>
+
+
+<div>$$
+\tag{41}
+
+\mathbb{T_{pss}} = \bigcup_{k=3}^{M} \{  \bar{\mathcal{U}}_k \}
+
+$$
+
+</div>
+
+<p>A nice feature of this setup is PDF of producing either $\mathbb{T}_{pss}$ or $\bar{\mathcal{U}}_k$ for any $k$ is exactly the same, they are simply 1. This is something that we didn&rsquo;t have with the path space setup and the key to our problem as we can see later.</p>
+
+
+<div id="eq_pss_nice_feature">$$
+\tag{42}
+
+P(\mathbb{T}_{pss}) = P(\bar{\mathcal{U}}_k) = 1
+
+$$
+
+</div>
+
+<p>With our revisied version, the problem we are trying to solve becomes</p>
+
+
+<div id="eq_re_gi_3">$$
+\tag{43}
+
+L_{GI}(x_1 \rightarrow x_0) = \Sigma_{k=3}^M L_{pss,k}(x_1 \rightarrow x_0)
+
+$$
+
+</div>
+
+<p>Let&rsquo;s see whether it works if we throw this initial candidate in a regular Monte Carlo estimator for approximation, we will then have this estimator</p>
+
+
+<div id="eq_pss_est">$$
+\tag{44}
+
+\hat{I}_{pss,N} = \dfrac{1}{N} \Sigma_{i=1}^N  \dfrac{\Sigma_{k=3}^{M} \ell_{pss,k}(x_{0i}, x_{1i}, u_{2i} \dots, u_{ki})}{P(\mathbb{T}_{pss,i})}
+
+$$
+
+</div>
+
+<p>Quite different from last time, taking advantage of <span style="white-space: nowrap;"><a href="#eq_pss_nice_feature">equation 42</a></span>, we have the following derivation.</p>
+
+
+<div id="eq_pss_proof_1">$$
+\tag{45}
+
+  \begin{array} {lcl} E(\hat{I}_{pss,N})  & = & E(\dfrac{1}{N} \Sigma_{i=1}^N \dfrac{\Sigma_{k=3}^{M} \ell_{pss,k}(x_{0i}, x_{1i}, u_{2i} \dots, u_{ki})}{P(\mathbb{T}_{pss,i})}) \\\\ & = & E(\dfrac{1}{N} \Sigma_{i=1}^N \Sigma_{k=3}^{M} \dfrac{\ell_{pss,k}(x_{0i}, x_{1i}, u_{2i} \dots, u_{ki})}{P(\bar{\mathcal{U}}_{ki}) }) \\\\ & = &  L(x_1 \rightarrow x_0) \end{array}
+
+$$
+
+</div>
+
+<p>This says a lot! With our new setup, we can now call $\mathbb{T}_{pss}$ a sample. So we have successfully worked around the problem we saw in our last attempt. There is certainly some progress made here, we now can define our proposal candidates with proper proposal PDFs, which we are convinced that it works within a regular Monte Carlo estimation.</p>
+<p>But what about in the context of RIS? Target function can simply be chosen the same as $\Sigma_{k=3}^M \ell_{pss,k}$. This target function makes a lot of sense as it is simply the integrand in the integral of our interest now, which in theory gives us zero-variance sampling with infinite initial candidate count. So yeah, it works as well.</p>
+<p>However, there is one subtlety that easily falls apart when we throw this theory in a ReSTIR GI implementation. ReSTIR gains its power by reusing samples. Here we defined a point in high dimensional unit cube as our sample, which is all what we can reuse, not much else.</p>
+<p>What ReSTIR GI reconnects is $x_2$ in path domain, rather than primary sample space. With the above setup, the only thing closest to $x_2$ we have is $u_2$, the random number that we use to produce $x_2$. We certainly can&rsquo;t simply reuse $u_2$ at $y_1$, which will produce a different $x_2$, none of the further bounces make sense if $x_2$ can&rsquo;t be reused, unfortunately.</p>
+<p>Our second attempt fails again as the theory is not sufficient enough to support what we actually want to do in ReSTIR GI even though it does work in a regular Monte Carlo estimator.</p>
+<h3 id="the-functional-form-of-initial-candidates-in-restir-gi">The Functional Form of Initial Candidates in ReSTIR GI</h3>
+<p>We explored the problems we faced with initial candidates in both path space (path with each bounce at surfaces of a scene) and primary sample space. Path tree as samples is clearly a failure as it won&rsquo;t even work with a standard Monte Carlo approximation. Primary sample space solution allows us to make some progress to throw theory in regular Monte Carlo sampling, but not ReSTIR GI due to the lack of $x_2$ signal in the initial sample concept.</p>
+<p>But we are making progress with primary sample space theory now.
+To fix the problem in the previous section, we can leave $x_2$ as is and the rest of the path tree in primary sample space. Hence, our integral now becomes this</p>
+
+
+<div id="eq_y_sample">$$
+\tag{46}
+
+y_{mix,k} = \begin{cases} x_k &: k < 3 \\\\ x_k(u_k) &: x >= 3 \end{cases}
+
+$$
+
+</div>
+
+
+
+<div id="eq_lp_mix_integrand">$$
+\tag{47}
+
+\begin{aligned}
+\ell_{mix,k}(x_0, x_1, x_2, u_3 \dots, u_k) &= L_e(y_{mix,k} \rightarrow y_{mix,k-1}) f(x_2 \rightarrow x_1 \rightarrow x_0) G(x_2, x_1) 
+\\[0.5em] &\quad  \prod_{i=3}^{k} \frac{f(y_{mix,i} \rightarrow y_{mix,i-1} \rightarrow y_{mix,i-2}) G(y_{mix,i}, y_{mix,i-1})}{p_a(y_{mix,i})}
+\end{aligned}
+
+$$
+
+</div>
+
+
+
+<div id="eq_lpc_mix">$$
+\tag{48}
+
+\begin{aligned}
+L_{mix,k}(x_1 \rightarrow x_0) &= \underbrace{\int_{\mathcal{A}} \int_{\mathcal{U}} \dots \int_{\mathcal{U}}}_{k-1} \ell_{mix,k}(x_0, x_1, x_2, u_3 \dots, u_k) \mathrm{d}x_2 \mathrm{d}u_3 \dots \mathrm{d}u_k
+\end{aligned}
+
+$$
+
+</div>
+
+<p>Just as previous sections, let&rsquo;s precisely define proposal candidate, proposal PDF and target function in ReSTIR GI so that we can evaluate the correctness of our solution. Initial proposal candidate in ReSTIR GI in this case is a point $x_2$ on surfaces of the scene and a point in a high dimensional unit cube. We can define sample as</p>
+
+
+<div>$$
+\tag{49}
+
+\bar{\mathcal{Y}_k} = ( x_2, u_3, ... , u_{k-1}, u_k )
+
+$$
+
+</div>
+
+
+
+<div id="eq_mix_sample">$$
+\tag{50}
+
+\mathbb{T}_{mix} = \bigcup_{k=3}^{M} \bar{\mathcal{Y}}_k
+
+$$
+
+</div>
+
+<p>Thanks to the path reuse between different depths, it still preserves the nice property that PDF of producing each path or the path tree is identical, except they are not 1 anymore.</p>
+
+
+<div id="eq_mix_nice_feature">$$
+\tag{51}
+
+P(\mathbb{T}_{mix}) = P(\bar{\mathcal{Y}}_k) = p_a(x_2)
+
+$$
+
+</div>
+
+<p>Our new revised version of rendering equation now becomes</p>
+
+
+<div id="eq_re_gi_4">$$
+\tag{52}
+
+L_{GI}(x_1 \rightarrow x_0) = \Sigma_{k=3}^M L_{mix,k}(x_0, x_1)
+
+$$
+
+</div>
+
+<p>With all the nice properties preserved from both failed attempts made earlier, this looks good now. Our new estimator for <span style="white-space: nowrap;"><a href="#eq_re_gi_4">equation 52</a></span> is</p>
+
+
+<div id="eq_mix_est">$$
+\tag{53}
+
+\hat{I}_{mix,N} = \dfrac{1}{N} \Sigma_{i=1}^N  \dfrac{\Sigma_{k=3}^{M} \ell_{mix,k}(x_{0i}, x_{1i}, x_{2i}, u_{3i} \dots, u_{ki})}{P(\mathbb{T}_{mix, i})}
+
+$$
+
+</div>
+
+<p>Same as above, let&rsquo;s prove it working in a Monte Carlo estimation next.</p>
+
+
+<div id="eq_mix_proof">$$
+\tag{54}
+
+  \begin{array} {lcl} E(\hat{I}_{mix,N})  & = & E(\dfrac{1}{N} \Sigma_{i=1}^N \dfrac{\Sigma_{k=3}^{M} \ell_{mix,k}(x_{0i}, x_{1i}, x_{2i}, u_{3i} \dots, u_{ki})}{P(\mathbb{T}_{mix,i})}) \\\\ & = &  E(\dfrac{1}{N} \Sigma_{i=1}^N \Sigma_{k=3}^{M} \dfrac{\ell_{mix,k}(x_{0i}, x_{1i}, x_{2i}, u_{3i} \dots, u_{ki})}{P(\bar{\mathcal{Y}}_{ki}) }) \\\\ & = & L(x_1 \rightarrow x_0)  \end{array}
+
+$$
+
+</div>
+
+<p>As we can imagine, this gives us the theoretical support to throw such samples in RIS or ReSTIR. Our choice of target function could simply be $\Sigma_{k=3}^M \ell_{mix,k}$ this time since this is the integrand in our integral. This will in theory give us zero-variance approximation with unlimited number of initial proposal candidates.</p>
+<p>Different from our second attempt, we can indeed share $x_2$ this time. Of course, this means we need to save some of the important bits of this bounce as well, such as normal and position. Besides, there is also some very minor catch with this new solution. In previous solution, we didn&rsquo;t even need to store the proposal PDF at all. However, with this new solution, we need to introduce 4 more bytes in our reservoir data structure for $p_a(x_2)$, which is acceptable.</p>
+<p>Unfortunately, there are still a few problems that we need to deal with with this idea before we can move forward.</p>
+<p>Storing the sample {$x_2, u_3, \dots, u_M$} is expensive as the memory footprint of a reservoir is linear to the number of max depth supported in the path tracer. We need to not only store $M-2$ random numbers ($u_i$) in the path (again, it requires more if we draw NEE or BRDF samples), but also $M-2$ proposal PDFs that keep record of the PDF of producing each path. Proposal PDF here shouldn&rsquo;t be a problem given that they are all simply $p_a(x_2)$. But just storing the random number $u_i$ per depth will still make reservoir&rsquo;s memory cost O($M$). Large reservoir storage will not only require more bandwidth to read data from buffers, but also pressure on register usage as well, either of which is friendly to GPU performance. ReSTIR GI chooses to work around the problem by caching the radiance from $x_2$ to $x_1$. Strictly speaking, this is not possible as such a radiance is an integral itself, all we can do is to cache the unbiased approximation of the radiance from $x_2$ to $x_1$. To put it in math, here it is the cache form for path of depth $k$</p>
+
+
+<div id="eq_cache">$$
+\tag{55}
+
+LC_k(x_2 \rightarrow x_1) = L_e(y_{mix,k} \rightarrow y_{mix,k-1})) \prod_{i=3}^{k} \frac{f(y_{mix,i} \rightarrow y_{mix, i-1}, \rightarrow y_{mix, i-2}) \cdot G(y_{mix,i}, y_{mix, i-1})}{p_a(y_{mix,i})}
+
+$$
+
+</div>
+
+<p>Cached radiance estimate has a few major benefits. Since <span style="white-space: nowrap;"><a href="#eq_cache">equation 55</a></span> is part of target function and rendering equation integrand in PSS as well, which are the only two places that requires the path sample as input, we no longer need to store the whole path anymore, we merely need the approximated radiance now. And during resampling or anywhere target function value or rendering equation value is needed, we can simply throw the cache over rather than reevaluating each of individual path contribution again.</p>
+<p>This certainly gets us some progress by not requiring us to store the whole path anymore. But we still need to cache the approximated radiance from $x_2$ to $x_1$ for contributions of path of each depth, which we have up to $M-2$ possibilities in the worst case. The fact that our reservoir storage is O($M$) still remains. To work around this problem, we can take advantage of <span style="white-space: nowrap;"><a href="#eq_mix_proof">equation 54</a></span> again. Because the denominator is the same for all paths approximation, we only need to store the summed approximated radiance, rather for each depth. And this allows us to reduce the reservoir memory cost from O($M$) to O(1).</p>
+<p>If we need to store all the random numbers in the reservoir for some reason, an alternative is to store the random number seed, which can reproduce the same sequence on every run. However, this approach imposes certain requirements on the implementation of the random number context. In contrast, caching the actual values enables faster evaluation of the target function or integrand during resampling, something that storing only the seed does not provide.</p>
+<p>To be strict about the theory here, this cached solution is not flawless. If we take a closer look at the cached radiance estimate in <span style="white-space: nowrap;"><a href="#eq_cache">equation 55</a></span>, it is also a function of $x_1$. It means when we apply the cache on a path with a different $x_1$ during resampling, chances are our cached value is not 100% correct anymore unless the material at $x_2$ is simply lambert BRDF. There are two options we have here</p>
+<ul>
+<li>Reevaluate brdf at $x_2$. This has its own complication which we will mention later.</li>
+<li>Simply accept the bias, which is what most people do. And the original paper accepts this as well. Since ReSTIR GI is designed mostly for indirect diffuse and rough specular signal, this bias is totally acceptable in game rendering.</li>
+</ul>
+<h3 id="typical-implementation-of-restir-gi-initial-candidates">Typical Implementation of ReSTIR GI Initial Candidates</h3>
+<p>To be clear, the above mathematical model totally works. There is absolutely no problem that we can write a ReSTIR GI implementation based on the above theory. However, in reality, most people chose a different form of implementation, which is based on a slightly different mathemtical foundation than the above one. Specifically, the previous model uses all area PDFs to draw bounces in a path, rather than solid angle PDFs. We derived the theory this way as it involves slightly less complication.</p>
+<p>Common sense is if we estimate an integral that integrates over area, rather than solid angle, we should use area PDF to draw the samples for real, which is not entirely true, but not totally nonsense either. I will point it out real use cases when it is not the case later. However, if we use the above model, the proposal PDF we store in a reservoir should be regarding to area rather than solid angle. Otherwise, it appears fairly confusing then.</p>
+<p>Almost all implementations of a path tracer that I saw integrates over solid angle and store PDFs in solid angle form, rather than area<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__pbrt" style="text-decoration: none;">[10</a>, <a href="#ref-ref_tag__rtiow" style="text-decoration: none;">16</a>, <a href="#ref-ref_tag__mitsuba3" style="text-decoration: none;">17]</a></sup>. The typical way to find next bounce in a path is to shoot a continuation ray and find the closest intersection, rather than somehow find a point on the surfaces of the scene based on surface properties themselves.</p>
+<p>To allow us storing solid angle proposal PDF in a reservoir, we need to make some minor tweaks to <span style="white-space: nowrap;"><a href="#eq_lp_mix_integrand">equation 47</a></span>. Let&rsquo;s define our final form of integral.  Some of the math defined between <span style="white-space: nowrap;"><a href="#eq_y_sample">equation 46</a></span> and <span style="white-space: nowrap;"><a href="#eq_cache">equation 55</a></span>, inclusive, in the previous section remain exactly the same. The things in the above derivation that need to be adjusted are <span style="white-space: nowrap;"><a href="#eq_lp_mix_integrand">equation 47</a></span>, <span style="white-space: nowrap;"><a href="#eq_lpc_mix">equation 48</a></span>, <span style="white-space: nowrap;"><a href="#eq_mix_nice_feature">equation 51</a></span> and <span style="white-space: nowrap;"><a href="#eq_cache">equation 55</a></span>. The revised definition are as below.</p>
+
+
+<div id="eq_lp_mix_integrand_final">$$
+\tag{56}
+
+\begin{aligned}
+\ell_{mix,k}(x_0, x_1, x_2, u_3 \dots, u_k) &= L_e(y_{mix,k} \rightarrow y_{mix,k-1}) f(x_2 \rightarrow x_1 \rightarrow x_0) cos(\theta_{x_1 \rightarrow x_2})
+\\[0.5em] &\quad  \prod_{i=3}^{k} \frac{f(y_{mix,i} \rightarrow y_{mix,i-1} \rightarrow y_{mix,i-2}) cos(\theta_{y_{i-1} \rightarrow y_i})}{p_{\omega}(y_{mix, i-1} \rightarrow y_{mix, i})}
+\end{aligned}
+
+$$
+
+</div>
+
+
+
+<div id="eq_lpc_mix_final">$$
+\tag{57}
+
+\begin{aligned}
+L_{mix,k}(x_1 \rightarrow x_0) &= \underbrace{\int_{\Omega} \int_{\mathcal{U}} \dots \int_{\mathcal{U}}}_{k-1} \ell_{mix,k}(x_0, x_1, x_2, u_3 \dots, u_k) \mathrm{d}x_2 \mathrm{d}u_3 \dots \mathrm{d}u_k
+\end{aligned}
+
+$$
+
+</div>
+
+
+
+<div id="eq_mix_nice_feature_final">$$
+\tag{58}
+
+P(\mathbb{T}_{mix}) = P(\bar{\mathcal{Y}}_k) = p_{\omega}(x_1 \rightarrow x_2)
+
+$$
+
+</div>
+
+
+
+<div id="eq_revised_cache">$$
+\tag{59}
+
+LC_k(x_2 \rightarrow x_1) = L_e(y_{mix,k} \rightarrow y_{mix,k-1})) \prod_{i=3}^{k} \frac{f(y_{mix,i} \rightarrow y_{mix, i-1}, \rightarrow y_{mix, i-2}) \cdot cos(\theta_{y_{mix, i-1} \rightarrow y_{mix,i}})}{p_{\omega}(y_{mix, i-1}, y_{mix,i})}
+
+$$
+
+</div>
+
+<p>To clarify, from now on, when we mention these definitions, we use the new ones, rather than the old one defined in the last section. I could have listed all the definitions again, but that will only make the post longer. As we can see, most of the changes are pretty minor. To make sure we catch all the details here they are.</p>
+<ul>
+<li>
+<p>In <span style="white-space: nowrap;"><a href="#eq_lp_mix_integrand_final">equation 56</a></span>, we replace the G term with $cos(\theta_{x_1 \rightarrow x_2})$ as the other parts of G term help convert area PDF to solid angle PDF. Strictly speaking, we need to add visibility term in it. This complication is left for the next section when we talk about resampling.</p>
+</li>
+<li>
+<p>The multi-item product parts in <span style="white-space: nowrap;"><a href="#eq_lp_mix_integrand_final">equation 56</a></span> and <span style="white-space: nowrap;"><a href="#eq_revised_cache">equation 59</a></span> also have similar change. Superficially, they appear precisely the same with each other mathematically, it is not exactly true, which we will mention later in the post. Besides, there are two subtle details that are worth mentioning.</p>
+<ul>
+<li>
+<p>The visibility term in G term is ignored in the above equation. This is because we assume anything after $x_3$, including it, is found by a continuation ray, which means $y_{mix, i}$ and $y_{mix, i-1}$ are visible to each other for sure.</p>
+</li>
+<li>
+<p>The PDF term $p_{\omega}(y_{mix, i-1} \rightarrow y_{mix, i})$ is the solid angle PDF around $y_{mix, i-1}$ to pick a direction to $y_{mix, i}$. A very important detail here is $x_{i-1}$ matters when we pick $x_i$. Later we will see this has quite some subtle implications on several things.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>The only change in <span style="white-space: nowrap;"><a href="#eq_lpc_mix_final">equation 57</a></span> is we now integrate over solid angle for $x_2$ rather than area now, which means in a Monte Carlo path tracer, the PDF we divide needs to be w.r.t solid angle. And this is adjusted in <span style="white-space: nowrap;"><a href="#eq_mix_nice_feature_final">equation 58</a></span>.</p>
+</li>
+</ul>
+<p>With these subtle changes, it helps us understanding what exactly a ReSTIR GI implementation does now. Since most of the changes are so small, the above prove that this works in ReSTIR in its initial sampling pass still applies without any changes.</p>
+<p>Before we move forward, here is a quick summary of what we came through so far.</p>
+<ul>
+<li>The integral is as <span style="white-space: nowrap;"><a href="#eq_re_gi_4">equation 52</a></span>, which is almost in primary sample space.</li>
+<li>The target function should be <span style="white-space: nowrap;"><a href="#eq_lp_mix_integrand_final">equation 56</a></span>.</li>
+<li>The initial candidate in ReSTIR GI is the union of a point on surfaces of the scene and a point in a high dimensional unit cube.</li>
+<li>The PDF of producing initial candidate is simply the solid angle PDF of producing the bounce $x_2$.</li>
+</ul>
+<p>The above items nicely answers the question we have at the beginning this section. At this point, readers should have a pretty solid understanding of what initial candidate in ReSTIR GI is, which allows us to talk about further details in resampling next.</p>
+<h2 id="resampling-samples">Resampling Samples</h2>
+<p>Lots of the resampling theory in ReSTIR DI applies in ReSTIR GI as well, which will not be the focus of this section. In this section, we will only mention the delta between ReSTIR GI and ReSTIR DI, something I didn&rsquo;t mention in my previous blog post.</p>
+<h3 id="conversion-of-pdf-during-resampling">Conversion of PDF during Resampling</h3>
+<p>In the original ReSTIR DI paper, area PDF was used to pick candidate samples on light sources. And area PDF is independent of primary intersection or the pixel that draws the candidate sample in the first place. While in ReSTIR GI, things are different. As we learn from the previous section, ReSTIR GI&rsquo;s initial sample is $x_2$ and a point in a high dimensional unit cube. Even though the PDF of picking the high dimensional point is independent of $x_1$, we still need to figure out a way to pick $x_2$, which almost all ReSTIR GI implementation find by drawing a continuation ray based on BRDF at $x_1$. Typically, the PDF stored in GI reservoir is w.r.t solid angle around $x_1$ as well. And this means the PDF in reservoir is pixel dependent, unlike ReSTIR DI&rsquo;s implementation. This adds a bit of complication when it comes to resampling as we can see later.</p>
+<p>To be clear, the above statement only states how the original paper recommended implementing ReSTIR. This is by no means to say ReSTIR DI has to draw candidate samples based on area PDF, it doesn&rsquo;t need to store PDF w.r.t area either. It is worth pointing out that it is not relevant between the stored PDF form and which form of PDF we use to draw our candidate samples. We could use solid angle PDF to draw candidate samples and store the corresponding area PDFs, vice versa. For example, on NvRTX branch of UE5, there are several methods besides area PDF sampling for drawing candidate samples on light sources, such as ReGIR<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__regir" style="text-decoration: none;">[18]</a></sup> and BRDF ray sampling. And we store ReSTIR DI proposal PDF w.r.t solid angle around $x_1$.  And the same goes true for ReSTIR GI. Like I mentioned earlier, we could have totally came up with a solution that stored area PDF in GI reservoir in a ReSTIR GI implementation. Since most implementations store solid angle PDF, following discussion will assume so as well.</p>
+<p>This subtle detail is critically important for us to implement ReSTIR GI correctly. Essentially, in <span style="white-space: nowrap;"><a href="#eq_mix_nice_feature_final">equation 58</a></span>, we pointed it out that $p_{\omega}(x_1 \rightarrow x_2)$ is actually a function of $x_1$. So what does it really mean to us when it comes to implementing ReSTIR GI.</p>
+
+
+<figure class="custom-figure">
+  
+    <img src="/img/posts/understanding_the_math_behind_restir_gi/restirgi_graph.png" alt="Image">
+  
+  
+    <figcaption class="custom-figure-caption"><strong>Green arrow</strong>: continuation ray. <strong>Blue lines</strong>: Geometry. <strong>Yellow lines</strong>: geometry with emissive material</figcaption>
+  
+</figure>
+
+
+<p>Let&rsquo;s imagine a pixel B that hits $y_1$ would like to resample a candidate sample path drawn by a pixel A that hits $x_1$. During resampling, from pixel B&rsquo;s perspective, this candidate sample $\bar{\mathcal{Y}_M}$ is drawn by some PDF. How this candidate sample is drawn doesn&rsquo;t interest pixel B, all it cares is this sample comes with a PDF or a UCW. To make things simpler, let&rsquo;s focus on PDF for now since we do know the PDF of picking this candidate sample even though in complicated cases, this PDF could be intractable, only UCW is known. The theory below applies to UCW as well.</p>
+<p>We can certainly reuse the candidate sample. But can we directly reuse the PDF as well? It depends. If the PDF is independent of $x_1$, yes, we use the PDF without any changes. But if we draw samples based on a PDF w.r.t solid angle, it is a function of $x_1$. In order to resample this candidate path, we need a conversion to make sure we can transform $p_{\omega}(x_1 \rightarrow x_2)$ to $p_{\omega}(y_1 \rightarrow x_2)$. This appears intimidating in the first place. But it is actually quite trivial with the help of area PDF which is pixel independent. We can easily convert both into area PDF.</p>
+
+
+<div id="eq_x1tox2">$$
+\tag{60}
+
+p_{\omega}(x_1 \rightarrow x_2) = \dfrac{| x_1 - x_2 |^2}{cos(\theta_{x_2 \rightarrow x_1})} p_a(x_2)
+
+$$
+
+</div>
+
+
+
+<div id="eq_y1tox2">$$
+\tag{61}
+
+p_{\omega}(y_1 \rightarrow x_2) = \dfrac{| y_1 - x_2 |^2}{cos(\theta_{x_2 \rightarrow y_1})} p_a(x_2)
+
+$$
+
+</div>
+
+<p>By combining <span style="white-space: nowrap;"><a href="#eq_x1tox2">equation 60</a></span> and <span style="white-space: nowrap;"><a href="#eq_y1tox2">equation 61</a></span>, we can come up with the following equation.</p>
+
+
+<div id="eq_jacobian">$$
+\tag{62}
+
+p_{\omega}(y_1 \rightarrow x_2) = \left( \dfrac{| y_1 - x_2 |^2 cos(\theta_{x_2 \rightarrow x_1})}{| x_1 - x_2 |^2 cos(\theta_{x_2 \rightarrow y_1})} \right) p_{\omega}(x_1 \rightarrow x_2)
+
+$$
+
+</div>
+
+<p>To be clear, when we produce the resampling weight for this new candidate path, we need a few things, target function evaluated with this new candidate path mixed with $y_1$, multiple importance sampling weight and the reciprocal of proposal PDF and a Jacobian, the above transformation factor in <span style="white-space: nowrap;"><a href="#eq_jacobian">equation 62</a></span>. Here it is</p>
+
+
+<div id="eq_restirgi_resampling_weight">$$
+\tag{63}
+
+\begin{array} {lcl} w_i(x_0, y_1, \bar{\mathcal{Y}_M}) & = & \hat{p}(x_0, y_1, \bar{\mathcal{Y}_M}) m(x_0, y_1, \bar{\mathcal{Y}_M}) p_{\omega}(y_1 \rightarrow x_2) \\\\ & = & \hat{p}(x_0, y_1, \bar{\mathcal{Y}_M}) m(x_0, y_1, \bar{\mathcal{Y}_M}) p_{\omega}(x_1 \rightarrow x_2) \left( \dfrac{| x_1 - x_2 |^2 cos(\theta_{x_2 \rightarrow y_1})}{| y_1 - x_2 |^2 cos(\theta_{x_2 \rightarrow x_1})} \right) \end{array}
+
+$$
+
+</div>
+
+<p>This is well explained in the GRIS paper<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup>. But we didn&rsquo;t use the GRIS theory for explaination here just to make sure readers who have no knowledge about it will still understand why such an extra term is needed.</p>
+<p>One more note here is <span style="white-space: nowrap;"><a href="#eq_restirgi_resampling_weight">equation 63</a></span> draws a conflicted conclusion with Algorithm 4 in the original ReSTIR GI paper. After verifying with authors of the original paper, I believe the above form is the correct math for ReSTIR GI.</p>
+<h3 id="biased-resampling">Biased Resampling</h3>
+<p>There could be multiple sources of bias in a ReSTIR GI implementation. In this section, I would like to chat about the cached approximated radiance. Let&rsquo;s revisit <span style="white-space: nowrap;"><a href="#eq_revised_cache">equation 59</a></span> here. We mentioned the exact form of our cache, below is how we can reuse candidates from other reservoir:</p>
+
+
+<div id="eq_reuse_candidate">$$
+\tag{64}
+
+\ell_{mix,k}(x_0, y_1, x_2, u_3 \dots, u_k) = LC_k(x_2 \rightarrow x_1) f(x_2 \rightarrow y_1 \rightarrow x_0) cos(\theta_{y_1 \rightarrow x_2})
+
+$$
+
+</div>
+
+<p>The above shows how our cache will be in our Monte Carlo estimator. An observant reader may have already noticed a problem here, it is not even a correct expression to start with as $x_1$ is not part of the function, but it does show up on the right side. This moves the needle as when we resampling this candidate by another pixel, which has a different primary bounce, say $y_1$, the cache is immediately invalid as pointed out earlier unless it is purely lambert BRDF at $x_2$.
+To completely eliminate this bias, we need to reevaluate the BRDF at $x_2$ in <span style="white-space: nowrap;"><a href="#eq_revised_cache">equation 59</a></span> so that we can swap $x_1$ with $y_1$.  At first glance, evaluating the BRDF at $x_2$ doesn&rsquo;t seem difficult at all. The truth is quite the opposite. It is not trivial for a couple of reasons.</p>
+<ul>
+<li>
+<p>Modern game engines have complicated material setup, which can be reflected by the size of GBuffer, a place holder for us to keep track of all relevant parameters for BRDFs. This is a very typical solution for rasterization<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__deferredshading" style="text-decoration: none;">[19]</a></sup>. Lately, with the introduction of real time ray tracing<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__rtrt" style="text-decoration: none;">[20]</a></sup>, a new form of container becomes the payload, which is a lot more memory sensitive than GBuffer. Typically, payload doesn&rsquo;t have as much data as GBuffer because of it.<br>
+If we would like to reevaluate BRDF at $x_2$ during resampling, we would need to store all necessary input for BRDF of our interests ideally. Even though, this is still O(1) memory cost, it does dramatically bump the size of a reservoir easily by a few times. Earlier we mentioned the extra memory bandwidth and register pressure, but an extra burden is possible heavier live state during Shader Execute Reordering (SER)<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__ser" style="text-decoration: none;">[21]</a></sup>, none of which is friendly to GPU performance. The negative impact is no where near negligible.</p>
+</li>
+<li>
+<p>Apart from memory cost that burdens performance, there is also challenges coming from the BRDF execution logic. It could be quite a few of instructions just to evaluate a BRDF. Because this needs to happen at multiple places, wherever resampling weight is needed, shader divergence could be legit concern as well. Besides, the extra instructions in shader kernel may lower instruction cache hit rate as well. To be clear, we indeed have the BRDF evaluation cost during resampling because of target function require $f(x_2 \rightarrow x_1 \rightarrow x_0)$ if we choose our target function to be the full integrand of rendering equation. What I&rsquo;m saying here is we don&rsquo;t appreciate more execution of these unless we have to.</p>
+</li>
+<li>
+<p>With our current setup without any NEE or BRDF sampling, we got only one extra BRDF for evaluation, which is $f(x_3 \rightarrow x_2 \rightarrow x_1)$. The memory requirement goes beyond BRDF, it needs position of $x_3$ to be stored as well. But in practice, it is almost always more complicated than this. Because literally all path tracers draw NEE samples, which introduces another BRDF for evaluation. Things get even more sophisticated when multiple importance sampling with BRDF ray is applied, not just because we need one more BRDF evaluation for BRDF samples, but balance heuristic may easily introduce a few more. What is even worse is the NEE/BRDF sample positions will need to be stored as well.<br>
+One practical and possible solution to the problem is to resample one single path within the path tree in path space and then pass the PSS candidate around, still with $x_2$ in path domain, of course. This is similar to what ReSTIR PT does. With care, if we resample one single path, it is possible to restrict the extra BRDF evaluation into one. This goes beyond the topic of this blog post, if readers are interested in it, checkout the ReSTIR PT paper<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup>.</p>
+</li>
+<li>
+<p>If all the above still don&rsquo;t convince you this is a bad idea, here is a blocker next. A candidate sample in ReSTIR GI is $\bar{\mathcal{Y}}_k$ during reusing, we only reuse $x_2$ in path domain. For the rest of the dimensions, we reuse the candidate sample in primary sample space. To some degree, we can think about it this way, we reuse $x_2$ and the random numbers ($u_3, \dots, u_M$) so that we can produce the rest of the path tree beyond $x_2$. The cache makes one assumption that as long as $x_2$ is reused, the same random numbers ($u_3, \dots, u_M$) will produce exactly the same path tree as the original path tree produced by the sample to be reused. But if we look closer, this assumption is a broken one. To explain, we draw BRDF continuation ray at $x_2$ to find $x_3$ during producing this candidate in the first place, this process again is a function of $x_1$. And this is pretty bad as with a different $y_1$ now, even if we have the same $x_2$, the rest of primary sample space candidate being the same doesn&rsquo;t guarantee us the same path tree  anymore. This means the bias not only comes from $f(x_3 \rightarrow x_2 \rightarrow x_1)$, but also a different path tree. The whole evaluation of this remapped candidate should be much more different than what we actually used to produce the cache.<br>
+Do we have a solution to the problem? One way to fix the problem for real is to actually produce the newly remapped path tree by shooting a bunch of new rays with ($u_3, \dots, u_M$) and of course BRDF evaluations as well. This solution will work in theory. However, the power of ReSTIR is to borrow samples at minimal cost rather than drawing new samples. And this negates that by almost turning the resampling into drawing a whole new sample. This is not to say ReSTIR will lose its exponential growth of sample quality at linear cost, but it greatly reduces the number of candidates we consider during resampling. Be mindful if we check visibility during resampling in ReSTIR DI, reusing is similar with drawing a new sample in terms of cost. Different than ReSTIR DI, in ReSTIR GI, its initial candidate is a whole lot more expensive to produce, which commonly requires a path tracer. And this is why we can draw up to 32 samples in ReSTIR DI during initial sample generation pass, but we couldn&rsquo;t produce anywhere near this in a ReSTIR GI algorithm.</p>
+</li>
+</ul>
+<p>With all the above reasons, it is clear that fixing the bias is close to impossible without tanking perf. But in theory, it is still doable. Even if we still want to give it a try, one more question we should be asking ourselves should be is there value in fixing it?</p>
+
+
+<figure class="custom-figure">
+  
+    <img src="/img/posts/understanding_the_math_behind_restir_gi/restirgi_diracdelta_x2.png" alt="Image">
+  
+  
+    <figcaption class="custom-figure-caption">Effectively no resampling in caustic case with ReSTIR GI</figcaption>
+  
+</figure>
+
+
+<p>Imagine BRDF at $x_2$ has a sharp shape, what likely will happen is with reevaluated BRDF at $x_2$, chances are the new candidate will likely to be rejected, during resampling. This is simply caustic case, which is not something ReSTIR GI is designed for. ReSTIR GI will work mostly well when the BRDFs at $x_1$ and $x_2$ are mostly rough enough.
+In summary, when the BRDF at $x_2$ is sharp, the decision of whether to reevaluate during resampling it boils down to a choice between biased resampling and inefficient resampling, neither of which is perfect.
+In the case of rough BRDF at $x_2$, the reevaluated BRDF at $x_2$ likely will be similar with the one baked in the cache. This gives us another good reason not to pursue for a proper fix for this bias.</p>
+<h3 id="visibility-check-during-resampling">Visibility Check During Resampling</h3>
+<p>The next topic that we should visit is visibility checking during resampling. To make things clear, let&rsquo;s add one more detail in <span style="white-space: nowrap;"><a href="#eq_lp_mix_integrand_final">equation 56</a></span></p>
+
+
+<div id="eq_lp_mix_integrand_final_revised">$$
+\tag{65}
+
+\begin{aligned}
+\ell_{mix,k}(x_0, x_1, x_2, u_3 \dots, u_k) &= L_e(y_{mix,k} \rightarrow y_{mix,k-1}) f(x_2 \rightarrow x_1 \rightarrow x_0) cos(\theta_{x_1 \rightarrow x_2}) V(x_1, x_2)
+\\[0.5em] &\quad  \prod_{i=3}^{k} \frac{f(y_{mix,i} \rightarrow y_{mix,i-1} \rightarrow y_{mix,i-2}) cos(\theta_{y_{i-1} \rightarrow y_i})}{p_{\omega}(y_{mix, i-1} \rightarrow y_{mix, i})}
+\end{aligned}
+
+$$
+
+</div>
+
+<p>The revised form only differs by an additional visibility factor. This factor is commonly absent in most sources as it is mostly assumed that when rendering equation integral is over solid angle, rather than area, next bounces are found by continuation ray drawn from BRDF, hence consecutive bounces in a path are visible to each other by default.</p>
+<p>However, I&rsquo;d like to repeat my point here again, it is one thing that we integral over solid angle, it is totally another thing to draw samples from solid angle PDF. We don&rsquo;t have to do so. There are a few examples already.</p>
+<ul>
+<li>As a matter of fact, ReSTIR GI itself is one example. During resampling, pixel B only borrows a sample from pixel A. What pixel A offers is a sample along with its PDF or UCW. But the way it produces its candidate sample could be based on PDF w.r.t solid angle around pixel A&rsquo;s $x_1$, it could even be a sample produced by RIS, which only offers UCW, rather than PDF. Either is fine. However, the important detail to note is that for pixel B, the sample provided by pixel A is not drawn according to a PDF with respect to solid angle, at least not around pixel B&rsquo;s primary bounce $y_1$, even if the rendering equation is integrated over solid angle. This could mean $y_1$ and $x_2$ may not be visible to each other, which makes the above visibility term necessary.</li>
+<li>If the above example is a bit difficult to understand, here is an easy one that everyone is familiar with. During NEE sampling, which commonly uses an area PDF, it doesn&rsquo;t really matter if the rendering equation is over solid angle or not, a visibility ray, commonly named NEE ray or light ray, is necessary to make sure we don&rsquo;t count contribution from blocked light sources. In this case, visibility ray is also needed.</li>
+</ul>
+<p>One more subtle detail here is I didn&rsquo;t add the visibility term between any other two consecutive bounces in a path in <span style="white-space: nowrap;"><a href="#eq_lp_mix_integrand_final_revised">equation 65</a></span>, this is by assuming continuation ray verifies it for us already, which is somewhat fine for ReSTIR GI. To be quite strict, ReSTIR GI doesn&rsquo;t restrict in what way we should approximate radiance coming from $x_2$ to $x_1$ even though it mentions NEE sampling based path tracer, other methods can be used<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restirgi_impl" style="text-decoration: none;">[22]</a></sup>. For simplicity, we ignore it here by assuming further consecutive bounces after $x_2$ are all visible to each other by default. If necessary, this needs to be added.</p>
+<p>So what does it mean with the extra visibility term in <span style="white-space: nowrap;"><a href="#eq_lp_mix_integrand_final_revised">equation 65</a></span> when it comes to ReSTIR GI implementation? A few things</p>
+<ul>
+<li>We need to verify visibility during final evaluation. This sounds very nature because we would certainly not want to count blocked paths from contributing our pixel. The theory behind it is clearly explained in this section.<br>
+And the truth is if the resampling path right before final evaluation checks visibility during its resampling, we don&rsquo;t need to check it in the shading pass anymore as we are sure during the last resampling pass the winner sample is a visible path.</li>
+<li>Target function is a bit tricky here. Ideally, we need to count the visibility check during temporal and spatial resampling as well. This gives us zero variance approximation in an ideal world. However, this will lower the performance of resampling. So the question is can we choose not to check visibility just to save a bit of cost during resampling? Thanks to the per-initial candidate target function theory, we can choose to check visibility during resampling and we can also choose to ignore it during resampling in target function as well, which will lower sampling efficiency but gain some perf. We can even choose to do so based on particular samples to be reused.</li>
+</ul>
+<p>In practice, not having to check visibility during resampling does allow us to reuse more samples during resampling, which is a welcome change in real time rendering. The efficiency lost mostly happens at where occlusion happens and denoiser commonly does a good job at getting rid of the noise in general.</p>
+<h1 id="restir-gi-restrictions">ReSTIR GI Restrictions</h1>
+<p>Last, we should identify a restriction of ReSTIR GI. This is not a tech that solves all GI problems. As we can imagine, when BRDF at $y_1$ has a sharp shape, a tiny little change in the direction of the secondary bounce will likely result in no resampling at all. In a corner case, if it is a dirac delta BRDF at $x_1$, the path candidate for pixel A will only make sense for itself, any other pixels with attempts to reuse this sample will result in failure for resampling as the BRDF reevaluated at their own primary surface will result in 0 or a close-to-zero value, which commonly means zero or very small target function value, hence a lower resampling weight as well.</p>
+
+
+<figure class="custom-figure">
+  
+    <img src="/img/posts/understanding_the_math_behind_restir_gi/restirgi_diracdelta.png" alt="Image">
+  
+  
+    <figcaption class="custom-figure-caption">Resampling of path that introdcues almost no contribution.</figcaption>
+  
+</figure>
+
+
+<p>This is why ReSTIR GI is not specifically designed for sharp specular reflections in global illumination. Because in such cases, it effectively reduces to a standard path tracer. The quality of the sampling becomes identical to that produced by the path tracer during its initial sampling pass. As shown in the comparison below, we observe a significant improvement in GI quality on diffuse materials, while reflections in the mirror exhibit a similar level of noise.</p>
+
+
+
+
+
+
+
+ 
+ 
+ 
+ 
+
+
+
+
+<style>
+.ba-sliderb21bfb02832e9f359ffa2d4d1c4a2a7e {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    margin: auto;
+    background-color: #FFFFFF;  
+}
+
+.ba-sliderb21bfb02832e9f359ffa2d4d1c4a2a7e img {
+    width: 100%;
+    display: block;
+    max-width: none;
+}
+
+.ba-sliderb21bfb02832e9f359ffa2d4d1c4a2a7e .resize {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 58%;  
+    overflow: hidden;
+}
+
+.ba-sliderb21bfb02832e9f359ffa2d4d1c4a2a7e .handle {
+    position: absolute;
+    left: 58%;  
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(0, 0, 0, 0.4);
+    cursor: ew-resize;
+    z-index: 20;
+    transition: background-color 0.3s ease;
+}
+.ba-sliderb21bfb02832e9f359ffa2d4d1c4a2a7e .handle:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    margin-top: -32px;
+    margin-left: -4px;
+    width: 10px;
+    height: 64px;
+    background: #808080;
+}
+
+.ba-containerb21bfb02832e9f359ffa2d4d1c4a2a7e {
+    position: relative;
+    text-align: center;
+}
+
+.ba-bottom-leftb21bfb02832e9f359ffa2d4d1c4a2a7e,
+.ba-bottom-rightb21bfb02832e9f359ffa2d4d1c4a2a7e {
+    position: absolute;
+    bottom: 8px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.ba-bottom-leftb21bfb02832e9f359ffa2d4d1c4a2a7e {
+    left: 16px;
+    color: #FFFFFF;  
+}
+.ba-bottom-rightb21bfb02832e9f359ffa2d4d1c4a2a7e {
+    right: 16px;
+    color: #FFFFFF;  
+}
+
+ 
+
+.ba-link-leftb21bfb02832e9f359ffa2d4d1c4a2a7e ,
+.ba-link-rightb21bfb02832e9f359ffa2d4d1c4a2a7e {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    z-index: 10;
+}
+.ba-link-leftb21bfb02832e9f359ffa2d4d1c4a2a7e {
+    left: 0;
+}
+.ba-link-rightb21bfb02832e9f359ffa2d4d1c4a2a7e {
+    right: 0;
+}
+
+</style>
+
+<figure class="custom-compare">
+    <div class="ba-sliderb21bfb02832e9f359ffa2d4d1c4a2a7e" id="ba-slider-b21bfb02832e9f359ffa2d4d1c4a2a7e">
+        <div class="ba-containerb21bfb02832e9f359ffa2d4d1c4a2a7e">
+            <img src="/img/posts/understanding_the_math_behind_restir_gi/compare_pt.png">
+            <div class="ba-bottom-rightb21bfb02832e9f359ffa2d4d1c4a2a7e">Standard Path Tracer</div>
+        </div>
+        <div class="resize">
+            <img src="/img/posts/understanding_the_math_behind_restir_gi/compare_restir.png">
+            <div class="ba-bottom-leftb21bfb02832e9f359ffa2d4d1c4a2a7e">ReSTIR GI</div>
+        </div>
+        <span class="handle"></span>
+
+        
+        
+        <a class="ba-link-leftb21bfb02832e9f359ffa2d4d1c4a2a7e" id="ba-link-left-b21bfb02832e9f359ffa2d4d1c4a2a7e" href="/img/posts/understanding_the_math_behind_restir_gi/compare_restir.png" target="_blank"></a>
+        <a class="ba-link-rightb21bfb02832e9f359ffa2d4d1c4a2a7e" id="ba-link-right-b21bfb02832e9f359ffa2d4d1c4a2a7e" href="/img/posts/understanding_the_math_behind_restir_gi/compare_pt.png" target="_blank"></a>
+        
+    </div>
+    
+        <figcaption class="custom-figure-caption">While ReSTIR GI improves the GI signal on matte materials, the noise level on the metallic ball remains unchanged</figcaption>
+    
+</figure>
+
+
+<script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" crossorigin="anonymous"></script>
+
+
+<script>
+(function($) {
+  function drags(dragElement, resizeElement, container) {
+    dragElement.on('mousedown.ba touchstart.ba', function(e) {
+      dragElement.addClass('ba-draggable');
+      resizeElement.addClass('ba-resizable');
+
+      var startX = e.pageX || e.originalEvent.touches[0].pageX;
+      var dragWidth = dragElement.outerWidth(),
+          posX = dragElement.offset().left + dragWidth - startX,
+          containerOffset = container.offset().left,
+          containerWidth = container.outerWidth();
+
+      var minLeft = containerOffset + 10;
+      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+
+      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
+        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
+        var leftValue = moveX + posX - dragWidth;
+
+        if (leftValue < minLeft) leftValue = minLeft;
+        else if (leftValue > maxLeft) leftValue = maxLeft;
+
+        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+
+        dragElement.css('left', percentage);
+        resizeElement.css('width', percentage);
+
+        updateLinks(container, dragElement);
+      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
+        dragElement.removeClass('ba-draggable');
+        resizeElement.removeClass('ba-resizable');
+        $(this).off('.ba');
+      });
+
+      e.preventDefault();
+    });
+  }
+
+  function updateLinks(container, handle) {
+    var containerWidth = container.outerWidth();
+    var handleLeft = handle.position().left;
+
+    var leftLink = container.find('.ba-link-leftb21bfb02832e9f359ffa2d4d1c4a2a7e');
+    var rightLink = container.find('.ba-link-rightb21bfb02832e9f359ffa2d4d1c4a2a7e');
+
+    var deadZone = 20; 
+
+    leftLink.css({
+      width: Math.max(0, handleLeft - deadZone) + 'px'
+    });
+
+    rightLink.css({
+      width: Math.max(0, containerWidth - handleLeft - deadZone) + 'px',
+      left: (handleLeft + deadZone) + 'px'
+    });
+  }
+
+  $.fn.beforeAfter = function() {
+    var container = $(this);
+    var handle = container.find('.handle');
+    var resize = container.find('.resize');
+
+    var width = container.width();
+    resize.find('img').css('width', width + 'px');
+
+    drags(handle, resize, container);
+    updateLinks(container, handle);
+
+    $(window).on('resize', function() {
+      var width = container.width();
+      resize.find('img').css('width', width + 'px');
+      updateLinks(container, handle);
+    });
+  }
+})(jQuery);
+
+$('#ba-slider-b21bfb02832e9f359ffa2d4d1c4a2a7e').beforeAfter();
+</script>
+
+<p>To clarify, this is not to suggest that ReSTIR GI cannot handle specular GI signals at all. In fact, based on my experience, any roughness value greater than 0.04 in UE5 will likely result in minimal issues during resampling. However, values close to 0.01 start to reveal sampling problems. In UE5’s Lumen system, the screen-space probe gathering pass also handles indirect diffuse and rough specular signals, making it an ideal candidate for ReSTIR GI to swap with. The following comparison of ReSTIR GI, with and without rough specular contribution, clearly demonstrates the value of the rough specular signal produced by ReSTIR GI.</p>
+
+
+
+
+
+
+
+ 
+ 
+ 
+ 
+
+
+
+
+<style>
+.ba-slider0498f65ffc3ed535c15b989a960a23c2 {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    margin: auto;
+    background-color: #FFFFFF;  
+}
+
+.ba-slider0498f65ffc3ed535c15b989a960a23c2 img {
+    width: 100%;
+    display: block;
+    max-width: none;
+}
+
+.ba-slider0498f65ffc3ed535c15b989a960a23c2 .resize {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 62%;  
+    overflow: hidden;
+}
+
+.ba-slider0498f65ffc3ed535c15b989a960a23c2 .handle {
+    position: absolute;
+    left: 62%;  
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(0, 0, 0, 0.4);
+    cursor: ew-resize;
+    z-index: 20;
+    transition: background-color 0.3s ease;
+}
+.ba-slider0498f65ffc3ed535c15b989a960a23c2 .handle:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    margin-top: -32px;
+    margin-left: -4px;
+    width: 10px;
+    height: 64px;
+    background: #808080;
+}
+
+.ba-container0498f65ffc3ed535c15b989a960a23c2 {
+    position: relative;
+    text-align: center;
+}
+
+.ba-bottom-left0498f65ffc3ed535c15b989a960a23c2,
+.ba-bottom-right0498f65ffc3ed535c15b989a960a23c2 {
+    position: absolute;
+    bottom: 8px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.ba-bottom-left0498f65ffc3ed535c15b989a960a23c2 {
+    left: 16px;
+    color: #FFFFFF;  
+}
+.ba-bottom-right0498f65ffc3ed535c15b989a960a23c2 {
+    right: 16px;
+    color: #FFFFFF;  
+}
+
+ 
+
+.ba-link-left0498f65ffc3ed535c15b989a960a23c2 ,
+.ba-link-right0498f65ffc3ed535c15b989a960a23c2 {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    z-index: 10;
+}
+.ba-link-left0498f65ffc3ed535c15b989a960a23c2 {
+    left: 0;
+}
+.ba-link-right0498f65ffc3ed535c15b989a960a23c2 {
+    right: 0;
+}
+
+</style>
+
+<figure class="custom-compare">
+    <div class="ba-slider0498f65ffc3ed535c15b989a960a23c2" id="ba-slider-0498f65ffc3ed535c15b989a960a23c2">
+        <div class="ba-container0498f65ffc3ed535c15b989a960a23c2">
+            <img src="/img/posts/understanding_the_math_behind_restir_gi/restirgi_no_spec.png">
+            <div class="ba-bottom-right0498f65ffc3ed535c15b989a960a23c2">Without Rough Specular Contribution</div>
+        </div>
+        <div class="resize">
+            <img src="/img/posts/understanding_the_math_behind_restir_gi/restirgi_spec.png">
+            <div class="ba-bottom-left0498f65ffc3ed535c15b989a960a23c2">With Rough Specular Contribution</div>
+        </div>
+        <span class="handle"></span>
+
+        
+        
+        <a class="ba-link-left0498f65ffc3ed535c15b989a960a23c2" id="ba-link-left-0498f65ffc3ed535c15b989a960a23c2" href="/img/posts/understanding_the_math_behind_restir_gi/restirgi_spec.png" target="_blank"></a>
+        <a class="ba-link-right0498f65ffc3ed535c15b989a960a23c2" id="ba-link-right-0498f65ffc3ed535c15b989a960a23c2" href="/img/posts/understanding_the_math_behind_restir_gi/restirgi_no_spec.png" target="_blank"></a>
+        
+    </div>
+    
+        <figcaption class="custom-figure-caption">The rough specular contribution accounts for a significant amount of energy in the image</figcaption>
+    
+</figure>
+
+
+<script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" crossorigin="anonymous"></script>
+
+
+<script>
+(function($) {
+  function drags(dragElement, resizeElement, container) {
+    dragElement.on('mousedown.ba touchstart.ba', function(e) {
+      dragElement.addClass('ba-draggable');
+      resizeElement.addClass('ba-resizable');
+
+      var startX = e.pageX || e.originalEvent.touches[0].pageX;
+      var dragWidth = dragElement.outerWidth(),
+          posX = dragElement.offset().left + dragWidth - startX,
+          containerOffset = container.offset().left,
+          containerWidth = container.outerWidth();
+
+      var minLeft = containerOffset + 10;
+      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+
+      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
+        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
+        var leftValue = moveX + posX - dragWidth;
+
+        if (leftValue < minLeft) leftValue = minLeft;
+        else if (leftValue > maxLeft) leftValue = maxLeft;
+
+        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+
+        dragElement.css('left', percentage);
+        resizeElement.css('width', percentage);
+
+        updateLinks(container, dragElement);
+      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
+        dragElement.removeClass('ba-draggable');
+        resizeElement.removeClass('ba-resizable');
+        $(this).off('.ba');
+      });
+
+      e.preventDefault();
+    });
+  }
+
+  function updateLinks(container, handle) {
+    var containerWidth = container.outerWidth();
+    var handleLeft = handle.position().left;
+
+    var leftLink = container.find('.ba-link-left0498f65ffc3ed535c15b989a960a23c2');
+    var rightLink = container.find('.ba-link-right0498f65ffc3ed535c15b989a960a23c2');
+
+    var deadZone = 20; 
+
+    leftLink.css({
+      width: Math.max(0, handleLeft - deadZone) + 'px'
+    });
+
+    rightLink.css({
+      width: Math.max(0, containerWidth - handleLeft - deadZone) + 'px',
+      left: (handleLeft + deadZone) + 'px'
+    });
+  }
+
+  $.fn.beforeAfter = function() {
+    var container = $(this);
+    var handle = container.find('.handle');
+    var resize = container.find('.resize');
+
+    var width = container.width();
+    resize.find('img').css('width', width + 'px');
+
+    drags(handle, resize, container);
+    updateLinks(container, handle);
+
+    $(window).on('resize', function() {
+      var width = container.width();
+      resize.find('img').css('width', width + 'px');
+      updateLinks(container, handle);
+    });
+  }
+})(jQuery);
+
+$('#ba-slider-0498f65ffc3ed535c15b989a960a23c2').beforeAfter();
+</script>
+
+<h1 id="summary">Summary</h1>
+<p>In this post, we’ve gone through an in-depth analysis of several key aspects of ReSTIR GI, including initial candidate concept, resampling, and the various sources of bias. These details are crucial when implementing the ReSTIR GI algorithm in a real project. While this knowledge might not directly improve your current implementation, gaining a deeper understanding of the underlying mathematics can open up new opportunities for future improvements.</p>
+<p>Last but not least, before wrapping up this post, I’d like to thank my peer <a href="https://research.nvidia.com/person/markus-kettunen">Markus Kettunen</a>, one of the authors of the original ReSTIR GI paper, for helping me verify the theory and for reviewing this lengthy article with helpful corrections. He also pointed out the fourth cause in the bias section, which was new to me. That said, even though I received valuable input from my Nvidia colleague, <strong>this article is not an official explanation of ReSTIR GI.</strong> It simply reflects my personal thoughts and learnings during my implementation of ReSTIR GI. Please take everything discussed here with a grain of salt. And if you notice any inaccuracies or unclear explanations, feel free to leave a comment.</p>
+<!-- raw HTML omitted -->
+<h1 id="references">References</h1>
+<div><div id="ref-ref_tag__restir_gris">
+      [1]
+        
+        <a href="https://research.nvidia.com/publication/2022-07_generalized-resampled-importance-sampling-foundations-restir" rel="noopener noreferrer">Generalized Resampled Importance Sampling: Foundations of ReSTIR</a>
+    </div><div id="ref-ref_tag__restir_gi">
+      [2]
+        
+        <a href="https://research.nvidia.com/publication/2021-06_restir-gi-path-resampling-real-time-path-tracing" rel="noopener noreferrer">ReSTIR GI: Path Resampling for Real-Time Path Tracing</a>
+    </div><div id="ref-ref_tag__mk_rptltge">
+      [3]
+        
+        <a href="https://gdcvault.com/play/1034648/Advanced-Graphics-Summit-Making-Connections" rel="noopener noreferrer">Making Connections: Real-Time Path-Traced Light Transport in Game Engines</a>
+    </div><div id="ref-ref_tag__ptniz">
+      [4]
+        
+        <a href="https://www.nvidia.com/en-us/on-demand/session/gdc25-gdc1002/" rel="noopener noreferrer">Path tracing nanite in zorah</a>
+    </div><div id="ref-ref_tag__utmbrd">
+      [5]
+        
+        <a href="https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_di/" rel="noopener noreferrer">Understanding The Math Behind ReSTIR DI</a>
+    </div><div id="ref-ref_tag__restir_di">
+      [6]
+        
+        <a href="https://research.nvidia.com/publication/2020-07_spatiotemporal-reservoir-resampling-real-time-ray-tracing-dynamic-direct" rel="noopener noreferrer">Spatiotemporal reservoir resampling for real-time ray tracing with dynamic direct lighting</a>
+    </div><div id="ref-ref_tag__lumen">
+      [7]
+        
+        <a href="https://advances.realtimerendering.com/s2022/index.html#Lumen" rel="noopener noreferrer">Lumen: Real-time Global Illumination in Unreal Engine 5</a>
+    </div><div id="ref-ref_tag__pguide0">
+      [8]
+        
+        <a href="https://studios.disneyresearch.com/wp-content/uploads/2019/03/Practical-Path-Guiding-for-Efficient-Light-Transport-Simulation.pdf" rel="noopener noreferrer">Practical Path Guiding for Efficient Light-Transport Simulation</a>
+    </div><div id="ref-ref_tag__pguide1">
+      [9]
+        
+        <a href="https://cgg.mff.cuni.cz/~jirka/path-guiding-in-production/2019/index.htm" rel="noopener noreferrer">Path Guiding in Production</a>
+    </div><div id="ref-ref_tag__pbrt">
+      [10]
+        
+        <a href="https://www.pbr-book.org/" rel="noopener noreferrer">Physically Based Rendering</a>
+    </div><div id="ref-ref_tag__ris">
+      [11]
+        
+        <a href="https://scholarsarchive.byu.edu/cgi/viewcontent.cgi?article=1662&amp;context=etd" rel="noopener noreferrer">Importance Resampling for Global Illumination</a>
+    </div><div id="ref-ref_tag__ev_thesis">
+      [12]
+        
+        <a href="#ZgotmplZ" rel="noopener noreferrer">Robust Monte Carlo Methods For Light Transport Simulation</a>
+    </div><div id="ref-ref_tag__wrs">
+      [13]
+        
+        <a href="https://cwyman.org/papers/rtg2-chapter22-preprint.pdf" rel="noopener noreferrer">Weighted Reservoir Sampling: Randomly Sampling Streams</a>
+    </div><div id="ref-ref_tag__gentle_restir">
+      [14]
+        
+        <a href="https://intro-to-restir.cwyman.org/" rel="noopener noreferrer">A Gentle Introduction to ReSTIR: Path Reuse in Real-time</a>
+    </div><div id="ref-ref_tag__nee">
+      [15]
+        
+        <a href="https://www.cg.tuwien.ac.at/sites/default/files/course/4411/attachments/08_next%20event%20estimation.pdf" rel="noopener noreferrer">Rendering: Next Event Estimation</a>
+    </div><div id="ref-ref_tag__rtiow">
+      [16]
+        
+        <a href="https://raytracing.github.io/" rel="noopener noreferrer">Ray Tracing in One Weekend (The Book Series)</a>
+    </div><div id="ref-ref_tag__mitsuba3">
+      [17]
+        
+        <a href="https://www.mitsuba-renderer.org/" rel="noopener noreferrer">Mitsuba 3 Physically Based Renderer</a>
+    </div><div id="ref-ref_tag__regir">
+      [18]
+        
+        <a href="https://research.nvidia.com/labs/rtr/publication/boksansky2021rendering/" rel="noopener noreferrer">Rendering Many Lights with Grid-Based Reservoirs</a>
+    </div><div id="ref-ref_tag__deferredshading">
+      [19]
+        
+        <a href="https://my.eng.utah.edu/~cs5600/slides/Wk%209%20D3DTutorial_DeferredShading.pdf" rel="noopener noreferrer">Deferred Shading</a>
+    </div><div id="ref-ref_tag__rtrt">
+      [20]
+        
+        <a href="https://rtintro.realtimerendering.com/" rel="noopener noreferrer">Introduction To Real-Time Ray Tracing</a>
+    </div><div id="ref-ref_tag__ser">
+      [21]
+        
+        <a href="https://developer.nvidia.com/blog/improve-shader-performance-and-in-game-frame-rates-with-shader-execution-reordering/" rel="noopener noreferrer">Improve Shader Performance and In-Game Frame Rates with Shader Execution Reordering</a>
+    </div><div id="ref-ref_tag__restirgi_impl">
+      [22]
+        
+        <a href="https://medium.com/traverse-research/dynamic-diffuse-global-illumination-b56dc0525a0a" rel="noopener noreferrer">Dynamic diffuse global illumination</a>
+    </div></div>
+
+
+      </div>
+
+      <div class="">
+        <style>
+    .toc {
+        position: fixed;
+        left: 50%;
+        top: 110px;
+        font-size: 0.8em;
+        width: 320px;
+        margin-left: 480px;
+        padding-left: 20px;
+        padding-bottom: 100px;
+        padding-top: 80px;
+        overflow-y: auto;
+        line-height: 1.7em;
+        scroll-padding-top: 100px;
+        border-left: 3px solid rgba(128, 128, 128, 0.4);;
+    }
+
+    .toc label {
+        font-size: 20px;
+        font-weight: bold;
+        margin: 6.4rem 0 3.2rem 0;
+    }
+
+    .toc a {
+        filter: grayscale(90%);
+    }
+
+    .toc a:hover {
+        font-weight: bold;
+        filter: grayscale(0%);
+    }
+
+    .toc ul {
+        margin-left:1px;
+        padding-left: 20px;
+        list-style-type: circle;
+    }
+    
+     
+    .toc ul ul{
+        margin-left:1px;
+        padding-left: 20px;
+        list-style-type: circle;
+    }
+
+     
+    .toc ul ul ul{
+        margin-left:1px;
+        padding-left: 20px;
+        list-style-type: circle;
+    }
+
+    .toc li a.active {
+        font-weight: bold;
+        filter: grayscale(0%);
+    }
+
+    .toc li a.semi_active {
+        font-weight: bold;
+        filter: grayscale(60%);
+    }
+
+    @media (max-width: 1640px) {
+      main {
+        max-width: 100%;
+      }
+  
+      .toc {
+        display: none;
+      }
+    }
+
+</style>
+  
+
+
+
+
+
+
+
+
+
+
+<div class="toc" style="display:none;">
+    <label>Contents</label>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#introduction">Introduction</a></li>
+    <li><a href="#preliminary-reading">Preliminary Reading</a>
+      <ul>
+        <li><a href="#rendering-equation">Rendering Equation</a></li>
+        <li><a href="#primary-sample-space">Primary Sample Space</a></li>
+        <li><a href="#per-initial-candidate-target-function-in-ris">Per Initial Candidate Target Function in RIS</a></li>
+      </ul>
+    </li>
+    <li><a href="#restir-gi-details">ReSTIR GI Details</a>
+      <ul>
+        <li><a href="#initial-candidates-in-restir-gi">Initial Candidates in ReSTIR GI</a>
+          <ul>
+            <li><a href="#a-possible-solution">A Possible Solution?</a></li>
+            <li><a href="#primary-sample-space-initial-candidate">Primary Sample Space Initial Candidate?</a></li>
+            <li><a href="#the-functional-form-of-initial-candidates-in-restir-gi">The Functional Form of Initial Candidates in ReSTIR GI</a></li>
+            <li><a href="#typical-implementation-of-restir-gi-initial-candidates">Typical Implementation of ReSTIR GI Initial Candidates</a></li>
+          </ul>
+        </li>
+        <li><a href="#resampling-samples">Resampling Samples</a>
+          <ul>
+            <li><a href="#conversion-of-pdf-during-resampling">Conversion of PDF during Resampling</a></li>
+            <li><a href="#biased-resampling">Biased Resampling</a></li>
+            <li><a href="#visibility-check-during-resampling">Visibility Check During Resampling</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#restir-gi-restrictions">ReSTIR GI Restrictions</a></li>
+    <li><a href="#summary">Summary</a></li>
+    <li><a href="#references">References</a></li>
+  </ul>
+</nav>
+</div>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.slim.min.js" integrity="sha384-5AkRS45j4ukf+JbWAfHL8P4onPA9p0KwwP7pUdjSQA3ss9edbJUJc/XcYAiheSSz" crossorigin="anonymous"></script>
+    <script>
+        (function() {
+            var $toc = $('#TableOfContents');
+            
+            if ($toc.length > 0) {
+                var $window = $(window);
+                
+                function onScroll(){
+                    var currentScroll = $window.scrollTop();
+                    var h = $('h1, h2, h3, h4, h5, h6');
+                    var id = "";
+                    h.each(function (i, e) {
+                        e = $(e);
+                        if (e.offset().top - 80 <= currentScroll ) {
+                            id = e.attr('id');
+                        }
+                    });
+                    var active = $toc.find('a.active');
+                    if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
+
+                    active.each(function (i, e) {
+                        $(e).removeClass('active').siblings('ul').hide();
+                    });
+
+                    var semi_active = $toc.find('a.semi_active');
+                    semi_active.each(function (i, e) {
+                        $(e).removeClass('semi_active').siblings('ul').hide();
+                    });
+                    
+                    $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
+                        if( i == 0 )
+                            $(e).children('a').addClass('active').siblings('ul').show();
+                        else
+                            $(e).children('a').addClass('semi_active').siblings('ul').show();
+                    });
+                }
+
+                $window.on('scroll', onScroll);
+                $(document).ready(function() {
+                    $toc.find('a').parent('li').find('ul').hide();
+                    onScroll();
+                    document.getElementsByClassName('toc')[0].style.display = '';
+                });
+            }
+        })();
+    </script>
+
+      </div>
+
+      <footer>
+        
+
+
+        <script>
+    
+    function updateThemeToMatchDarkMode(isdarkmode) {
+      localStorage.setItem("pref-theme", isdarkmode ? 'dark_dimmed' : 'light');
+
+      
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if(iframe) {
+        const message = { setConfig: { theme: isdarkmode ? 'dark_dimmed' : 'light' } };
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+    }
+
+    
+    document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+      const isdarkmode = !document.body.classList.contains("colorscheme-dark");
+      updateThemeToMatchDarkMode(isdarkmode);
+    });
+
+    
+    window.onload = () => {
+      const isdarkmode = document.body.classList.contains("colorscheme-dark");
+      updateThemeToMatchDarkMode(isdarkmode);
+    };
+
+    
+    {
+      let giscusTheme = localStorage.getItem("pref-theme");
+      let giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo": "JiayinCao\/AGraphicsGuyNotes",
+        "data-repo-id": "MDEwOlJlcG9zaXRvcnkzMDQ5MjAzMDg=",
+        "data-category": "Giscus-Comments",
+        "data-category-id": "DIC_kwDOEiy29M4CTFTj",
+        "data-strict" : "1",
+        "data-mapping": "pathname",
+        "data-reactions-enabled": "0",
+        "data-emit-metadata": "0",
+        "data-input-position": "bottom",
+        "data-theme": giscusTheme === null ? "light" : giscusTheme,
+        "data-lang": "en",
+        "crossorigin": "anonymous",
+        "async": "",
+      };
+      
+      let giscusScript = document.createElement("script");
+      Object.entries(giscusAttributes).forEach(([key, value]) => giscusScript.setAttribute(key, value));
+      document.getElementsByTagName("article")[0].appendChild(giscusScript);
+    }
+  </script>
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+          2015 -
+        
+        2025
+         Jiayin Cao 
+      
+      
+      
+    </section>
+  </footer>
+
+    </main>
+
+    
+      
+      <script src="/js/dark-mode.min.c2d8a1f8f2660e4a46d776277c72695a1e0ca65939d79f754441d47551604af5.js"></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>

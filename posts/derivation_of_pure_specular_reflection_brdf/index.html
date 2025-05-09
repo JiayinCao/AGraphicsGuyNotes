@@ -27,7 +27,6 @@ This is a memo for me recording the derivation of specular reflection in a more 
 <meta property="article:modified_time" content="2015-10-22T00:00:00+00:00" />
 
 
-
     <title>
   Derivation of pure Specular Reflection BRDF · A Graphics Guy&#39;s Note
 </title>
@@ -56,6 +55,8 @@ This is a memo for me recording the derivation of specular reflection in a more 
       
     
 
+    
+      <link rel="stylesheet" href="/css/custom.css" />
     
 
     
@@ -115,7 +116,9 @@ This is a memo for me recording the derivation of specular reflection in a more 
 </style>
     
 
-    <meta name="generator" content="Hugo 0.120.4">
+    <meta name="generator" content="Hugo 0.117.0">
+
+    <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
 
   
@@ -266,7 +269,7 @@ $$ L_o(\omega_o) = ( 1 - F_r(\omega_i) ) \dfrac{{\eta_o}^2}{{\eta_i}^2} L_i(\ome
 <p>Derivation of the relationship between radiance and btdf is also similar to the one mentioned above, except the fact that R is replaced with T representing the transmittance direction, T can be calculated through Snell&rsquo;s law. Refraction depending on different wavelength is also ignored here. Here is the final conclusion drawn by PBRT:</p>
 
 $$ f(\omega_i , \omega_o) = ( 1 - F_r(\omega_i) ) \dfrac{{\eta_o}^2}{{\eta_i}^2}\dfrac{\delta( \omega_i - T(\omega_o) )}{|cos(\theta_{i})|} $$
-<h1 id="reference">Reference</h1>
+<h1 id="references">References</h1>
 <p>[1] <a href="http://pbrt.org/">Physically Based Rendering, second edition</a></p>
 
       </div>
@@ -369,7 +372,7 @@ $$ f(\omega_i , \omega_o) = ( 1 - F_r(\omega_i) ) \dfrac{{\eta_o}^2}{{\eta_i}^2}
       </ul>
     </li>
     <li><a href="#refraction-btdf">Refraction BTDF</a></li>
-    <li><a href="#reference">Reference</a></li>
+    <li><a href="#references">References</a></li>
   </ul>
 </nav>
 </div>
@@ -499,7 +502,7 @@ $$ f(\omega_i , \omega_o) = ( 1 - F_r(\omega_i) ) \dfrac{{\eta_o}^2}{{\eta_i}^2}
         
           2015 -
         
-        2024
+        2025
          Jiayin Cao 
       
       

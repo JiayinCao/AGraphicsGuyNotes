@@ -27,7 +27,6 @@ The above image is generated with my renderer." />
 <meta property="article:modified_time" content="2015-11-11T00:00:00+00:00" />
 
 
-
     <title>
   Glass Material Simulated by Microfacet BXDF · A Graphics Guy&#39;s Note
 </title>
@@ -56,6 +55,8 @@ The above image is generated with my renderer." />
       
     
 
+    
+      <link rel="stylesheet" href="/css/custom.css" />
     
 
     
@@ -115,7 +116,9 @@ The above image is generated with my renderer." />
 </style>
     
 
-    <meta name="generator" content="Hugo 0.120.4">
+    <meta name="generator" content="Hugo 0.117.0">
+
+    <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
 
   
@@ -290,7 +293,7 @@ $$ f(\omega_i,\omega_o,x) = \dfrac{|\omega_i \cdot h| |\omega_o \cdot h|}{|\omeg
 
 $$ |\dfrac{\omega_h}{\omega_o}| = \dfrac{{\eta_o}^2 | \omega_o \cdot h |}{(\eta_i (\omega_i \cdot h) &#43; \eta_o (\omega_o \cdot h))^2}$$
 <p>Sampling refracted ray direction is similar to the method method <a href="https://agraphicsguynotes.com/posts/sample_microfacet_brdf/">here</a>. First a normal needs to be sampled respecting to a given pdf and then choose between reflected and refracted direction by fresnel term, finally evaluate the corresponding bxdf with the generated ray.</p>
-<h1 id="reference">Reference</h1>
+<h1 id="references">References</h1>
 <p>[1] <a href="https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.html">Microfacet Models for Refraction through Rough Surfaces</a><br>
 [2] <a href="https://en.wikipedia.org/wiki/Snell%27s_law">Snell&rsquo;s Law</a></p>
 
@@ -388,7 +391,7 @@ $$ |\dfrac{\omega_h}{\omega_o}| = \dfrac{{\eta_o}^2 | \omega_o \cdot h |}{(\eta_
     <li><a href="#snells-law-for-refraction-direction">Snell&rsquo;s Law for Refraction Direction</a></li>
     <li><a href="#combine-refraction-with-reflection">Combine Refraction with Reflection</a></li>
     <li><a href="#microfacet-for-rough-glass-material">Microfacet for Rough Glass Material</a></li>
-    <li><a href="#reference">Reference</a></li>
+    <li><a href="#references">References</a></li>
   </ul>
 </nav>
 </div>
@@ -518,7 +521,7 @@ $$ |\dfrac{\omega_h}{\omega_o}| = \dfrac{{\eta_o}^2 | \omega_o \cdot h |}{(\eta_
         
           2015 -
         
-        2024
+        2025
          Jiayin Cao 
       
       

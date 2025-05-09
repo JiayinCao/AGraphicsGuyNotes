@@ -24,7 +24,6 @@
 <meta property="article:modified_time" content="2016-02-04T00:00:00+00:00" />
 
 
-
     <title>
   The Missing Primary Ray PDF in Path Tracing · A Graphics Guy&#39;s Note
 </title>
@@ -53,6 +52,8 @@
       
     
 
+    
+      <link rel="stylesheet" href="/css/custom.css" />
     
 
     
@@ -112,7 +113,9 @@
 </style>
     
 
-    <meta name="generator" content="Hugo 0.120.4">
+    <meta name="generator" content="Hugo 0.117.0">
+
+    <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
 
   
@@ -252,7 +255,7 @@ $$ \begin{array}{lcl}I&amp;=&amp;\dfrac{W_e(p_0\rightarrow p_1)G(p_0\longleftrig
 <p>And that is why we don&rsquo;t need to consider primary ray pdf in the first place because it gets cancelled before the first intersection. In a practical path tracer or others, there is totally no need to evaluate the complex equation since we already know that the throughput equals to one before we consider the radiance.</p>
 <h1 id="why-bother-to-figure-it-out">Why Bother to Figure it Out?</h1>
 <p>We came all the way to a value equals to one, why bother? The answer is simple, to make things more transparent. We can&rsquo;t just store radiance value into images without knowing why we keep doing it. And the other very important reason is to perform correct calculation in a light tracing algorithm, which doesn&rsquo;t trace primary ray at all. Without knowing the importance function, it will quickly confuse anyone who is trying to do it in the first time.</p>
-<h1 id="reference">Reference</h1>
+<h1 id="references">References</h1>
 <p>[1] <a href="http://dougkerr.net/Pumpkin/articles/Cosine_Fourth_Falloff.pdf">Derivation of the “Cosine Fourth” Law for Falloff of Illuminance Across a Camera Image</a><br>
 [2] <a href="http://www.pbrt.org/">Physically based Rendering, 2rd</a></p>
 
@@ -355,7 +358,7 @@ $$ \begin{array}{lcl}I&amp;=&amp;\dfrac{W_e(p_0\rightarrow p_1)G(p_0\longleftrig
       </ul>
     </li>
     <li><a href="#why-bother-to-figure-it-out">Why Bother to Figure it Out?</a></li>
-    <li><a href="#reference">Reference</a></li>
+    <li><a href="#references">References</a></li>
   </ul>
 </nav>
 </div>
@@ -485,7 +488,7 @@ $$ \begin{array}{lcl}I&amp;=&amp;\dfrac{W_e(p_0\rightarrow p_1)G(p_0\longleftrig
         
           2015 -
         
-        2024
+        2025
          Jiayin Cao 
       
       

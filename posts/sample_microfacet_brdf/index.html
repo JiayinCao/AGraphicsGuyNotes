@@ -27,7 +27,6 @@ The left monkey has pure reflection brdf which is mentioned in my previous blog 
 <meta property="article:modified_time" content="2015-11-01T00:00:00+00:00" />
 
 
-
     <title>
   Sampling Microfacet BRDF · A Graphics Guy&#39;s Note
 </title>
@@ -56,6 +55,8 @@ The left monkey has pure reflection brdf which is mentioned in my previous blog 
       
     
 
+    
+      <link rel="stylesheet" href="/css/custom.css" />
     
 
     
@@ -115,7 +116,9 @@ The left monkey has pure reflection brdf which is mentioned in my previous blog 
 </style>
     
 
-    <meta name="generator" content="Hugo 0.120.4">
+    <meta name="generator" content="Hugo 0.117.0">
+
+    <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
 
   
@@ -313,223 +316,191 @@ $$ p(\theta) = p_h(\theta) \dfrac{d\omega_h}{d\omega_i} = \dfrac{p_h(\theta)}{4 
 
 
 
-
-
-
-
-
-
-
+ 
+ 
+ 
+ 
 
 
 
 
 <style>
-    .ba-slider10b97b22b77d4af64917b9b2ab6df72b {
-        position: relative;
-        overflow: hidden;
-        width: 90%;
-         
-    }
-    
-    .ba-slider10b97b22b77d4af64917b9b2ab6df72b img {
-        width: 100%;
-        display:block;
-        max-width:none;
-    }
-    
-    .ba-slider10b97b22b77d4af64917b9b2ab6df72b .resize {
-        position: absolute;
-        top:0;
-        left: 0;
-        height: 100%;
-        width: 50%;
-        overflow: hidden;
-    }
+.ba-slider10b97b22b77d4af64917b9b2ab6df72b {
+    position: relative;
+    overflow: hidden;
+    width: 90%;
+    margin: auto;
+    background-color: #FFFFFF;  
+}
 
-    .ba-slider10b97b22b77d4af64917b9b2ab6df72b .handle {  
-        position:absolute; 
-        left:50%;
-        top:0;
-        bottom:0;
-        width:2px;
-         
-        
-        background: rgba(0,0,0,.4);
-        cursor: ew-resize;
-    }
-    
-    .ba-slider10b97b22b77d4af64917b9b2ab6df72b .handle:after {   
-        position: absolute;
-        top: 50%;
-        width: 10px;
-        height: 64px;
-        margin: -32px 0 0 -4px;
-    
-        content:' ';
-        color:white;
-        font-weight:bold;
-        font-size:1px;
-        text-align:center;
-        line-height:64px;
-    
-        background: rgb(128, 128, 128, 0.7);
-        border-radius: 0%;
-    }
+.ba-slider10b97b22b77d4af64917b9b2ab6df72b img {
+    width: 100%;
+    display: block;
+    max-width: none;
+}
 
-     
-    .ba-container10b97b22b77d4af64917b9b2ab6df72b {
-        position: relative;
-        text-align: center;
-        color: white;
-    }
+.ba-slider10b97b22b77d4af64917b9b2ab6df72b .resize {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 50%;  
+    overflow: hidden;
+}
 
-     
-    .ba-bottom-left10b97b22b77d4af64917b9b2ab6df72b {
-        position: absolute;
-        bottom: 8px;
-        left: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;;
-    }
+.ba-slider10b97b22b77d4af64917b9b2ab6df72b .handle {
+    position: absolute;
+    left: 50%;  
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(0, 0, 0, 0.4);
+    cursor: ew-resize;
+    z-index: 20;
+    transition: background-color 0.3s ease;
+}
+.ba-slider10b97b22b77d4af64917b9b2ab6df72b .handle:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    margin-top: -32px;
+    margin-left: -4px;
+    width: 10px;
+    height: 64px;
+    background: #808080;
+}
 
-     
-    .ba-top-left10b97b22b77d4af64917b9b2ab6df72b {
-        position: absolute;
-        top: 8px;
-        left: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;;
-    }
+.ba-container10b97b22b77d4af64917b9b2ab6df72b {
+    position: relative;
+    text-align: center;
+}
 
-     
-    .ba-top-right10b97b22b77d4af64917b9b2ab6df72b {
-        position: absolute;
-        top: 8px;
-        right: 16px;
-        font-weight: bold;
-        white-space: nowrap;
-        color: white;
-    }
+.ba-bottom-left10b97b22b77d4af64917b9b2ab6df72b,
+.ba-bottom-right10b97b22b77d4af64917b9b2ab6df72b {
+    position: absolute;
+    bottom: 8px;
+    font-weight: bold;
+    white-space: nowrap;
+}
 
-     
-    .ba-bottom-right10b97b22b77d4af64917b9b2ab6df72b {
-        position: absolute;
-        bottom: 8px;
-        right: 16px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: white;
-    }
+.ba-bottom-left10b97b22b77d4af64917b9b2ab6df72b {
+    left: 16px;
+    color: #FFFFFF;  
+}
+.ba-bottom-right10b97b22b77d4af64917b9b2ab6df72b {
+    right: 16px;
+    color: #FFFFFF;  
+}
 
-     
-    .ba-centered10b97b22b77d4af64917b9b2ab6df72b {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
+ 
+
 </style>
 
-<div class="ba-slider10b97b22b77d4af64917b9b2ab6df72b" style="margin: auto;">
-    <div class="ba-container10b97b22b77d4af64917b9b2ab6df72b">
-        <img src=/img/posts/sample_microfacet_brdf/sampling_default.png><img>
-        <div class="ba-bottom-right10b97b22b77d4af64917b9b2ab6df72b">Before</div>
-    </div>
-    <div class="resize">
-        <img src=/img/posts/sample_microfacet_brdf/sampling_ndf.png>
-        <div class="ba-bottom-left10b97b22b77d4af64917b9b2ab6df72b">After</div>
-    </div>
-    <span class="handle"></span>
-</div>
+<figure class="custom-compare">
+    <div class="ba-slider10b97b22b77d4af64917b9b2ab6df72b" id="ba-slider-10b97b22b77d4af64917b9b2ab6df72b">
+        <div class="ba-container10b97b22b77d4af64917b9b2ab6df72b">
+            <img src="/img/posts/sample_microfacet_brdf/sampling_default.png">
+            <div class="ba-bottom-right10b97b22b77d4af64917b9b2ab6df72b">Before</div>
+        </div>
+        <div class="resize">
+            <img src="/img/posts/sample_microfacet_brdf/sampling_ndf.png">
+            <div class="ba-bottom-left10b97b22b77d4af64917b9b2ab6df72b">After</div>
+        </div>
+        <span class="handle"></span>
 
-
+        
+        
+    </div>
     
-    <script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" crossorigin="anonymous"></script>
+</figure>
+
+
+<script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" crossorigin="anonymous"></script>
 
 
 <script>
 (function($) {
   function drags(dragElement, resizeElement, container) {
-    
-    
-    dragElement.on('mousedown.ba-events touchstart.ba-events', function(e) {
-      
+    dragElement.on('mousedown.ba touchstart.ba', function(e) {
       dragElement.addClass('ba-draggable');
       resizeElement.addClass('ba-resizable');
-      
-      
-      var startX = (e.pageX) ? e.pageX : e.originalEvent.touches[0].pageX;
-      
-      
+
+      var startX = e.pageX || e.originalEvent.touches[0].pageX;
       var dragWidth = dragElement.outerWidth(),
           posX = dragElement.offset().left + dragWidth - startX,
           containerOffset = container.offset().left,
           containerWidth = container.outerWidth();
-   
-      
-      minLeft = containerOffset + 10;
-      maxLeft = containerOffset + containerWidth - dragWidth - 10;
-      
-      
-      dragElement.parents().on("mousemove.ba-events touchmove.ba-events", function(e) {
-        
-        
-        var moveX = (e.pageX) ? e.pageX : e.originalEvent.touches[0].pageX;
-        
-        leftValue = moveX + posX - dragWidth;
-        
-        
-        if ( leftValue < minLeft) {
-          leftValue = minLeft;
-        } else if (leftValue > maxLeft) {
-          leftValue = maxLeft;
-        }
-        
-        
-        widthValue = (leftValue + dragWidth/2 - containerOffset)*100/containerWidth+'%';
-        
-        
-        $('.ba-draggable').css('left', widthValue);
-        $('.ba-resizable').css('width', widthValue);
-      
-      }).on('mouseup.ba-events touchend.ba-events touchcancel.ba-events', function(){
+
+      var minLeft = containerOffset + 10;
+      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+
+      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
+        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
+        var leftValue = moveX + posX - dragWidth;
+
+        if (leftValue < minLeft) leftValue = minLeft;
+        else if (leftValue > maxLeft) leftValue = maxLeft;
+
+        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+
+        dragElement.css('left', percentage);
+        resizeElement.css('width', percentage);
+
+        updateLinks(container, dragElement);
+      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
         dragElement.removeClass('ba-draggable');
         resizeElement.removeClass('ba-resizable');
-        
-        $(this).off('.ba-events'); 
+        $(this).off('.ba');
       });
+
       e.preventDefault();
     });
   }
 
-  
-  $.fn.beforeAfter = function() {
-    var cur = this;
-    
-    var width = cur.width()+'px';
-    cur.find('.resize img').css('width', width);
-    
-    drags(cur.find('.handle'), cur.find('.resize'), cur);
+  function updateLinks(container, handle) {
+    var containerWidth = container.outerWidth();
+    var handleLeft = handle.position().left;
 
-    
-    
-    $(window).resize(function(){
-      var width = cur.width()+'px';
-      cur.find('.resize img').css('width', width);
+    var leftLink = container.find('.ba-link-left10b97b22b77d4af64917b9b2ab6df72b');
+    var rightLink = container.find('.ba-link-right10b97b22b77d4af64917b9b2ab6df72b');
+
+    var deadZone = 20; 
+
+    leftLink.css({
+      width: Math.max(0, handleLeft - deadZone) + 'px'
+    });
+
+    rightLink.css({
+      width: Math.max(0, containerWidth - handleLeft - deadZone) + 'px',
+      left: (handleLeft + deadZone) + 'px'
     });
   }
-}(jQuery));
 
-$('.ba-slider'+"10b97b22b77d4af64917b9b2ab6df72b").beforeAfter();
+  $.fn.beforeAfter = function() {
+    var container = $(this);
+    var handle = container.find('.handle');
+    var resize = container.find('.resize');
+
+    var width = container.width();
+    resize.find('img').css('width', width + 'px');
+
+    drags(handle, resize, container);
+    updateLinks(container, handle);
+
+    $(window).on('resize', function() {
+      var width = container.width();
+      resize.find('img').css('width', width + 'px');
+      updateLinks(container, handle);
+    });
+  }
+})(jQuery);
+
+$('#ba-slider-10b97b22b77d4af64917b9b2ab6df72b').beforeAfter();
 </script>
-
 
 <p>There are 64 samples per pixel and GGX is chosen as NDF, the three monkeys have different roughness values(0.0,0.5,1.0). As we can see from the image that the left-most monkey gets much better result than the default sampling method. And for the other two monkeys, we have similar result with the cosine-pdf sampling method.</p>
 <p>There are already some research work improving the sampling method mentioned in this blog. I may need to try their method once I have some free cycles.</p>
-<h1 id="reference">Reference:</h1>
+<h1 id="references">References</h1>
 <p>[1] <a href="https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.html">Microfacet Models for Refraction through Rough Surfaces</a><br>
 [2] <a href="https://en.wikipedia.org/wiki/Dirac_delta_function">Dirac delta function</a><br>
 [3] <a href="http://www.reedbeta.com/blog/2013/07/31/hows-the-ndf-really-defined/">How is the NDF really defined</a><br>
@@ -636,7 +607,7 @@ $('.ba-slider'+"10b97b22b77d4af64917b9b2ab6df72b").beforeAfter();
     </li>
     <li><a href="#one-extra-step">One Extra Step</a></li>
     <li><a href="#conclusion">Conclusion</a></li>
-    <li><a href="#reference">Reference:</a></li>
+    <li><a href="#references">References</a></li>
   </ul>
 </nav>
 </div>
@@ -766,7 +737,7 @@ $('.ba-slider'+"10b97b22b77d4af64917b9b2ab6df72b").beforeAfter();
         
           2015 -
         
-        2024
+        2025
          Jiayin Cao 
       
       

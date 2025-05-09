@@ -24,7 +24,6 @@
 <meta property="article:modified_time" content="2015-06-24T00:00:00+00:00" />
 
 
-
     <title>
   Directional Light Map from the Ground Up · A Graphics Guy&#39;s Note
 </title>
@@ -53,6 +52,8 @@
       
     
 
+    
+      <link rel="stylesheet" href="/css/custom.css" />
     
 
     
@@ -112,7 +113,9 @@
 </style>
     
 
-    <meta name="generator" content="Hugo 0.120.4">
+    <meta name="generator" content="Hugo 0.117.0">
+
+    <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
 
   
@@ -327,7 +330,7 @@ $$ \begin{array} {lcl} color &amp;=&amp; dot( normal , basis[0] )^2 * lightmap\_
 <h1 id="conclusion">Conclusion</h1>
 <p>Directional light map is an extension to traditional light map algorithm, it takes surface normal intro account during rendering, which brings much more detailed information to the final generated image.</p>
 <p>Although it may introduces a couple of extra instructions comparing with the old normal map, it is quite affordable even on mobile devices, that&rsquo;s why UE3 has an internal implementation of it on mobile. Given the extra quality it brings, those cost should be considered worthy.</p>
-<h1 id="reference">Reference</h1>
+<h1 id="references">References</h1>
 <p>[1] <a href="http://docs.unity3d.com/Manual/LightmappingDirectional.html">Directional Light Map, Unity document</a><br>
 [2] <a href="http://web.student.tuwien.ac.at/~e9907459/docs_tutorials/directionalLightmaps.pdf">Directional Lightmap</a><br>
 [3] <a href="http://pbrt.org/">Physically Based Rendering</a><br>
@@ -441,7 +444,7 @@ $$ \begin{array} {lcl} color &amp;=&amp; dot( normal , basis[0] )^2 * lightmap\_
       </ul>
     </li>
     <li><a href="#conclusion">Conclusion</a></li>
-    <li><a href="#reference">Reference</a></li>
+    <li><a href="#references">References</a></li>
   </ul>
 </nav>
 </div>
@@ -571,7 +574,7 @@ $$ \begin{array} {lcl} color &amp;=&amp; dot( normal , basis[0] )^2 * lightmap\_
         
           2015 -
         
-        2024
+        2025
          Jiayin Cao 
       
       

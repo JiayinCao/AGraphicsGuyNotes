@@ -6,7 +6,17 @@
     <description>Recent content in Posts on A Graphics Guy&#39;s Note</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sat, 26 Aug 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://agraphicsguynotes.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 11 Apr 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://agraphicsguynotes.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Understanding The Math Behind ReSTIR GI</title>
+      <link>https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_gi/</link>
+      <pubDate>Fri, 11 Apr 2025 00:00:00 +0000</pubDate>
+      
+      <guid>https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_gi/</guid>
+      <description>Recently, I had the pleasure of contributing to Nvidia’s Zorah project, the flagship demo for the RTX 50 Series GPUs. My primary role was to provide technical support for light transport in Zorah, which included collaborating with my colleague Daqi Lin to implement a brand new ReSTIR-based global illumination solution, specifically, ReSTIR PT[1], within the NvRTX branch of Unreal Engine.
+A GDC presentation video on Zorah was released a few weeks ago.</description>
+    </item>
+    
     <item>
       <title>Fiber in C&#43;&#43;: Understanding the Basics</title>
       <link>https://agraphicsguynotes.com/posts/fiber_in_cpp_understanding_the_basics/</link>
@@ -18,12 +28,12 @@ In this blog post, I will put down some of my learnings about fiber basics.</des
     </item>
     
     <item>
-      <title>Understanding The Math Behind ReStir DI</title>
+      <title>Understanding The Math Behind ReSTIR DI</title>
       <link>https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_di/</link>
       <pubDate>Mon, 05 Dec 2022 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_di/</guid>
-      <description>Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReStir (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like ReStir DI, ReStir GI, ReStir PT, Volumetric ReStir, etc.
+      <description>Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReSTIR (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like ReSTIR DI, ReSTIR GI, ReSTIR PT, Volumetric ReSTIR, etc.
 The original papers are clearly the best resources to learn the tech. Due to the complexity of the algorithm, understanding the theory and math remains challenging for graphics programmers who are not very familiar with sampling methods.</description>
     </item>
     

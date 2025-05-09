@@ -27,7 +27,6 @@ In this blog post, I will put down some of my learnings about fiber basics." />
 <meta property="article:modified_time" content="2023-08-26T00:00:00+00:00" />
 
 
-
     <title>
   Fiber in C&#43;&#43;: Understanding the Basics · A Graphics Guy&#39;s Note
 </title>
@@ -56,6 +55,8 @@ In this blog post, I will put down some of my learnings about fiber basics." />
       
     
 
+    
+      <link rel="stylesheet" href="/css/custom.css" />
     
 
     
@@ -89,7 +90,9 @@ In this blog post, I will put down some of my learnings about fiber basics." />
 
     
 
-    <meta name="generator" content="Hugo 0.120.4">
+    <meta name="generator" content="Hugo 0.117.0">
+
+    <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
 
   
@@ -196,7 +199,7 @@ Again, the scheduler has no prior knowledge about the game engine. It will have 
 <p>If these are within tolerance, what further pushed some game studios to move towards a more efficient system design is a problematic case that a task needs to wait for some inputs that is not yet produced by other task.</p>
 <ul>
 <li>
-<p>An impractical solution would be to schedule more threads than the number of physical cores and yield the thread&rsquo;s control if it waits for something so that OS can schedule other thread on it. This may sound fine. Unfortunately, it has flaws.</p>
+<p>A typical solution would be to schedule more threads than the number of physical cores and yield the thread&rsquo;s control if it waits for something so that OS can schedule other thread on it. This may sound fine. Unfortunately, it has flaws.</p>
 <ul>
 <li>
 <p>First of all, the OS has no idea when the inputs are ready, it will keep trying to put this thread back on the physical core to make attempts to resume it from time to time. This is clearly very inefficient since until the input is ready, all prior attempts are useless effort that only waste hardware resources.</p>
@@ -772,7 +775,7 @@ One of the solutions is simply to implement an assebmly based fiber interface on
 <h1 id="summary">Summary</h1>
 <p>In summary, we mentioned a lot about fibers in this post. Starting from the very basics about CPU architecture, and then a detailed fiber implementation, all the way to the problems with fibers.</p>
 <p>As we can see, fiber offer great flexibility that is commonly not available through other methods, which is why it is favored by game studios seeking for better performance. Of course, the power of fiber is clearly not limited to game development alone. It can be used in mostly all CPU computational intensive software that cares about performance.</p>
-<h1 id="reference">Reference</h1>
+<h1 id="references">References</h1>
 <p>[1] <a href="https://en.wikipedia.org/wiki/Preemption_(computing)">Preemption (computing)</a><br>
 [2] <a href="https://www.intel.com/content/www/us/en/gaming/resources/hyper-threading.html">Here’s how Intel® Hyper-Threading Technology (Intel® HT Technology) helps processors do more work at the same time</a><br>
 [3] <a href="https://www.youtube.com/watch?v=8C8NnE1Dg4A">C++ Coroutines: Under the covers</a><br>
@@ -931,7 +934,7 @@ One of the solutions is simply to implement an assebmly based fiber interface on
       </ul>
     </li>
     <li><a href="#summary">Summary</a></li>
-    <li><a href="#reference">Reference</a></li>
+    <li><a href="#references">References</a></li>
   </ul>
 </nav>
 </div>
@@ -1061,7 +1064,7 @@ One of the solutions is simply to implement an assebmly based fiber interface on
         
           2015 -
         
-        2024
+        2025
          Jiayin Cao 
       
       
