@@ -6,11 +6,11 @@
     <description>Recent content on A Graphics Guy&#39;s Note</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 11 Apr 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://agraphicsguynotes.com/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 09 May 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://agraphicsguynotes.com/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Understanding The Math Behind ReSTIR GI</title>
       <link>https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_gi/</link>
-      <pubDate>Fri, 11 Apr 2025 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 09 May 2025 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_gi/</guid>
       <description>Recently, I had the pleasure of contributing to Nvidia’s Zorah project, the flagship demo for the RTX 50 Series GPUs. My primary role was to provide technical support for light transport in Zorah, which included collaborating with my colleague Daqi Lin to implement a brand new ReSTIR-based global illumination solution, specifically, ReSTIR PT[1], within the NvRTX branch of Unreal Engine.
