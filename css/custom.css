@@ -12,3 +12,8 @@
   font-size: 0.85em; /* smaller than 0.85em */
   margin-top: 0.5rem;
 }
+
+.fa-bluesky {
+  transform: scale(0.8);
+  display: inline-block; /* required for transform to work correctly */
+}
