@@ -230,6 +230,7 @@ A GDC presentation video on Zorah was released a few weeks ago." />
 
 
 
+
 </p>
 <!-- raw HTML omitted -->
 <p>Recently, I had the pleasure of contributing to Nvidia’s Zorah project, the flagship demo for the RTX 50 Series GPUs. My primary role was to provide technical support for light transport in Zorah, which included collaborating with my colleague <a href="https://research.nvidia.com/person/daqi-lin">Daqi Lin</a> to implement a brand new ReSTIR-based global illumination solution, specifically, ReSTIR PT<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup>, within the <a href="https://developer.nvidia.com/game-engines/unreal-engine/rtx-branch">NvRTX branch</a> of Unreal Engine.</p>
@@ -1189,35 +1190,47 @@ $$
 <p>By combining <span style="white-space: nowrap;"><a href="#eq_x1tox2">equation 60</a></span> and <span style="white-space: nowrap;"><a href="#eq_y1tox2">equation 61</a></span>, we can come up with the following equation.</p>
 
 
-<div id="eq_jacobian">$$
+<div>$$
 \tag{62}
 
-p_{\omega}(y_1 \rightarrow x_2) = \left( \dfrac{| y_1 - x_2 |^2 cos(\theta_{x_2 \rightarrow x_1})}{| x_1 - x_2 |^2 cos(\theta_{x_2 \rightarrow y_1})} \right) p_{\omega}(x_1 \rightarrow x_2)
+p_{\omega}(y_1 \rightarrow x_2) = \dfrac{p_{\omega}(x_1 \rightarrow x_2)}{\left( \dfrac{cos(\theta_{x_2 \rightarrow y_1})}{cos(\theta_{x_2 \rightarrow x_1})}\dfrac{|x_1 - x_2|^2}{|y_1 - x_2|^2} \right) }
 
 $$
 
 </div>
 
-<p>To be clear, when we produce the resampling weight for this new candidate path, we need a few things, target function evaluated with this new candidate path mixed with $y_1$, multiple importance sampling weight and the reciprocal of proposal PDF and a Jacobian, the above transformation factor in <span style="white-space: nowrap;"><a href="#eq_jacobian">equation 62</a></span>. Here it is</p>
+<p>The denominator is given by the Jacobian determinant<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__gradient_domain pt" style="text-decoration: none;">[19]</a></sup>.</p>
+
+
+<div id="eq_jacobian_def">$$
+\tag{63}
+
+|J_{x_1 \rightarrow y_1}| = \dfrac{cos(\theta_{x_2 \rightarrow y_1})}{cos(\theta_{x_2 \rightarrow x_1})}\dfrac{|x_1 - x_2|^2}{|y_1 - x_2|^2}
+
+$$
+
+</div>
+
+<p>To be clear, when we produce the resampling weight for this new candidate path, we need a few things, target function evaluated with this new candidate path mixed with $y_1$, multiple importance sampling weight and the reciprocal of proposal PDF and a Jacobian determinant, the above transformation factor in <span style="white-space: nowrap;"><a href="#eq_jacobian_def">equation 63</a></span>. Here it is</p>
 
 
 <div id="eq_restirgi_resampling_weight">$$
-\tag{63}
+\tag{64}
 
-\begin{array} {lcl} w_i(x_0, y_1, \bar{\mathcal{Y}_M}) & = & \hat{p}(x_0, y_1, \bar{\mathcal{Y}_M}) m(x_0, y_1, \bar{\mathcal{Y}_M}) p_{\omega}(y_1 \rightarrow x_2) \\\\ & = & \hat{p}(x_0, y_1, \bar{\mathcal{Y}_M}) m(x_0, y_1, \bar{\mathcal{Y}_M}) p_{\omega}(x_1 \rightarrow x_2) \left( \dfrac{| x_1 - x_2 |^2 cos(\theta_{x_2 \rightarrow y_1})}{| y_1 - x_2 |^2 cos(\theta_{x_2 \rightarrow x_1})} \right) \end{array}
+\begin{array} {lcl} w_i(x_0, y_1, \bar{\mathcal{Y}_M}) & = & \hat{p}(x_0, y_1, \bar{\mathcal{Y}_M}) m(x_0, y_1, \bar{\mathcal{Y}_M}) p_{\omega}(y_1 \rightarrow x_2) \\\\ & = & \dfrac{\hat{p}(x_0, y_1, \bar{\mathcal{Y}_M}) m(x_0, y_1, \bar{\mathcal{Y}_M})}{\left( \dfrac{p_{\omega}(x_1 \rightarrow x_2)}{|J_{x_1 \rightarrow y_1}|} \right) } \end{array}
 
 $$
 
 </div>
 
 <p>This is well explained in the GRIS paper<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup>. But we didn&rsquo;t use the GRIS theory for explaination here just to make sure readers who have no knowledge about it will still understand why such an extra term is needed.</p>
-<p>One more note here is <span style="white-space: nowrap;"><a href="#eq_restirgi_resampling_weight">equation 63</a></span> draws a conflicted conclusion with Algorithm 4 in the original ReSTIR GI paper. After verifying with authors of the original paper, I believe the above form is the correct math for ReSTIR GI.</p>
+<p>One more note here is <span style="white-space: nowrap;"><a href="#eq_restirgi_resampling_weight">equation 64</a></span> draws a conflicted conclusion with Algorithm 4 in the original ReSTIR GI paper. After verifying with authors of the original paper, I believe the above form is the correct math for ReSTIR GI.</p>
 <h3 id="biased-resampling">Biased Resampling</h3>
 <p>There could be multiple sources of bias in a ReSTIR GI implementation. In this section, I would like to chat about the cached approximated radiance. Let&rsquo;s revisit <span style="white-space: nowrap;"><a href="#eq_revised_cache">equation 59</a></span> here. We mentioned the exact form of our cache, below is how we can reuse candidates from other reservoir:</p>
 
 
 <div id="eq_reuse_candidate">$$
-\tag{64}
+\tag{65}
 
 \ell_{mix,k}(x_0, y_1, x_2, u_3 \dots, u_k) = LC_k(x_2 \rightarrow x_1) f(x_2 \rightarrow y_1 \rightarrow x_0) cos(\theta_{y_1 \rightarrow x_2})
 
@@ -1229,8 +1242,8 @@ $$
 To completely eliminate this bias, we need to reevaluate the BRDF at $x_2$ in <span style="white-space: nowrap;"><a href="#eq_revised_cache">equation 59</a></span> so that we can swap $x_1$ with $y_1$.  At first glance, evaluating the BRDF at $x_2$ doesn&rsquo;t seem difficult at all. The truth is quite the opposite. It is not trivial for a couple of reasons.</p>
 <ul>
 <li>
-<p>Modern game engines have complicated material setup, which can be reflected by the size of GBuffer, a place holder for us to keep track of all relevant parameters for BRDFs. This is a very typical solution for rasterization<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__deferredshading" style="text-decoration: none;">[19]</a></sup>. Lately, with the introduction of real time ray tracing<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__rtrt" style="text-decoration: none;">[20]</a></sup>, a new form of container becomes the payload, which is a lot more memory sensitive than GBuffer. Typically, payload doesn&rsquo;t have as much data as GBuffer because of it.<br>
-If we would like to reevaluate BRDF at $x_2$ during resampling, we would need to store all necessary input for BRDF of our interests ideally. Even though, this is still O(1) memory cost, it does dramatically bump the size of a reservoir easily by a few times. Earlier we mentioned the extra memory bandwidth and register pressure, but an extra burden is possible heavier live state during Shader Execute Reordering (SER)<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__ser" style="text-decoration: none;">[21]</a></sup>, none of which is friendly to GPU performance. The negative impact is no where near negligible.</p>
+<p>Modern game engines have complicated material setup, which can be reflected by the size of GBuffer, a place holder for us to keep track of all relevant parameters for BRDFs. This is a very typical solution for rasterization<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__deferredshading" style="text-decoration: none;">[20]</a></sup>. Lately, with the introduction of real time ray tracing<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__rtrt" style="text-decoration: none;">[21]</a></sup>, a new form of container becomes the payload, which is a lot more memory sensitive than GBuffer. Typically, payload doesn&rsquo;t have as much data as GBuffer because of it.<br>
+If we would like to reevaluate BRDF at $x_2$ during resampling, we would need to store all necessary input for BRDF of our interests ideally. Even though, this is still O(1) memory cost, it does dramatically bump the size of a reservoir easily by a few times. Earlier we mentioned the extra memory bandwidth and register pressure, but an extra burden is possible heavier live state during Shader Execute Reordering (SER)<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__ser" style="text-decoration: none;">[22]</a></sup>, none of which is friendly to GPU performance. The negative impact is no where near negligible.</p>
 </li>
 <li>
 <p>Apart from memory cost that burdens performance, there is also challenges coming from the BRDF execution logic. It could be quite a few of instructions just to evaluate a BRDF. Because this needs to happen at multiple places, wherever resampling weight is needed, shader divergence could be legit concern as well. Besides, the extra instructions in shader kernel may lower instruction cache hit rate as well. To be clear, we indeed have the BRDF evaluation cost during resampling because of target function require $f(x_2 \rightarrow x_1 \rightarrow x_0)$ if we choose our target function to be the full integrand of rendering equation. What I&rsquo;m saying here is we don&rsquo;t appreciate more execution of these unless we have to.</p>
@@ -1265,7 +1278,7 @@ In the case of rough BRDF at $x_2$, the reevaluated BRDF at $x_2$ likely will be
 
 
 <div id="eq_lp_mix_integrand_final_revised">$$
-\tag{65}
+\tag{66}
 
 \begin{aligned}
 \ell_{mix,k}(x_0, x_1, x_2, u_3 \dots, u_k) &= L_e(y_{mix,k} \rightarrow y_{mix,k-1}) f(x_2 \rightarrow x_1 \rightarrow x_0) cos(\theta_{x_1 \rightarrow x_2}) V(x_1, x_2)
@@ -1282,8 +1295,8 @@ $$
 <li>As a matter of fact, ReSTIR GI itself is one example. During resampling, pixel B only borrows a sample from pixel A. What pixel A offers is a sample along with its PDF or UCW. But the way it produces its candidate sample could be based on PDF w.r.t solid angle around pixel A&rsquo;s $x_1$, it could even be a sample produced by RIS, which only offers UCW, rather than PDF. Either is fine. However, the important detail to note is that for pixel B, the sample provided by pixel A is not drawn according to a PDF with respect to solid angle, at least not around pixel B&rsquo;s primary bounce $y_1$, even if the rendering equation is integrated over solid angle. This could mean $y_1$ and $x_2$ may not be visible to each other, which makes the above visibility term necessary.</li>
 <li>If the above example is a bit difficult to understand, here is an easy one that everyone is familiar with. During NEE sampling, which commonly uses an area PDF, it doesn&rsquo;t really matter if the rendering equation is over solid angle or not, a visibility ray, commonly named NEE ray or light ray, is necessary to make sure we don&rsquo;t count contribution from blocked light sources. In this case, visibility ray is also needed.</li>
 </ul>
-<p>One more subtle detail here is I didn&rsquo;t add the visibility term between any other two consecutive bounces in a path in <span style="white-space: nowrap;"><a href="#eq_lp_mix_integrand_final_revised">equation 65</a></span>, this is by assuming continuation ray verifies it for us already, which is somewhat fine for ReSTIR GI. To be quite strict, ReSTIR GI doesn&rsquo;t restrict in what way we should approximate radiance coming from $x_2$ to $x_1$ even though it mentions NEE sampling based path tracer, other methods can be used<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restirgi_impl" style="text-decoration: none;">[22]</a></sup>. For simplicity, we ignore it here by assuming further consecutive bounces after $x_2$ are all visible to each other by default. If necessary, this needs to be added.</p>
-<p>So what does it mean with the extra visibility term in <span style="white-space: nowrap;"><a href="#eq_lp_mix_integrand_final_revised">equation 65</a></span> when it comes to ReSTIR GI implementation? A few things</p>
+<p>One more subtle detail here is I didn&rsquo;t add the visibility term between any other two consecutive bounces in a path in <span style="white-space: nowrap;"><a href="#eq_lp_mix_integrand_final_revised">equation 66</a></span>, this is by assuming continuation ray verifies it for us already, which is somewhat fine for ReSTIR GI. To be quite strict, ReSTIR GI doesn&rsquo;t restrict in what way we should approximate radiance coming from $x_2$ to $x_1$ even though it mentions NEE sampling based path tracer, other methods can be used<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restirgi_impl" style="text-decoration: none;">[23]</a></sup>. For simplicity, we ignore it here by assuming further consecutive bounces after $x_2$ are all visible to each other by default. If necessary, this needs to be added.</p>
+<p>So what does it mean with the extra visibility term in <span style="white-space: nowrap;"><a href="#eq_lp_mix_integrand_final_revised">equation 66</a></span> when it comes to ReSTIR GI implementation? A few things</p>
 <ul>
 <li>We need to verify visibility during final evaluation. This sounds very nature because we would certainly not want to count blocked paths from contributing our pixel. The theory behind it is clearly explained in this section.<br>
 And the truth is if the resampling path right before final evaluation checks visibility during its resampling, we don&rsquo;t need to check it in the shading pass anymore as we are sure during the last resampling pass the winner sample is a visible path.</li>
@@ -1799,20 +1812,24 @@ $('#ba-slider-0498f65ffc3ed535c15b989a960a23c2').beforeAfter();
       [18]
         
         <a href="https://research.nvidia.com/labs/rtr/publication/boksansky2021rendering/" rel="noopener noreferrer">Rendering Many Lights with Grid-Based Reservoirs</a>
-    </div><div id="ref-ref_tag__deferredshading">
+    </div><div id="ref-ref_tag__gradient_domain pt">
       [19]
+        
+        <a href="https://dl.acm.org/doi/10.1145/2766997" rel="noopener noreferrer">Gradient-domain path tracing</a>
+    </div><div id="ref-ref_tag__deferredshading">
+      [20]
         
         <a href="https://my.eng.utah.edu/~cs5600/slides/Wk%209%20D3DTutorial_DeferredShading.pdf" rel="noopener noreferrer">Deferred Shading</a>
     </div><div id="ref-ref_tag__rtrt">
-      [20]
+      [21]
         
         <a href="https://rtintro.realtimerendering.com/" rel="noopener noreferrer">Introduction To Real-Time Ray Tracing</a>
     </div><div id="ref-ref_tag__ser">
-      [21]
+      [22]
         
         <a href="https://developer.nvidia.com/blog/improve-shader-performance-and-in-game-frame-rates-with-shader-execution-reordering/" rel="noopener noreferrer">Improve Shader Performance and In-Game Frame Rates with Shader Execution Reordering</a>
     </div><div id="ref-ref_tag__restirgi_impl">
-      [22]
+      [23]
         
         <a href="https://medium.com/traverse-research/dynamic-diffuse-global-illumination-b56dc0525a0a" rel="noopener noreferrer">Dynamic diffuse global illumination</a>
     </div></div>
