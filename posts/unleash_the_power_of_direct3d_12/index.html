@@ -145,13 +145,6 @@ The big picture Different from its predecessors, D3D12 mainly aims at reducing C
   </section>
 </nav>
 
-      <script>
-        
-        document.getElementById('dark-mode-toggle').addEventListener('click', () => {
-          const isdarkmode = !document.body.classList.contains("colorscheme-dark");
-          localStorage.setItem("pref-theme", isdarkmode ? 'dark_dimmed' : 'light');
-        });
-      </script>
 
       <div class="content">
         
@@ -422,34 +415,75 @@ And similar APIs, like Vulkan, Metal, share a common way of how modern graphics 
 
         <script>
     
-    function updateThemeToMatchDarkMode(isdarkmode) {
-      localStorage.setItem("pref-theme", isdarkmode ? 'dark_dimmed' : 'light');
+    
+    
+    function getInitialGiscusTheme() {
+      const cs = localStorage.getItem("colorscheme");
+      if (cs === "dark" || cs === "light") {
+        return cs === "dark" ? "dark_dimmed" : "light";
+      }
+      const b = document.body;
+      if (b.classList.contains("colorscheme-light") || b.classList.contains("colorscheme-dark")) {
+        return b.classList.contains("colorscheme-dark") ? "dark_dimmed" : "light";
+      }
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark_dimmed" : "light";
+    }
 
-      
-      const iframe = document.querySelector('iframe.giscus-frame');
-      if(iframe) {
-        const message = { setConfig: { theme: isdarkmode ? 'dark_dimmed' : 'light' } };
-        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+    function giscusFrameTheme() {
+      return document.body.classList.contains("colorscheme-dark") ? "dark_dimmed" : "light";
+    }
+
+    function postGiscusTheme(theme) {
+      const iframe = document.querySelector("iframe.giscus-frame");
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage(
+          { giscus: { setConfig: { theme: theme } } },
+          "https://giscus.app"
+        );
       }
     }
 
+    function syncGiscusToBody() {
+      postGiscusTheme(giscusFrameTheme());
+    }
+
     
-    document.getElementById('dark-mode-toggle').addEventListener('click', () => {
-      const isdarkmode = !document.body.classList.contains("colorscheme-dark");
-      updateThemeToMatchDarkMode(isdarkmode);
+    document.getElementById("dark-mode-toggle").addEventListener("click", () => {
+      setTimeout(syncGiscusToBody, 0);
     });
 
     
-    window.onload = () => {
-      const isdarkmode = document.body.classList.contains("colorscheme-dark");
-      updateThemeToMatchDarkMode(isdarkmode);
-    };
+    function whenGiscusFrameReady(fn) {
+      const tryNow = () => {
+        const iframe = document.querySelector("iframe.giscus-frame");
+        if (iframe) {
+          fn(iframe);
+          return true;
+        }
+        return false;
+      };
+      if (tryNow()) return;
+      const obs = new MutationObserver(() => {
+        if (tryNow()) obs.disconnect();
+      });
+      obs.observe(document.body, { childList: true, subtree: true });
+      window.addEventListener(
+        "load",
+        () => {
+          if (tryNow()) obs.disconnect();
+        },
+        { once: true }
+      );
+    }
 
-    
+    whenGiscusFrameReady(() => {
+      syncGiscusToBody();
+    });
+
     {
-      let giscusTheme = localStorage.getItem("pref-theme");
-      let giscusAttributes = {
-        "src": "https://giscus.app/client.js",
+      const dataTheme = getInitialGiscusTheme();
+      const giscusAttributes = {
+        src: "https://giscus.app/client.js",
         "data-repo": "JiayinCao\/AGraphicsGuyNotes",
         "data-repo-id": "MDEwOlJlcG9zaXRvcnkzMDQ5MjAzMDg=",
         "data-category": "Giscus-Comments",
@@ -459,13 +493,13 @@ And similar APIs, like Vulkan, Metal, share a common way of how modern graphics 
         "data-reactions-enabled": "0",
         "data-emit-metadata": "0",
         "data-input-position": "bottom",
-        "data-theme": giscusTheme === null ? "light" : giscusTheme,
+        "data-theme": dataTheme,
         "data-lang": "en",
-        "crossorigin": "anonymous",
-        "async": "",
+        crossorigin: "anonymous",
+        async: "",
       };
-      
-      let giscusScript = document.createElement("script");
+
+      const giscusScript = document.createElement("script");
       Object.entries(giscusAttributes).forEach(([key, value]) => giscusScript.setAttribute(key, value));
       document.getElementsByTagName("article")[0].appendChild(giscusScript);
     }
@@ -501,7 +535,7 @@ And similar APIs, like Vulkan, Metal, share a common way of how modern graphics 
 
     
       
-      <script src="/js/dark-mode.min.c2d8a1f8f2660e4a46d776277c72695a1e0ca65939d79f754441d47551604af5.js"></script>
+      <script src="/js/dark-mode.min.928a160d00dae3b92c8d5c8ed7b9435b4b6311f09bcd24f101165b7ff8a82f47.js"></script>
     
 
     
