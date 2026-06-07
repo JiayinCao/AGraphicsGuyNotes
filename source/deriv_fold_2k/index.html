@@ -1,0 +1,2026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>shader E (deriv_fold_2k.ssl)</title>
+</head>
+<body>
+<pre>// ssl_benchmark deriv_fold_2k — ~2000 lines, ddx/ddy fold to zero (see bench_deriv_fold_2k_generator.h)
+texture2d g_tex;
+
+float df2k_fold_h0() {
+    float a = 1.0f;
+    float b = sin(a) &#43; 15.7999992f;
+    return ddx(b) &#43; ddy(b);
+}
+
+float df2k_fold_h1() {
+    float a = 1.16999996f;
+    float b = sin(a) &#43; 33.7999992f;
+    return ddx(b) &#43; ddy(b);
+}
+
+float df2k_fold_h2() {
+    float a = 1.34000003f;
+    float b = sin(a) &#43; 29.2799988f;
+    return ddx(b) &#43; ddy(b);
+}
+
+float df2k_osc_0(float a, float b, float c, out float ox) {
+    float o0 = sin(a * 2.25999999f &#43; c);
+    float o1 = cos(b * 6.35600042f - a);
+    float o2 = sin((a &#43; b) * 2.52000022f) * cos(c * 2.25999999f);
+    float bank = o0 &#43; o1 * 0.5f &#43; o2 * 0.25f;
+    ox = bank &#43; c * 6.35600042f;
+    return bank * 2.52000022f &#43; ox;
+}
+
+float df2k_cheb_1(float a, float b, out float ox, out float oy) {
+    float t = a * 3.81999993f &#43; b * 0.5f;
+    float t0 = 1.0f;
+    float t1 = t;
+    float t2 = 2.0f * t * t1 - t0;
+    float t3 = 2.0f * t * t2 - t1;
+    ox = t2 &#43; t3 * 0.25f;
+    oy = t1 - t0 &#43; b * 3.81999993f;
+    return t3 &#43; ox - oy;
+}
+
+float df2k_osc_2(float a, float b, float c, out float ox) {
+    float o0 = sin(a * 7.46999979f &#43; c);
+    float o1 = cos(b * 1.39300001f - a);
+    float o2 = sin((a &#43; b) * 3.00000024f) * cos(c * 7.46999979f);
+    float bank = o0 &#43; o1 * 0.5f &#43; o2 * 0.25f;
+    ox = bank &#43; c * 1.39300001f;
+    return bank * 3.00000024f &#43; ox;
+}
+
+float df2k_resid_3(float a, float b, out float ox, out float oy) {
+    float base = a * b * 9.34999943f;
+    float guess = sin(base) &#43; base * base;
+    float resid = guess - base;
+    ox = resid &#43; guess * 9.34999943f;
+    oy = resid - base * 9.34999943f;
+    return resid &#43; ox * 0.5f;
+}
+
+float df2k_cross_4(float a, float b, float c, float d, out float ox, out float oy) {
+    float p0 = a * d &#43; b * c;
+    float p1 = (a &#43; d) * (b - c) * 5.38000011f;
+    float blend = tanh(p0) &#43; sin(p1 * 5.32200003f);
+    ox = blend &#43; p0 * 5.38000011f;
+    oy = blend - p1 * 5.32200003f;
+    return blend &#43; ox - oy;
+}
+
+float df2k_harm_5(float a, float b, float c, float d, out float ox, out float oy) {
+    float h0 = sin(a &#43; b * 5.17999983f);
+    float h1 = cos(c &#43; d * 6.36899996f);
+    float h2 = sin(h0 &#43; h1) * cos(h0 - h1);
+    ox = h2 &#43; a * 5.17999983f;
+    oy = h2 &#43; d * 6.36899996f;
+    return h0 &#43; h1 &#43; h2;
+}
+
+float df2k_rat_6(float a, float b, float c, out float ox, out float oy) {
+    float mix = (a * 4.23999977f &#43; b) / (c &#43; 4.0f);
+    float wave = sin(mix) * cos(b * 1.45200002f) &#43; tanh(a - c);
+    float lift = wave * wave &#43; mix * 4.23999977f;
+    ox = lift &#43; wave;
+    oy = lift - wave &#43; b * 1.45200002f;
+    return lift &#43; ox * 4.23999977f - oy * 1.45200002f;
+}
+
+float df2k_osc_7(float a, float b, float c, out float ox) {
+    float o0 = sin(a * 4.75f &#43; c);
+    float o1 = cos(b * 3.6960001f - a);
+    float o2 = sin((a &#43; b) * 0.568000019f) * cos(c * 4.75f);
+    float bank = o0 &#43; o1 * 0.5f &#43; o2 * 0.25f;
+    ox = bank &#43; c * 3.6960001f;
+    return bank * 0.568000019f &#43; ox;
+}
+
+float df2k_blend_8(float a, float b, float c, out float ox, out float oy) {
+    float seed = a &#43; b * 3.22000003f;
+    float gate = seed - c * 21.6000004f;
+    float hi = sin(seed) &#43; log(1.0f &#43; c);
+    float lo = cos(seed) - exp(b * 3.22000003f * 0.01f);
+    float w = 0.5f &#43; 0.5f * tanh(gate);
+    float picked = hi * w &#43; lo * (1.0f - w);
+    ox = picked &#43; c;
+    oy = picked - a * 21.6000004f;
+    return picked * 3.22000003f;
+}
+
+float df2k_fold_9(float a, float b, float c, out float ox, out float oy) {
+    float m = a - b;
+    float am = m &gt;= 0.0f ? m : -m;
+    float shaped = am * 1.25999999f &#43; c * (a &#43; b);
+    float ripple = sin(shaped) &#43; cos(c * 1.25999999f);
+    ox = shaped &#43; ripple;
+    oy = shaped - ripple * 1.25999999f;
+    return ripple &#43; ox * 1.25999999f;
+}
+
+float df2k_rat_10(float a, float b, float c, out float ox, out float oy) {
+    float mix = (a * 9.18999958f &#43; b) / (c &#43; 9.0f);
+    float wave = sin(mix) * cos(b * 0.606000006f) &#43; tanh(a - c);
+    float lift = wave * wave &#43; mix * 9.18999958f;
+    ox = lift &#43; wave;
+    oy = lift - wave &#43; b * 0.606000006f;
+    return lift &#43; ox * 9.18999958f - oy * 0.606000006f;
+}
+
+float df2k_blend_11(float a, float b, float c, out float ox, out float oy) {
+    float seed = a &#43; b * 2.42999983f;
+    float gate = seed - c * 30.5f;
+    float hi = sin(seed) &#43; log(1.0f &#43; c);
+    float lo = cos(seed) - exp(b * 2.42999983f * 0.01f);
+    float w = 0.5f &#43; 0.5f * tanh(gate);
+    float picked = hi * w &#43; lo * (1.0f - w);
+    ox = picked &#43; c;
+    oy = picked - a * 30.5f;
+    return picked * 2.42999983f;
+}
+
+void df2k_trip_12(float a, float b, float c, out float ox, out float oy, out float oz) {
+    float hub = a * b &#43; c * 8.60999966f;
+    float skew = sin(hub) - cos(c * 2.75200009f);
+    ox = hub &#43; skew;
+    oy = hub - skew * 8.60999966f;
+    oz = skew &#43; c * 2.75200009f;
+}
+
+float df2k_resid_13(float a, float b, out float ox, out float oy) {
+    float base = a * b * 8.32999992f;
+    float guess = sin(base) &#43; base * base;
+    float resid = guess - base;
+    ox = resid &#43; guess * 8.32999992f;
+    oy = resid - base * 8.32999992f;
+    return resid &#43; ox * 0.5f;
+}
+
+float df2k_cross_14(float a, float b, float c, float d, out float ox, out float oy) {
+    float p0 = a * d &#43; b * c;
+    float p1 = (a &#43; d) * (b - c) * 6.40999985f;
+    float blend = tanh(p0) &#43; sin(p1 * 5.18400002f);
+    ox = blend &#43; p0 * 6.40999985f;
+    oy = blend - p1 * 5.18400002f;
+    return blend &#43; ox - oy;
+}
+
+float df2k_fold_15(float a, float b, float c, out float ox, out float oy) {
+    float m = a - b;
+    float am = m &gt;= 0.0f ? m : -m;
+    float shaped = am * 3.03999996f &#43; c * (a &#43; b);
+    float ripple = sin(shaped) &#43; cos(c * 3.03999996f);
+    ox = shaped &#43; ripple;
+    oy = shaped - ripple * 3.03999996f;
+    return ripple &#43; ox * 3.03999996f;
+}
+
+float df2k_umix_16(float a, float b, out float ox) {
+    float s = a;
+    s = s * 4.50999975f &#43; b &#43; 1.95999992f;
+    s = s * 5.67000008f &#43; b &#43; 7.07999992f;
+    ox = s &#43; sin(s * 2.99000001f);
+    return ox * 2.99000001f;
+}
+
+float df2k_rgb_17(float a, float b, float c, out float ox, out float oy, out float oz) {
+    float r = sin(a * 3.27999997f);
+    float g = cos(b * 4.94400024f);
+    float bch = sin(c &#43; a * 0.3f);
+    float nr = r * 0.5f &#43; g * 0.3f &#43; bch * 0.2f;
+    float ng = g * 0.5f &#43; bch * 0.3f &#43; r * 0.2f;
+    float nb = bch * 0.5f &#43; r * 0.3f &#43; g * 0.2f;
+    ox = nr &#43; ng * 0.25f;
+    oy = ng &#43; nb * 0.25f;
+    oz = nb &#43; nr * 0.25f;
+    return nr &#43; ng &#43; nb;
+}
+
+float df2k_latt_18(float a, float b, float c, out float ox, out float oy) {
+    float fx = a * 3.5999999f &#43; c * 0.31f;
+    float fy = b * 7.60500002f &#43; c * 0.17f;
+    float cell = sin(fx) &#43; sin(fy) &#43; sin(fx &#43; fy);
+    float diag = cos(fx - fy) * 3.5999999f;
+    ox = cell &#43; diag;
+    oy = cell - diag &#43; b * 7.60500002f;
+    return cell * 0.5f &#43; ox * 0.25f;
+}
+
+float df2k_det2_19(float a, float b, float c, float d, out float ox) {
+    float m00 = a &#43; c * 6.0f;
+    float m01 = b - d * 0.5f;
+    float m10 = c &#43; a * 0.5f;
+    float m11 = d &#43; 6.0f;
+    float det = m00 * m11 - m01 * m10;
+    ox = det &#43; sin(m00 &#43; m11);
+    return det * 6.0f &#43; ox;
+}
+
+float df2k_cross_20(float a, float b, float c, float d, out float ox, out float oy) {
+    float p0 = a * d &#43; b * c;
+    float p1 = (a &#43; d) * (b - c) * 0.189999998f;
+    float blend = tanh(p0) &#43; sin(p1 * 2.50800014f);
+    ox = blend &#43; p0 * 0.189999998f;
+    oy = blend - p1 * 2.50800014f;
+    return blend &#43; ox - oy;
+}
+
+float df2k_ratio_21(float a, float b, float c, out float ox) {
+    float w0 = a / (b &#43; 7.0f);
+    float w1 = c * 2.96000004f;
+    float fused = w0 * (1.0f - w1) &#43; w1 * sin(a &#43; c);
+    ox = fused &#43; log(1.0f &#43; w0 * w0);
+    return fused * 2.96000004f &#43; ox;
+}
+
+float df2k_fold_22(float a, float b, float c, out float ox, out float oy) {
+    float m = a - b;
+    float am = m &gt;= 0.0f ? m : -m;
+    float shaped = am * 3.14999986f &#43; c * (a &#43; b);
+    float ripple = sin(shaped) &#43; cos(c * 3.14999986f);
+    ox = shaped &#43; ripple;
+    oy = shaped - ripple * 3.14999986f;
+    return ripple &#43; ox * 3.14999986f;
+}
+
+float df2k_sstep_23(float a, float b, float c, out float ox) {
+    float t0 = a * 2.97000003f &#43; b;
+    float t1 = t0 * t0 * (3.0f - 2.0f * t0);
+    float t2 = t1 &#43; c * 13.132f;
+    float t3 = t2 * t2 * (3.0f - 2.0f * t2);
+    ox = t3 &#43; sin(t1 &#43; c);
+    return ox * 2.97000003f &#43; t3;
+}
+
+float df2k_ratio_24(float a, float b, float c, out float ox) {
+    float w0 = a / (b &#43; 4.0f);
+    float w1 = c * 2.72000003f;
+    float fused = w0 * (1.0f - w1) &#43; w1 * sin(a &#43; c);
+    ox = fused &#43; log(1.0f &#43; w0 * w0);
+    return fused * 2.72000003f &#43; ox;
+}
+
+float df2k_poly_25(float a, float b, out float ox, out float oy) {
+    float a2 = a * a;
+    float b2 = b * b;
+    float cross = a2 * b &#43; b2 * 1.11000001f;
+    float norm = 1.0f &#43; a2 &#43; b2 * 1.70099998f;
+    float val = cross / norm;
+    ox = val &#43; a * 1.11000001f;
+    oy = val - b * 1.70099998f;
+    return val &#43; ox - oy;
+}
+
+float df2k_fold_26(float a, float b, float c, out float ox, out float oy) {
+    float m = a - b;
+    float am = m &gt;= 0.0f ? m : -m;
+    float shaped = am * 2.74000001f &#43; c * (a &#43; b);
+    float ripple = sin(shaped) &#43; cos(c * 2.74000001f);
+    ox = shaped &#43; ripple;
+    oy = shaped - ripple * 2.74000001f;
+    return ripple &#43; ox * 2.74000001f;
+}
+
+float df2k_fold_27(float a, float b, float c, out float ox, out float oy) {
+    float m = a - b;
+    float am = m &gt;= 0.0f ? m : -m;
+    float shaped = am * 1.14999998f &#43; c * (a &#43; b);
+    float ripple = sin(shaped) &#43; cos(c * 1.14999998f);
+    ox = shaped &#43; ripple;
+    oy = shaped - ripple * 1.14999998f;
+    return ripple &#43; ox * 1.14999998f;
+}
+
+void df2k_trip_28(float a, float b, float c, out float ox, out float oy, out float oz) {
+    float hub = a * b &#43; c * 5.00999975f;
+    float skew = sin(hub) - cos(c * 3.42400026f);
+    ox = hub &#43; skew;
+    oy = hub - skew * 5.00999975f;
+    oz = skew &#43; c * 3.42400026f;
+}
+
+float df2k_resid_29(float a, float b, out float ox, out float oy) {
+    float base = a * b * 1.29999995f;
+    float guess = sin(base) &#43; base * base;
+    float resid = guess - base;
+    ox = resid &#43; guess * 1.29999995f;
+    oy = resid - base * 1.29999995f;
+    return resid &#43; ox * 0.5f;
+}
+
+float df2k_dual_30(float a, float b, float c, out float ox, out float oy) {
+    float gate = a - c * 3.48000002f;
+    float path_a = sin(gate) &#43; b * 2.83999991f;
+    float path_b = cos(gate) - log(1.0f &#43; b);
+    float merged = path_a * path_b * 2.83999991f;
+    ox = merged &#43; path_a;
+    oy = merged &#43; path_b;
+    return merged &#43; c * 3.48000002f;
+}
+
+float df2k_latt_31(float a, float b, float c, out float ox, out float oy) {
+    float fx = a * 1.11000001f &#43; c * 0.31f;
+    float fy = b * 5.75999975f &#43; c * 0.17f;
+    float cell = sin(fx) &#43; sin(fy) &#43; sin(fx &#43; fy);
+    float diag = cos(fx - fy) * 1.11000001f;
+    ox = cell &#43; diag;
+    oy = cell - diag &#43; b * 5.75999975f;
+    return cell * 0.5f &#43; ox * 0.25f;
+}
+
+float df2k_wmix_32(float a, float b, float c, out float ox) {
+    float t0 = a * 4.53999996f &#43; b * 3.53999996f;
+    float t1 = c * 1.32599998f - a * 3.53999996f;
+    float t2 = tanh(t0) &#43; exp(t1 * 4.53999996f * 0.01f);
+    ox = t2 &#43; t0 - t1;
+    return t2 * 1.32599998f;
+}
+
+float df2k_cheb_33(float a, float b, out float ox, out float oy) {
+    float t = a * 0.329999983f &#43; b * 0.5f;
+    float t0 = 1.0f;
+    float t1 = t;
+    float t2 = 2.0f * t * t1 - t0;
+    float t3 = 2.0f * t * t2 - t1;
+    ox = t2 &#43; t3 * 0.25f;
+    oy = t1 - t0 &#43; b * 0.329999983f;
+    return t3 &#43; ox - oy;
+}
+
+float df2k_wmix_34(float a, float b, float c, out float ox) {
+    float t0 = a * 6.11999989f &#43; b * 11.316f;
+    float t1 = c * 10.283f - a * 11.316f;
+    float t2 = tanh(t0) &#43; exp(t1 * 6.11999989f * 0.01f);
+    ox = t2 &#43; t0 - t1;
+    return t2 * 10.283f;
+}
+
+float df2k_rat_35(float a, float b, float c, out float ox, out float oy) {
+    float mix = (a * 7.94999981f &#43; b) / (c &#43; 7.0f);
+    float wave = sin(mix) * cos(b * 0.518999994f) &#43; tanh(a - c);
+    float lift = wave * wave &#43; mix * 7.94999981f;
+    ox = lift &#43; wave;
+    oy = lift - wave &#43; b * 0.518999994f;
+    return lift &#43; ox * 7.94999981f - oy * 0.518999994f;
+}
+
+float df2k_rgb_36(float a, float b, float c, out float ox, out float oy, out float oz) {
+    float r = sin(a * 4.6500001f);
+    float g = cos(b * 8.4800005f);
+    float bch = sin(c &#43; a * 0.3f);
+    float nr = r * 0.5f &#43; g * 0.3f &#43; bch * 0.2f;
+    float ng = g * 0.5f &#43; bch * 0.3f &#43; r * 0.2f;
+    float nb = bch * 0.5f &#43; r * 0.3f &#43; g * 0.2f;
+    ox = nr &#43; ng * 0.25f;
+    oy = ng &#43; nb * 0.25f;
+    oz = nb &#43; nr * 0.25f;
+    return nr &#43; ng &#43; nb;
+}
+
+float df2k_logexp_37(float a, float b, out float ox) {
+    float stage0 = log(1.0f &#43; a * a &#43; 7.73999977f);
+    float stage1 = exp(b * 0.076000005f * 0.01f) - stage0;
+    float stage2 = stage1 / (1.0f &#43; stage0 * stage0 &#43; 6.0f);
+    ox = stage2 &#43; stage0 * 7.73999977f;
+    return stage2 * 0.076000005f &#43; ox;
+}
+
+float df2k_harm_38(float a, float b, float c, float d, out float ox, out float oy) {
+    float h0 = sin(a &#43; b * 1.0f);
+    float h1 = cos(c &#43; d * 10.3949995f);
+    float h2 = sin(h0 &#43; h1) * cos(h0 - h1);
+    ox = h2 &#43; a * 1.0f;
+    oy = h2 &#43; d * 10.3949995f;
+    return h0 &#43; h1 &#43; h2;
+}
+
+float df2k_dual_39(float a, float b, float c, out float ox, out float oy) {
+    float gate = a - c * 10.1099997f;
+    float path_a = sin(gate) &#43; b * 6.3499999f;
+    float path_b = cos(gate) - log(1.0f &#43; b);
+    float merged = path_a * path_b * 6.3499999f;
+    ox = merged &#43; path_a;
+    oy = merged &#43; path_b;
+    return merged &#43; c * 10.1099997f;
+}
+
+float df2k_harm_40(float a, float b, float c, float d, out float ox, out float oy) {
+    float h0 = sin(a &#43; b * 3.25999999f);
+    float h1 = cos(c &#43; d * 2.18899989f);
+    float h2 = sin(h0 &#43; h1) * cos(h0 - h1);
+    ox = h2 &#43; a * 3.25999999f;
+    oy = h2 &#43; d * 2.18899989f;
+    return h0 &#43; h1 &#43; h2;
+}
+
+float df2k_harm_41(float a, float b, float c, float d, out float ox, out float oy) {
+    float h0 = sin(a &#43; b * 4.77999973f);
+    float h1 = cos(c &#43; d * 9.93299961f);
+    float h2 = sin(h0 &#43; h1) * cos(h0 - h1);
+    ox = h2 &#43; a * 4.77999973f;
+    oy = h2 &#43; d * 9.93299961f;
+    return h0 &#43; h1 &#43; h2;
+}
+
+float df2k_inv_42(float a, float b, out float ox, out float oy) {
+    float num = a * a &#43; b * 8.30000019f;
+    float den = b &#43; 4.0f &#43; a * 8.30000019f;
+    float ratio = num / den;
+    float folded = ratio - 1.0f / (1.0f &#43; ratio * ratio);
+    ox = folded &#43; num * 8.30000019f;
+    oy = folded - den * 8.30000019f;
+    return folded;
+}
+
+float df2k_poly_43(float a, float b, out float ox, out float oy) {
+    float a2 = a * a;
+    float b2 = b * b;
+    float cross = a2 * b &#43; b2 * 1.05999994f;
+    float norm = 1.0f &#43; a2 &#43; b2 * 6.64199972f;
+    float val = cross / norm;
+    ox = val &#43; a * 1.05999994f;
+    oy = val - b * 6.64199972f;
+    return val &#43; ox - oy;
+}
+
+float df2k_ratio_44(float a, float b, float c, out float ox) {
+    float w0 = a / (b &#43; 9.0f);
+    float w1 = c * 3.38999987f;
+    float fused = w0 * (1.0f - w1) &#43; w1 * sin(a &#43; c);
+    ox = fused &#43; log(1.0f &#43; w0 * w0);
+    return fused * 3.38999987f &#43; ox;
+}
+
+float df2k_det2_45(float a, float b, float c, float d, out float ox) {
+    float m00 = a &#43; c * 1.80999994f;
+    float m01 = b - d * 0.5f;
+    float m10 = c &#43; a * 0.5f;
+    float m11 = d &#43; 1.80999994f;
+    float det = m00 * m11 - m01 * m10;
+    ox = det &#43; sin(m00 &#43; m11);
+    return det * 1.80999994f &#43; ox;
+}
+
+float df2k_ratio_46(float a, float b, float c, out float ox) {
+    float w0 = a / (b &#43; 9.0f);
+    float w1 = c * 5.38000011f;
+    float fused = w0 * (1.0f - w1) &#43; w1 * sin(a &#43; c);
+    ox = fused &#43; log(1.0f &#43; w0 * w0);
+    return fused * 5.38000011f &#43; ox;
+}
+
+float df2k_rat_47(float a, float b, float c, out float ox, out float oy) {
+    float mix = (a * 4.57999992f &#43; b) / (c &#43; 10.0f);
+    float wave = sin(mix) * cos(b * 1.42500007f) &#43; tanh(a - c);
+    float lift = wave * wave &#43; mix * 4.57999992f;
+    ox = lift &#43; wave;
+    oy = lift - wave &#43; b * 1.42500007f;
+    return lift &#43; ox * 4.57999992f - oy * 1.42500007f;
+}
+
+float df2k_umix_48(float a, float b, out float ox) {
+    float s = a;
+    s = s * 8.32999992f &#43; b &#43; 9.88000011f;
+    s = s * 8.14999962f &#43; b &#43; 5.1500001f;
+    s = s * 2.5f &#43; b &#43; 5.6500001f;
+    s = s * 8.72999954f &#43; b &#43; 8.53999996f;
+    s = s * 0.280000001f &#43; b &#43; 9.03999996f;
+    ox = s &#43; sin(s * 1.62f);
+    return ox * 1.62f;
+}
+
+float df2k_logexp_49(float a, float b, out float ox) {
+    float stage0 = log(1.0f &#43; a * a &#43; 8.92000008f);
+    float stage1 = exp(b * 1.43200004f * 0.01f) - stage0;
+    float stage2 = stage1 / (1.0f &#43; stage0 * stage0 &#43; 7.0f);
+    ox = stage2 &#43; stage0 * 8.92000008f;
+    return stage2 * 1.43200004f &#43; ox;
+}
+
+float df2k_rat_50(float a, float b, float c, out float ox, out float oy) {
+    float mix = (a * 2.15999985f &#43; b) / (c &#43; 14.0f);
+    float wave = sin(mix) * cos(b * 2.61000013f) &#43; tanh(a - c);
+    float lift = wave * wave &#43; mix * 2.15999985f;
+    ox = lift &#43; wave;
+    oy = lift - wave &#43; b * 2.61000013f;
+    return lift &#43; ox * 2.15999985f - oy * 2.61000013f;
+}
+
+float df2k_osc_51(float a, float b, float c, out float ox) {
+    float o0 = sin(a * 2.55999994f &#43; c);
+    float o1 = cos(b * 3.79400015f - a);
+    float o2 = sin((a &#43; b) * 4.23200035f) * cos(c * 2.55999994f);
+    float bank = o0 &#43; o1 * 0.5f &#43; o2 * 0.25f;
+    ox = bank &#43; c * 3.79400015f;
+    return bank * 4.23200035f &#43; ox;
+}
+
+float df2k_poly_52(float a, float b, out float ox, out float oy) {
+    float a2 = a * a;
+    float b2 = b * b;
+    float cross = a2 * b &#43; b2 * 5.54999971f;
+    float norm = 1.0f &#43; a2 &#43; b2 * 1.30499995f;
+    float val = cross / norm;
+    ox = val &#43; a * 5.54999971f;
+    oy = val - b * 1.30499995f;
+    return val &#43; ox - oy;
+}
+
+float df2k_poly_53(float a, float b, out float ox, out float oy) {
+    float a2 = a * a;
+    float b2 = b * b;
+    float cross = a2 * b &#43; b2 * 1.13f;
+    float norm = 1.0f &#43; a2 &#43; b2 * 6.8039999f;
+    float val = cross / norm;
+    ox = val &#43; a * 1.13f;
+    oy = val - b * 6.8039999f;
+    return val &#43; ox - oy;
+}
+
+float df2k_harm_54(float a, float b, float c, float d, out float ox, out float oy) {
+    float h0 = sin(a &#43; b * 3.83999991f);
+    float h1 = cos(c &#43; d * 6.85300016f);
+    float h2 = sin(h0 &#43; h1) * cos(h0 - h1);
+    ox = h2 &#43; a * 3.83999991f;
+    oy = h2 &#43; d * 6.85300016f;
+    return h0 &#43; h1 &#43; h2;
+}
+
+float df2k_det2_55(float a, float b, float c, float d, out float ox) {
+    float m00 = a &#43; c * 9.78999996f;
+    float m01 = b - d * 0.5f;
+    float m10 = c &#43; a * 0.5f;
+    float m11 = d &#43; 9.78999996f;
+    float det = m00 * m11 - m01 * m10;
+    ox = det &#43; sin(m00 &#43; m11);
+    return det * 9.78999996f &#43; ox;
+}
+
+float df2k_resid_56(float a, float b, out float ox, out float oy) {
+    float base = a * b * 2.97000003f;
+    float guess = sin(base) &#43; base * base;
+    float resid = guess - base;
+    ox = resid &#43; guess * 2.97000003f;
+    oy = resid - base * 2.97000003f;
+    return resid &#43; ox * 0.5f;
+}
+
+float df2k_cross_57(float a, float b, float c, float d, out float ox, out float oy) {
+    float p0 = a * d &#43; b * c;
+    float p1 = (a &#43; d) * (b - c) * 8.35999966f;
+    float blend = tanh(p0) &#43; sin(p1 * 1.602f);
+    ox = blend &#43; p0 * 8.35999966f;
+    oy = blend - p1 * 1.602f;
+    return blend &#43; ox - oy;
+}
+
+float df2k_wmix_58(float a, float b, float c, out float ox) {
+    float t0 = a * 8.03999996f &#43; b * 2.50800014f;
+    float t1 = c * 12.5710001f - a * 2.50800014f;
+    float t2 = tanh(t0) &#43; exp(t1 * 8.03999996f * 0.01f);
+    ox = t2 &#43; t0 - t1;
+    return t2 * 12.5710001f;
+}
+
+float df2k_sstep_59(float a, float b, float c, out float ox) {
+    float t0 = a * 8.05999947f &#43; b;
+    float t1 = t0 * t0 * (3.0f - 2.0f * t0);
+    float t2 = t1 &#43; c * 3.99000001f;
+    float t3 = t2 * t2 * (3.0f - 2.0f * t2);
+    ox = t3 &#43; sin(t1 &#43; c);
+    return ox * 8.05999947f &#43; t3;
+}
+
+float df2k_logexp_60(float a, float b, out float ox) {
+    float stage0 = log(1.0f &#43; a * a &#43; 0.289999992f);
+    float stage1 = exp(b * 0.726000011f * 0.01f) - stage0;
+    float stage2 = stage1 / (1.0f &#43; stage0 * stage0 &#43; 7.0f);
+    ox = stage2 &#43; stage0 * 0.289999992f;
+    return stage2 * 0.726000011f &#43; ox;
+}
+
+float df2k_blend_61(float a, float b, float c, out float ox, out float oy) {
+    float seed = a &#43; b * 1.8499999f;
+    float gate = seed - c * 44.1500015f;
+    float hi = sin(seed) &#43; log(1.0f &#43; c);
+    float lo = cos(seed) - exp(b * 1.8499999f * 0.01f);
+    float w = 0.5f &#43; 0.5f * tanh(gate);
+    float picked = hi * w &#43; lo * (1.0f - w);
+    ox = picked &#43; c;
+    oy = picked - a * 44.1500015f;
+    return picked * 1.8499999f;
+}
+
+float df2k_harm_62(float a, float b, float c, float d, out float ox, out float oy) {
+    float h0 = sin(a &#43; b * 3.46000004f);
+    float h1 = cos(c &#43; d * 1.26499999f);
+    float h2 = sin(h0 &#43; h1) * cos(h0 - h1);
+    ox = h2 &#43; a * 3.46000004f;
+    oy = h2 &#43; d * 1.26499999f;
+    return h0 &#43; h1 &#43; h2;
+}
+
+float df2k_latt_63(float a, float b, float c, out float ox, out float oy) {
+    float fx = a * 3.64999986f &#43; c * 0.31f;
+    float fy = b * 1.79999995f &#43; c * 0.17f;
+    float cell = sin(fx) &#43; sin(fy) &#43; sin(fx &#43; fy);
+    float diag = cos(fx - fy) * 3.64999986f;
+    ox = cell &#43; diag;
+    oy = cell - diag &#43; b * 1.79999995f;
+    return cell * 0.5f &#43; ox * 0.25f;
+}
+
+float df2k_dual_64(float a, float b, float c, out float ox, out float oy) {
+    float gate = a - c * 15.6300001f;
+    float path_a = sin(gate) &#43; b * 5.28999996f;
+    float path_b = cos(gate) - log(1.0f &#43; b);
+    float merged = path_a * path_b * 5.28999996f;
+    ox = merged &#43; path_a;
+    oy = merged &#43; path_b;
+    return merged &#43; c * 15.6300001f;
+}
+
+float df2k_det2_65(float a, float b, float c, float d, out float ox) {
+    float m00 = a &#43; c * 3.25f;
+    float m01 = b - d * 0.5f;
+    float m10 = c &#43; a * 0.5f;
+    float m11 = d &#43; 3.25f;
+    float det = m00 * m11 - m01 * m10;
+    ox = det &#43; sin(m00 &#43; m11);
+    return det * 3.25f &#43; ox;
+}
+
+float df2k_rat_66(float a, float b, float c, out float ox, out float oy) {
+    float mix = (a * 5.85999966f &#43; b) / (c &#43; 14.0f);
+    float wave = sin(mix) * cos(b * 1.88699996f) &#43; tanh(a - c);
+    float lift = wave * wave &#43; mix * 5.85999966f;
+    ox = lift &#43; wave;
+    oy = lift - wave &#43; b * 1.88699996f;
+    return lift &#43; ox * 5.85999966f - oy * 1.88699996f;
+}
+
+float df2k_umix_67(float a, float b, out float ox) {
+    float s = a;
+    s = s * 0.839999974f &#43; b &#43; 6.94999981f;
+    s = s * 5.33999968f &#43; b &#43; 7.28999996f;
+    ox = s &#43; sin(s * 0.0799999982f);
+    return ox * 0.0799999982f;
+}
+
+float df2k_cheb_68(float a, float b, out float ox, out float oy) {
+    float t = a * 2.99000001f &#43; b * 0.5f;
+    float t0 = 1.0f;
+    float t1 = t;
+    float t2 = 2.0f * t * t1 - t0;
+    float t3 = 2.0f * t * t2 - t1;
+    ox = t2 &#43; t3 * 0.25f;
+    oy = t1 - t0 &#43; b * 2.99000001f;
+    return t3 &#43; ox - oy;
+}
+
+float df2k_latt_69(float a, float b, float c, out float ox, out float oy) {
+    float fx = a * 7.3499999f &#43; c * 0.31f;
+    float fy = b * 8.53499985f &#43; c * 0.17f;
+    float cell = sin(fx) &#43; sin(fy) &#43; sin(fx &#43; fy);
+    float diag = cos(fx - fy) * 7.3499999f;
+    ox = cell &#43; diag;
+    oy = cell - diag &#43; b * 8.53499985f;
+    return cell * 0.5f &#43; ox * 0.25f;
+}
+
+float df2k_cross_70(float a, float b, float c, float d, out float ox, out float oy) {
+    float p0 = a * d &#43; b * c;
+    float p1 = (a &#43; d) * (b - c) * 5.78999996f;
+    float blend = tanh(p0) &#43; sin(p1 * 5.09399986f);
+    ox = blend &#43; p0 * 5.78999996f;
+    oy = blend - p1 * 5.09399986f;
+    return blend &#43; ox - oy;
+}
+
+float df2k_poly_71(float a, float b, out float ox, out float oy) {
+    float a2 = a * a;
+    float b2 = b * b;
+    float cross = a2 * b &#43; b2 * 0.370000005f;
+    float norm = 1.0f &#43; a2 &#43; b2 * 8.81999969f;
+    float val = cross / norm;
+    ox = val &#43; a * 0.370000005f;
+    oy = val - b * 8.81999969f;
+    return val &#43; ox - oy;
+}
+
+float df2k_ratio_72(float a, float b, float c, out float ox) {
+    float w0 = a / (b &#43; 4.0f);
+    float w1 = c * 8.78999996f;
+    float fused = w0 * (1.0f - w1) &#43; w1 * sin(a &#43; c);
+    ox = fused &#43; log(1.0f &#43; w0 * w0);
+    return fused * 8.78999996f &#43; ox;
+}
+
+float df2k_rgb_73(float a, float b, float c, out float ox, out float oy, out float oz) {
+    float r = sin(a * 1.38f);
+    float g = cos(b * 1.60000002f);
+    float bch = sin(c &#43; a * 0.3f);
+    float nr = r * 0.5f &#43; g * 0.3f &#43; bch * 0.2f;
+    float ng = g * 0.5f &#43; bch * 0.3f &#43; r * 0.2f;
+    float nb = bch * 0.5f &#43; r * 0.3f &#43; g * 0.2f;
+    ox = nr &#43; ng * 0.25f;
+    oy = ng &#43; nb * 0.25f;
+    oz = nb &#43; nr * 0.25f;
+    return nr &#43; ng &#43; nb;
+}
+
+float df2k_rat_74(float a, float b, float c, out float ox, out float oy) {
+    float mix = (a * 4.71000004f &#43; b) / (c &#43; 4.0f);
+    float wave = sin(mix) * cos(b * 1.18799996f) &#43; tanh(a - c);
+    float lift = wave * wave &#43; mix * 4.71000004f;
+    ox = lift &#43; wave;
+    oy = lift - wave &#43; b * 1.18799996f;
+    return lift &#43; ox * 4.71000004f - oy * 1.18799996f;
+}
+
+float df2k_inv_75(float a, float b, out float ox, out float oy) {
+    float num = a * a &#43; b * 2.44000006f;
+    float den = b &#43; 11.0f &#43; a * 2.44000006f;
+    float ratio = num / den;
+    float folded = ratio - 1.0f / (1.0f &#43; ratio * ratio);
+    ox = folded &#43; num * 2.44000006f;
+    oy = folded - den * 2.44000006f;
+    return folded;
+}
+
+float df2k_fold_76(float a, float b, float c, out float ox, out float oy) {
+    float m = a - b;
+    float am = m &gt;= 0.0f ? m : -m;
+    float shaped = am * 8.02999973f &#43; c * (a &#43; b);
+    float ripple = sin(shaped) &#43; cos(c * 8.02999973f);
+    ox = shaped &#43; ripple;
+    oy = shaped - ripple * 8.02999973f;
+    return ripple &#43; ox * 8.02999973f;
+}
+
+void df2k_trip_77(float a, float b, float c, out float ox, out float oy, out float oz) {
+    float hub = a * b &#43; c * 9.71000004f;
+    float skew = sin(hub) - cos(c * 3.15600014f);
+    ox = hub &#43; skew;
+    oy = hub - skew * 9.71000004f;
+    oz = skew &#43; c * 3.15600014f;
+}
+
+float df2k_logexp_78(float a, float b, out float ox) {
+    float stage0 = log(1.0f &#43; a * a &#43; 0.48999998f);
+    float stage1 = exp(b * 0.924000025f * 0.01f) - stage0;
+    float stage2 = stage1 / (1.0f &#43; stage0 * stage0 &#43; 3.0f);
+    ox = stage2 &#43; stage0 * 0.48999998f;
+    return stage2 * 0.924000025f &#43; ox;
+}
+
+float df2k_cheb_79(float a, float b, out float ox, out float oy) {
+    float t = a * 3.6099999f &#43; b * 0.5f;
+    float t0 = 1.0f;
+    float t1 = t;
+    float t2 = 2.0f * t * t1 - t0;
+    float t3 = 2.0f * t * t2 - t1;
+    ox = t2 &#43; t3 * 0.25f;
+    oy = t1 - t0 &#43; b * 3.6099999f;
+    return t3 &#43; ox - oy;
+}
+
+float df2k_logexp_80(float a, float b, out float ox) {
+    float stage0 = log(1.0f &#43; a * a &#43; 9.27999973f);
+    float stage1 = exp(b * 0.716000021f * 0.01f) - stage0;
+    float stage2 = stage1 / (1.0f &#43; stage0 * stage0 &#43; 5.0f);
+    ox = stage2 &#43; stage0 * 9.27999973f;
+    return stage2 * 0.716000021f &#43; ox;
+}
+
+float df2k_umix_81(float a, float b, out float ox) {
+    float s = a;
+    s = s * 5.73999977f &#43; b &#43; 3.78999996f;
+    s = s * 9.34999943f &#43; b &#43; 6.64999962f;
+    ox = s &#43; sin(s * 4.3499999f);
+    return ox * 4.3499999f;
+}
+
+float df2k_osc_82(float a, float b, float c, out float ox) {
+    float o0 = sin(a * 0.0799999982f &#43; c);
+    float o1 = cos(b * 0.623000026f - a);
+    float o2 = sin((a &#43; b) * 2.43200016f) * cos(c * 0.0799999982f);
+    float bank = o0 &#43; o1 * 0.5f &#43; o2 * 0.25f;
+    ox = bank &#43; c * 0.623000026f;
+    return bank * 2.43200016f &#43; ox;
+}
+
+float df2k_det2_83(float a, float b, float c, float d, out float ox) {
+    float m00 = a &#43; c * 8.96000004f;
+    float m01 = b - d * 0.5f;
+    float m10 = c &#43; a * 0.5f;
+    float m11 = d &#43; 8.96000004f;
+    float det = m00 * m11 - m01 * m10;
+    ox = det &#43; sin(m00 &#43; m11);
+    return det * 8.96000004f &#43; ox;
+}
+
+float df2k_harm_84(float a, float b, float c, float d, out float ox, out float oy) {
+    float h0 = sin(a &#43; b * 9.76000023f);
+    float h1 = cos(c &#43; d * 4.07000017f);
+    float h2 = sin(h0 &#43; h1) * cos(h0 - h1);
+    ox = h2 &#43; a * 9.76000023f;
+    oy = h2 &#43; d * 4.07000017f;
+    return h0 &#43; h1 &#43; h2;
+}
+
+float df2k_inv_85(float a, float b, out float ox, out float oy) {
+    float num = a * a &#43; b * 2.41999984f;
+    float den = b &#43; 11.0f &#43; a * 2.41999984f;
+    float ratio = num / den;
+    float folded = ratio - 1.0f / (1.0f &#43; ratio * ratio);
+    ox = folded &#43; num * 2.41999984f;
+    oy = folded - den * 2.41999984f;
+    return folded;
+}
+
+void df2k_trip_86(float a, float b, float c, out float ox, out float oy, out float oz) {
+    float hub = a * b &#43; c * 0.170000002f;
+    float skew = sin(hub) - cos(c * 3.82000017f);
+    ox = hub &#43; skew;
+    oy = hub - skew * 0.170000002f;
+    oz = skew &#43; c * 3.82000017f;
+}
+
+float df2k_cheb_87(float a, float b, out float ox, out float oy) {
+    float t = a * 5.87999964f &#43; b * 0.5f;
+    float t0 = 1.0f;
+    float t1 = t;
+    float t2 = 2.0f * t * t1 - t0;
+    float t3 = 2.0f * t * t2 - t1;
+    ox = t2 &#43; t3 * 0.25f;
+    oy = t1 - t0 &#43; b * 5.87999964f;
+    return t3 &#43; ox - oy;
+}
+
+float df2k_cross_88(float a, float b, float c, float d, out float ox, out float oy) {
+    float p0 = a * d &#43; b * c;
+    float p1 = (a &#43; d) * (b - c) * 6.02999973f;
+    float blend = tanh(p0) &#43; sin(p1 * 0.342000008f);
+    ox = blend &#43; p0 * 6.02999973f;
+    oy = blend - p1 * 0.342000008f;
+    return blend &#43; ox - oy;
+}
+
+float df2k_dual_89(float a, float b, float c, out float ox, out float oy) {
+    float gate = a - c * 22.289999f;
+    float path_a = sin(gate) &#43; b * 9.38000011f;
+    float path_b = cos(gate) - log(1.0f &#43; b);
+    float merged = path_a * path_b * 9.38000011f;
+    ox = merged &#43; path_a;
+    oy = merged &#43; path_b;
+    return merged &#43; c * 22.289999f;
+}
+
+float df2k_resid_90(float a, float b, out float ox, out float oy) {
+    float base = a * b * 4.53999996f;
+    float guess = sin(base) &#43; base * base;
+    float resid = guess - base;
+    ox = resid &#43; guess * 4.53999996f;
+    oy = resid - base * 4.53999996f;
+    return resid &#43; ox * 0.5f;
+}
+
+float df2k_osc_91(float a, float b, float c, out float ox) {
+    float o0 = sin(a * 1.71999991f &#43; c);
+    float o1 = cos(b * 5.66300011f - a);
+    float o2 = sin((a &#43; b) * 1.54400003f) * cos(c * 1.71999991f);
+    float bank = o0 &#43; o1 * 0.5f &#43; o2 * 0.25f;
+    ox = bank &#43; c * 5.66300011f;
+    return bank * 1.54400003f &#43; ox;
+}
+
+float df2k_ratio_92(float a, float b, float c, out float ox) {
+    float w0 = a / (b &#43; 2.0f);
+    float w1 = c * 8.39999962f;
+    float fused = w0 * (1.0f - w1) &#43; w1 * sin(a &#43; c);
+    ox = fused &#43; log(1.0f &#43; w0 * w0);
+    return fused * 8.39999962f &#43; ox;
+}
+
+float df2k_umix_93(float a, float b, out float ox) {
+    float s = a;
+    s = s * 9.67000008f &#43; b &#43; 8.69999981f;
+    s = s * 1.12f &#43; b &#43; 9.76000023f;
+    ox = s &#43; sin(s * 9.17999935f);
+    return ox * 9.17999935f;
+}
+
+float df2k_det2_94(float a, float b, float c, float d, out float ox) {
+    float m00 = a &#43; c * 4.85999966f;
+    float m01 = b - d * 0.5f;
+    float m10 = c &#43; a * 0.5f;
+    float m11 = d &#43; 4.85999966f;
+    float det = m00 * m11 - m01 * m10;
+    ox = det &#43; sin(m00 &#43; m11);
+    return det * 4.85999966f &#43; ox;
+}
+
+float df2k_inv_95(float a, float b, out float ox, out float oy) {
+    float num = a * a &#43; b * 5.48000002f;
+    float den = b &#43; 12.0f &#43; a * 5.48000002f;
+    float ratio = num / den;
+    float folded = ratio - 1.0f / (1.0f &#43; ratio * ratio);
+    ox = folded &#43; num * 5.48000002f;
+    oy = folded - den * 5.48000002f;
+    return folded;
+}
+
+float df2k_cross_96(float a, float b, float c, float d, out float ox, out float oy) {
+    float p0 = a * d &#43; b * c;
+    float p1 = (a &#43; d) * (b - c) * 2.45000005f;
+    float blend = tanh(p0) &#43; sin(p1 * 3.58200002f);
+    ox = blend &#43; p0 * 2.45000005f;
+    oy = blend - p1 * 3.58200002f;
+    return blend &#43; ox - oy;
+}
+
+float df2k_inv_97(float a, float b, out float ox, out float oy) {
+    float num = a * a &#43; b * 3.77999997f;
+    float den = b &#43; 9.0f &#43; a * 3.77999997f;
+    float ratio = num / den;
+    float folded = ratio - 1.0f / (1.0f &#43; ratio * ratio);
+    ox = folded &#43; num * 3.77999997f;
+    oy = folded - den * 3.77999997f;
+    return folded;
+}
+
+float df2k_wmix_98(float a, float b, float c, out float ox) {
+    float t0 = a * 8.02999973f &#43; b * 5.26800013f;
+    float t1 = c * 5.46000004f - a * 5.26800013f;
+    float t2 = tanh(t0) &#43; exp(t1 * 8.02999973f * 0.01f);
+    ox = t2 &#43; t0 - t1;
+    return t2 * 5.46000004f;
+}
+
+float df2k_ratio_99(float a, float b, float c, out float ox) {
+    float w0 = a / (b &#43; 8.0f);
+    float w1 = c * 5.42999983f;
+    float fused = w0 * (1.0f - w1) &#43; w1 * sin(a &#43; c);
+    ox = fused &#43; log(1.0f &#43; w0 * w0);
+    return fused * 5.42999983f &#43; ox;
+}
+
+float df2k_harm_100(float a, float b, float c, float d, out float ox, out float oy) {
+    float h0 = sin(a &#43; b * 8.15999985f);
+    float h1 = cos(c &#43; d * 3.35500002f);
+    float h2 = sin(h0 &#43; h1) * cos(h0 - h1);
+    ox = h2 &#43; a * 8.15999985f;
+    oy = h2 &#43; d * 3.35500002f;
+    return h0 &#43; h1 &#43; h2;
+}
+
+float df2k_poly_101(float a, float b, out float ox, out float oy) {
+    float a2 = a * a;
+    float b2 = b * b;
+    float cross = a2 * b &#43; b2 * 5.44999981f;
+    float norm = 1.0f &#43; a2 &#43; b2 * 2.94299984f;
+    float val = cross / norm;
+    ox = val &#43; a * 5.44999981f;
+    oy = val - b * 2.94299984f;
+    return val &#43; ox - oy;
+}
+
+float df2k_latt_102(float a, float b, float c, out float ox, out float oy) {
+    float fx = a * 3.90999985f &#43; c * 0.31f;
+    float fy = b * 3.32999992f &#43; c * 0.17f;
+    float cell = sin(fx) &#43; sin(fy) &#43; sin(fx &#43; fy);
+    float diag = cos(fx - fy) * 3.90999985f;
+    ox = cell &#43; diag;
+    oy = cell - diag &#43; b * 3.32999992f;
+    return cell * 0.5f &#43; ox * 0.25f;
+}
+
+shader main(out float o) {
+    float x1 = global_value&lt;x1&gt;;
+    float x2 = global_value&lt;x2&gt;;
+    float u = global_value&lt;uv_u&gt;;
+    float v = global_value&lt;uv_v&gt;;
+    float acc = 0.0f;
+    float acc_w = 1e-4f;
+    float fold_ddx = 0.0f;
+    float fold_ddy = 0.0f;
+
+    {
+        color tex_0 = texture2d_sample&lt;g_tex&gt;(u * 1.26699996f, v &#43; 0.668000042f);
+        acc &#43;= (tex_0.r &#43; tex_0.g * 0.25f) * acc_w;
+    }
+
+    {
+        float ox_0;
+        float lane_0 = df2k_osc_0(x1, x2, u, ox_0);
+        acc &#43;= (lane_0 &#43; sin(ox_0)) * acc_w;
+        float fold_c_0 = sin(79.5f) * 6.69000006f &#43; cos(39.75f);
+        fold_ddx &#43;= ddx(fold_c_0) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_0);
+    }
+
+    {
+        float ox_1;
+        float oy_1;
+        float lane_1 = df2k_cheb_1(x1 &#43; u * 0.02f, x2, ox_1, oy_1);
+        acc &#43;= (lane_1 &#43; sin(ox_1 &#43; oy_1)) * acc_w;
+        float fold_c_1 = sin(23.5f) * 25.9200001f &#43; cos(11.75f);
+        fold_ddx &#43;= ddx(fold_c_1) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_1);
+    }
+
+    {
+        float ox_2;
+        float lane_2 = df2k_osc_2(x1, x2, u, ox_2);
+        acc &#43;= (lane_2 &#43; sin(ox_2)) * acc_w;
+        float fold_c_2 = sin(99.5f) * 1.5f &#43; cos(49.75f);
+        fold_ddx &#43;= ddx(fold_c_2) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_2);
+    }
+
+    {
+        float ox_3;
+        float oy_3;
+        float lane_3 = df2k_resid_3(x2, u, ox_3, oy_3);
+        acc &#43;= (lane_3 &#43; tanh(ox_3 &#43; oy_3)) * acc_w;
+        float fold_c_3 = sin(311.0f) * 8.01000023f &#43; cos(155.5f);
+        fold_ddx &#43;= ddx(fold_c_3) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_3);
+    }
+
+    {
+        float ox_4;
+        float oy_4;
+        float lane_4 = df2k_cross_4(x1, x2, u, v, ox_4, oy_4);
+        acc &#43;= (lane_4 * 4.31999969f) * acc_w;
+        float fold_c_4 = sin(162.5f) * 25.289999f &#43; cos(81.25f);
+        fold_ddx &#43;= ddx(fold_c_4) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_4);
+    }
+
+    {
+        float ox_5;
+        float oy_5;
+        float lane_5 = df2k_harm_5(x1, x2, u, v, ox_5, oy_5);
+        acc &#43;= (lane_5 &#43; ox_5 * 0.1f - oy_5 * 0.05f) * acc_w;
+        float fold_c_5 = sin(222.0f) * 18.0299988f &#43; cos(111.0f);
+        fold_ddx &#43;= ddx(fold_c_5) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_5);
+    }
+
+    {
+        float ox_6;
+        float oy_6;
+        float lane_6 = df2k_rat_6(x1, x2, u, ox_6, oy_6);
+        acc &#43;= (lane_6 * 4.58999968f &#43; ox_6) * acc_w;
+        float fold_c_6 = sin(191.0f) * 11.5799999f &#43; cos(95.5f);
+        fold_ddx &#43;= ddx(fold_c_6) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_6);
+    }
+
+    {
+        float ox_7;
+        float lane_7 = df2k_osc_7(x1, x2, u, ox_7);
+        acc &#43;= (lane_7 &#43; sin(ox_7)) * acc_w;
+        float fold_c_7 = sin(458.5f) * 2.75999999f &#43; cos(229.25f);
+        fold_ddx &#43;= ddx(fold_c_7) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_7);
+    }
+
+    {
+        float ox_8;
+        float oy_8;
+        float lane_8 = df2k_blend_8(x1, x2, v, ox_8, oy_8);
+        acc &#43;= (lane_8 &#43; oy_8 * 0.001f) * acc_w;
+        float fold_c_8 = sin(37.5f) * 18.7199993f &#43; cos(18.75f);
+        fold_ddx &#43;= ddx(fold_c_8) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_8);
+    }
+
+    {
+        float ox_9;
+        float oy_9;
+        float lane_9 = df2k_fold_9(x1, x2, u, ox_9, oy_9);
+        acc &#43;= (lane_9 * lane_9 * 0.001f) * acc_w;
+        float fold_c_9 = sin(462.0f) * 9.84000015f &#43; cos(231.0f);
+        fold_ddx &#43;= ddx(fold_c_9) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_9);
+    }
+
+    {
+        float ox_10;
+        float oy_10;
+        float lane_10 = df2k_rat_10(x1, x2, u, ox_10, oy_10);
+        acc &#43;= (lane_10 * 4.55999994f &#43; ox_10) * acc_w;
+        float fold_c_10 = sin(203.5f) * 23.6700001f &#43; cos(101.75f);
+        fold_ddx &#43;= ddx(fold_c_10) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_10);
+    }
+
+    {
+        float ox_11;
+        float oy_11;
+        float lane_11 = df2k_blend_11(x1, x2, v, ox_11, oy_11);
+        acc &#43;= (lane_11 &#43; oy_11 * 0.001f) * acc_w;
+        float fold_c_11 = sin(480.0f) * 25.4399986f &#43; cos(240.0f);
+        fold_ddx &#43;= ddx(fold_c_11) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_11);
+    }
+
+    {
+        float ox_12;
+        float oy_12;
+        float oz_12;
+        df2k_trip_12(x1, x2, u, ox_12, oy_12, oz_12);
+        acc &#43;= (ox_12 &#43; oy_12 * 0.5f &#43; oz_12 * 5.4000001f) * acc_w;
+        float fold_c_12 = sin(256.0f) * 26.6399994f &#43; cos(128.0f);
+        fold_ddx &#43;= ddx(fold_c_12) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_12);
+    }
+
+    {
+        float ox_13;
+        float oy_13;
+        float lane_13 = df2k_resid_13(x2, u, ox_13, oy_13);
+        acc &#43;= (lane_13 &#43; tanh(ox_13 &#43; oy_13)) * acc_w;
+        float fold_c_13 = sin(17.0f) * 21.9599991f &#43; cos(8.5f);
+        fold_ddx &#43;= ddx(fold_c_13) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_13);
+    }
+
+    {
+        float ox_14;
+        float oy_14;
+        float lane_14 = df2k_cross_14(x1, x2, u, v, ox_14, oy_14);
+        acc &#43;= (lane_14 * 7.50999975f) * acc_w;
+        float fold_c_14 = sin(90.5f) * 26.4300003f &#43; cos(45.25f);
+        fold_ddx &#43;= ddx(fold_c_14) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_14);
+    }
+
+    {
+        float ox_15;
+        float oy_15;
+        float lane_15 = df2k_fold_15(x1, x2, u, ox_15, oy_15);
+        acc &#43;= (lane_15 * lane_15 * 0.001f) * acc_w;
+        float fold_c_15 = sin(97.5f) * 0.629999995f &#43; cos(48.75f);
+        fold_ddx &#43;= ddx(fold_c_15) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_15);
+    }
+
+    {
+        float ox_16;
+        float lane_16 = df2k_umix_16(x1 &#43; u * 0.01f, x2, ox_16);
+        acc &#43;= (lane_16 &#43; ox_16 * 0.25f) * acc_w;
+        float fold_c_16 = sin(67.0f) * 15.1199999f &#43; cos(33.5f);
+        fold_ddx &#43;= ddx(fold_c_16) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_16);
+    }
+
+    {
+        float ox_17;
+        float oy_17;
+        float oz_17;
+        float lane_17 = df2k_rgb_17(x1, x2, u, ox_17, oy_17, oz_17);
+        acc &#43;= (lane_17 &#43; ox_17 * 0.1f &#43; oy_17 * 0.05f &#43; oz_17 * 0.02f) * acc_w;
+        float fold_c_17 = sin(182.0f) * 18.2399998f &#43; cos(91.0f);
+        fold_ddx &#43;= ddx(fold_c_17) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_17);
+    }
+
+    {
+        float ox_18;
+        float oy_18;
+        float lane_18 = df2k_latt_18(x1, x2, v, ox_18, oy_18);
+        acc &#43;= (lane_18 &#43; ox_18 - oy_18 * 0.5f) * acc_w;
+        float fold_c_18 = sin(152.5f) * 8.36999989f &#43; cos(76.25f);
+        fold_ddx &#43;= ddx(fold_c_18) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_18);
+    }
+
+    {
+        float ox_19;
+        float lane_19 = df2k_det2_19(x1, x2, u, v, ox_19);
+        acc &#43;= (lane_19 &#43; ox_19 * 0.01f) * acc_w;
+        float fold_c_19 = sin(184.5f) * 7.73999977f &#43; cos(92.25f);
+        fold_ddx &#43;= ddx(fold_c_19) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_19);
+    }
+
+    {
+        float ox_20;
+        float oy_20;
+        float lane_20 = df2k_cross_20(x1, x2, u, v, ox_20, oy_20);
+        acc &#43;= (lane_20 * 1.49000001f) * acc_w;
+        float fold_c_20 = sin(198.0f) * 27.8400002f &#43; cos(99.0f);
+        fold_ddx &#43;= ddx(fold_c_20) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_20);
+    }
+
+    {
+        float ox_21;
+        float lane_21 = df2k_ratio_21(x1, x2, u, ox_21);
+        acc &#43;= (lane_21 &#43; log(1.0f &#43; ox_21 * ox_21)) * acc_w;
+        float fold_c_21 = sin(120.0f) * 0.959999979f &#43; cos(60.0f);
+        fold_ddx &#43;= ddx(fold_c_21) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_21);
+    }
+
+    {
+        float ox_22;
+        float oy_22;
+        float lane_22 = df2k_fold_22(x1, x2, u, ox_22, oy_22);
+        acc &#43;= (lane_22 * lane_22 * 0.001f) * acc_w;
+        float fold_c_22 = sin(482.5f) * 28.8899994f &#43; cos(241.25f);
+        fold_ddx &#43;= ddx(fold_c_22) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_22);
+    }
+
+    {
+        float ox_23;
+        float lane_23 = df2k_sstep_23(x1, x2, u, ox_23);
+        acc &#43;= (lane_23 &#43; ox_23 * 0.05f) * acc_w;
+        float fold_c_23 = sin(177.5f) * 6.29999971f &#43; cos(88.75f);
+        fold_ddx &#43;= ddx(fold_c_23) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_23);
+    }
+
+    {
+        float ox_24;
+        float lane_24 = df2k_ratio_24(x1, x2, u, ox_24);
+        acc &#43;= (lane_24 &#43; log(1.0f &#43; ox_24 * ox_24)) * acc_w;
+        float fold_c_24 = sin(483.0f) * 29.5799999f &#43; cos(241.5f);
+        fold_ddx &#43;= ddx(fold_c_24) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_24);
+    }
+
+    {
+        float ox_25;
+        float oy_25;
+        float lane_25 = df2k_poly_25(x1 &#43; v * 0.01f, x2, ox_25, oy_25);
+        acc &#43;= (lane_25 &#43; ox_25 * oy_25 * 0.001f) * acc_w;
+        float fold_c_25 = sin(321.0f) * 21.4499989f &#43; cos(160.5f);
+        fold_ddx &#43;= ddx(fold_c_25) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_25);
+    }
+
+    {
+        float ox_26;
+        float oy_26;
+        float lane_26 = df2k_fold_26(x1, x2, u, ox_26, oy_26);
+        acc &#43;= (lane_26 * lane_26 * 0.001f) * acc_w;
+        float fold_c_26 = sin(431.0f) * 13.7399998f &#43; cos(215.5f);
+        fold_ddx &#43;= ddx(fold_c_26) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_26);
+    }
+
+    {
+        float ox_27;
+        float oy_27;
+        float lane_27 = df2k_fold_27(x1, x2, u, ox_27, oy_27);
+        acc &#43;= (lane_27 * lane_27 * 0.001f) * acc_w;
+        float fold_c_27 = sin(255.5f) * 20.6700001f &#43; cos(127.75f);
+        fold_ddx &#43;= ddx(fold_c_27) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_27);
+    }
+
+    {
+        float ox_28;
+        float oy_28;
+        float oz_28;
+        df2k_trip_28(x1, x2, u, ox_28, oy_28, oz_28);
+        acc &#43;= (ox_28 &#43; oy_28 * 0.5f &#43; oz_28 * 6.02999973f) * acc_w;
+        float fold_c_28 = sin(215.0f) * 16.1399994f &#43; cos(107.5f);
+        fold_ddx &#43;= ddx(fold_c_28) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_28);
+    }
+
+    {
+        float ox_29;
+        float oy_29;
+        float lane_29 = df2k_resid_29(x2, u, ox_29, oy_29);
+        acc &#43;= (lane_29 &#43; tanh(ox_29 &#43; oy_29)) * acc_w;
+        float fold_c_29 = sin(260.5f) * 24.539999f &#43; cos(130.25f);
+        fold_ddx &#43;= ddx(fold_c_29) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_29);
+    }
+
+    {
+        float ox_30;
+        float oy_30;
+        float lane_30 = df2k_dual_30(x1, u, v, ox_30, oy_30);
+        acc &#43;= (lane_30 &#43; ox_30 * 0.001f) * acc_w;
+        float fold_c_30 = sin(32.5f) * 22.8899994f &#43; cos(16.25f);
+        fold_ddx &#43;= ddx(fold_c_30) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_30);
+    }
+
+    {
+        float ox_31;
+        float oy_31;
+        float lane_31 = df2k_latt_31(x1, x2, v, ox_31, oy_31);
+        acc &#43;= (lane_31 &#43; ox_31 - oy_31 * 0.5f) * acc_w;
+        float fold_c_31 = sin(394.5f) * 29.7299995f &#43; cos(197.25f);
+        fold_ddx &#43;= ddx(fold_c_31) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_31);
+    }
+
+    {
+        float ox_32;
+        float lane_32 = df2k_wmix_32(x1, v, u, ox_32);
+        acc &#43;= (lane_32 &#43; cos(ox_32)) * acc_w;
+        float fold_c_32 = sin(191.5f) * 13.9799995f &#43; cos(95.75f);
+        fold_ddx &#43;= ddx(fold_c_32) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_32);
+    }
+
+    {
+        float ox_33;
+        float oy_33;
+        float lane_33 = df2k_cheb_33(x1 &#43; u * 0.02f, x2, ox_33, oy_33);
+        acc &#43;= (lane_33 &#43; sin(ox_33 &#43; oy_33)) * acc_w;
+        float fold_c_33 = sin(84.5f) * 12.1799994f &#43; cos(42.25f);
+        fold_ddx &#43;= ddx(fold_c_33) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_33);
+    }
+
+    {
+        float ox_34;
+        float lane_34 = df2k_wmix_34(x1, v, u, ox_34);
+        acc &#43;= (lane_34 &#43; cos(ox_34)) * acc_w;
+        float fold_c_34 = sin(489.0f) * 21.3299999f &#43; cos(244.5f);
+        fold_ddx &#43;= ddx(fold_c_34) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_34);
+    }
+
+    {
+        float ox_35;
+        float oy_35;
+        float lane_35 = df2k_rat_35(x1, x2, u, ox_35, oy_35);
+        acc &#43;= (lane_35 * 2.61999989f &#43; ox_35) * acc_w;
+        float fold_c_35 = sin(58.5f) * 11.25f &#43; cos(29.25f);
+        fold_ddx &#43;= ddx(fold_c_35) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_35);
+    }
+
+    {
+        float ox_36;
+        float oy_36;
+        float oz_36;
+        float lane_36 = df2k_rgb_36(x1, x2, u, ox_36, oy_36, oz_36);
+        acc &#43;= (lane_36 &#43; ox_36 * 0.1f &#43; oy_36 * 0.05f &#43; oz_36 * 0.02f) * acc_w;
+        float fold_c_36 = sin(280.5f) * 1.25999999f &#43; cos(140.25f);
+        fold_ddx &#43;= ddx(fold_c_36) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_36);
+    }
+
+    {
+        float ox_37;
+        float lane_37 = df2k_logexp_37(x1, x2, ox_37);
+        acc &#43;= (lane_37 &#43; ox_37 * 4.44999981f) * acc_w;
+        float fold_c_37 = sin(70.0f) * 17.0100002f &#43; cos(35.0f);
+        fold_ddx &#43;= ddx(fold_c_37) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_37);
+    }
+
+    {
+        float ox_38;
+        float oy_38;
+        float lane_38 = df2k_harm_38(x1, x2, u, v, ox_38, oy_38);
+        acc &#43;= (lane_38 &#43; ox_38 * 0.1f - oy_38 * 0.05f) * acc_w;
+        float fold_c_38 = sin(289.5f) * 18.0f &#43; cos(144.75f);
+        fold_ddx &#43;= ddx(fold_c_38) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_38);
+    }
+
+    {
+        float ox_39;
+        float oy_39;
+        float lane_39 = df2k_dual_39(x1, u, v, ox_39, oy_39);
+        acc &#43;= (lane_39 &#43; ox_39 * 0.001f) * acc_w;
+        float fold_c_39 = sin(91.0f) * 14.7599993f &#43; cos(45.5f);
+        fold_ddx &#43;= ddx(fold_c_39) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_39);
+    }
+
+    {
+        float ox_40;
+        float oy_40;
+        float lane_40 = df2k_harm_40(x1, x2, u, v, ox_40, oy_40);
+        acc &#43;= (lane_40 &#43; ox_40 * 0.1f - oy_40 * 0.05f) * acc_w;
+        float fold_c_40 = sin(28.0f) * 22.3199997f &#43; cos(14.0f);
+        fold_ddx &#43;= ddx(fold_c_40) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_40);
+    }
+
+    {
+        float ox_41;
+        float oy_41;
+        float lane_41 = df2k_harm_41(x1, x2, u, v, ox_41, oy_41);
+        acc &#43;= (lane_41 &#43; ox_41 * 0.1f - oy_41 * 0.05f) * acc_w;
+        float fold_c_41 = sin(149.0f) * 8.22000027f &#43; cos(74.5f);
+        fold_ddx &#43;= ddx(fold_c_41) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_41);
+    }
+
+    {
+        float ox_42;
+        float oy_42;
+        float lane_42 = df2k_inv_42(u, v, ox_42, oy_42);
+        acc &#43;= (lane_42 &#43; ox_42 - oy_42) * acc_w;
+        float fold_c_42 = sin(244.5f) * 1.23000002f &#43; cos(122.25f);
+        fold_ddx &#43;= ddx(fold_c_42) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_42);
+    }
+
+    {
+        float ox_43;
+        float oy_43;
+        float lane_43 = df2k_poly_43(x1 &#43; v * 0.01f, x2, ox_43, oy_43);
+        acc &#43;= (lane_43 &#43; ox_43 * oy_43 * 0.001f) * acc_w;
+        float fold_c_43 = sin(76.5f) * 23.3999996f &#43; cos(38.25f);
+        fold_ddx &#43;= ddx(fold_c_43) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_43);
+    }
+
+    {
+        float ox_44;
+        float lane_44 = df2k_ratio_44(x1, x2, u, ox_44);
+        acc &#43;= (lane_44 &#43; log(1.0f &#43; ox_44 * ox_44)) * acc_w;
+        float fold_c_44 = sin(13.5f) * 13.5299997f &#43; cos(6.75f);
+        fold_ddx &#43;= ddx(fold_c_44) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_44);
+    }
+
+    {
+        float ox_45;
+        float lane_45 = df2k_det2_45(x1, x2, u, v, ox_45);
+        acc &#43;= (lane_45 &#43; ox_45 * 0.01f) * acc_w;
+        float fold_c_45 = sin(301.0f) * 29.0999985f &#43; cos(150.5f);
+        fold_ddx &#43;= ddx(fold_c_45) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_45);
+    }
+
+    {
+        float ox_46;
+        float lane_46 = df2k_ratio_46(x1, x2, u, ox_46);
+        acc &#43;= (lane_46 &#43; log(1.0f &#43; ox_46 * ox_46)) * acc_w;
+        float fold_c_46 = sin(487.0f) * 19.5f &#43; cos(243.5f);
+        fold_ddx &#43;= ddx(fold_c_46) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_46);
+    }
+
+    {
+        float ox_47;
+        float oy_47;
+        float lane_47 = df2k_rat_47(x1, x2, u, ox_47, oy_47);
+        acc &#43;= (lane_47 * 7.05999994f &#43; ox_47) * acc_w;
+        float fold_c_47 = sin(473.0f) * 9.02999973f &#43; cos(236.5f);
+        fold_ddx &#43;= ddx(fold_c_47) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_47);
+    }
+
+    {
+        float ox_48;
+        float lane_48 = df2k_umix_48(x1 &#43; u * 0.01f, x2, ox_48);
+        acc &#43;= (lane_48 &#43; ox_48 * 0.25f) * acc_w;
+        float fold_c_48 = sin(42.5f) * 6.32999992f &#43; cos(21.25f);
+        fold_ddx &#43;= ddx(fold_c_48) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_48);
+    }
+
+    {
+        float ox_49;
+        float lane_49 = df2k_logexp_49(x1, x2, ox_49);
+        acc &#43;= (lane_49 &#43; ox_49 * 6.55999994f) * acc_w;
+        float fold_c_49 = sin(219.0f) * 28.4699993f &#43; cos(109.5f);
+        fold_ddx &#43;= ddx(fold_c_49) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_49);
+    }
+
+    {
+        float ox_50;
+        float oy_50;
+        float lane_50 = df2k_rat_50(x1, x2, u, ox_50, oy_50);
+        acc &#43;= (lane_50 * 3.11999989f &#43; ox_50) * acc_w;
+        float fold_c_50 = sin(457.0f) * 24.9899998f &#43; cos(228.5f);
+        fold_ddx &#43;= ddx(fold_c_50) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_50);
+    }
+
+    {
+        float ox_51;
+        float lane_51 = df2k_osc_51(x1, x2, u, ox_51);
+        acc &#43;= (lane_51 &#43; sin(ox_51)) * acc_w;
+        float fold_c_51 = sin(233.5f) * 25.2299995f &#43; cos(116.75f);
+        fold_ddx &#43;= ddx(fold_c_51) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_51);
+    }
+
+    {
+        float ox_52;
+        float oy_52;
+        float lane_52 = df2k_poly_52(x1 &#43; v * 0.01f, x2, ox_52, oy_52);
+        acc &#43;= (lane_52 &#43; ox_52 * oy_52 * 0.001f) * acc_w;
+        float fold_c_52 = sin(39.5f) * 2.25f &#43; cos(19.75f);
+        fold_ddx &#43;= ddx(fold_c_52) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_52);
+    }
+
+    {
+        float ox_53;
+        float oy_53;
+        float lane_53 = df2k_poly_53(x1 &#43; v * 0.01f, x2, ox_53, oy_53);
+        acc &#43;= (lane_53 &#43; ox_53 * oy_53 * 0.001f) * acc_w;
+        float fold_c_53 = sin(368.0f) * 15.5999994f &#43; cos(184.0f);
+        fold_ddx &#43;= ddx(fold_c_53) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_53);
+    }
+
+    {
+        float ox_54;
+        float oy_54;
+        float lane_54 = df2k_harm_54(x1, x2, u, v, ox_54, oy_54);
+        acc &#43;= (lane_54 &#43; ox_54 * 0.1f - oy_54 * 0.05f) * acc_w;
+        float fold_c_54 = sin(356.0f) * 21.5699997f &#43; cos(178.0f);
+        fold_ddx &#43;= ddx(fold_c_54) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_54);
+    }
+
+    {
+        float ox_55;
+        float lane_55 = df2k_det2_55(x1, x2, u, v, ox_55);
+        acc &#43;= (lane_55 &#43; ox_55 * 0.01f) * acc_w;
+        float fold_c_55 = sin(2.5f) * 25.6499996f &#43; cos(1.25f);
+        fold_ddx &#43;= ddx(fold_c_55) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_55);
+    }
+
+    {
+        float ox_56;
+        float oy_56;
+        float lane_56 = df2k_resid_56(x2, u, ox_56, oy_56);
+        acc &#43;= (lane_56 &#43; tanh(ox_56 &#43; oy_56)) * acc_w;
+        float fold_c_56 = sin(182.0f) * 1.74000001f &#43; cos(91.0f);
+        fold_ddx &#43;= ddx(fold_c_56) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_56);
+    }
+
+    {
+        float ox_57;
+        float oy_57;
+        float lane_57 = df2k_cross_57(x1, x2, u, v, ox_57, oy_57);
+        acc &#43;= (lane_57 * 1.70999992f) * acc_w;
+        float fold_c_57 = sin(180.0f) * 3.9599998f &#43; cos(90.0f);
+        fold_ddx &#43;= ddx(fold_c_57) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_57);
+    }
+
+    {
+        float ox_58;
+        float lane_58 = df2k_wmix_58(x1, v, u, ox_58);
+        acc &#43;= (lane_58 &#43; cos(ox_58)) * acc_w;
+        float fold_c_58 = sin(56.0f) * 25.1999989f &#43; cos(28.0f);
+        fold_ddx &#43;= ddx(fold_c_58) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_58);
+    }
+
+    {
+        float ox_59;
+        float lane_59 = df2k_sstep_59(x1, x2, u, ox_59);
+        acc &#43;= (lane_59 &#43; ox_59 * 0.05f) * acc_w;
+        float fold_c_59 = sin(308.5f) * 23.8199997f &#43; cos(154.25f);
+        fold_ddx &#43;= ddx(fold_c_59) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_59);
+    }
+
+    {
+        float ox_60;
+        float lane_60 = df2k_logexp_60(x1, x2, ox_60);
+        acc &#43;= (lane_60 &#43; ox_60 * 1.88f) * acc_w;
+        float fold_c_60 = sin(300.0f) * 29.2199993f &#43; cos(150.0f);
+        fold_ddx &#43;= ddx(fold_c_60) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_60);
+    }
+
+    {
+        float ox_61;
+        float oy_61;
+        float lane_61 = df2k_blend_61(x1, x2, v, ox_61, oy_61);
+        acc &#43;= (lane_61 &#43; oy_61 * 0.001f) * acc_w;
+        float fold_c_61 = sin(178.5f) * 27.8999996f &#43; cos(89.25f);
+        fold_ddx &#43;= ddx(fold_c_61) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_61);
+    }
+
+    {
+        float ox_62;
+        float oy_62;
+        float lane_62 = df2k_harm_62(x1, x2, u, v, ox_62, oy_62);
+        acc &#43;= (lane_62 &#43; ox_62 * 0.1f - oy_62 * 0.05f) * acc_w;
+        float fold_c_62 = sin(195.0f) * 28.4699993f &#43; cos(97.5f);
+        fold_ddx &#43;= ddx(fold_c_62) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_62);
+    }
+
+    {
+        float ox_63;
+        float oy_63;
+        float lane_63 = df2k_latt_63(x1, x2, v, ox_63, oy_63);
+        acc &#43;= (lane_63 &#43; ox_63 - oy_63 * 0.5f) * acc_w;
+        float fold_c_63 = sin(265.5f) * 22.5299988f &#43; cos(132.75f);
+        fold_ddx &#43;= ddx(fold_c_63) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_63);
+    }
+
+    {
+        float ox_64;
+        float oy_64;
+        float lane_64 = df2k_dual_64(x1, u, v, ox_64, oy_64);
+        acc &#43;= (lane_64 &#43; ox_64 * 0.001f) * acc_w;
+        float fold_c_64 = sin(293.5f) * 27.8400002f &#43; cos(146.75f);
+        fold_ddx &#43;= ddx(fold_c_64) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_64);
+    }
+
+    {
+        float ox_65;
+        float lane_65 = df2k_det2_65(x1, x2, u, v, ox_65);
+        acc &#43;= (lane_65 &#43; ox_65 * 0.01f) * acc_w;
+        float fold_c_65 = sin(363.5f) * 11.6399994f &#43; cos(181.75f);
+        fold_ddx &#43;= ddx(fold_c_65) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_65);
+    }
+
+    {
+        float ox_66;
+        float oy_66;
+        float lane_66 = df2k_rat_66(x1, x2, u, ox_66, oy_66);
+        acc &#43;= (lane_66 * 0.409999996f &#43; ox_66) * acc_w;
+        float fold_c_66 = sin(425.5f) * 18.2399998f &#43; cos(212.75f);
+        fold_ddx &#43;= ddx(fold_c_66) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_66);
+    }
+
+    {
+        float ox_67;
+        float lane_67 = df2k_umix_67(x1 &#43; u * 0.01f, x2, ox_67);
+        acc &#43;= (lane_67 &#43; ox_67 * 0.25f) * acc_w;
+        float fold_c_67 = sin(24.5f) * 10.3499994f &#43; cos(12.25f);
+        fold_ddx &#43;= ddx(fold_c_67) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_67);
+    }
+
+    {
+        float ox_68;
+        float oy_68;
+        float lane_68 = df2k_cheb_68(x1 &#43; u * 0.02f, x2, ox_68, oy_68);
+        acc &#43;= (lane_68 &#43; sin(ox_68 &#43; oy_68)) * acc_w;
+        float fold_c_68 = sin(160.5f) * 26.1899986f &#43; cos(80.25f);
+        fold_ddx &#43;= ddx(fold_c_68) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_68);
+    }
+
+    {
+        float ox_69;
+        float oy_69;
+        float lane_69 = df2k_latt_69(x1, x2, v, ox_69, oy_69);
+        acc &#43;= (lane_69 &#43; ox_69 - oy_69 * 0.5f) * acc_w;
+        float fold_c_69 = sin(19.0f) * 16.5599995f &#43; cos(9.5f);
+        fold_ddx &#43;= ddx(fold_c_69) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_69);
+    }
+
+    {
+        float ox_70;
+        float oy_70;
+        float lane_70 = df2k_cross_70(x1, x2, u, v, ox_70, oy_70);
+        acc &#43;= (lane_70 * 7.3499999f) * acc_w;
+        float fold_c_70 = sin(388.5f) * 7.28999996f &#43; cos(194.25f);
+        fold_ddx &#43;= ddx(fold_c_70) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_70);
+    }
+
+    {
+        float ox_71;
+        float oy_71;
+        float lane_71 = df2k_poly_71(x1 &#43; v * 0.01f, x2, ox_71, oy_71);
+        acc &#43;= (lane_71 &#43; ox_71 * oy_71 * 0.001f) * acc_w;
+        float fold_c_71 = sin(202.0f) * 10.1399994f &#43; cos(101.0f);
+        fold_ddx &#43;= ddx(fold_c_71) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_71);
+    }
+
+    {
+        float ox_72;
+        float lane_72 = df2k_ratio_72(x1, x2, u, ox_72);
+        acc &#43;= (lane_72 &#43; log(1.0f &#43; ox_72 * ox_72)) * acc_w;
+        float fold_c_72 = sin(195.0f) * 26.25f &#43; cos(97.5f);
+        fold_ddx &#43;= ddx(fold_c_72) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_72);
+    }
+
+    {
+        float ox_73;
+        float oy_73;
+        float oz_73;
+        float lane_73 = df2k_rgb_73(x1, x2, u, ox_73, oy_73, oz_73);
+        acc &#43;= (lane_73 &#43; ox_73 * 0.1f &#43; oy_73 * 0.05f &#43; oz_73 * 0.02f) * acc_w;
+        float fold_c_73 = sin(130.0f) * 17.4300003f &#43; cos(65.0f);
+        fold_ddx &#43;= ddx(fold_c_73) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_73);
+    }
+
+    {
+        float ox_74;
+        float oy_74;
+        float lane_74 = df2k_rat_74(x1, x2, u, ox_74, oy_74);
+        acc &#43;= (lane_74 * 3.54999995f &#43; ox_74) * acc_w;
+        float fold_c_74 = sin(426.5f) * 10.5f &#43; cos(213.25f);
+        fold_ddx &#43;= ddx(fold_c_74) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_74);
+    }
+
+    {
+        float ox_75;
+        float oy_75;
+        float lane_75 = df2k_inv_75(u, v, ox_75, oy_75);
+        acc &#43;= (lane_75 &#43; ox_75 - oy_75) * acc_w;
+        float fold_c_75 = sin(273.5f) * 0.0899999961f &#43; cos(136.75f);
+        fold_ddx &#43;= ddx(fold_c_75) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_75);
+    }
+
+    {
+        float ox_76;
+        float oy_76;
+        float lane_76 = df2k_fold_76(x1, x2, u, ox_76, oy_76);
+        acc &#43;= (lane_76 * lane_76 * 0.001f) * acc_w;
+        float fold_c_76 = sin(297.5f) * 3.65999985f &#43; cos(148.75f);
+        fold_ddx &#43;= ddx(fold_c_76) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_76);
+    }
+
+    {
+        float ox_77;
+        float oy_77;
+        float oz_77;
+        df2k_trip_77(x1, x2, u, ox_77, oy_77, oz_77);
+        acc &#43;= (ox_77 &#43; oy_77 * 0.5f &#43; oz_77 * 1.69999993f) * acc_w;
+        float fold_c_77 = sin(392.0f) * 17.7299995f &#43; cos(196.0f);
+        fold_ddx &#43;= ddx(fold_c_77) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_77);
+    }
+
+    {
+        float ox_78;
+        float lane_78 = df2k_logexp_78(x1, x2, ox_78);
+        acc &#43;= (lane_78 &#43; ox_78 * 9.0f) * acc_w;
+        float fold_c_78 = sin(434.0f) * 12.3299999f &#43; cos(217.0f);
+        fold_ddx &#43;= ddx(fold_c_78) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_78);
+    }
+
+    {
+        float ox_79;
+        float oy_79;
+        float lane_79 = df2k_cheb_79(x1 &#43; u * 0.02f, x2, ox_79, oy_79);
+        acc &#43;= (lane_79 &#43; sin(ox_79 &#43; oy_79)) * acc_w;
+        float fold_c_79 = sin(215.5f) * 14.7599993f &#43; cos(107.75f);
+        fold_ddx &#43;= ddx(fold_c_79) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_79);
+    }
+
+    {
+        float ox_80;
+        float lane_80 = df2k_logexp_80(x1, x2, ox_80);
+        acc &#43;= (lane_80 &#43; ox_80 * 6.06999969f) * acc_w;
+        float fold_c_80 = sin(427.5f) * 26.4899998f &#43; cos(213.75f);
+        fold_ddx &#43;= ddx(fold_c_80) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_80);
+    }
+
+    {
+        float ox_81;
+        float lane_81 = df2k_umix_81(x1 &#43; u * 0.01f, x2, ox_81);
+        acc &#43;= (lane_81 &#43; ox_81 * 0.25f) * acc_w;
+        float fold_c_81 = sin(112.5f) * 15.0299997f &#43; cos(56.25f);
+        fold_ddx &#43;= ddx(fold_c_81) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_81);
+    }
+
+    {
+        float ox_82;
+        float lane_82 = df2k_osc_82(x1, x2, u, ox_82);
+        acc &#43;= (lane_82 &#43; sin(ox_82)) * acc_w;
+        float fold_c_82 = sin(98.5f) * 2.0999999f &#43; cos(49.25f);
+        fold_ddx &#43;= ddx(fold_c_82) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_82);
+    }
+
+    {
+        float ox_83;
+        float lane_83 = df2k_det2_83(x1, x2, u, v, ox_83);
+        acc &#43;= (lane_83 &#43; ox_83 * 0.01f) * acc_w;
+        float fold_c_83 = sin(282.0f) * 11.3999996f &#43; cos(141.0f);
+        fold_ddx &#43;= ddx(fold_c_83) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_83);
+    }
+
+    {
+        float ox_84;
+        float oy_84;
+        float lane_84 = df2k_harm_84(x1, x2, u, v, ox_84, oy_84);
+        acc &#43;= (lane_84 &#43; ox_84 * 0.1f - oy_84 * 0.05f) * acc_w;
+        float fold_c_84 = sin(288.5f) * 29.3999996f &#43; cos(144.25f);
+        fold_ddx &#43;= ddx(fold_c_84) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_84);
+    }
+
+    {
+        float ox_85;
+        float oy_85;
+        float lane_85 = df2k_inv_85(u, v, ox_85, oy_85);
+        acc &#43;= (lane_85 &#43; ox_85 - oy_85) * acc_w;
+        float fold_c_85 = sin(319.0f) * 20.2199993f &#43; cos(159.5f);
+        fold_ddx &#43;= ddx(fold_c_85) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_85);
+    }
+
+    {
+        float ox_86;
+        float oy_86;
+        float oz_86;
+        df2k_trip_86(x1, x2, u, ox_86, oy_86, oz_86);
+        acc &#43;= (ox_86 &#43; oy_86 * 0.5f &#43; oz_86 * 7.69999981f) * acc_w;
+        float fold_c_86 = sin(54.5f) * 9.38999939f &#43; cos(27.25f);
+        fold_ddx &#43;= ddx(fold_c_86) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_86);
+    }
+
+    {
+        float ox_87;
+        float oy_87;
+        float lane_87 = df2k_cheb_87(x1 &#43; u * 0.02f, x2, ox_87, oy_87);
+        acc &#43;= (lane_87 &#43; sin(ox_87 &#43; oy_87)) * acc_w;
+        float fold_c_87 = sin(241.0f) * 5.48999977f &#43; cos(120.5f);
+        fold_ddx &#43;= ddx(fold_c_87) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_87);
+    }
+
+    {
+        float ox_88;
+        float oy_88;
+        float lane_88 = df2k_cross_88(x1, x2, u, v, ox_88, oy_88);
+        acc &#43;= (lane_88 * 0.329999983f) * acc_w;
+        float fold_c_88 = sin(469.5f) * 3.50999999f &#43; cos(234.75f);
+        fold_ddx &#43;= ddx(fold_c_88) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_88);
+    }
+
+    {
+        float ox_89;
+        float oy_89;
+        float lane_89 = df2k_dual_89(x1, u, v, ox_89, oy_89);
+        acc &#43;= (lane_89 &#43; ox_89 * 0.001f) * acc_w;
+        float fold_c_89 = sin(150.0f) * 0.449999988f &#43; cos(75.0f);
+        fold_ddx &#43;= ddx(fold_c_89) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_89);
+    }
+
+    {
+        float ox_90;
+        float oy_90;
+        float lane_90 = df2k_resid_90(x2, u, ox_90, oy_90);
+        acc &#43;= (lane_90 &#43; tanh(ox_90 &#43; oy_90)) * acc_w;
+        float fold_c_90 = sin(336.5f) * 1.67999995f &#43; cos(168.25f);
+        fold_ddx &#43;= ddx(fold_c_90) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_90);
+    }
+
+    {
+        float ox_91;
+        float lane_91 = df2k_osc_91(x1, x2, u, ox_91);
+        acc &#43;= (lane_91 &#43; sin(ox_91)) * acc_w;
+        float fold_c_91 = sin(66.5f) * 6.1500001f &#43; cos(33.25f);
+        fold_ddx &#43;= ddx(fold_c_91) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_91);
+    }
+
+    {
+        float ox_92;
+        float lane_92 = df2k_ratio_92(x1, x2, u, ox_92);
+        acc &#43;= (lane_92 &#43; log(1.0f &#43; ox_92 * ox_92)) * acc_w;
+        float fold_c_92 = sin(455.5f) * 13.3499994f &#43; cos(227.75f);
+        fold_ddx &#43;= ddx(fold_c_92) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_92);
+    }
+
+    {
+        float ox_93;
+        float lane_93 = df2k_umix_93(x1 &#43; u * 0.01f, x2, ox_93);
+        acc &#43;= (lane_93 &#43; ox_93 * 0.25f) * acc_w;
+        float fold_c_93 = sin(72.0f) * 15.1499996f &#43; cos(36.0f);
+        fold_ddx &#43;= ddx(fold_c_93) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_93);
+    }
+
+    {
+        float ox_94;
+        float lane_94 = df2k_det2_94(x1, x2, u, v, ox_94);
+        acc &#43;= (lane_94 &#43; ox_94 * 0.01f) * acc_w;
+        float fold_c_94 = sin(444.5f) * 16.4699993f &#43; cos(222.25f);
+        fold_ddx &#43;= ddx(fold_c_94) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_94);
+    }
+
+    {
+        float ox_95;
+        float oy_95;
+        float lane_95 = df2k_inv_95(u, v, ox_95, oy_95);
+        acc &#43;= (lane_95 &#43; ox_95 - oy_95) * acc_w;
+        float fold_c_95 = sin(160.0f) * 4.6500001f &#43; cos(80.0f);
+        fold_ddx &#43;= ddx(fold_c_95) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_95);
+    }
+
+    {
+        float ox_96;
+        float oy_96;
+        float lane_96 = df2k_cross_96(x1, x2, u, v, ox_96, oy_96);
+        acc &#43;= (lane_96 * 2.71000004f) * acc_w;
+        float fold_c_96 = sin(198.5f) * 20.3699989f &#43; cos(99.25f);
+        fold_ddx &#43;= ddx(fold_c_96) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_96);
+    }
+
+    {
+        float ox_97;
+        float oy_97;
+        float lane_97 = df2k_inv_97(u, v, ox_97, oy_97);
+        acc &#43;= (lane_97 &#43; ox_97 - oy_97) * acc_w;
+        float fold_c_97 = sin(342.0f) * 23.1899986f &#43; cos(171.0f);
+        fold_ddx &#43;= ddx(fold_c_97) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_97);
+    }
+
+    {
+        float ox_98;
+        float lane_98 = df2k_wmix_98(x1, v, u, ox_98);
+        acc &#43;= (lane_98 &#43; cos(ox_98)) * acc_w;
+        float fold_c_98 = sin(353.5f) * 4.5f &#43; cos(176.75f);
+        fold_ddx &#43;= ddx(fold_c_98) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_98);
+    }
+
+    {
+        float ox_99;
+        float lane_99 = df2k_ratio_99(x1, x2, u, ox_99);
+        acc &#43;= (lane_99 &#43; log(1.0f &#43; ox_99 * ox_99)) * acc_w;
+        float fold_c_99 = sin(141.0f) * 22.5f &#43; cos(70.5f);
+        fold_ddx &#43;= ddx(fold_c_99) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_99);
+    }
+
+    {
+        float ox_100;
+        float oy_100;
+        float lane_100 = df2k_harm_100(x1, x2, u, v, ox_100, oy_100);
+        acc &#43;= (lane_100 &#43; ox_100 * 0.1f - oy_100 * 0.05f) * acc_w;
+        float fold_c_100 = sin(71.5f) * 9.68999958f &#43; cos(35.75f);
+        fold_ddx &#43;= ddx(fold_c_100) &#43; df2k_fold_h1();
+        fold_ddy &#43;= ddy(fold_c_100);
+    }
+
+    {
+        float ox_101;
+        float oy_101;
+        float lane_101 = df2k_poly_101(x1 &#43; v * 0.01f, x2, ox_101, oy_101);
+        acc &#43;= (lane_101 &#43; ox_101 * oy_101 * 0.001f) * acc_w;
+        float fold_c_101 = sin(402.5f) * 25.289999f &#43; cos(201.25f);
+        fold_ddx &#43;= ddx(fold_c_101) &#43; df2k_fold_h2();
+        fold_ddy &#43;= ddy(fold_c_101);
+    }
+
+    {
+        float ox_102;
+        float oy_102;
+        float lane_102 = df2k_latt_102(x1, x2, v, ox_102, oy_102);
+        acc &#43;= (lane_102 &#43; ox_102 - oy_102 * 0.5f) * acc_w;
+        float fold_c_102 = sin(496.0f) * 0.689999998f &#43; cos(248.0f);
+        fold_ddx &#43;= ddx(fold_c_102) &#43; df2k_fold_h0();
+        fold_ddy &#43;= ddy(fold_c_102);
+    }
+
+    o = acc &#43; fold_ddx &#43; fold_ddy;
+}
+</pre>
+</body>
+</html>
+
+

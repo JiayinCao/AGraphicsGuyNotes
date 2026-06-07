@@ -2842,11 +2842,16 @@ $$
 <h2 id="measuring-the-cost-of-derivatives-in-ssl">Measuring the Cost of Derivatives in SSL</h2>
 <p>There are a few aspects worth examining here, memory consumption and performance, both in compilation and runtime. To gather data, I asked an AI to produce a few SSL shaders. They are</p>
 <ul>
-<li>A tiny <a href="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/no_deriv.ssl">shader A</a> that has no derivative need</li>
-<li>A tiny <a href="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/deriv_minimal.ssl">shader B</a> that needs derivatives</li>
-<li>A long <a href="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/no_deriv_2k.ssl">shader C</a> with 2k LOC that doesn&rsquo;t need derivatives</li>
-<li>A long <a href="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/deriv_2k.ssl">shader D</a> with 2k LOC that needs derivatives</li>
-<li>A long <a href="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/deriv_fold_2k.ssl">shader E</a> with 2k LOC that needs derivatives, but all derivatives can be folded to 0</li>
+<li>A tiny <a href="/source/no_deriv/" target="_blank" rel="noopener noreferrer">shader A</a>
+ that has no derivative need</li>
+<li>A tiny <a href="/source/deriv_minimal/" target="_blank" rel="noopener noreferrer">shader B</a>
+ that needs derivatives</li>
+<li>A long <a href="/source/no_deriv_2k/" target="_blank" rel="noopener noreferrer">shader C</a>
+ with 2k LOC that doesn&rsquo;t need derivatives</li>
+<li>A long <a href="/source/deriv_2k/" target="_blank" rel="noopener noreferrer">shader D</a>
+ with 2k LOC that needs derivatives</li>
+<li>A long <a href="/source/deriv_fold_2k/" target="_blank" rel="noopener noreferrer">shader E</a>
+ with 2k LOC that needs derivatives, but all derivatives can be folded to 0</li>
 </ul>
 
 
@@ -2866,13 +2871,13 @@ $$
 
 
 <style>
-  #compact-table-156 table {
+  #compact-table-161 table {
     margin: 0 0 0.65rem;
   }
 
    
-  #compact-table-156 table td,
-  #compact-table-156 table th {
+  #compact-table-161 table td,
+  #compact-table-161 table th {
     padding: 0.405rem 0.878rem;
     line-height: 1.782;
     vertical-align: middle;
@@ -2881,56 +2886,56 @@ $$
     border-color: #000;
   }
 
-  body.colorscheme-dark #compact-table-156 table td,
-  body.colorscheme-dark #compact-table-156 table th {
+  body.colorscheme-dark #compact-table-161 table td,
+  body.colorscheme-dark #compact-table-161 table th {
     border-color: #dadada;
   }
 
   @media (prefers-color-scheme: dark) {
-    body.colorscheme-auto #compact-table-156 table td,
-    body.colorscheme-auto #compact-table-156 table th {
+    body.colorscheme-auto #compact-table-161 table td,
+    body.colorscheme-auto #compact-table-161 table th {
       border-color: #dadada;
     }
   }
 
-  #compact-table-156 .katex {
+  #compact-table-161 .katex {
     font-size: 1.316em;
   }
 
-  #compact-table-156 .katex-display {
+  #compact-table-161 .katex-display {
     margin: 0;
   }
 
-  #compact-table-156 .compact-table-note {
+  #compact-table-161 .compact-table-note {
     margin: 0 0 1.5rem;
     font-size: 0.85em;
     line-height: 1.45;
   }
 
-  #compact-table-156 .compact-table-note .katex {
+  #compact-table-161 .compact-table-note .katex {
     font-size: 1em;
   }
 
   
-  #compact-table-156 table {
+  #compact-table-161 table {
     table-layout: fixed;
     width: 100%;
   }
 
-  #compact-table-156 table th:first-child,
-  #compact-table-156 table td:first-child {
+  #compact-table-161 table th:first-child,
+  #compact-table-161 table td:first-child {
     width: 34%;
   }
 
-  #compact-table-156 table th:not(:first-child),
-  #compact-table-156 table td:not(:first-child) {
+  #compact-table-161 table th:not(:first-child),
+  #compact-table-161 table td:not(:first-child) {
     width: calc(66% / 5);
   }
   
 
   
 </style>
-<div id="compact-table-156" class="compact-table compact-table-striped-groups-3">
+<div id="compact-table-161" class="compact-table compact-table-striped-groups-3">
 <table>
 <thead>
 <tr>

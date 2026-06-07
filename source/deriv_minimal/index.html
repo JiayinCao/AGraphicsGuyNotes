@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>shader B (deriv_minimal.ssl)</title>
+</head>
+<body>
+<pre>// Benchmark case: primary value path &#43; minimal live ddx/ddy on y = x1*x2/(x1&#43;1).
+
+float wave_mix(float a, float b, float phase) {
+    float w = sin(phase) * 0.5f &#43; cos(phase * 0.73f) * 0.5f;
+    return a * w &#43; b * (1.0f - w);
+}
+
+float rational_shape(float x, float denom) {
+    float num = x * x &#43; 1.0f;
+    return num / (denom &#43; 2.0f);
+}
+
+float soften(float t) {
+    return t / (1.0f &#43; t * t);
+}
+
+shader main(out float o, out float o_ddx, out float o_ddy) {
+    float x1 = global_value&lt;x1&gt;;
+    float x2 = global_value&lt;x2&gt;;
+    float u = global_value&lt;uv_u&gt;;
+    float v = global_value&lt;uv_v&gt;;
+    float p = wave_mix(x1, x2, u &#43; v);
+    float q = rational_shape(p, x2);
+    float y = x1 * x2 / (x1 &#43; 1.0f);
+    o = soften(q) &#43; log(1.0f &#43; u * v) * 0.1f &#43; y * 0.01f;
+    o_ddx = ddx(y);
+    o_ddy = ddy(y);
+}
+</pre>
+</body>
+</html>
+
+

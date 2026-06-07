@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>shader A (no_deriv.ssl)</title>
+</head>
+<body>
+<pre>// Benchmark case: no screen-space derivatives used (deriv-on vs deriv-off should match).
+
+float wave_mix(float a, float b, float phase) {
+    float w = sin(phase) * 0.5f &#43; cos(phase * 0.73f) * 0.5f;
+    return a * w &#43; b * (1.0f - w);
+}
+
+float rational_shape(float x, float denom) {
+    float num = x * x &#43; 1.0f;
+    return num / (denom &#43; 2.0f);
+}
+
+float soften(float t) {
+    return t / (1.0f &#43; t * t);
+}
+
+shader main(out float o) {
+    float x1 = global_value&lt;x1&gt;;
+    float x2 = global_value&lt;x2&gt;;
+    float u = global_value&lt;uv_u&gt;;
+    float v = global_value&lt;uv_v&gt;;
+    float p = wave_mix(x1, x2, u &#43; v);
+    float q = rational_shape(p, x2);
+    o = soften(q) &#43; log(1.0f &#43; u * v) * 0.1f;
+}
+</pre>
+</body>
+</html>
+
+
