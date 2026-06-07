@@ -1380,7 +1380,7 @@ Below is what that might look like, the same math as the <code>eval</code> funct
 
 <div id="mermaid_shader_entry_graph" class="mermaid-block" data-mermaid-id="2"><script type="text/plain" class="mermaid-source">
 flowchart TD
-    position(position)
+    pos_g(position)
 
     global_input_pos("global_input_pos = global_value position")
 
@@ -1396,7 +1396,7 @@ flowchart TD
     closure("output = make_closure Lambert")
     renderer_output("output")
 
-    position --> global_input_pos
+    pos_g --> global_input_pos
     global_input_pos --> pos_x
     global_input_pos --> pos_y
     global_input_pos --> pos_z
@@ -1408,8 +1408,8 @@ flowchart TD
     fake_normal --> closure
     closure --> renderer_output
 
-    classDef needsDeriv fill:#1b6e2080,stroke:#1b3e20ff
-    class position,global_input_pos,pos_x,pos_y,pos_z,eval_call needsDeriv
+    classDef needsDeriv fill:#1b6e20,stroke:#1b3e20
+    class pos_g,global_input_pos,pos_x,pos_y,pos_z,eval_call needsDeriv
 </script>
 <div class="mermaid-view"></div>
 </div>
@@ -1429,7 +1429,7 @@ flowchart TD
     screen_sy["screen space y"]
     host_ssl_line[" "]
 
-    position("position = f(x, y)")
+    pos_g("position = f(x, y)")
 
     global_input_pos("global_input_pos = global_value position")
 
@@ -1446,9 +1446,9 @@ flowchart TD
     ssl_renderer_line[" "]
     renderer_output("output")
 
-    screen_sx --> position
-    screen_sy --> position
-    position --> global_input_pos
+    screen_sx --> pos_g
+    screen_sy --> pos_g
+    pos_g --> global_input_pos
     global_input_pos --> pos_x
     global_input_pos --> pos_y
     global_input_pos --> pos_z
@@ -1460,14 +1460,14 @@ flowchart TD
     fake_normal --> closure
     closure --> renderer_output
 
-    position ~~~ host_ssl_line
+    pos_g ~~~ host_ssl_line
     host_ssl_line ~~~ global_input_pos
     closure ~~~ ssl_renderer_line
     ssl_renderer_line ~~~ renderer_output
 
-    classDef needsDeriv fill:#1b6e2080,stroke:#1b3e20ff
+    classDef needsDeriv fill:#1b6e20,stroke:#1b3e20
     classDef layoutAnchor fill:transparent,stroke:transparent,color:transparent
-    class screen_sx,screen_sy,position,global_input_pos,pos_x,pos_y,pos_z,eval_call needsDeriv
+    class screen_sx,screen_sy,pos_g,global_input_pos,pos_x,pos_y,pos_z,eval_call needsDeriv
     class host_ssl_line,ssl_renderer_line layoutAnchor
 </script>
 <div class="mermaid-view"></div>
@@ -4916,7 +4916,7 @@ The benchmarks suggest the cost is manageable. Compile time can rise for shaders
       <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
       
         
-        <script src="/js/mermaid-init.min.d1bf75ed7b5df150e99bda8ecdc5041e120504d3babfdd3f3cee29065bdffa58.js"></script>
+        <script src="/js/mermaid-init.min.9b23e691d1fb5278b31cf5562acf0be98aca58112d1c94e35790a72079f2154c.js"></script>
       
     
 
