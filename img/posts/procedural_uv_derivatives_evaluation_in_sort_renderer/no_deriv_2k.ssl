@@ -1,0 +1,2010 @@
+// ssl_benchmark no_deriv_2k — ~2000 lines, no ddx/ddy (see bench_no_deriv_2k_generator.h)
+texture2d g_tex;
+
+float nd2k_osc_0(float a, float b, float c, out float ox) {
+    float o0 = sin(a * 2.25999999f + c);
+    float o1 = cos(b * 6.35600042f - a);
+    float o2 = sin((a + b) * 2.52000022f) * cos(c * 2.25999999f);
+    float bank = o0 + o1 * 0.5f + o2 * 0.25f;
+    ox = bank + c * 6.35600042f;
+    return bank * 2.52000022f + ox;
+}
+
+float nd2k_cheb_1(float a, float b, out float ox, out float oy) {
+    float t = a * 3.81999993f + b * 0.5f;
+    float t0 = 1.0f;
+    float t1 = t;
+    float t2 = 2.0f * t * t1 - t0;
+    float t3 = 2.0f * t * t2 - t1;
+    ox = t2 + t3 * 0.25f;
+    oy = t1 - t0 + b * 3.81999993f;
+    return t3 + ox - oy;
+}
+
+float nd2k_osc_2(float a, float b, float c, out float ox) {
+    float o0 = sin(a * 7.46999979f + c);
+    float o1 = cos(b * 1.39300001f - a);
+    float o2 = sin((a + b) * 3.00000024f) * cos(c * 7.46999979f);
+    float bank = o0 + o1 * 0.5f + o2 * 0.25f;
+    ox = bank + c * 1.39300001f;
+    return bank * 3.00000024f + ox;
+}
+
+float nd2k_resid_3(float a, float b, out float ox, out float oy) {
+    float base = a * b * 9.34999943f;
+    float guess = sin(base) + base * base;
+    float resid = guess - base;
+    ox = resid + guess * 9.34999943f;
+    oy = resid - base * 9.34999943f;
+    return resid + ox * 0.5f;
+}
+
+float nd2k_cross_4(float a, float b, float c, float d, out float ox, out float oy) {
+    float p0 = a * d + b * c;
+    float p1 = (a + d) * (b - c) * 5.38000011f;
+    float blend = tanh(p0) + sin(p1 * 5.32200003f);
+    ox = blend + p0 * 5.38000011f;
+    oy = blend - p1 * 5.32200003f;
+    return blend + ox - oy;
+}
+
+float nd2k_harm_5(float a, float b, float c, float d, out float ox, out float oy) {
+    float h0 = sin(a + b * 5.17999983f);
+    float h1 = cos(c + d * 6.36899996f);
+    float h2 = sin(h0 + h1) * cos(h0 - h1);
+    ox = h2 + a * 5.17999983f;
+    oy = h2 + d * 6.36899996f;
+    return h0 + h1 + h2;
+}
+
+float nd2k_rat_6(float a, float b, float c, out float ox, out float oy) {
+    float mix = (a * 4.23999977f + b) / (c + 4.0f);
+    float wave = sin(mix) * cos(b * 1.45200002f) + tanh(a - c);
+    float lift = wave * wave + mix * 4.23999977f;
+    ox = lift + wave;
+    oy = lift - wave + b * 1.45200002f;
+    return lift + ox * 4.23999977f - oy * 1.45200002f;
+}
+
+float nd2k_osc_7(float a, float b, float c, out float ox) {
+    float o0 = sin(a * 4.75f + c);
+    float o1 = cos(b * 3.6960001f - a);
+    float o2 = sin((a + b) * 0.568000019f) * cos(c * 4.75f);
+    float bank = o0 + o1 * 0.5f + o2 * 0.25f;
+    ox = bank + c * 3.6960001f;
+    return bank * 0.568000019f + ox;
+}
+
+float nd2k_blend_8(float a, float b, float c, out float ox, out float oy) {
+    float seed = a + b * 3.22000003f;
+    float gate = seed - c * 21.6000004f;
+    float hi = sin(seed) + log(1.0f + c);
+    float lo = cos(seed) - exp(b * 3.22000003f * 0.01f);
+    float w = 0.5f + 0.5f * tanh(gate);
+    float picked = hi * w + lo * (1.0f - w);
+    ox = picked + c;
+    oy = picked - a * 21.6000004f;
+    return picked * 3.22000003f;
+}
+
+float nd2k_fold_9(float a, float b, float c, out float ox, out float oy) {
+    float m = a - b;
+    float am = m >= 0.0f ? m : -m;
+    float shaped = am * 1.25999999f + c * (a + b);
+    float ripple = sin(shaped) + cos(c * 1.25999999f);
+    ox = shaped + ripple;
+    oy = shaped - ripple * 1.25999999f;
+    return ripple + ox * 1.25999999f;
+}
+
+float nd2k_rat_10(float a, float b, float c, out float ox, out float oy) {
+    float mix = (a * 9.18999958f + b) / (c + 9.0f);
+    float wave = sin(mix) * cos(b * 0.606000006f) + tanh(a - c);
+    float lift = wave * wave + mix * 9.18999958f;
+    ox = lift + wave;
+    oy = lift - wave + b * 0.606000006f;
+    return lift + ox * 9.18999958f - oy * 0.606000006f;
+}
+
+float nd2k_blend_11(float a, float b, float c, out float ox, out float oy) {
+    float seed = a + b * 2.42999983f;
+    float gate = seed - c * 30.5f;
+    float hi = sin(seed) + log(1.0f + c);
+    float lo = cos(seed) - exp(b * 2.42999983f * 0.01f);
+    float w = 0.5f + 0.5f * tanh(gate);
+    float picked = hi * w + lo * (1.0f - w);
+    ox = picked + c;
+    oy = picked - a * 30.5f;
+    return picked * 2.42999983f;
+}
+
+void nd2k_trip_12(float a, float b, float c, out float ox, out float oy, out float oz) {
+    float hub = a * b + c * 8.60999966f;
+    float skew = sin(hub) - cos(c * 2.75200009f);
+    ox = hub + skew;
+    oy = hub - skew * 8.60999966f;
+    oz = skew + c * 2.75200009f;
+}
+
+float nd2k_resid_13(float a, float b, out float ox, out float oy) {
+    float base = a * b * 8.32999992f;
+    float guess = sin(base) + base * base;
+    float resid = guess - base;
+    ox = resid + guess * 8.32999992f;
+    oy = resid - base * 8.32999992f;
+    return resid + ox * 0.5f;
+}
+
+float nd2k_cross_14(float a, float b, float c, float d, out float ox, out float oy) {
+    float p0 = a * d + b * c;
+    float p1 = (a + d) * (b - c) * 6.40999985f;
+    float blend = tanh(p0) + sin(p1 * 5.18400002f);
+    ox = blend + p0 * 6.40999985f;
+    oy = blend - p1 * 5.18400002f;
+    return blend + ox - oy;
+}
+
+float nd2k_fold_15(float a, float b, float c, out float ox, out float oy) {
+    float m = a - b;
+    float am = m >= 0.0f ? m : -m;
+    float shaped = am * 3.03999996f + c * (a + b);
+    float ripple = sin(shaped) + cos(c * 3.03999996f);
+    ox = shaped + ripple;
+    oy = shaped - ripple * 3.03999996f;
+    return ripple + ox * 3.03999996f;
+}
+
+float nd2k_umix_16(float a, float b, out float ox) {
+    float s = a;
+    s = s * 4.50999975f + b + 1.95999992f;
+    s = s * 5.67000008f + b + 7.07999992f;
+    ox = s + sin(s * 2.99000001f);
+    return ox * 2.99000001f;
+}
+
+float nd2k_rgb_17(float a, float b, float c, out float ox, out float oy, out float oz) {
+    float r = sin(a * 3.27999997f);
+    float g = cos(b * 4.94400024f);
+    float bch = sin(c + a * 0.3f);
+    float nr = r * 0.5f + g * 0.3f + bch * 0.2f;
+    float ng = g * 0.5f + bch * 0.3f + r * 0.2f;
+    float nb = bch * 0.5f + r * 0.3f + g * 0.2f;
+    ox = nr + ng * 0.25f;
+    oy = ng + nb * 0.25f;
+    oz = nb + nr * 0.25f;
+    return nr + ng + nb;
+}
+
+float nd2k_latt_18(float a, float b, float c, out float ox, out float oy) {
+    float fx = a * 3.5999999f + c * 0.31f;
+    float fy = b * 7.60500002f + c * 0.17f;
+    float cell = sin(fx) + sin(fy) + sin(fx + fy);
+    float diag = cos(fx - fy) * 3.5999999f;
+    ox = cell + diag;
+    oy = cell - diag + b * 7.60500002f;
+    return cell * 0.5f + ox * 0.25f;
+}
+
+float nd2k_det2_19(float a, float b, float c, float d, out float ox) {
+    float m00 = a + c * 6.0f;
+    float m01 = b - d * 0.5f;
+    float m10 = c + a * 0.5f;
+    float m11 = d + 6.0f;
+    float det = m00 * m11 - m01 * m10;
+    ox = det + sin(m00 + m11);
+    return det * 6.0f + ox;
+}
+
+float nd2k_cross_20(float a, float b, float c, float d, out float ox, out float oy) {
+    float p0 = a * d + b * c;
+    float p1 = (a + d) * (b - c) * 0.189999998f;
+    float blend = tanh(p0) + sin(p1 * 2.50800014f);
+    ox = blend + p0 * 0.189999998f;
+    oy = blend - p1 * 2.50800014f;
+    return blend + ox - oy;
+}
+
+float nd2k_ratio_21(float a, float b, float c, out float ox) {
+    float w0 = a / (b + 7.0f);
+    float w1 = c * 2.96000004f;
+    float fused = w0 * (1.0f - w1) + w1 * sin(a + c);
+    ox = fused + log(1.0f + w0 * w0);
+    return fused * 2.96000004f + ox;
+}
+
+float nd2k_fold_22(float a, float b, float c, out float ox, out float oy) {
+    float m = a - b;
+    float am = m >= 0.0f ? m : -m;
+    float shaped = am * 3.14999986f + c * (a + b);
+    float ripple = sin(shaped) + cos(c * 3.14999986f);
+    ox = shaped + ripple;
+    oy = shaped - ripple * 3.14999986f;
+    return ripple + ox * 3.14999986f;
+}
+
+float nd2k_sstep_23(float a, float b, float c, out float ox) {
+    float t0 = a * 2.97000003f + b;
+    float t1 = t0 * t0 * (3.0f - 2.0f * t0);
+    float t2 = t1 + c * 13.132f;
+    float t3 = t2 * t2 * (3.0f - 2.0f * t2);
+    ox = t3 + sin(t1 + c);
+    return ox * 2.97000003f + t3;
+}
+
+float nd2k_ratio_24(float a, float b, float c, out float ox) {
+    float w0 = a / (b + 4.0f);
+    float w1 = c * 2.72000003f;
+    float fused = w0 * (1.0f - w1) + w1 * sin(a + c);
+    ox = fused + log(1.0f + w0 * w0);
+    return fused * 2.72000003f + ox;
+}
+
+float nd2k_poly_25(float a, float b, out float ox, out float oy) {
+    float a2 = a * a;
+    float b2 = b * b;
+    float cross = a2 * b + b2 * 1.11000001f;
+    float norm = 1.0f + a2 + b2 * 1.70099998f;
+    float val = cross / norm;
+    ox = val + a * 1.11000001f;
+    oy = val - b * 1.70099998f;
+    return val + ox - oy;
+}
+
+float nd2k_fold_26(float a, float b, float c, out float ox, out float oy) {
+    float m = a - b;
+    float am = m >= 0.0f ? m : -m;
+    float shaped = am * 2.74000001f + c * (a + b);
+    float ripple = sin(shaped) + cos(c * 2.74000001f);
+    ox = shaped + ripple;
+    oy = shaped - ripple * 2.74000001f;
+    return ripple + ox * 2.74000001f;
+}
+
+float nd2k_fold_27(float a, float b, float c, out float ox, out float oy) {
+    float m = a - b;
+    float am = m >= 0.0f ? m : -m;
+    float shaped = am * 1.14999998f + c * (a + b);
+    float ripple = sin(shaped) + cos(c * 1.14999998f);
+    ox = shaped + ripple;
+    oy = shaped - ripple * 1.14999998f;
+    return ripple + ox * 1.14999998f;
+}
+
+void nd2k_trip_28(float a, float b, float c, out float ox, out float oy, out float oz) {
+    float hub = a * b + c * 5.00999975f;
+    float skew = sin(hub) - cos(c * 3.42400026f);
+    ox = hub + skew;
+    oy = hub - skew * 5.00999975f;
+    oz = skew + c * 3.42400026f;
+}
+
+float nd2k_resid_29(float a, float b, out float ox, out float oy) {
+    float base = a * b * 1.29999995f;
+    float guess = sin(base) + base * base;
+    float resid = guess - base;
+    ox = resid + guess * 1.29999995f;
+    oy = resid - base * 1.29999995f;
+    return resid + ox * 0.5f;
+}
+
+float nd2k_dual_30(float a, float b, float c, out float ox, out float oy) {
+    float gate = a - c * 3.48000002f;
+    float path_a = sin(gate) + b * 2.83999991f;
+    float path_b = cos(gate) - log(1.0f + b);
+    float merged = path_a * path_b * 2.83999991f;
+    ox = merged + path_a;
+    oy = merged + path_b;
+    return merged + c * 3.48000002f;
+}
+
+float nd2k_latt_31(float a, float b, float c, out float ox, out float oy) {
+    float fx = a * 1.11000001f + c * 0.31f;
+    float fy = b * 5.75999975f + c * 0.17f;
+    float cell = sin(fx) + sin(fy) + sin(fx + fy);
+    float diag = cos(fx - fy) * 1.11000001f;
+    ox = cell + diag;
+    oy = cell - diag + b * 5.75999975f;
+    return cell * 0.5f + ox * 0.25f;
+}
+
+float nd2k_wmix_32(float a, float b, float c, out float ox) {
+    float t0 = a * 4.53999996f + b * 3.53999996f;
+    float t1 = c * 1.32599998f - a * 3.53999996f;
+    float t2 = tanh(t0) + exp(t1 * 4.53999996f * 0.01f);
+    ox = t2 + t0 - t1;
+    return t2 * 1.32599998f;
+}
+
+float nd2k_cheb_33(float a, float b, out float ox, out float oy) {
+    float t = a * 0.329999983f + b * 0.5f;
+    float t0 = 1.0f;
+    float t1 = t;
+    float t2 = 2.0f * t * t1 - t0;
+    float t3 = 2.0f * t * t2 - t1;
+    ox = t2 + t3 * 0.25f;
+    oy = t1 - t0 + b * 0.329999983f;
+    return t3 + ox - oy;
+}
+
+float nd2k_wmix_34(float a, float b, float c, out float ox) {
+    float t0 = a * 6.11999989f + b * 11.316f;
+    float t1 = c * 10.283f - a * 11.316f;
+    float t2 = tanh(t0) + exp(t1 * 6.11999989f * 0.01f);
+    ox = t2 + t0 - t1;
+    return t2 * 10.283f;
+}
+
+float nd2k_rat_35(float a, float b, float c, out float ox, out float oy) {
+    float mix = (a * 7.94999981f + b) / (c + 7.0f);
+    float wave = sin(mix) * cos(b * 0.518999994f) + tanh(a - c);
+    float lift = wave * wave + mix * 7.94999981f;
+    ox = lift + wave;
+    oy = lift - wave + b * 0.518999994f;
+    return lift + ox * 7.94999981f - oy * 0.518999994f;
+}
+
+float nd2k_rgb_36(float a, float b, float c, out float ox, out float oy, out float oz) {
+    float r = sin(a * 4.6500001f);
+    float g = cos(b * 8.4800005f);
+    float bch = sin(c + a * 0.3f);
+    float nr = r * 0.5f + g * 0.3f + bch * 0.2f;
+    float ng = g * 0.5f + bch * 0.3f + r * 0.2f;
+    float nb = bch * 0.5f + r * 0.3f + g * 0.2f;
+    ox = nr + ng * 0.25f;
+    oy = ng + nb * 0.25f;
+    oz = nb + nr * 0.25f;
+    return nr + ng + nb;
+}
+
+float nd2k_logexp_37(float a, float b, out float ox) {
+    float stage0 = log(1.0f + a * a + 7.73999977f);
+    float stage1 = exp(b * 0.076000005f * 0.01f) - stage0;
+    float stage2 = stage1 / (1.0f + stage0 * stage0 + 6.0f);
+    ox = stage2 + stage0 * 7.73999977f;
+    return stage2 * 0.076000005f + ox;
+}
+
+float nd2k_harm_38(float a, float b, float c, float d, out float ox, out float oy) {
+    float h0 = sin(a + b * 1.0f);
+    float h1 = cos(c + d * 10.3949995f);
+    float h2 = sin(h0 + h1) * cos(h0 - h1);
+    ox = h2 + a * 1.0f;
+    oy = h2 + d * 10.3949995f;
+    return h0 + h1 + h2;
+}
+
+float nd2k_dual_39(float a, float b, float c, out float ox, out float oy) {
+    float gate = a - c * 10.1099997f;
+    float path_a = sin(gate) + b * 6.3499999f;
+    float path_b = cos(gate) - log(1.0f + b);
+    float merged = path_a * path_b * 6.3499999f;
+    ox = merged + path_a;
+    oy = merged + path_b;
+    return merged + c * 10.1099997f;
+}
+
+float nd2k_harm_40(float a, float b, float c, float d, out float ox, out float oy) {
+    float h0 = sin(a + b * 3.25999999f);
+    float h1 = cos(c + d * 2.18899989f);
+    float h2 = sin(h0 + h1) * cos(h0 - h1);
+    ox = h2 + a * 3.25999999f;
+    oy = h2 + d * 2.18899989f;
+    return h0 + h1 + h2;
+}
+
+float nd2k_harm_41(float a, float b, float c, float d, out float ox, out float oy) {
+    float h0 = sin(a + b * 4.77999973f);
+    float h1 = cos(c + d * 9.93299961f);
+    float h2 = sin(h0 + h1) * cos(h0 - h1);
+    ox = h2 + a * 4.77999973f;
+    oy = h2 + d * 9.93299961f;
+    return h0 + h1 + h2;
+}
+
+float nd2k_inv_42(float a, float b, out float ox, out float oy) {
+    float num = a * a + b * 8.30000019f;
+    float den = b + 4.0f + a * 8.30000019f;
+    float ratio = num / den;
+    float folded = ratio - 1.0f / (1.0f + ratio * ratio);
+    ox = folded + num * 8.30000019f;
+    oy = folded - den * 8.30000019f;
+    return folded;
+}
+
+float nd2k_poly_43(float a, float b, out float ox, out float oy) {
+    float a2 = a * a;
+    float b2 = b * b;
+    float cross = a2 * b + b2 * 1.05999994f;
+    float norm = 1.0f + a2 + b2 * 6.64199972f;
+    float val = cross / norm;
+    ox = val + a * 1.05999994f;
+    oy = val - b * 6.64199972f;
+    return val + ox - oy;
+}
+
+float nd2k_ratio_44(float a, float b, float c, out float ox) {
+    float w0 = a / (b + 9.0f);
+    float w1 = c * 3.38999987f;
+    float fused = w0 * (1.0f - w1) + w1 * sin(a + c);
+    ox = fused + log(1.0f + w0 * w0);
+    return fused * 3.38999987f + ox;
+}
+
+float nd2k_det2_45(float a, float b, float c, float d, out float ox) {
+    float m00 = a + c * 1.80999994f;
+    float m01 = b - d * 0.5f;
+    float m10 = c + a * 0.5f;
+    float m11 = d + 1.80999994f;
+    float det = m00 * m11 - m01 * m10;
+    ox = det + sin(m00 + m11);
+    return det * 1.80999994f + ox;
+}
+
+float nd2k_ratio_46(float a, float b, float c, out float ox) {
+    float w0 = a / (b + 9.0f);
+    float w1 = c * 5.38000011f;
+    float fused = w0 * (1.0f - w1) + w1 * sin(a + c);
+    ox = fused + log(1.0f + w0 * w0);
+    return fused * 5.38000011f + ox;
+}
+
+float nd2k_rat_47(float a, float b, float c, out float ox, out float oy) {
+    float mix = (a * 4.57999992f + b) / (c + 10.0f);
+    float wave = sin(mix) * cos(b * 1.42500007f) + tanh(a - c);
+    float lift = wave * wave + mix * 4.57999992f;
+    ox = lift + wave;
+    oy = lift - wave + b * 1.42500007f;
+    return lift + ox * 4.57999992f - oy * 1.42500007f;
+}
+
+float nd2k_umix_48(float a, float b, out float ox) {
+    float s = a;
+    s = s * 8.32999992f + b + 9.88000011f;
+    s = s * 8.14999962f + b + 5.1500001f;
+    s = s * 2.5f + b + 5.6500001f;
+    s = s * 8.72999954f + b + 8.53999996f;
+    s = s * 0.280000001f + b + 9.03999996f;
+    ox = s + sin(s * 1.62f);
+    return ox * 1.62f;
+}
+
+float nd2k_logexp_49(float a, float b, out float ox) {
+    float stage0 = log(1.0f + a * a + 8.92000008f);
+    float stage1 = exp(b * 1.43200004f * 0.01f) - stage0;
+    float stage2 = stage1 / (1.0f + stage0 * stage0 + 7.0f);
+    ox = stage2 + stage0 * 8.92000008f;
+    return stage2 * 1.43200004f + ox;
+}
+
+float nd2k_rat_50(float a, float b, float c, out float ox, out float oy) {
+    float mix = (a * 2.15999985f + b) / (c + 14.0f);
+    float wave = sin(mix) * cos(b * 2.61000013f) + tanh(a - c);
+    float lift = wave * wave + mix * 2.15999985f;
+    ox = lift + wave;
+    oy = lift - wave + b * 2.61000013f;
+    return lift + ox * 2.15999985f - oy * 2.61000013f;
+}
+
+float nd2k_osc_51(float a, float b, float c, out float ox) {
+    float o0 = sin(a * 2.55999994f + c);
+    float o1 = cos(b * 3.79400015f - a);
+    float o2 = sin((a + b) * 4.23200035f) * cos(c * 2.55999994f);
+    float bank = o0 + o1 * 0.5f + o2 * 0.25f;
+    ox = bank + c * 3.79400015f;
+    return bank * 4.23200035f + ox;
+}
+
+float nd2k_poly_52(float a, float b, out float ox, out float oy) {
+    float a2 = a * a;
+    float b2 = b * b;
+    float cross = a2 * b + b2 * 5.54999971f;
+    float norm = 1.0f + a2 + b2 * 1.30499995f;
+    float val = cross / norm;
+    ox = val + a * 5.54999971f;
+    oy = val - b * 1.30499995f;
+    return val + ox - oy;
+}
+
+float nd2k_poly_53(float a, float b, out float ox, out float oy) {
+    float a2 = a * a;
+    float b2 = b * b;
+    float cross = a2 * b + b2 * 1.13f;
+    float norm = 1.0f + a2 + b2 * 6.8039999f;
+    float val = cross / norm;
+    ox = val + a * 1.13f;
+    oy = val - b * 6.8039999f;
+    return val + ox - oy;
+}
+
+float nd2k_harm_54(float a, float b, float c, float d, out float ox, out float oy) {
+    float h0 = sin(a + b * 3.83999991f);
+    float h1 = cos(c + d * 6.85300016f);
+    float h2 = sin(h0 + h1) * cos(h0 - h1);
+    ox = h2 + a * 3.83999991f;
+    oy = h2 + d * 6.85300016f;
+    return h0 + h1 + h2;
+}
+
+float nd2k_det2_55(float a, float b, float c, float d, out float ox) {
+    float m00 = a + c * 9.78999996f;
+    float m01 = b - d * 0.5f;
+    float m10 = c + a * 0.5f;
+    float m11 = d + 9.78999996f;
+    float det = m00 * m11 - m01 * m10;
+    ox = det + sin(m00 + m11);
+    return det * 9.78999996f + ox;
+}
+
+float nd2k_resid_56(float a, float b, out float ox, out float oy) {
+    float base = a * b * 2.97000003f;
+    float guess = sin(base) + base * base;
+    float resid = guess - base;
+    ox = resid + guess * 2.97000003f;
+    oy = resid - base * 2.97000003f;
+    return resid + ox * 0.5f;
+}
+
+float nd2k_cross_57(float a, float b, float c, float d, out float ox, out float oy) {
+    float p0 = a * d + b * c;
+    float p1 = (a + d) * (b - c) * 8.35999966f;
+    float blend = tanh(p0) + sin(p1 * 1.602f);
+    ox = blend + p0 * 8.35999966f;
+    oy = blend - p1 * 1.602f;
+    return blend + ox - oy;
+}
+
+float nd2k_wmix_58(float a, float b, float c, out float ox) {
+    float t0 = a * 8.03999996f + b * 2.50800014f;
+    float t1 = c * 12.5710001f - a * 2.50800014f;
+    float t2 = tanh(t0) + exp(t1 * 8.03999996f * 0.01f);
+    ox = t2 + t0 - t1;
+    return t2 * 12.5710001f;
+}
+
+float nd2k_sstep_59(float a, float b, float c, out float ox) {
+    float t0 = a * 8.05999947f + b;
+    float t1 = t0 * t0 * (3.0f - 2.0f * t0);
+    float t2 = t1 + c * 3.99000001f;
+    float t3 = t2 * t2 * (3.0f - 2.0f * t2);
+    ox = t3 + sin(t1 + c);
+    return ox * 8.05999947f + t3;
+}
+
+float nd2k_logexp_60(float a, float b, out float ox) {
+    float stage0 = log(1.0f + a * a + 0.289999992f);
+    float stage1 = exp(b * 0.726000011f * 0.01f) - stage0;
+    float stage2 = stage1 / (1.0f + stage0 * stage0 + 7.0f);
+    ox = stage2 + stage0 * 0.289999992f;
+    return stage2 * 0.726000011f + ox;
+}
+
+float nd2k_blend_61(float a, float b, float c, out float ox, out float oy) {
+    float seed = a + b * 1.8499999f;
+    float gate = seed - c * 44.1500015f;
+    float hi = sin(seed) + log(1.0f + c);
+    float lo = cos(seed) - exp(b * 1.8499999f * 0.01f);
+    float w = 0.5f + 0.5f * tanh(gate);
+    float picked = hi * w + lo * (1.0f - w);
+    ox = picked + c;
+    oy = picked - a * 44.1500015f;
+    return picked * 1.8499999f;
+}
+
+float nd2k_harm_62(float a, float b, float c, float d, out float ox, out float oy) {
+    float h0 = sin(a + b * 3.46000004f);
+    float h1 = cos(c + d * 1.26499999f);
+    float h2 = sin(h0 + h1) * cos(h0 - h1);
+    ox = h2 + a * 3.46000004f;
+    oy = h2 + d * 1.26499999f;
+    return h0 + h1 + h2;
+}
+
+float nd2k_latt_63(float a, float b, float c, out float ox, out float oy) {
+    float fx = a * 3.64999986f + c * 0.31f;
+    float fy = b * 1.79999995f + c * 0.17f;
+    float cell = sin(fx) + sin(fy) + sin(fx + fy);
+    float diag = cos(fx - fy) * 3.64999986f;
+    ox = cell + diag;
+    oy = cell - diag + b * 1.79999995f;
+    return cell * 0.5f + ox * 0.25f;
+}
+
+float nd2k_dual_64(float a, float b, float c, out float ox, out float oy) {
+    float gate = a - c * 15.6300001f;
+    float path_a = sin(gate) + b * 5.28999996f;
+    float path_b = cos(gate) - log(1.0f + b);
+    float merged = path_a * path_b * 5.28999996f;
+    ox = merged + path_a;
+    oy = merged + path_b;
+    return merged + c * 15.6300001f;
+}
+
+float nd2k_det2_65(float a, float b, float c, float d, out float ox) {
+    float m00 = a + c * 3.25f;
+    float m01 = b - d * 0.5f;
+    float m10 = c + a * 0.5f;
+    float m11 = d + 3.25f;
+    float det = m00 * m11 - m01 * m10;
+    ox = det + sin(m00 + m11);
+    return det * 3.25f + ox;
+}
+
+float nd2k_rat_66(float a, float b, float c, out float ox, out float oy) {
+    float mix = (a * 5.85999966f + b) / (c + 14.0f);
+    float wave = sin(mix) * cos(b * 1.88699996f) + tanh(a - c);
+    float lift = wave * wave + mix * 5.85999966f;
+    ox = lift + wave;
+    oy = lift - wave + b * 1.88699996f;
+    return lift + ox * 5.85999966f - oy * 1.88699996f;
+}
+
+float nd2k_umix_67(float a, float b, out float ox) {
+    float s = a;
+    s = s * 0.839999974f + b + 6.94999981f;
+    s = s * 5.33999968f + b + 7.28999996f;
+    ox = s + sin(s * 0.0799999982f);
+    return ox * 0.0799999982f;
+}
+
+float nd2k_cheb_68(float a, float b, out float ox, out float oy) {
+    float t = a * 2.99000001f + b * 0.5f;
+    float t0 = 1.0f;
+    float t1 = t;
+    float t2 = 2.0f * t * t1 - t0;
+    float t3 = 2.0f * t * t2 - t1;
+    ox = t2 + t3 * 0.25f;
+    oy = t1 - t0 + b * 2.99000001f;
+    return t3 + ox - oy;
+}
+
+float nd2k_latt_69(float a, float b, float c, out float ox, out float oy) {
+    float fx = a * 7.3499999f + c * 0.31f;
+    float fy = b * 8.53499985f + c * 0.17f;
+    float cell = sin(fx) + sin(fy) + sin(fx + fy);
+    float diag = cos(fx - fy) * 7.3499999f;
+    ox = cell + diag;
+    oy = cell - diag + b * 8.53499985f;
+    return cell * 0.5f + ox * 0.25f;
+}
+
+float nd2k_cross_70(float a, float b, float c, float d, out float ox, out float oy) {
+    float p0 = a * d + b * c;
+    float p1 = (a + d) * (b - c) * 5.78999996f;
+    float blend = tanh(p0) + sin(p1 * 5.09399986f);
+    ox = blend + p0 * 5.78999996f;
+    oy = blend - p1 * 5.09399986f;
+    return blend + ox - oy;
+}
+
+float nd2k_poly_71(float a, float b, out float ox, out float oy) {
+    float a2 = a * a;
+    float b2 = b * b;
+    float cross = a2 * b + b2 * 0.370000005f;
+    float norm = 1.0f + a2 + b2 * 8.81999969f;
+    float val = cross / norm;
+    ox = val + a * 0.370000005f;
+    oy = val - b * 8.81999969f;
+    return val + ox - oy;
+}
+
+float nd2k_ratio_72(float a, float b, float c, out float ox) {
+    float w0 = a / (b + 4.0f);
+    float w1 = c * 8.78999996f;
+    float fused = w0 * (1.0f - w1) + w1 * sin(a + c);
+    ox = fused + log(1.0f + w0 * w0);
+    return fused * 8.78999996f + ox;
+}
+
+float nd2k_rgb_73(float a, float b, float c, out float ox, out float oy, out float oz) {
+    float r = sin(a * 1.38f);
+    float g = cos(b * 1.60000002f);
+    float bch = sin(c + a * 0.3f);
+    float nr = r * 0.5f + g * 0.3f + bch * 0.2f;
+    float ng = g * 0.5f + bch * 0.3f + r * 0.2f;
+    float nb = bch * 0.5f + r * 0.3f + g * 0.2f;
+    ox = nr + ng * 0.25f;
+    oy = ng + nb * 0.25f;
+    oz = nb + nr * 0.25f;
+    return nr + ng + nb;
+}
+
+float nd2k_rat_74(float a, float b, float c, out float ox, out float oy) {
+    float mix = (a * 4.71000004f + b) / (c + 4.0f);
+    float wave = sin(mix) * cos(b * 1.18799996f) + tanh(a - c);
+    float lift = wave * wave + mix * 4.71000004f;
+    ox = lift + wave;
+    oy = lift - wave + b * 1.18799996f;
+    return lift + ox * 4.71000004f - oy * 1.18799996f;
+}
+
+float nd2k_inv_75(float a, float b, out float ox, out float oy) {
+    float num = a * a + b * 2.44000006f;
+    float den = b + 11.0f + a * 2.44000006f;
+    float ratio = num / den;
+    float folded = ratio - 1.0f / (1.0f + ratio * ratio);
+    ox = folded + num * 2.44000006f;
+    oy = folded - den * 2.44000006f;
+    return folded;
+}
+
+float nd2k_fold_76(float a, float b, float c, out float ox, out float oy) {
+    float m = a - b;
+    float am = m >= 0.0f ? m : -m;
+    float shaped = am * 8.02999973f + c * (a + b);
+    float ripple = sin(shaped) + cos(c * 8.02999973f);
+    ox = shaped + ripple;
+    oy = shaped - ripple * 8.02999973f;
+    return ripple + ox * 8.02999973f;
+}
+
+void nd2k_trip_77(float a, float b, float c, out float ox, out float oy, out float oz) {
+    float hub = a * b + c * 9.71000004f;
+    float skew = sin(hub) - cos(c * 3.15600014f);
+    ox = hub + skew;
+    oy = hub - skew * 9.71000004f;
+    oz = skew + c * 3.15600014f;
+}
+
+float nd2k_logexp_78(float a, float b, out float ox) {
+    float stage0 = log(1.0f + a * a + 0.48999998f);
+    float stage1 = exp(b * 0.924000025f * 0.01f) - stage0;
+    float stage2 = stage1 / (1.0f + stage0 * stage0 + 3.0f);
+    ox = stage2 + stage0 * 0.48999998f;
+    return stage2 * 0.924000025f + ox;
+}
+
+float nd2k_cheb_79(float a, float b, out float ox, out float oy) {
+    float t = a * 3.6099999f + b * 0.5f;
+    float t0 = 1.0f;
+    float t1 = t;
+    float t2 = 2.0f * t * t1 - t0;
+    float t3 = 2.0f * t * t2 - t1;
+    ox = t2 + t3 * 0.25f;
+    oy = t1 - t0 + b * 3.6099999f;
+    return t3 + ox - oy;
+}
+
+float nd2k_logexp_80(float a, float b, out float ox) {
+    float stage0 = log(1.0f + a * a + 9.27999973f);
+    float stage1 = exp(b * 0.716000021f * 0.01f) - stage0;
+    float stage2 = stage1 / (1.0f + stage0 * stage0 + 5.0f);
+    ox = stage2 + stage0 * 9.27999973f;
+    return stage2 * 0.716000021f + ox;
+}
+
+float nd2k_umix_81(float a, float b, out float ox) {
+    float s = a;
+    s = s * 5.73999977f + b + 3.78999996f;
+    s = s * 9.34999943f + b + 6.64999962f;
+    ox = s + sin(s * 4.3499999f);
+    return ox * 4.3499999f;
+}
+
+float nd2k_osc_82(float a, float b, float c, out float ox) {
+    float o0 = sin(a * 0.0799999982f + c);
+    float o1 = cos(b * 0.623000026f - a);
+    float o2 = sin((a + b) * 2.43200016f) * cos(c * 0.0799999982f);
+    float bank = o0 + o1 * 0.5f + o2 * 0.25f;
+    ox = bank + c * 0.623000026f;
+    return bank * 2.43200016f + ox;
+}
+
+float nd2k_det2_83(float a, float b, float c, float d, out float ox) {
+    float m00 = a + c * 8.96000004f;
+    float m01 = b - d * 0.5f;
+    float m10 = c + a * 0.5f;
+    float m11 = d + 8.96000004f;
+    float det = m00 * m11 - m01 * m10;
+    ox = det + sin(m00 + m11);
+    return det * 8.96000004f + ox;
+}
+
+float nd2k_harm_84(float a, float b, float c, float d, out float ox, out float oy) {
+    float h0 = sin(a + b * 9.76000023f);
+    float h1 = cos(c + d * 4.07000017f);
+    float h2 = sin(h0 + h1) * cos(h0 - h1);
+    ox = h2 + a * 9.76000023f;
+    oy = h2 + d * 4.07000017f;
+    return h0 + h1 + h2;
+}
+
+float nd2k_inv_85(float a, float b, out float ox, out float oy) {
+    float num = a * a + b * 2.41999984f;
+    float den = b + 11.0f + a * 2.41999984f;
+    float ratio = num / den;
+    float folded = ratio - 1.0f / (1.0f + ratio * ratio);
+    ox = folded + num * 2.41999984f;
+    oy = folded - den * 2.41999984f;
+    return folded;
+}
+
+void nd2k_trip_86(float a, float b, float c, out float ox, out float oy, out float oz) {
+    float hub = a * b + c * 0.170000002f;
+    float skew = sin(hub) - cos(c * 3.82000017f);
+    ox = hub + skew;
+    oy = hub - skew * 0.170000002f;
+    oz = skew + c * 3.82000017f;
+}
+
+float nd2k_cheb_87(float a, float b, out float ox, out float oy) {
+    float t = a * 5.87999964f + b * 0.5f;
+    float t0 = 1.0f;
+    float t1 = t;
+    float t2 = 2.0f * t * t1 - t0;
+    float t3 = 2.0f * t * t2 - t1;
+    ox = t2 + t3 * 0.25f;
+    oy = t1 - t0 + b * 5.87999964f;
+    return t3 + ox - oy;
+}
+
+float nd2k_cross_88(float a, float b, float c, float d, out float ox, out float oy) {
+    float p0 = a * d + b * c;
+    float p1 = (a + d) * (b - c) * 6.02999973f;
+    float blend = tanh(p0) + sin(p1 * 0.342000008f);
+    ox = blend + p0 * 6.02999973f;
+    oy = blend - p1 * 0.342000008f;
+    return blend + ox - oy;
+}
+
+float nd2k_dual_89(float a, float b, float c, out float ox, out float oy) {
+    float gate = a - c * 22.289999f;
+    float path_a = sin(gate) + b * 9.38000011f;
+    float path_b = cos(gate) - log(1.0f + b);
+    float merged = path_a * path_b * 9.38000011f;
+    ox = merged + path_a;
+    oy = merged + path_b;
+    return merged + c * 22.289999f;
+}
+
+float nd2k_resid_90(float a, float b, out float ox, out float oy) {
+    float base = a * b * 4.53999996f;
+    float guess = sin(base) + base * base;
+    float resid = guess - base;
+    ox = resid + guess * 4.53999996f;
+    oy = resid - base * 4.53999996f;
+    return resid + ox * 0.5f;
+}
+
+float nd2k_osc_91(float a, float b, float c, out float ox) {
+    float o0 = sin(a * 1.71999991f + c);
+    float o1 = cos(b * 5.66300011f - a);
+    float o2 = sin((a + b) * 1.54400003f) * cos(c * 1.71999991f);
+    float bank = o0 + o1 * 0.5f + o2 * 0.25f;
+    ox = bank + c * 5.66300011f;
+    return bank * 1.54400003f + ox;
+}
+
+float nd2k_ratio_92(float a, float b, float c, out float ox) {
+    float w0 = a / (b + 2.0f);
+    float w1 = c * 8.39999962f;
+    float fused = w0 * (1.0f - w1) + w1 * sin(a + c);
+    ox = fused + log(1.0f + w0 * w0);
+    return fused * 8.39999962f + ox;
+}
+
+float nd2k_umix_93(float a, float b, out float ox) {
+    float s = a;
+    s = s * 9.67000008f + b + 8.69999981f;
+    s = s * 1.12f + b + 9.76000023f;
+    ox = s + sin(s * 9.17999935f);
+    return ox * 9.17999935f;
+}
+
+float nd2k_det2_94(float a, float b, float c, float d, out float ox) {
+    float m00 = a + c * 4.85999966f;
+    float m01 = b - d * 0.5f;
+    float m10 = c + a * 0.5f;
+    float m11 = d + 4.85999966f;
+    float det = m00 * m11 - m01 * m10;
+    ox = det + sin(m00 + m11);
+    return det * 4.85999966f + ox;
+}
+
+float nd2k_inv_95(float a, float b, out float ox, out float oy) {
+    float num = a * a + b * 5.48000002f;
+    float den = b + 12.0f + a * 5.48000002f;
+    float ratio = num / den;
+    float folded = ratio - 1.0f / (1.0f + ratio * ratio);
+    ox = folded + num * 5.48000002f;
+    oy = folded - den * 5.48000002f;
+    return folded;
+}
+
+float nd2k_cross_96(float a, float b, float c, float d, out float ox, out float oy) {
+    float p0 = a * d + b * c;
+    float p1 = (a + d) * (b - c) * 2.45000005f;
+    float blend = tanh(p0) + sin(p1 * 3.58200002f);
+    ox = blend + p0 * 2.45000005f;
+    oy = blend - p1 * 3.58200002f;
+    return blend + ox - oy;
+}
+
+float nd2k_inv_97(float a, float b, out float ox, out float oy) {
+    float num = a * a + b * 3.77999997f;
+    float den = b + 9.0f + a * 3.77999997f;
+    float ratio = num / den;
+    float folded = ratio - 1.0f / (1.0f + ratio * ratio);
+    ox = folded + num * 3.77999997f;
+    oy = folded - den * 3.77999997f;
+    return folded;
+}
+
+float nd2k_wmix_98(float a, float b, float c, out float ox) {
+    float t0 = a * 8.02999973f + b * 5.26800013f;
+    float t1 = c * 5.46000004f - a * 5.26800013f;
+    float t2 = tanh(t0) + exp(t1 * 8.02999973f * 0.01f);
+    ox = t2 + t0 - t1;
+    return t2 * 5.46000004f;
+}
+
+float nd2k_ratio_99(float a, float b, float c, out float ox) {
+    float w0 = a / (b + 8.0f);
+    float w1 = c * 5.42999983f;
+    float fused = w0 * (1.0f - w1) + w1 * sin(a + c);
+    ox = fused + log(1.0f + w0 * w0);
+    return fused * 5.42999983f + ox;
+}
+
+float nd2k_harm_100(float a, float b, float c, float d, out float ox, out float oy) {
+    float h0 = sin(a + b * 8.15999985f);
+    float h1 = cos(c + d * 3.35500002f);
+    float h2 = sin(h0 + h1) * cos(h0 - h1);
+    ox = h2 + a * 8.15999985f;
+    oy = h2 + d * 3.35500002f;
+    return h0 + h1 + h2;
+}
+
+float nd2k_poly_101(float a, float b, out float ox, out float oy) {
+    float a2 = a * a;
+    float b2 = b * b;
+    float cross = a2 * b + b2 * 5.44999981f;
+    float norm = 1.0f + a2 + b2 * 2.94299984f;
+    float val = cross / norm;
+    ox = val + a * 5.44999981f;
+    oy = val - b * 2.94299984f;
+    return val + ox - oy;
+}
+
+float nd2k_latt_102(float a, float b, float c, out float ox, out float oy) {
+    float fx = a * 3.90999985f + c * 0.31f;
+    float fy = b * 3.32999992f + c * 0.17f;
+    float cell = sin(fx) + sin(fy) + sin(fx + fy);
+    float diag = cos(fx - fy) * 3.90999985f;
+    ox = cell + diag;
+    oy = cell - diag + b * 3.32999992f;
+    return cell * 0.5f + ox * 0.25f;
+}
+
+float nd2k_rat_103(float a, float b, float c, out float ox, out float oy) {
+    float mix = (a * 7.01999998f + b) / (c + 12.0f);
+    float wave = sin(mix) * cos(b * 0.822000027f) + tanh(a - c);
+    float lift = wave * wave + mix * 7.01999998f;
+    ox = lift + wave;
+    oy = lift - wave + b * 0.822000027f;
+    return lift + ox * 7.01999998f - oy * 0.822000027f;
+}
+
+void nd2k_trip_104(float a, float b, float c, out float ox, out float oy, out float oz) {
+    float hub = a * b + c * 1.16999996f;
+    float skew = sin(hub) - cos(c * 3.26800013f);
+    ox = hub + skew;
+    oy = hub - skew * 1.16999996f;
+    oz = skew + c * 3.26800013f;
+}
+
+float nd2k_osc_105(float a, float b, float c, out float ox) {
+    float o0 = sin(a * 2.25f + c);
+    float o1 = cos(b * 2.90499997f - a);
+    float o2 = sin((a + b) * 0.24000001f) * cos(c * 2.25f);
+    float bank = o0 + o1 * 0.5f + o2 * 0.25f;
+    ox = bank + c * 2.90499997f;
+    return bank * 0.24000001f + ox;
+}
+
+float nd2k_dual_106(float a, float b, float c, out float ox, out float oy) {
+    float gate = a - c * 8.84999943f;
+    float path_a = sin(gate) + b * 7.44000006f;
+    float path_b = cos(gate) - log(1.0f + b);
+    float merged = path_a * path_b * 7.44000006f;
+    ox = merged + path_a;
+    oy = merged + path_b;
+    return merged + c * 8.84999943f;
+}
+
+float nd2k_umix_107(float a, float b, out float ox) {
+    float s = a;
+    s = s * 1.76999998f + b + 7.6699996f;
+    s = s * 3.76999998f + b + 8.10999966f;
+    ox = s + sin(s * 4.73000002f);
+    return ox * 4.73000002f;
+}
+
+float nd2k_fold_108(float a, float b, float c, out float ox, out float oy) {
+    float m = a - b;
+    float am = m >= 0.0f ? m : -m;
+    float shaped = am * 4.03999996f + c * (a + b);
+    float ripple = sin(shaped) + cos(c * 4.03999996f);
+    ox = shaped + ripple;
+    oy = shaped - ripple * 4.03999996f;
+    return ripple + ox * 4.03999996f;
+}
+
+float nd2k_rgb_109(float a, float b, float c, out float ox, out float oy, out float oz) {
+    float r = sin(a * 0.959999979f);
+    float g = cos(b * 5.72800016f);
+    float bch = sin(c + a * 0.3f);
+    float nr = r * 0.5f + g * 0.3f + bch * 0.2f;
+    float ng = g * 0.5f + bch * 0.3f + r * 0.2f;
+    float nb = bch * 0.5f + r * 0.3f + g * 0.2f;
+    ox = nr + ng * 0.25f;
+    oy = ng + nb * 0.25f;
+    oz = nb + nr * 0.25f;
+    return nr + ng + nb;
+}
+
+float nd2k_wmix_110(float a, float b, float c, out float ox) {
+    float t0 = a * 0.939999998f + b * 9.27600002f;
+    float t1 = c * 0.832000017f - a * 9.27600002f;
+    float t2 = tanh(t0) + exp(t1 * 0.939999998f * 0.01f);
+    ox = t2 + t0 - t1;
+    return t2 * 0.832000017f;
+}
+
+float nd2k_wmix_111(float a, float b, float c, out float ox) {
+    float t0 = a * 7.48999977f + b * 1.45200002f;
+    float t1 = c * 7.50099993f - a * 1.45200002f;
+    float t2 = tanh(t0) + exp(t1 * 7.48999977f * 0.01f);
+    ox = t2 + t0 - t1;
+    return t2 * 7.50099993f;
+}
+
+float nd2k_resid_112(float a, float b, out float ox, out float oy) {
+    float base = a * b * 7.19000006f;
+    float guess = sin(base) + base * base;
+    float resid = guess - base;
+    ox = resid + guess * 7.19000006f;
+    oy = resid - base * 7.19000006f;
+    return resid + ox * 0.5f;
+}
+
+float nd2k_det2_113(float a, float b, float c, float d, out float ox) {
+    float m00 = a + c * 0.389999986f;
+    float m01 = b - d * 0.5f;
+    float m10 = c + a * 0.5f;
+    float m11 = d + 0.389999986f;
+    float det = m00 * m11 - m01 * m10;
+    ox = det + sin(m00 + m11);
+    return det * 0.389999986f + ox;
+}
+
+float nd2k_cheb_114(float a, float b, out float ox, out float oy) {
+    float t = a * 0.889999986f + b * 0.5f;
+    float t0 = 1.0f;
+    float t1 = t;
+    float t2 = 2.0f * t * t1 - t0;
+    float t3 = 2.0f * t * t2 - t1;
+    ox = t2 + t3 * 0.25f;
+    oy = t1 - t0 + b * 0.889999986f;
+    return t3 + ox - oy;
+}
+
+float nd2k_rat_115(float a, float b, float c, out float ox, out float oy) {
+    float mix = (a * 3.3599999f + b) / (c + 14.0f);
+    float wave = sin(mix) * cos(b * 1.21200001f) + tanh(a - c);
+    float lift = wave * wave + mix * 3.3599999f;
+    ox = lift + wave;
+    oy = lift - wave + b * 1.21200001f;
+    return lift + ox * 3.3599999f - oy * 1.21200001f;
+}
+
+float nd2k_resid_116(float a, float b, out float ox, out float oy) {
+    float base = a * b * 4.11999989f;
+    float guess = sin(base) + base * base;
+    float resid = guess - base;
+    ox = resid + guess * 4.11999989f;
+    oy = resid - base * 4.11999989f;
+    return resid + ox * 0.5f;
+}
+
+float nd2k_rat_117(float a, float b, float c, out float ox, out float oy) {
+    float mix = (a * 5.57999992f + b) / (c + 17.0f);
+    float wave = sin(mix) * cos(b * 2.91300011f) + tanh(a - c);
+    float lift = wave * wave + mix * 5.57999992f;
+    ox = lift + wave;
+    oy = lift - wave + b * 2.91300011f;
+    return lift + ox * 5.57999992f - oy * 2.91300011f;
+}
+
+float nd2k_umix_118(float a, float b, out float ox) {
+    float s = a;
+    s = s * 2.95000005f + b + 2.95000005f;
+    s = s * 6.71000004f + b + 3.77999997f;
+    s = s * 0.199999988f + b + 0.610000014f;
+    ox = s + sin(s * 7.92999983f);
+    return ox * 7.92999983f;
+}
+
+float nd2k_fold_119(float a, float b, float c, out float ox, out float oy) {
+    float m = a - b;
+    float am = m >= 0.0f ? m : -m;
+    float shaped = am * 5.60999966f + c * (a + b);
+    float ripple = sin(shaped) + cos(c * 5.60999966f);
+    ox = shaped + ripple;
+    oy = shaped - ripple * 5.60999966f;
+    return ripple + ox * 5.60999966f;
+}
+
+float nd2k_ratio_120(float a, float b, float c, out float ox) {
+    float w0 = a / (b + 4.0f);
+    float w1 = c * 1.52999997f;
+    float fused = w0 * (1.0f - w1) + w1 * sin(a + c);
+    ox = fused + log(1.0f + w0 * w0);
+    return fused * 1.52999997f + ox;
+}
+
+float nd2k_osc_121(float a, float b, float c, out float ox) {
+    float o0 = sin(a * 7.48999977f + c);
+    float o1 = cos(b * 2.46399999f - a);
+    float o2 = sin((a + b) * 7.95200014f) * cos(c * 7.48999977f);
+    float bank = o0 + o1 * 0.5f + o2 * 0.25f;
+    ox = bank + c * 2.46399999f;
+    return bank * 7.95200014f + ox;
+}
+
+float nd2k_latt_122(float a, float b, float c, out float ox, out float oy) {
+    float fx = a * 1.71999991f + c * 0.31f;
+    float fy = b * 11.04f + c * 0.17f;
+    float cell = sin(fx) + sin(fy) + sin(fx + fy);
+    float diag = cos(fx - fy) * 1.71999991f;
+    ox = cell + diag;
+    oy = cell - diag + b * 11.04f;
+    return cell * 0.5f + ox * 0.25f;
+}
+
+shader main(out float o) {
+    float x1 = global_value<x1>;
+    float x2 = global_value<x2>;
+    float u = global_value<uv_u>;
+    float v = global_value<uv_v>;
+    float acc = 0.0f;
+    float acc_w = 1e-4f;
+
+    {
+        color tex_0 = texture2d_sample<g_tex>(u * 1.26699996f, v + 0.668000042f);
+        acc += (tex_0.r + tex_0.g * 0.25f) * acc_w;
+    }
+
+    {
+        float ox_0;
+        float lane_0 = nd2k_osc_0(x1, x2, u, ox_0);
+        acc += (lane_0 + sin(ox_0)) * acc_w;
+    }
+
+    {
+        float ox_1;
+        float oy_1;
+        float lane_1 = nd2k_cheb_1(x1 + u * 0.02f, x2, ox_1, oy_1);
+        acc += (lane_1 + sin(ox_1 + oy_1)) * acc_w;
+    }
+
+    {
+        float ox_2;
+        float lane_2 = nd2k_osc_2(x1, x2, u, ox_2);
+        acc += (lane_2 + sin(ox_2)) * acc_w;
+    }
+
+    {
+        float ox_3;
+        float oy_3;
+        float lane_3 = nd2k_resid_3(x2, u, ox_3, oy_3);
+        acc += (lane_3 + tanh(ox_3 + oy_3)) * acc_w;
+    }
+
+    {
+        float ox_4;
+        float oy_4;
+        float lane_4 = nd2k_cross_4(x1, x2, u, v, ox_4, oy_4);
+        acc += (lane_4 * 4.31999969f) * acc_w;
+    }
+
+    {
+        float ox_5;
+        float oy_5;
+        float lane_5 = nd2k_harm_5(x1, x2, u, v, ox_5, oy_5);
+        acc += (lane_5 + ox_5 * 0.1f - oy_5 * 0.05f) * acc_w;
+    }
+
+    {
+        float ox_6;
+        float oy_6;
+        float lane_6 = nd2k_rat_6(x1, x2, u, ox_6, oy_6);
+        acc += (lane_6 * 4.58999968f + ox_6) * acc_w;
+    }
+
+    {
+        float ox_7;
+        float lane_7 = nd2k_osc_7(x1, x2, u, ox_7);
+        acc += (lane_7 + sin(ox_7)) * acc_w;
+    }
+
+    {
+        float ox_8;
+        float oy_8;
+        float lane_8 = nd2k_blend_8(x1, x2, v, ox_8, oy_8);
+        acc += (lane_8 + oy_8 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_9;
+        float oy_9;
+        float lane_9 = nd2k_fold_9(x1, x2, u, ox_9, oy_9);
+        acc += (lane_9 * lane_9 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_10;
+        float oy_10;
+        float lane_10 = nd2k_rat_10(x1, x2, u, ox_10, oy_10);
+        acc += (lane_10 * 4.55999994f + ox_10) * acc_w;
+    }
+
+    {
+        float ox_11;
+        float oy_11;
+        float lane_11 = nd2k_blend_11(x1, x2, v, ox_11, oy_11);
+        acc += (lane_11 + oy_11 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_12;
+        float oy_12;
+        float oz_12;
+        nd2k_trip_12(x1, x2, u, ox_12, oy_12, oz_12);
+        acc += (ox_12 + oy_12 * 0.5f + oz_12 * 5.4000001f) * acc_w;
+    }
+
+    {
+        float ox_13;
+        float oy_13;
+        float lane_13 = nd2k_resid_13(x2, u, ox_13, oy_13);
+        acc += (lane_13 + tanh(ox_13 + oy_13)) * acc_w;
+    }
+
+    {
+        float ox_14;
+        float oy_14;
+        float lane_14 = nd2k_cross_14(x1, x2, u, v, ox_14, oy_14);
+        acc += (lane_14 * 7.50999975f) * acc_w;
+    }
+
+    {
+        float ox_15;
+        float oy_15;
+        float lane_15 = nd2k_fold_15(x1, x2, u, ox_15, oy_15);
+        acc += (lane_15 * lane_15 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_16;
+        float lane_16 = nd2k_umix_16(x1 + u * 0.01f, x2, ox_16);
+        acc += (lane_16 + ox_16 * 0.25f) * acc_w;
+    }
+
+    {
+        float ox_17;
+        float oy_17;
+        float oz_17;
+        float lane_17 = nd2k_rgb_17(x1, x2, u, ox_17, oy_17, oz_17);
+        acc += (lane_17 + ox_17 * 0.1f + oy_17 * 0.05f + oz_17 * 0.02f) * acc_w;
+    }
+
+    {
+        float ox_18;
+        float oy_18;
+        float lane_18 = nd2k_latt_18(x1, x2, v, ox_18, oy_18);
+        acc += (lane_18 + ox_18 - oy_18 * 0.5f) * acc_w;
+    }
+
+    {
+        float ox_19;
+        float lane_19 = nd2k_det2_19(x1, x2, u, v, ox_19);
+        acc += (lane_19 + ox_19 * 0.01f) * acc_w;
+    }
+
+    {
+        float ox_20;
+        float oy_20;
+        float lane_20 = nd2k_cross_20(x1, x2, u, v, ox_20, oy_20);
+        acc += (lane_20 * 1.49000001f) * acc_w;
+    }
+
+    {
+        float ox_21;
+        float lane_21 = nd2k_ratio_21(x1, x2, u, ox_21);
+        acc += (lane_21 + log(1.0f + ox_21 * ox_21)) * acc_w;
+    }
+
+    {
+        float ox_22;
+        float oy_22;
+        float lane_22 = nd2k_fold_22(x1, x2, u, ox_22, oy_22);
+        acc += (lane_22 * lane_22 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_23;
+        float lane_23 = nd2k_sstep_23(x1, x2, u, ox_23);
+        acc += (lane_23 + ox_23 * 0.05f) * acc_w;
+    }
+
+    {
+        float ox_24;
+        float lane_24 = nd2k_ratio_24(x1, x2, u, ox_24);
+        acc += (lane_24 + log(1.0f + ox_24 * ox_24)) * acc_w;
+    }
+
+    {
+        float ox_25;
+        float oy_25;
+        float lane_25 = nd2k_poly_25(x1 + v * 0.01f, x2, ox_25, oy_25);
+        acc += (lane_25 + ox_25 * oy_25 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_26;
+        float oy_26;
+        float lane_26 = nd2k_fold_26(x1, x2, u, ox_26, oy_26);
+        acc += (lane_26 * lane_26 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_27;
+        float oy_27;
+        float lane_27 = nd2k_fold_27(x1, x2, u, ox_27, oy_27);
+        acc += (lane_27 * lane_27 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_28;
+        float oy_28;
+        float oz_28;
+        nd2k_trip_28(x1, x2, u, ox_28, oy_28, oz_28);
+        acc += (ox_28 + oy_28 * 0.5f + oz_28 * 6.02999973f) * acc_w;
+    }
+
+    {
+        float ox_29;
+        float oy_29;
+        float lane_29 = nd2k_resid_29(x2, u, ox_29, oy_29);
+        acc += (lane_29 + tanh(ox_29 + oy_29)) * acc_w;
+    }
+
+    {
+        float ox_30;
+        float oy_30;
+        float lane_30 = nd2k_dual_30(x1, u, v, ox_30, oy_30);
+        acc += (lane_30 + ox_30 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_31;
+        float oy_31;
+        float lane_31 = nd2k_latt_31(x1, x2, v, ox_31, oy_31);
+        acc += (lane_31 + ox_31 - oy_31 * 0.5f) * acc_w;
+    }
+
+    {
+        float ox_32;
+        float lane_32 = nd2k_wmix_32(x1, v, u, ox_32);
+        acc += (lane_32 + cos(ox_32)) * acc_w;
+    }
+
+    {
+        float ox_33;
+        float oy_33;
+        float lane_33 = nd2k_cheb_33(x1 + u * 0.02f, x2, ox_33, oy_33);
+        acc += (lane_33 + sin(ox_33 + oy_33)) * acc_w;
+    }
+
+    {
+        float ox_34;
+        float lane_34 = nd2k_wmix_34(x1, v, u, ox_34);
+        acc += (lane_34 + cos(ox_34)) * acc_w;
+    }
+
+    {
+        float ox_35;
+        float oy_35;
+        float lane_35 = nd2k_rat_35(x1, x2, u, ox_35, oy_35);
+        acc += (lane_35 * 2.61999989f + ox_35) * acc_w;
+    }
+
+    {
+        float ox_36;
+        float oy_36;
+        float oz_36;
+        float lane_36 = nd2k_rgb_36(x1, x2, u, ox_36, oy_36, oz_36);
+        acc += (lane_36 + ox_36 * 0.1f + oy_36 * 0.05f + oz_36 * 0.02f) * acc_w;
+    }
+
+    {
+        float ox_37;
+        float lane_37 = nd2k_logexp_37(x1, x2, ox_37);
+        acc += (lane_37 + ox_37 * 4.44999981f) * acc_w;
+    }
+
+    {
+        float ox_38;
+        float oy_38;
+        float lane_38 = nd2k_harm_38(x1, x2, u, v, ox_38, oy_38);
+        acc += (lane_38 + ox_38 * 0.1f - oy_38 * 0.05f) * acc_w;
+    }
+
+    {
+        float ox_39;
+        float oy_39;
+        float lane_39 = nd2k_dual_39(x1, u, v, ox_39, oy_39);
+        acc += (lane_39 + ox_39 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_40;
+        float oy_40;
+        float lane_40 = nd2k_harm_40(x1, x2, u, v, ox_40, oy_40);
+        acc += (lane_40 + ox_40 * 0.1f - oy_40 * 0.05f) * acc_w;
+    }
+
+    {
+        float ox_41;
+        float oy_41;
+        float lane_41 = nd2k_harm_41(x1, x2, u, v, ox_41, oy_41);
+        acc += (lane_41 + ox_41 * 0.1f - oy_41 * 0.05f) * acc_w;
+    }
+
+    {
+        float ox_42;
+        float oy_42;
+        float lane_42 = nd2k_inv_42(u, v, ox_42, oy_42);
+        acc += (lane_42 + ox_42 - oy_42) * acc_w;
+    }
+
+    {
+        float ox_43;
+        float oy_43;
+        float lane_43 = nd2k_poly_43(x1 + v * 0.01f, x2, ox_43, oy_43);
+        acc += (lane_43 + ox_43 * oy_43 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_44;
+        float lane_44 = nd2k_ratio_44(x1, x2, u, ox_44);
+        acc += (lane_44 + log(1.0f + ox_44 * ox_44)) * acc_w;
+    }
+
+    {
+        float ox_45;
+        float lane_45 = nd2k_det2_45(x1, x2, u, v, ox_45);
+        acc += (lane_45 + ox_45 * 0.01f) * acc_w;
+    }
+
+    {
+        float ox_46;
+        float lane_46 = nd2k_ratio_46(x1, x2, u, ox_46);
+        acc += (lane_46 + log(1.0f + ox_46 * ox_46)) * acc_w;
+    }
+
+    {
+        float ox_47;
+        float oy_47;
+        float lane_47 = nd2k_rat_47(x1, x2, u, ox_47, oy_47);
+        acc += (lane_47 * 7.05999994f + ox_47) * acc_w;
+    }
+
+    {
+        float ox_48;
+        float lane_48 = nd2k_umix_48(x1 + u * 0.01f, x2, ox_48);
+        acc += (lane_48 + ox_48 * 0.25f) * acc_w;
+    }
+
+    {
+        float ox_49;
+        float lane_49 = nd2k_logexp_49(x1, x2, ox_49);
+        acc += (lane_49 + ox_49 * 6.55999994f) * acc_w;
+    }
+
+    {
+        float ox_50;
+        float oy_50;
+        float lane_50 = nd2k_rat_50(x1, x2, u, ox_50, oy_50);
+        acc += (lane_50 * 3.11999989f + ox_50) * acc_w;
+    }
+
+    {
+        float ox_51;
+        float lane_51 = nd2k_osc_51(x1, x2, u, ox_51);
+        acc += (lane_51 + sin(ox_51)) * acc_w;
+    }
+
+    {
+        float ox_52;
+        float oy_52;
+        float lane_52 = nd2k_poly_52(x1 + v * 0.01f, x2, ox_52, oy_52);
+        acc += (lane_52 + ox_52 * oy_52 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_53;
+        float oy_53;
+        float lane_53 = nd2k_poly_53(x1 + v * 0.01f, x2, ox_53, oy_53);
+        acc += (lane_53 + ox_53 * oy_53 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_54;
+        float oy_54;
+        float lane_54 = nd2k_harm_54(x1, x2, u, v, ox_54, oy_54);
+        acc += (lane_54 + ox_54 * 0.1f - oy_54 * 0.05f) * acc_w;
+    }
+
+    {
+        float ox_55;
+        float lane_55 = nd2k_det2_55(x1, x2, u, v, ox_55);
+        acc += (lane_55 + ox_55 * 0.01f) * acc_w;
+    }
+
+    {
+        float ox_56;
+        float oy_56;
+        float lane_56 = nd2k_resid_56(x2, u, ox_56, oy_56);
+        acc += (lane_56 + tanh(ox_56 + oy_56)) * acc_w;
+    }
+
+    {
+        float ox_57;
+        float oy_57;
+        float lane_57 = nd2k_cross_57(x1, x2, u, v, ox_57, oy_57);
+        acc += (lane_57 * 1.70999992f) * acc_w;
+    }
+
+    {
+        float ox_58;
+        float lane_58 = nd2k_wmix_58(x1, v, u, ox_58);
+        acc += (lane_58 + cos(ox_58)) * acc_w;
+    }
+
+    {
+        float ox_59;
+        float lane_59 = nd2k_sstep_59(x1, x2, u, ox_59);
+        acc += (lane_59 + ox_59 * 0.05f) * acc_w;
+    }
+
+    {
+        float ox_60;
+        float lane_60 = nd2k_logexp_60(x1, x2, ox_60);
+        acc += (lane_60 + ox_60 * 1.88f) * acc_w;
+    }
+
+    {
+        float ox_61;
+        float oy_61;
+        float lane_61 = nd2k_blend_61(x1, x2, v, ox_61, oy_61);
+        acc += (lane_61 + oy_61 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_62;
+        float oy_62;
+        float lane_62 = nd2k_harm_62(x1, x2, u, v, ox_62, oy_62);
+        acc += (lane_62 + ox_62 * 0.1f - oy_62 * 0.05f) * acc_w;
+    }
+
+    {
+        float ox_63;
+        float oy_63;
+        float lane_63 = nd2k_latt_63(x1, x2, v, ox_63, oy_63);
+        acc += (lane_63 + ox_63 - oy_63 * 0.5f) * acc_w;
+    }
+
+    {
+        float ox_64;
+        float oy_64;
+        float lane_64 = nd2k_dual_64(x1, u, v, ox_64, oy_64);
+        acc += (lane_64 + ox_64 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_65;
+        float lane_65 = nd2k_det2_65(x1, x2, u, v, ox_65);
+        acc += (lane_65 + ox_65 * 0.01f) * acc_w;
+    }
+
+    {
+        float ox_66;
+        float oy_66;
+        float lane_66 = nd2k_rat_66(x1, x2, u, ox_66, oy_66);
+        acc += (lane_66 * 0.409999996f + ox_66) * acc_w;
+    }
+
+    {
+        float ox_67;
+        float lane_67 = nd2k_umix_67(x1 + u * 0.01f, x2, ox_67);
+        acc += (lane_67 + ox_67 * 0.25f) * acc_w;
+    }
+
+    {
+        float ox_68;
+        float oy_68;
+        float lane_68 = nd2k_cheb_68(x1 + u * 0.02f, x2, ox_68, oy_68);
+        acc += (lane_68 + sin(ox_68 + oy_68)) * acc_w;
+    }
+
+    {
+        float ox_69;
+        float oy_69;
+        float lane_69 = nd2k_latt_69(x1, x2, v, ox_69, oy_69);
+        acc += (lane_69 + ox_69 - oy_69 * 0.5f) * acc_w;
+    }
+
+    {
+        float ox_70;
+        float oy_70;
+        float lane_70 = nd2k_cross_70(x1, x2, u, v, ox_70, oy_70);
+        acc += (lane_70 * 7.3499999f) * acc_w;
+    }
+
+    {
+        float ox_71;
+        float oy_71;
+        float lane_71 = nd2k_poly_71(x1 + v * 0.01f, x2, ox_71, oy_71);
+        acc += (lane_71 + ox_71 * oy_71 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_72;
+        float lane_72 = nd2k_ratio_72(x1, x2, u, ox_72);
+        acc += (lane_72 + log(1.0f + ox_72 * ox_72)) * acc_w;
+    }
+
+    {
+        float ox_73;
+        float oy_73;
+        float oz_73;
+        float lane_73 = nd2k_rgb_73(x1, x2, u, ox_73, oy_73, oz_73);
+        acc += (lane_73 + ox_73 * 0.1f + oy_73 * 0.05f + oz_73 * 0.02f) * acc_w;
+    }
+
+    {
+        float ox_74;
+        float oy_74;
+        float lane_74 = nd2k_rat_74(x1, x2, u, ox_74, oy_74);
+        acc += (lane_74 * 3.54999995f + ox_74) * acc_w;
+    }
+
+    {
+        float ox_75;
+        float oy_75;
+        float lane_75 = nd2k_inv_75(u, v, ox_75, oy_75);
+        acc += (lane_75 + ox_75 - oy_75) * acc_w;
+    }
+
+    {
+        float ox_76;
+        float oy_76;
+        float lane_76 = nd2k_fold_76(x1, x2, u, ox_76, oy_76);
+        acc += (lane_76 * lane_76 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_77;
+        float oy_77;
+        float oz_77;
+        nd2k_trip_77(x1, x2, u, ox_77, oy_77, oz_77);
+        acc += (ox_77 + oy_77 * 0.5f + oz_77 * 1.69999993f) * acc_w;
+    }
+
+    {
+        float ox_78;
+        float lane_78 = nd2k_logexp_78(x1, x2, ox_78);
+        acc += (lane_78 + ox_78 * 9.0f) * acc_w;
+    }
+
+    {
+        float ox_79;
+        float oy_79;
+        float lane_79 = nd2k_cheb_79(x1 + u * 0.02f, x2, ox_79, oy_79);
+        acc += (lane_79 + sin(ox_79 + oy_79)) * acc_w;
+    }
+
+    {
+        float ox_80;
+        float lane_80 = nd2k_logexp_80(x1, x2, ox_80);
+        acc += (lane_80 + ox_80 * 6.06999969f) * acc_w;
+    }
+
+    {
+        float ox_81;
+        float lane_81 = nd2k_umix_81(x1 + u * 0.01f, x2, ox_81);
+        acc += (lane_81 + ox_81 * 0.25f) * acc_w;
+    }
+
+    {
+        float ox_82;
+        float lane_82 = nd2k_osc_82(x1, x2, u, ox_82);
+        acc += (lane_82 + sin(ox_82)) * acc_w;
+    }
+
+    {
+        float ox_83;
+        float lane_83 = nd2k_det2_83(x1, x2, u, v, ox_83);
+        acc += (lane_83 + ox_83 * 0.01f) * acc_w;
+    }
+
+    {
+        float ox_84;
+        float oy_84;
+        float lane_84 = nd2k_harm_84(x1, x2, u, v, ox_84, oy_84);
+        acc += (lane_84 + ox_84 * 0.1f - oy_84 * 0.05f) * acc_w;
+    }
+
+    {
+        float ox_85;
+        float oy_85;
+        float lane_85 = nd2k_inv_85(u, v, ox_85, oy_85);
+        acc += (lane_85 + ox_85 - oy_85) * acc_w;
+    }
+
+    {
+        float ox_86;
+        float oy_86;
+        float oz_86;
+        nd2k_trip_86(x1, x2, u, ox_86, oy_86, oz_86);
+        acc += (ox_86 + oy_86 * 0.5f + oz_86 * 7.69999981f) * acc_w;
+    }
+
+    {
+        float ox_87;
+        float oy_87;
+        float lane_87 = nd2k_cheb_87(x1 + u * 0.02f, x2, ox_87, oy_87);
+        acc += (lane_87 + sin(ox_87 + oy_87)) * acc_w;
+    }
+
+    {
+        float ox_88;
+        float oy_88;
+        float lane_88 = nd2k_cross_88(x1, x2, u, v, ox_88, oy_88);
+        acc += (lane_88 * 0.329999983f) * acc_w;
+    }
+
+    {
+        float ox_89;
+        float oy_89;
+        float lane_89 = nd2k_dual_89(x1, u, v, ox_89, oy_89);
+        acc += (lane_89 + ox_89 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_90;
+        float oy_90;
+        float lane_90 = nd2k_resid_90(x2, u, ox_90, oy_90);
+        acc += (lane_90 + tanh(ox_90 + oy_90)) * acc_w;
+    }
+
+    {
+        float ox_91;
+        float lane_91 = nd2k_osc_91(x1, x2, u, ox_91);
+        acc += (lane_91 + sin(ox_91)) * acc_w;
+    }
+
+    {
+        float ox_92;
+        float lane_92 = nd2k_ratio_92(x1, x2, u, ox_92);
+        acc += (lane_92 + log(1.0f + ox_92 * ox_92)) * acc_w;
+    }
+
+    {
+        float ox_93;
+        float lane_93 = nd2k_umix_93(x1 + u * 0.01f, x2, ox_93);
+        acc += (lane_93 + ox_93 * 0.25f) * acc_w;
+    }
+
+    {
+        float ox_94;
+        float lane_94 = nd2k_det2_94(x1, x2, u, v, ox_94);
+        acc += (lane_94 + ox_94 * 0.01f) * acc_w;
+    }
+
+    {
+        float ox_95;
+        float oy_95;
+        float lane_95 = nd2k_inv_95(u, v, ox_95, oy_95);
+        acc += (lane_95 + ox_95 - oy_95) * acc_w;
+    }
+
+    {
+        float ox_96;
+        float oy_96;
+        float lane_96 = nd2k_cross_96(x1, x2, u, v, ox_96, oy_96);
+        acc += (lane_96 * 2.71000004f) * acc_w;
+    }
+
+    {
+        float ox_97;
+        float oy_97;
+        float lane_97 = nd2k_inv_97(u, v, ox_97, oy_97);
+        acc += (lane_97 + ox_97 - oy_97) * acc_w;
+    }
+
+    {
+        float ox_98;
+        float lane_98 = nd2k_wmix_98(x1, v, u, ox_98);
+        acc += (lane_98 + cos(ox_98)) * acc_w;
+    }
+
+    {
+        float ox_99;
+        float lane_99 = nd2k_ratio_99(x1, x2, u, ox_99);
+        acc += (lane_99 + log(1.0f + ox_99 * ox_99)) * acc_w;
+    }
+
+    {
+        float ox_100;
+        float oy_100;
+        float lane_100 = nd2k_harm_100(x1, x2, u, v, ox_100, oy_100);
+        acc += (lane_100 + ox_100 * 0.1f - oy_100 * 0.05f) * acc_w;
+    }
+
+    {
+        float ox_101;
+        float oy_101;
+        float lane_101 = nd2k_poly_101(x1 + v * 0.01f, x2, ox_101, oy_101);
+        acc += (lane_101 + ox_101 * oy_101 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_102;
+        float oy_102;
+        float lane_102 = nd2k_latt_102(x1, x2, v, ox_102, oy_102);
+        acc += (lane_102 + ox_102 - oy_102 * 0.5f) * acc_w;
+    }
+
+    {
+        float ox_103;
+        float oy_103;
+        float lane_103 = nd2k_rat_103(x1, x2, u, ox_103, oy_103);
+        acc += (lane_103 * 1.95999992f + ox_103) * acc_w;
+    }
+
+    {
+        float ox_104;
+        float oy_104;
+        float oz_104;
+        nd2k_trip_104(x1, x2, u, ox_104, oy_104, oz_104);
+        acc += (ox_104 + oy_104 * 0.5f + oz_104 * 2.42999983f) * acc_w;
+    }
+
+    {
+        float ox_105;
+        float lane_105 = nd2k_osc_105(x1, x2, u, ox_105);
+        acc += (lane_105 + sin(ox_105)) * acc_w;
+    }
+
+    {
+        float ox_106;
+        float oy_106;
+        float lane_106 = nd2k_dual_106(x1, u, v, ox_106, oy_106);
+        acc += (lane_106 + ox_106 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_107;
+        float lane_107 = nd2k_umix_107(x1 + u * 0.01f, x2, ox_107);
+        acc += (lane_107 + ox_107 * 0.25f) * acc_w;
+    }
+
+    {
+        float ox_108;
+        float oy_108;
+        float lane_108 = nd2k_fold_108(x1, x2, u, ox_108, oy_108);
+        acc += (lane_108 * lane_108 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_109;
+        float oy_109;
+        float oz_109;
+        float lane_109 = nd2k_rgb_109(x1, x2, u, ox_109, oy_109, oz_109);
+        acc += (lane_109 + ox_109 * 0.1f + oy_109 * 0.05f + oz_109 * 0.02f) * acc_w;
+    }
+
+    {
+        float ox_110;
+        float lane_110 = nd2k_wmix_110(x1, v, u, ox_110);
+        acc += (lane_110 + cos(ox_110)) * acc_w;
+    }
+
+    {
+        float ox_111;
+        float lane_111 = nd2k_wmix_111(x1, v, u, ox_111);
+        acc += (lane_111 + cos(ox_111)) * acc_w;
+    }
+
+    {
+        float ox_112;
+        float oy_112;
+        float lane_112 = nd2k_resid_112(x2, u, ox_112, oy_112);
+        acc += (lane_112 + tanh(ox_112 + oy_112)) * acc_w;
+    }
+
+    {
+        float ox_113;
+        float lane_113 = nd2k_det2_113(x1, x2, u, v, ox_113);
+        acc += (lane_113 + ox_113 * 0.01f) * acc_w;
+    }
+
+    {
+        float ox_114;
+        float oy_114;
+        float lane_114 = nd2k_cheb_114(x1 + u * 0.02f, x2, ox_114, oy_114);
+        acc += (lane_114 + sin(ox_114 + oy_114)) * acc_w;
+    }
+
+    {
+        float ox_115;
+        float oy_115;
+        float lane_115 = nd2k_rat_115(x1, x2, u, ox_115, oy_115);
+        acc += (lane_115 * 3.1099999f + ox_115) * acc_w;
+    }
+
+    {
+        float ox_116;
+        float oy_116;
+        float lane_116 = nd2k_resid_116(x2, u, ox_116, oy_116);
+        acc += (lane_116 + tanh(ox_116 + oy_116)) * acc_w;
+    }
+
+    {
+        float ox_117;
+        float oy_117;
+        float lane_117 = nd2k_rat_117(x1, x2, u, ox_117, oy_117);
+        acc += (lane_117 * 2.01999998f + ox_117) * acc_w;
+    }
+
+    {
+        float ox_118;
+        float lane_118 = nd2k_umix_118(x1 + u * 0.01f, x2, ox_118);
+        acc += (lane_118 + ox_118 * 0.25f) * acc_w;
+    }
+
+    {
+        float ox_119;
+        float oy_119;
+        float lane_119 = nd2k_fold_119(x1, x2, u, ox_119, oy_119);
+        acc += (lane_119 * lane_119 * 0.001f) * acc_w;
+    }
+
+    {
+        float ox_120;
+        float lane_120 = nd2k_ratio_120(x1, x2, u, ox_120);
+        acc += (lane_120 + log(1.0f + ox_120 * ox_120)) * acc_w;
+    }
+
+    {
+        color tex_121 = texture2d_sample<g_tex>(u * 1.79200006f, v + 1.12400007f);
+        acc += (tex_121.r + tex_121.g * 0.25f) * acc_w;
+    }
+
+    {
+        float ox_121;
+        float lane_121 = nd2k_osc_121(x1, x2, u, ox_121);
+        acc += (lane_121 + sin(ox_121)) * acc_w;
+    }
+
+    {
+        float ox_122;
+        float oy_122;
+        float lane_122 = nd2k_latt_122(x1, x2, v, ox_122, oy_122);
+        acc += (lane_122 + ox_122 - oy_122 * 0.5f) * acc_w;
+    }
+
+    o = acc;
+}

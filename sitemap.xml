@@ -3,10 +3,13 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://agraphicsguynotes.com/</loc>
-    <lastmod>2025-05-09T00:00:00+00:00</lastmod>
+    <lastmod>2026-06-07T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://agraphicsguynotes.com/posts/</loc>
-    <lastmod>2025-05-09T00:00:00+00:00</lastmod>
+    <lastmod>2026-06-07T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://agraphicsguynotes.com/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/</loc>
+    <lastmod>2026-06-07T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_gi/</loc>
     <lastmod>2025-05-09T00:00:00+00:00</lastmod>
@@ -17,7 +20,7 @@
     <loc>https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_di/</loc>
     <lastmod>2022-12-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://agraphicsguynotes.com/posts/making_a_shading_lagnauge_for_my_offline_renderer/</loc>
+    <loc>https://agraphicsguynotes.com/posts/making_a_shading_langauge_for_my_offline_renderer/</loc>
     <lastmod>2021-03-09T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://agraphicsguynotes.com/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/</loc>

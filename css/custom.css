@@ -13,7 +13,266 @@
   margin-top: 0.5rem;
 }
 
+.image-switcher {
+  margin: 0;
+  padding: 0;
+  width: var(--image-switcher-width, 100%);
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.image-switcher-viewport {
+  position: relative;
+  width: 100%;
+  line-height: 0;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.image-switcher-viewport img {
+  display: none;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.image-switcher-viewport img.is-active {
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.image-switcher-loupe-marker {
+  position: absolute;
+  box-sizing: border-box;
+  border: 2px solid #ff9800;
+  outline: 1px solid rgba(255, 255, 255, 0.85);
+  outline-offset: -1px;
+  background: rgba(255, 152, 0, 0.18);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+  cursor: move;
+  z-index: 5;
+  display: none;
+}
+
+.image-switcher-loupe-marker.is-visible {
+  display: block;
+}
+
+.image-switcher-loupe-marker.is-loupe-1 {
+  border-color: #03a9f4;
+  background: rgba(3, 169, 244, 0.18);
+  z-index: 6;
+}
+
+.image-switcher-loupe-marker.is-loupe-2 {
+  border-color: #8bc34a;
+  background: rgba(139, 195, 74, 0.18);
+  z-index: 7;
+}
+
+.image-switcher-loupe-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 0.65rem;
+  gap: 0.35rem;
+}
+
+.image-switcher-loupe-views {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+  width: 100%;
+}
+
+.image-switcher-loupe-view {
+  min-width: 0;
+}
+
+.image-switcher-loupe-view.is-loupe-0 .image-switcher-loupe-canvas {
+  border-color: #ff9800;
+}
+
+.image-switcher-loupe-view.is-loupe-1 .image-switcher-loupe-canvas {
+  border-color: #03a9f4;
+}
+
+.image-switcher-loupe-view.is-loupe-2 .image-switcher-loupe-canvas {
+  border-color: #8bc34a;
+}
+
+.image-switcher-loupe-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  border: 2px solid #bdbdbd;
+  background: #eeeeee;
+}
+
+body.colorscheme-dark .image-switcher-loupe-canvas {
+  border-color: #757575;
+  background: #424242;
+}
+
+@media (prefers-color-scheme: dark) {
+  body.colorscheme-auto .image-switcher-loupe-canvas {
+    border-color: #757575;
+    background: #424242;
+  }
+}
+
+.image-switcher-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.28rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.image-switcher-btn {
+  font: inherit;
+  font-size: 0.82em;
+  line-height: 1.25;
+  padding: 0.35em 0.75em;
+  border: 1px solid #bdbdbd;
+  border-radius: 4px;
+  background: #f5f5f5;
+  color: #424242;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.image-switcher-btn:hover {
+  background: #eeeeee;
+  border-color: #9e9e9e;
+}
+
+.image-switcher-btn.is-active {
+  background: #616161;
+  border-color: #616161;
+  color: #fafafa;
+}
+
+body.colorscheme-dark .image-switcher-btn {
+  background: #424242;
+  border-color: #757575;
+  color: #eeeeee;
+}
+
+body.colorscheme-dark .image-switcher-btn:hover {
+  background: #4f4f4f;
+  border-color: #9e9e9e;
+}
+
+body.colorscheme-dark .image-switcher-btn.is-active {
+  background: #bdbdbd;
+  border-color: #bdbdbd;
+  color: #212121;
+}
+
+@media (prefers-color-scheme: dark) {
+  body.colorscheme-auto .image-switcher-btn {
+    background: #424242;
+    border-color: #757575;
+    color: #eeeeee;
+  }
+
+  body.colorscheme-auto .image-switcher-btn:hover {
+    background: #4f4f4f;
+    border-color: #9e9e9e;
+  }
+
+  body.colorscheme-auto .image-switcher-btn.is-active {
+    background: #bdbdbd;
+    border-color: #bdbdbd;
+    color: #212121;
+  }
+}
+
+.image-switcher .custom-figure-caption {
+  text-align: center;
+  margin-top: 0.35rem;
+  line-height: 1.4;
+}
+
 .fa-bluesky {
   transform: scale(0.8);
   display: inline-block; /* required for transform to work correctly */
+}
+
+/* Make code blocks theme-aware (light/dark). */
+pre {
+  background-color: #E0E0E0;
+  margin: 0 0 2rem;
+  padding: 1rem;
+  border-radius: 1rem;
+}
+
+body.colorscheme-dark pre {
+  background-color: #424242;
+}
+
+.navigation {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: #FAFAFA;
+}
+
+/* Offset hash / in-page links so targets are not hidden under the sticky nav (6rem). */
+html {
+  scroll-padding-top: 6rem;
+}
+
+#post-start {
+  scroll-margin-top: 6rem;
+  outline: none;
+}
+
+#post-start:focus-visible {
+  outline: 2px solid #616161;
+  outline-offset: 4px;
+}
+
+body.colorscheme-dark #post-start:focus-visible {
+  outline-color: #bdbdbd;
+}
+
+body.colorscheme-dark .navigation {
+  background-color: #212121;
+}
+
+@media (prefers-color-scheme: dark) {
+  body.colorscheme-auto .navigation {
+    background-color: #212121;
+  }
+}
+
+/* compact_table stripedRowGroups="3": shade every 2nd group of 3 tbody rows (rows 4–6, 10–12, …) */
+.compact-table-striped-groups-3 tbody tr:nth-child(6n+4) td,
+.compact-table-striped-groups-3 tbody tr:nth-child(6n+5) td,
+.compact-table-striped-groups-3 tbody tr:nth-child(6n+6) td {
+  background-color: rgba(0, 0, 0, 0.12);
+}
+
+body.colorscheme-dark .compact-table-striped-groups-3 tbody tr:nth-child(6n+4) td,
+body.colorscheme-dark .compact-table-striped-groups-3 tbody tr:nth-child(6n+5) td,
+body.colorscheme-dark .compact-table-striped-groups-3 tbody tr:nth-child(6n+6) td {
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+@media (prefers-color-scheme: dark) {
+  body.colorscheme-auto .compact-table-striped-groups-3 tbody tr:nth-child(6n+4) td,
+  body.colorscheme-auto .compact-table-striped-groups-3 tbody tr:nth-child(6n+5) td,
+  body.colorscheme-auto .compact-table-striped-groups-3 tbody tr:nth-child(6n+6) td {
+    background-color: rgba(255, 255, 255, 0.14);
+  }
 }

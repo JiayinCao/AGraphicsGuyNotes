@@ -27,6 +27,7 @@ A GDC presentation video on Zorah was released a few weeks ago." />
 <meta property="article:modified_time" content="2025-05-09T00:00:00+00:00" />
 
 
+
     <title>
   Understanding The Math Behind ReSTIR GI · A Graphics Guy&#39;s Note
 </title>
@@ -60,6 +61,10 @@ A GDC presentation video on Zorah was released a few weeks ago." />
     
 
     
+      <link rel="stylesheet" href="/css/chroma-light.css" />
+    
+      <link rel="stylesheet" href="/css/chroma-dark.css" />
+    
       <link rel="stylesheet" href="/css/custom.css" />
     
 
@@ -67,7 +72,7 @@ A GDC presentation video on Zorah was released a few weeks ago." />
       
       
         
-        <link rel="stylesheet" href="/main.min.c6871eec105836f05025bd3d682a4f431abfdb83d740febdda8f8be50661a7de.css" integrity="sha256-xoce7BBYNvBQJb09aCpPQxq/24PXQP692o&#43;L5QZhp94=" crossorigin="anonymous" media="screen" />
+        <link rel="stylesheet" href="/main.min.8e6e1803b3e0f99ca06e08fbf045b41900ee5c04fb5b804be5c987ee4c81c9f3.css" integrity="sha256-jm4YA7Pg&#43;Zygbgj78EW0GQDuXAT7W4BL5cmH7kyByfM=" crossorigin="anonymous" media="screen" />
       
     
 
@@ -120,7 +125,7 @@ A GDC presentation video on Zorah was released a few weeks ago." />
 </style>
     
 
-    <meta name="generator" content="Hugo 0.117.0">
+    <meta name="generator" content="Hugo 0.120.4">
 
     <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
@@ -178,7 +183,7 @@ A GDC presentation video on Zorah was released a few weeks ago." />
     <article>
       <header>
         <div class="post-title">
-          <h1 class="title">Understanding The Math Behind ReSTIR GI</h1>
+          <h1 class="title" id="post-start" tabindex="-1">Understanding The Math Behind ReSTIR GI</h1>
         </div>
         <div class="post-meta">
           <div class="date">
@@ -226,7 +231,7 @@ A GDC presentation video on Zorah was released a few weeks ago." />
 
 </p>
 <!-- raw HTML omitted -->
-<p>Recently, I had the pleasure of contributing to Nvidia’s Zorah project, the flagship demo for the RTX 50 Series GPUs. My primary role was to provide technical support for light transport in Zorah, which included collaborating with my colleague <a href="https://research.nvidia.com/person/daqi-lin">Daqi Lin</a> to implement a brand new ReSTIR-based global illumination solution, specifically, ReSTIR PT<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup>, within the <a href="https://developer.nvidia.com/game-engines/unreal-engine/rtx-branch">NvRTX branch</a> of Unreal Engine.</p>
+<p>Recently, I had the pleasure of contributing to Nvidia’s Zorah project, the flagship demo for the RTX 50 Series GPUs. My primary role was to provide technical support for light transport in Zorah, which included collaborating with my colleague <a href="https://research.nvidia.com/person/daqi-lin">Daqi Lin</a> to implement a brand new ReSTIR-based global illumination solution, specifically, ReSTIR PT<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup>, within the <a href="https://developer.nvidia.com/game-engines/unreal-engine/rtx-branch">NvRTX branch</a> of Unreal Engine.</p>
 <p>A GDC presentation video on Zorah was released a few weeks ago. If it slipped past your radar, here it is for your convenience.</p>
 
 
@@ -265,10 +270,10 @@ A GDC presentation video on Zorah was released a few weeks ago." />
 
 <p>Hopefully, this video will spark some interest and motivate readers to dive into this lengthy post.
 All light bounces shown in the demo are dynamically evaluated in real time. Even though I had been working on this project for months, I was still blown away when I saw it in action for the first time. It was a powerful reminder of the advancements in real-time path traced global illumination technology.</p>
-<p>A heads-up before moving forward: technical details related to the engineering aspects of the Zorah project will not be covered in this blog post. This post actually has nothing to do with the Zorah project itself. Instead, it&rsquo;s focused on explaining the theory behind ReSTIR GI<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restir_gi" style="text-decoration: none;">[2]</a></sup>, rather than the engineering challenges we faced in Zorah or the theory behind ReSTIR PT.
-Since our ReSTIR PT implementation is built on top of an existing ReSTIR GI implementation<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__mk_rptltge" style="text-decoration: none;">[3]</a></sup> on NvRTX branch, running ReSTIR GI in the scenes shown above would already produce an indirect diffuse GI signal that’s on par with ReSTIR PT. The main improvement introduced in ReSTIR PT is mirror reflection.</p>
+<p>A heads-up before moving forward: technical details related to the engineering aspects of the Zorah project will not be covered in this blog post. This post actually has nothing to do with the Zorah project itself. Instead, it&rsquo;s focused on explaining the theory behind ReSTIR GI<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__restir_gi" style="text-decoration: none;">[2]</a></sup>, rather than the engineering challenges we faced in Zorah or the theory behind ReSTIR PT.
+Since our ReSTIR PT implementation is built on top of an existing ReSTIR GI implementation<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__mk_rptltge" style="text-decoration: none;">[3]</a></sup> on NvRTX branch, running ReSTIR GI in the scenes shown above would already produce an indirect diffuse GI signal that’s on par with ReSTIR PT. The main improvement introduced in ReSTIR PT is mirror reflection.</p>
 <p>So yes, showing the video here is a bit of a cheat, as it isn’t strictly about ReSTIR GI. But it’s still by far the best visual I can share to demonstrate what ReSTIR GI is capable of when focusing solely on diffuse GI. That’s why I feel it makes sense to include it here.</p>
-<p>For readers interested in the engineering side of the implementation, we have a GDC presentation<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__ptniz" style="text-decoration: none;">[4]</a></sup> available online, where we go into detail about how we approached the solution in Zorah. Alternatively, you can check out the open-source code in the <a href="https://developer.nvidia.com/game-engines/unreal-engine/rtx-branch">nvrtx-5.4 branch</a>.</p>
+<p>For readers interested in the engineering side of the implementation, we have a GDC presentation<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__ptniz" style="text-decoration: none;">[4]</a></sup> available online, where we go into detail about how we approached the solution in Zorah. Alternatively, you can check out the open-source code in the <a href="https://developer.nvidia.com/game-engines/unreal-engine/rtx-branch">nvrtx-5.4 branch</a>.</p>
 <p>Below is a screenshot captured from one of our levels, the Greenhouse level. The GI signal is produced by ReSTIR GI, rather than ReSTIR PT. If you’re interested in trying it out yourself, <a href="https://developer.nvidia.com/rtx-kit?sortBy=developer_learning_library%2Fsort%2Ftitle%3Aasc">here</a> is the link for download. You’ll also need the <a href="https://developer.nvidia.com/game-engines/unreal-engine/rtx-branch">NvRTX Experimental Branch</a> to run this demo, as it’s required to enable Megageo (the ray tracing Nanite feature).</p>
 
 
@@ -285,7 +290,7 @@ Since our ReSTIR PT implementation is built on top of an existing ReSTIR GI impl
 
 
 <h1 id="introduction">Introduction</h1>
-<p>About two and a half years ago, I shared a blog post<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__utmbrd" style="text-decoration: none;">[5]</a></sup> discussing the fundamental mathematical theory behind ReSTIR DI<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restir_di" style="text-decoration: none;">[6]</a></sup>. It aimed to explain the core theory behind the ReSTIR DI algorithm, the simplest form of ReSTIR.
+<p>About two and a half years ago, I shared a blog post<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__utmbrd" style="text-decoration: none;">[5]</a></sup> discussing the fundamental mathematical theory behind ReSTIR DI<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__restir_di" style="text-decoration: none;">[6]</a></sup>. It aimed to explain the core theory behind the ReSTIR DI algorithm, the simplest form of ReSTIR.
 As I continued exploring various variants of this sampling approach, I gained deeper insights into how ReSTIR works. In this blog post, I’d like to share some of my thoughts in the hope of shedding light on some of the more subtle aspects of ReSTIR GI, a variant of ReSTIR designed to tackle the global illumination problem, rather than the many-light problem.</p>
 <p>It’s important to read the original ReSTIR GI paper first, as this post won’t explain how the algorithm works. Instead, it focuses on a few mathematical aspects that can be confusing if not carefully thought through.
 Readers are also strongly encouraged to review the mathematical foundation of ReSTIR beforehand, as the content here may be quite confusing otherwise. Without a solid understanding of how ReSTIR works in general, it may be difficult to fully grasp the math discussed in this post.</p>
@@ -304,7 +309,7 @@ $$
 
 </div>
 
-<p>Strictly speaking, game engines split the rendering equation into several categories, such as emissive surfaces, direct illumination, indirect diffuse illumination, indirect smooth specular illumination, indirect rough specular illumination. It is worth noting that game engines may also have their own split based on light types as well. For example, direct illumination contribution from sky light can be evaluated in Unreal Engine&rsquo;s Lumen GI system<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__lumen" style="text-decoration: none;">[7]</a></sup>. But for simplicity, we assume this is split into three parts as it is sufficient for our discussion in this post.</p>
+<p>Strictly speaking, game engines split the rendering equation into several categories, such as emissive surfaces, direct illumination, indirect diffuse illumination, indirect smooth specular illumination, indirect rough specular illumination. It is worth noting that game engines may also have their own split based on light types as well. For example, direct illumination contribution from sky light can be evaluated in Unreal Engine&rsquo;s Lumen GI system<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__lumen" style="text-decoration: none;">[7]</a></sup>. But for simplicity, we assume this is split into three parts as it is sufficient for our discussion in this post.</p>
 <ul>
 <li>Emissive surfaces that are directly visible in primary view</li>
 <li>Direct illumination</li>
@@ -351,9 +356,9 @@ $$
 </p>
 <p>Things get a lot more complicated here. It all starts from the fact that $L_l$ doesn&rsquo;t have a closed form solution in most cases, unlike $L_e$ which we assume can be evaluated in O(1) time in deterministic manner. Or put it another way, this equation requires higher dimensional integral than the DI integral. As a matter of fact, this equation is an integral of infinite dimensions.
 Clearly, the GI problem is a much more complicated problem compared with DI, which largely thanks to the $L_l(w_i)$ lacks a deterministic evaluation. The truth is approximating $L_l(w_i)$ is equally challenging as solving the rendering equation in the first place as it expands to a rendering equation without the emissive term.</p>
-<p>With such a complicated problem, native sampling approach based on BRDF PDF for drawing continuation ray with NEE samples may lose its efficiency in some cases. Algorithms like path guiding <sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__pguide0" style="text-decoration: none;">[8</a>, <a href="#ref-ref_tag__pguide1" style="text-decoration: none;">9]</a></sup> are designed for improved sampling efficiecny. Unlike path guiding, without requiring complex data structure, ReSTIR GI also aims to effectively improve the sampling efficiency for <span style="white-space: nowrap;"><a href="#eq_re_gi">equation 4</a></span>.</p>
+<p>With such a complicated problem, native sampling approach based on BRDF PDF for drawing continuation ray with NEE samples may lose its efficiency in some cases. Algorithms like path guiding <sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__pguide0" style="text-decoration: none;">[8</a>, <a href="#ref-ref_tag__pguide1" style="text-decoration: none;">9]</a></sup> are designed for improved sampling efficiecny. Unlike path guiding, without requiring complex data structure, ReSTIR GI also aims to effectively improve the sampling efficiency for <span style="white-space: nowrap;"><a href="#eq_re_gi">equation 4</a></span>.</p>
 <h2 id="primary-sample-space">Primary Sample Space</h2>
-<p>Primary sample space, or PSS for short, is critical for us to understand ReSTIR GI, later we will see its application in it. To understand how it works in a path tracer, readers can take a look at the S3 section of GRIS paper&rsquo;s supplementary material<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup>.</p>
+<p>Primary sample space, or PSS for short, is critical for us to understand ReSTIR GI, later we will see its application in it. To understand how it works in a path tracer, readers can take a look at the S3 section of GRIS paper&rsquo;s supplementary material<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup>.</p>
 <p>For your convenience, I&rsquo;d also like to put down some explaination here. Different from the supplemental material, I&rsquo;d like to explain PSS without assuming any graphics context. Imagine we are estimating the following integral with Monte Carlo method.
 
 
@@ -473,20 +478,20 @@ $$
 
 </div>
 
-<p>If anyone has trouble in figuring out how $p_x(x(u))$ is converted to $p_u(u) / |x&rsquo;(u)|$, please check <a href="https://www.pbr-book.org/3ed-2018/Monte_Carlo_Integration/Transforming_between_Distributions">this chapter</a> in pbrt<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__pbrt" style="text-decoration: none;">[10]</a></sup>. I won&rsquo;t put down that simple derivation here to save some text.</p>
+<p>If anyone has trouble in figuring out how $p_x(x(u))$ is converted to $p_u(u) / |x&rsquo;(u)|$, please check <a href="https://www.pbr-book.org/3ed-2018/Monte_Carlo_Integration/Transforming_between_Distributions">this chapter</a> in pbrt<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__pbrt" style="text-decoration: none;">[10]</a></sup>. I won&rsquo;t put down that simple derivation here to save some text.</p>
 <p>The above derivation works with both scalar inputs and vector inputs, both $x$ and $u$ can be a multi-dimentional input, rather than a scalar. With vectors as inputs, the first way we prove PSS doesn&rsquo;t change at all, while we need to swap the derivation $f&rsquo;(x)$ by Jacobian in second proof in <span style="white-space: nowrap;"><a href="#eq_pss_proof">derivation 13</a></span>.</p>
 <h2 id="per-initial-candidate-target-function-in-ris">Per Initial Candidate Target Function in RIS</h2>
-<p>Resampled importance sampling is a sampling method to draw higher quality samples based on a bunch of lower quality  candidate samples drawn from proposal PDFs<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__ris" style="text-decoration: none;">[11]</a></sup>. It provides an unbiased Monte Carlo approximation of an integral by approximating generating samples based on some target function distribution, which doesn&rsquo;t have to be normalized. Its realized PDF is intractable, but we know it approaches to normalized target function with growing number of proposal candidates. Let&rsquo;s briefly go over how RIS works.</p>
+<p>Resampled importance sampling is a sampling method to draw higher quality samples based on a bunch of lower quality  candidate samples drawn from proposal PDFs<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__ris" style="text-decoration: none;">[11]</a></sup>. It provides an unbiased Monte Carlo approximation of an integral by approximating generating samples based on some target function distribution, which doesn&rsquo;t have to be normalized. Its realized PDF is intractable, but we know it approaches to normalized target function with growing number of proposal candidates. Let&rsquo;s briefly go over how RIS works.</p>
 <p>To approximate the integral of $f(x)$ over a specific domain, here is what we need to do with RIS</p>
 <ul>
 <li>Produces a bunch of proposal candidates $x_i$ based on some proposal PDF. We could draw proposal candidates from multiple different proposal PDFs, rather than just one.</li>
 <li>Define a target function $\hat{p}(x_i)$, which ideally should match the integrand well. A constant scaling factor on the target function shouldn&rsquo;t matter, meaning this target function doesn&rsquo;t have to be normalized.</li>
-<li>For each proposal candidate, we assign a resampling weight, which is $w_i(x_i) = m_i(x_i) \hat{p}(x_i) / p_i(x_i) $. Here, $m_i(x_i)$ is the MIS weight<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__ev_thesis" style="text-decoration: none;">[12]</a></sup>.</li>
-<li>Draw a sample by streaming in the proposal candidates. Each proposal candidate can be chosen based on their resampling weight. Specifically, the probablity of them being chosen is proportional to the resampling weight. This process is commonly done through an algorithm called weighted reservoir sampling<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__wrs" style="text-decoration: none;">[13]</a></sup>.</li>
-<li>The unbiased approximation of the reciprocal of the PDF producing this final sample is the combined resampling weights of visited proposal candidates divided by the target function value evaluated at the chosen sample. This is called unbiased contribution weight<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__gentle_restir" style="text-decoration: none;">[14]</a></sup>, UCW for short.</li>
+<li>For each proposal candidate, we assign a resampling weight, which is $w_i(x_i) = m_i(x_i) \hat{p}(x_i) / p_i(x_i) $. Here, $m_i(x_i)$ is the MIS weight<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__ev_thesis" style="text-decoration: none;">[12]</a></sup>.</li>
+<li>Draw a sample by streaming in the proposal candidates. Each proposal candidate can be chosen based on their resampling weight. Specifically, the probablity of them being chosen is proportional to the resampling weight. This process is commonly done through an algorithm called weighted reservoir sampling<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__wrs" style="text-decoration: none;">[13]</a></sup>.</li>
+<li>The unbiased approximation of the reciprocal of the PDF producing this final sample is the combined resampling weights of visited proposal candidates divided by the target function value evaluated at the chosen sample. This is called unbiased contribution weight<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__gentle_restir" style="text-decoration: none;">[14]</a></sup>, UCW for short.</li>
 </ul>
 <p>At this point, with the unbiased contribution weight, we should be able to throw the RIS sample in a Monte Carlo estimator for approximating the integral.</p>
-<p>The GRIS paper provides a fairly in-depth analysis of how to generalize RIS<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup>. The paper points it out that proposal candidates drawn from different proposal PDFs don&rsquo;t have to be in the same domain. It could be in different domains. Upon resampling, we should apply a shift mapping to convert the sample to the current domain of our interest and a Jacobian to the proposal PDF or UCW. Essentially, this is the theoritical foundation for ReSTIR GI as well, except that this GRIS idea was not published by the time ReSTIR GI paper was out. We can treat ReSTIR GI as one use case of GRIS theory. Without introducing the complexity in this post, I will try explaining how this is done without going through the details in this GRIS paper in the following section. However, readers are strongly recommended to go through it<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup> and the Siggraph course<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__gentle_restir" style="text-decoration: none;">[14]</a></sup> to gain a deeper understanding of this.</p>
+<p>The GRIS paper provides a fairly in-depth analysis of how to generalize RIS<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup>. The paper points it out that proposal candidates drawn from different proposal PDFs don&rsquo;t have to be in the same domain. It could be in different domains. Upon resampling, we should apply a shift mapping to convert the sample to the current domain of our interest and a Jacobian to the proposal PDF or UCW. Essentially, this is the theoritical foundation for ReSTIR GI as well, except that this GRIS idea was not published by the time ReSTIR GI paper was out. We can treat ReSTIR GI as one use case of GRIS theory. Without introducing the complexity in this post, I will try explaining how this is done without going through the details in this GRIS paper in the following section. However, readers are strongly recommended to go through it<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup> and the Siggraph course<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__gentle_restir" style="text-decoration: none;">[14]</a></sup> to gain a deeper understanding of this.</p>
 <p>Our interest in this section is about target function. After some careful derivation, it turns out that a different target function can be applied to each initial candidate. To clarify, the choice of using a different or the same target function is completely independent of whether the proposal candidates are drawn from the same proposal PDF or not. It is rarely mentioned in most sources that target function can be per proposal candidate, which gives us an impression that target function has to be the same for RIS process. And this is certainly not true. In order to prove so, let&rsquo;s define resampling weight with the revised version as below.</p>
 <p>
 
@@ -541,7 +546,7 @@ $$
 
 </div>
 
-<p>The whole derivation still stands even if there is a different target function for each proposal candidate. This may sound useless at the beginning as we won&rsquo;t know what the RIS sample PDF will converge to. But not having the restriction that we have to use a same target function throughout the whole process is certainly a welcome flexibility. In my previous blog post<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__utmbrd" style="text-decoration: none;">[5]</a></sup>, I explained in detail in a section visibility reuse why mixing target function with and without visibility check could be valid in ReSTIR DI. Back then, I didn&rsquo;t realize target function has this flexibility. With the above derivation, a much easier way to explain it is we simply can do so thanks to the per initial candidate target function flexibility allowed in RIS.</p>
+<p>The whole derivation still stands even if there is a different target function for each proposal candidate. This may sound useless at the beginning as we won&rsquo;t know what the RIS sample PDF will converge to. But not having the restriction that we have to use a same target function throughout the whole process is certainly a welcome flexibility. In my previous blog post<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__utmbrd" style="text-decoration: none;">[5]</a></sup>, I explained in detail in a section visibility reuse why mixing target function with and without visibility check could be valid in ReSTIR DI. Back then, I didn&rsquo;t realize target function has this flexibility. With the above derivation, a much easier way to explain it is we simply can do so thanks to the per initial candidate target function flexibility allowed in RIS.</p>
 <h1 id="restir-gi-details">ReSTIR GI Details</h1>
 <p>A typical structure of ReSTIR implementation looks like this</p>
 <figure><img src="/img/posts/understanding_the_math_behind_restir_gi/restir.drawio.png"/>
@@ -552,7 +557,7 @@ $$
 <p>On a side note, we can apply this structure to lots of other sampling problems as long as there is some form of coherence, in the case of ReSTIR GI it is temporal coherence between frames and spatial coherence between pixels on screen. The problem to be sampled doesn&rsquo;t need to be graphics relevant. To some degree, ReSTIR is essentially a generic importance sampling algorithm that helps produce high quality samples for Monte Carlo method.</p>
 <p>We commonly see the green passes as the core of ReSTIR. The general structure of ReSTIR is fairly similar between ReSTIR DI and ReSTIR GI. Even the implementation of ReSTIR (temporal + spatial) is largely similar. As we can see, the exact problem ReSTIR solves heavily depends on what the concept of initial candidate is in the initial sampling pass and what integral we try to approximate in the final evaluation pass. Clearly, the concept of initial candidate and final integrand has to match to make sense.</p>
 <p>In ReSTIR DI, it is fairly simple and clear what initial candidate is.
-It is nothing but a sample (point) on light sources. And the integral is simply <span style="white-space: nowrap;"><a href="#eq_re_di">integral 3</a></span>. W.r.t ReSTIR GI, the problem set seems to be <span style="white-space: nowrap;"><a href="#eq_re_gi">integral 4</a></span> and I also mention initial candidate is a path tree in my presentation<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__ptniz" style="text-decoration: none;">[4]</a></sup>, which is not wrong, but not very precise either. I had to explain it that way due to time limitation in our talk. There was certainly not enough time in our sharing for me to go through the math that we will mention in this blog post next. Hopefully, the following explanation in this post will fill in the gap. Understanding these details is the key to get ReSTIR GI implemented done right.</p>
+It is nothing but a sample (point) on light sources. And the integral is simply <span style="white-space: nowrap;"><a href="#eq_re_di">integral 3</a></span>. W.r.t ReSTIR GI, the problem set seems to be <span style="white-space: nowrap;"><a href="#eq_re_gi">integral 4</a></span> and I also mention initial candidate is a path tree in my presentation<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__ptniz" style="text-decoration: none;">[4]</a></sup>, which is not wrong, but not very precise either. I had to explain it that way due to time limitation in our talk. There was certainly not enough time in our sharing for me to go through the math that we will mention in this blog post next. Hopefully, the following explanation in this post will fill in the gap. Understanding these details is the key to get ReSTIR GI implemented done right.</p>
 <h2 id="initial-candidates-in-restir-gi">Initial Candidates in ReSTIR GI</h2>
 <p>There are a few items needed to be cleared before we put our hands on an actual implementation of ReSTIR GI.</p>
 <ul>
@@ -610,7 +615,7 @@ $$
 
 </div>
 
-<p>Let&rsquo;s define the path depth as the number of bounces per path, where we count the light vertex(sample) as a bounce as well. For example, a path like this [$x_0 \rightarrow x_1 \rightarrow x_2 \rightarrow x_3$] has a depth of 3. Please be noted path depth definition may very likely be defined differently in other sources, which is fine as long as it is consistent in this post. Here $x_3$ should be either on emissive surface or a light source, including dirac delta light sources. Strictly speaking, in the context of discussion, $x_3$ won&rsquo;t be dirac delta light sources, such as point or spot light, without NEE samples<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__nee" style="text-decoration: none;">[15]</a></sup> as continuation ray won&rsquo;t hit them. Though, most path tracers draw NEE or BRDF samples for paths of each depth for faster convergence. To make things simpler, we assume our path tree don&rsquo;t have those samples unless explicitly mentioned. With or without light samples, all of our theory in this post stands regardless. We will still call it a path tree without losing generality.</p>
+<p>Let&rsquo;s define the path depth as the number of bounces per path, where we count the light vertex(sample) as a bounce as well. For example, a path like this [$x_0 \rightarrow x_1 \rightarrow x_2 \rightarrow x_3$] has a depth of 3. Please be noted path depth definition may very likely be defined differently in other sources, which is fine as long as it is consistent in this post. Here $x_3$ should be either on emissive surface or a light source, including dirac delta light sources. Strictly speaking, in the context of discussion, $x_3$ won&rsquo;t be dirac delta light sources, such as point or spot light, without NEE samples<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__nee" style="text-decoration: none;">[15]</a></sup> as continuation ray won&rsquo;t hit them. Though, most path tracers draw NEE or BRDF samples for paths of each depth for faster convergence. To make things simpler, we assume our path tree don&rsquo;t have those samples unless explicitly mentioned. With or without light samples, all of our theory in this post stands regardless. We will still call it a path tree without losing generality.</p>
 <p>We can easily notice another $L$ in the <span style="white-space: nowrap;"><a href="#eq_re3-%3e2">equation 21</a></span>, which means we can expand it similarly. And the process goes on without an end, which is why rendering equation involves an integral of infinite dimensions.  Let&rsquo;s define $L_k$ where $k$ is the only path depth we consider in the light evaluation. For example, if we only care about contributions from path of depth 3, we can simplify $L_3$ by combining <span style="white-space: nowrap;"><a href="#eq_re1-%3e0">equation 18</a></span>, <span style="white-space: nowrap;"><a href="#eq_re2-%3e1">equation 20</a></span> and <span style="white-space: nowrap;"><a href="#eq_re3-%3e2">equation 21</a></span>.</p>
 
 
@@ -1058,7 +1063,7 @@ $$
 <h3 id="typical-implementation-of-restir-gi-initial-candidates">Typical Implementation of ReSTIR GI Initial Candidates</h3>
 <p>To be clear, the above mathematical model totally works. There is absolutely no problem that we can write a ReSTIR GI implementation based on the above theory. However, in reality, most people chose a different form of implementation, which is based on a slightly different mathemtical foundation than the above one. Specifically, the previous model uses all area PDFs to draw bounces in a path, rather than solid angle PDFs. We derived the theory this way as it involves slightly less complication.</p>
 <p>Common sense is if we estimate an integral that integrates over area, rather than solid angle, we should use area PDF to draw the samples for real, which is not entirely true, but not totally nonsense either. I will point it out real use cases when it is not the case later. However, if we use the above model, the proposal PDF we store in a reservoir should be regarding to area rather than solid angle. Otherwise, it appears fairly confusing then.</p>
-<p>Almost all implementations of a path tracer that I saw integrates over solid angle and store PDFs in solid angle form, rather than area<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__pbrt" style="text-decoration: none;">[10</a>, <a href="#ref-ref_tag__rtiow" style="text-decoration: none;">16</a>, <a href="#ref-ref_tag__mitsuba3" style="text-decoration: none;">17]</a></sup>. The typical way to find next bounce in a path is to shoot a continuation ray and find the closest intersection, rather than somehow find a point on the surfaces of the scene based on surface properties themselves.</p>
+<p>Almost all implementations of a path tracer that I saw integrates over solid angle and store PDFs in solid angle form, rather than area<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__pbrt" style="text-decoration: none;">[10</a>, <a href="#ref-ref_tag__rtiow" style="text-decoration: none;">16</a>, <a href="#ref-ref_tag__mitsuba3" style="text-decoration: none;">17]</a></sup>. The typical way to find next bounce in a path is to shoot a continuation ray and find the closest intersection, rather than somehow find a point on the surfaces of the scene based on surface properties themselves.</p>
 <p>To allow us storing solid angle proposal PDF in a reservoir, we need to make some minor tweaks to <span style="white-space: nowrap;"><a href="#eq_lp_mix_integrand">equation 47</a></span>. Let&rsquo;s define our final form of integral.  Some of the math defined between <span style="white-space: nowrap;"><a href="#eq_y_sample">equation 46</a></span> and <span style="white-space: nowrap;"><a href="#eq_cache">equation 55</a></span>, inclusive, in the previous section remain exactly the same. The things in the above derivation that need to be adjusted are <span style="white-space: nowrap;"><a href="#eq_lp_mix_integrand">equation 47</a></span>, <span style="white-space: nowrap;"><a href="#eq_lpc_mix">equation 48</a></span>, <span style="white-space: nowrap;"><a href="#eq_mix_nice_feature">equation 51</a></span> and <span style="white-space: nowrap;"><a href="#eq_cache">equation 55</a></span>. The revised definition are as below.</p>
 
 
@@ -1142,7 +1147,7 @@ $$
 <p>Lots of the resampling theory in ReSTIR DI applies in ReSTIR GI as well, which will not be the focus of this section. In this section, we will only mention the delta between ReSTIR GI and ReSTIR DI, something I didn&rsquo;t mention in my previous blog post.</p>
 <h3 id="conversion-of-pdf-during-resampling">Conversion of PDF during Resampling</h3>
 <p>In the original ReSTIR DI paper, area PDF was used to pick candidate samples on light sources. And area PDF is independent of primary intersection or the pixel that draws the candidate sample in the first place. While in ReSTIR GI, things are different. As we learn from the previous section, ReSTIR GI&rsquo;s initial sample is $x_2$ and a point in a high dimensional unit cube. Even though the PDF of picking the high dimensional point is independent of $x_1$, we still need to figure out a way to pick $x_2$, which almost all ReSTIR GI implementation find by drawing a continuation ray based on BRDF at $x_1$. Typically, the PDF stored in GI reservoir is w.r.t solid angle around $x_1$ as well. And this means the PDF in reservoir is pixel dependent, unlike ReSTIR DI&rsquo;s implementation. This adds a bit of complication when it comes to resampling as we can see later.</p>
-<p>To be clear, the above statement only states how the original paper recommended implementing ReSTIR. This is by no means to say ReSTIR DI has to draw candidate samples based on area PDF, it doesn&rsquo;t need to store PDF w.r.t area either. It is worth pointing out that it is not relevant between the stored PDF form and which form of PDF we use to draw our candidate samples. We could use solid angle PDF to draw candidate samples and store the corresponding area PDFs, vice versa. For example, on NvRTX branch of UE5, there are several methods besides area PDF sampling for drawing candidate samples on light sources, such as ReGIR<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__regir" style="text-decoration: none;">[18]</a></sup> and BRDF ray sampling. And we store ReSTIR DI proposal PDF w.r.t solid angle around $x_1$.  And the same goes true for ReSTIR GI. Like I mentioned earlier, we could have totally came up with a solution that stored area PDF in GI reservoir in a ReSTIR GI implementation. Since most implementations store solid angle PDF, following discussion will assume so as well.</p>
+<p>To be clear, the above statement only states how the original paper recommended implementing ReSTIR. This is by no means to say ReSTIR DI has to draw candidate samples based on area PDF, it doesn&rsquo;t need to store PDF w.r.t area either. It is worth pointing out that it is not relevant between the stored PDF form and which form of PDF we use to draw our candidate samples. We could use solid angle PDF to draw candidate samples and store the corresponding area PDFs, vice versa. For example, on NvRTX branch of UE5, there are several methods besides area PDF sampling for drawing candidate samples on light sources, such as ReGIR<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__regir" style="text-decoration: none;">[18]</a></sup> and BRDF ray sampling. And we store ReSTIR DI proposal PDF w.r.t solid angle around $x_1$.  And the same goes true for ReSTIR GI. Like I mentioned earlier, we could have totally came up with a solution that stored area PDF in GI reservoir in a ReSTIR GI implementation. Since most implementations store solid angle PDF, following discussion will assume so as well.</p>
 <p>This subtle detail is critically important for us to implement ReSTIR GI correctly. Essentially, in <span style="white-space: nowrap;"><a href="#eq_mix_nice_feature_final">equation 58</a></span>, we pointed it out that $p_{\omega}(x_1 \rightarrow x_2)$ is actually a function of $x_1$. So what does it really mean to us when it comes to implementing ReSTIR GI.</p>
 
 
@@ -1192,7 +1197,7 @@ $$
 
 </div>
 
-<p>The denominator is given by the Jacobian determinant<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__gradient_domain pt" style="text-decoration: none;">[19]</a></sup>.</p>
+<p>The denominator is given by the Jacobian determinant<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__gradient_domain pt" style="text-decoration: none;">[19]</a></sup>.</p>
 
 
 <div id="eq_jacobian_def">$$
@@ -1216,7 +1221,7 @@ $$
 
 </div>
 
-<p>This is well explained in the GRIS paper<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup>. But we didn&rsquo;t use the GRIS theory for explaination here just to make sure readers who have no knowledge about it will still understand why such an extra term is needed.</p>
+<p>This is well explained in the GRIS paper<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup>. But we didn&rsquo;t use the GRIS theory for explaination here just to make sure readers who have no knowledge about it will still understand why such an extra term is needed.</p>
 <p>One more note here is <span style="white-space: nowrap;"><a href="#eq_restirgi_resampling_weight">equation 64</a></span> draws a conflicted conclusion with Algorithm 4 in the original ReSTIR GI paper. After verifying with authors of the original paper, I believe the above form is the correct math for ReSTIR GI.</p>
 <h3 id="biased-resampling">Biased Resampling</h3>
 <p>There could be multiple sources of bias in a ReSTIR GI implementation. In this section, I would like to chat about the cached approximated radiance. Let&rsquo;s revisit <span style="white-space: nowrap;"><a href="#eq_revised_cache">equation 59</a></span> here. We mentioned the exact form of our cache, below is how we can reuse candidates from other reservoir:</p>
@@ -1235,15 +1240,15 @@ $$
 To completely eliminate this bias, we need to reevaluate the BRDF at $x_2$ in <span style="white-space: nowrap;"><a href="#eq_revised_cache">equation 59</a></span> so that we can swap $x_1$ with $y_1$.  At first glance, evaluating the BRDF at $x_2$ doesn&rsquo;t seem difficult at all. The truth is quite the opposite. It is not trivial for a couple of reasons.</p>
 <ul>
 <li>
-<p>Modern game engines have complicated material setup, which can be reflected by the size of GBuffer, a place holder for us to keep track of all relevant parameters for BRDFs. This is a very typical solution for rasterization<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__deferredshading" style="text-decoration: none;">[20]</a></sup>. Lately, with the introduction of real time ray tracing<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__rtrt" style="text-decoration: none;">[21]</a></sup>, a new form of container becomes the payload, which is a lot more memory sensitive than GBuffer. Typically, payload doesn&rsquo;t have as much data as GBuffer because of it.<br>
-If we would like to reevaluate BRDF at $x_2$ during resampling, we would need to store all necessary input for BRDF of our interests ideally. Even though, this is still O(1) memory cost, it does dramatically bump the size of a reservoir easily by a few times. Earlier we mentioned the extra memory bandwidth and register pressure, but an extra burden is possible heavier live state during Shader Execute Reordering (SER)<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__ser" style="text-decoration: none;">[22]</a></sup>, none of which is friendly to GPU performance. The negative impact is no where near negligible.</p>
+<p>Modern game engines have complicated material setup, which can be reflected by the size of GBuffer, a place holder for us to keep track of all relevant parameters for BRDFs. This is a very typical solution for rasterization<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__deferredshading" style="text-decoration: none;">[20]</a></sup>. Lately, with the introduction of real time ray tracing<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__rtrt" style="text-decoration: none;">[21]</a></sup>, a new form of container becomes the payload, which is a lot more memory sensitive than GBuffer. Typically, payload doesn&rsquo;t have as much data as GBuffer because of it.<br>
+If we would like to reevaluate BRDF at $x_2$ during resampling, we would need to store all necessary input for BRDF of our interests ideally. Even though, this is still O(1) memory cost, it does dramatically bump the size of a reservoir easily by a few times. Earlier we mentioned the extra memory bandwidth and register pressure, but an extra burden is possible heavier live state during Shader Execute Reordering (SER)<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__ser" style="text-decoration: none;">[22]</a></sup>, none of which is friendly to GPU performance. The negative impact is no where near negligible.</p>
 </li>
 <li>
 <p>Apart from memory cost that burdens performance, there is also challenges coming from the BRDF execution logic. It could be quite a few of instructions just to evaluate a BRDF. Because this needs to happen at multiple places, wherever resampling weight is needed, shader divergence could be legit concern as well. Besides, the extra instructions in shader kernel may lower instruction cache hit rate as well. To be clear, we indeed have the BRDF evaluation cost during resampling because of target function require $f(x_2 \rightarrow x_1 \rightarrow x_0)$ if we choose our target function to be the full integrand of rendering equation. What I&rsquo;m saying here is we don&rsquo;t appreciate more execution of these unless we have to.</p>
 </li>
 <li>
 <p>With our current setup without any NEE or BRDF sampling, we got only one extra BRDF for evaluation, which is $f(x_3 \rightarrow x_2 \rightarrow x_1)$. The memory requirement goes beyond BRDF, it needs position of $x_3$ to be stored as well. But in practice, it is almost always more complicated than this. Because literally all path tracers draw NEE samples, which introduces another BRDF for evaluation. Things get even more sophisticated when multiple importance sampling with BRDF ray is applied, not just because we need one more BRDF evaluation for BRDF samples, but balance heuristic may easily introduce a few more. What is even worse is the NEE/BRDF sample positions will need to be stored as well.<br>
-One practical and possible solution to the problem is to resample one single path within the path tree in path space and then pass the PSS candidate around, still with $x_2$ in path domain, of course. This is similar to what ReSTIR PT does. With care, if we resample one single path, it is possible to restrict the extra BRDF evaluation into one. This goes beyond the topic of this blog post, if readers are interested in it, checkout the ReSTIR PT paper<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup>.</p>
+One practical and possible solution to the problem is to resample one single path within the path tree in path space and then pass the PSS candidate around, still with $x_2$ in path domain, of course. This is similar to what ReSTIR PT does. With care, if we resample one single path, it is possible to restrict the extra BRDF evaluation into one. This goes beyond the topic of this blog post, if readers are interested in it, checkout the ReSTIR PT paper<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__restir_gris" style="text-decoration: none;">[1]</a></sup>.</p>
 </li>
 <li>
 <p>If all the above still don&rsquo;t convince you this is a bad idea, here is a blocker next. A candidate sample in ReSTIR GI is $\bar{\mathcal{Y}}_k$ during reusing, we only reuse $x_2$ in path domain. For the rest of the dimensions, we reuse the candidate sample in primary sample space. To some degree, we can think about it this way, we reuse $x_2$ and the random numbers ($u_3, \dots, u_M$) so that we can produce the rest of the path tree beyond $x_2$. The cache makes one assumption that as long as $x_2$ is reused, the same random numbers ($u_3, \dots, u_M$) will produce exactly the same path tree as the original path tree produced by the sample to be reused. But if we look closer, this assumption is a broken one. To explain, we draw BRDF continuation ray at $x_2$ to find $x_3$ during producing this candidate in the first place, this process again is a function of $x_1$. And this is pretty bad as with a different $y_1$ now, even if we have the same $x_2$, the rest of primary sample space candidate being the same doesn&rsquo;t guarantee us the same path tree  anymore. This means the bias not only comes from $f(x_3 \rightarrow x_2 \rightarrow x_1)$, but also a different path tree. The whole evaluation of this remapped candidate should be much more different than what we actually used to produce the cache.<br>
@@ -1288,7 +1293,7 @@ $$
 <li>As a matter of fact, ReSTIR GI itself is one example. During resampling, pixel B only borrows a sample from pixel A. What pixel A offers is a sample along with its PDF or UCW. But the way it produces its candidate sample could be based on PDF w.r.t solid angle around pixel A&rsquo;s $x_1$, it could even be a sample produced by RIS, which only offers UCW, rather than PDF. Either is fine. However, the important detail to note is that for pixel B, the sample provided by pixel A is not drawn according to a PDF with respect to solid angle, at least not around pixel B&rsquo;s primary bounce $y_1$, even if the rendering equation is integrated over solid angle. This could mean $y_1$ and $x_2$ may not be visible to each other, which makes the above visibility term necessary.</li>
 <li>If the above example is a bit difficult to understand, here is an easy one that everyone is familiar with. During NEE sampling, which commonly uses an area PDF, it doesn&rsquo;t really matter if the rendering equation is over solid angle or not, a visibility ray, commonly named NEE ray or light ray, is necessary to make sure we don&rsquo;t count contribution from blocked light sources. In this case, visibility ray is also needed.</li>
 </ul>
-<p>One more subtle detail here is I didn&rsquo;t add the visibility term between any other two consecutive bounces in a path in <span style="white-space: nowrap;"><a href="#eq_lp_mix_integrand_final_revised">equation 66</a></span>, this is by assuming continuation ray verifies it for us already, which is somewhat fine for ReSTIR GI. To be quite strict, ReSTIR GI doesn&rsquo;t restrict in what way we should approximate radiance coming from $x_2$ to $x_1$ even though it mentions NEE sampling based path tracer, other methods can be used<sup style="font-size: 0.7em; vertical-align: super;"><a href="#ref-ref_tag__restirgi_impl" style="text-decoration: none;">[23]</a></sup>. For simplicity, we ignore it here by assuming further consecutive bounces after $x_2$ are all visible to each other by default. If necessary, this needs to be added.</p>
+<p>One more subtle detail here is I didn&rsquo;t add the visibility term between any other two consecutive bounces in a path in <span style="white-space: nowrap;"><a href="#eq_lp_mix_integrand_final_revised">equation 66</a></span>, this is by assuming continuation ray verifies it for us already, which is somewhat fine for ReSTIR GI. To be quite strict, ReSTIR GI doesn&rsquo;t restrict in what way we should approximate radiance coming from $x_2$ to $x_1$ even though it mentions NEE sampling based path tracer, other methods can be used<sup class="ref-cite" style="font-size: 0.7em; vertical-align: super; white-space: nowrap;"><a href="#ref-ref_tag__restirgi_impl" style="text-decoration: none;">[23]</a></sup>. For simplicity, we ignore it here by assuming further consecutive bounces after $x_2$ are all visible to each other by default. If necessary, this needs to be added.</p>
 <p>So what does it mean with the extra visibility term in <span style="white-space: nowrap;"><a href="#eq_lp_mix_integrand_final_revised">equation 66</a></span> when it comes to ReSTIR GI implementation? A few things</p>
 <ul>
 <li>We need to verify visibility during final evaluation. This sounds very nature because we would certainly not want to count blocked paths from contributing our pixel. The theory behind it is clearly explained in this section.<br>
@@ -1320,6 +1325,10 @@ And the truth is if the resampling path right before final evaluation checks vis
 
  
  
+
+
+
+
  
  
 
@@ -1333,6 +1342,13 @@ And the truth is if the resampling path right before final evaluation checks vis
     width: 100%;
     margin: auto;
     background-color: #FFFFFF;  
+}
+
+ 
+@media (hover: none) and (pointer: coarse) {
+    .ba-sliderb21bfb02832e9f359ffa2d4d1c4a2a7e {
+        touch-action: pan-y;
+    }
 }
 
 .ba-sliderb21bfb02832e9f359ffa2d4d1c4a2a7e img {
@@ -1383,15 +1399,56 @@ And the truth is if the resampling path right before final evaluation checks vis
     bottom: 8px;
     font-weight: bold;
     white-space: nowrap;
+    line-height: 1.3;
+    pointer-events: none;
+}
+
+.ba-bottom-leftb21bfb02832e9f359ffa2d4d1c4a2a7e.ba-label-bg,
+.ba-bottom-rightb21bfb02832e9f359ffa2d4d1c4a2a7e.ba-label-bg {
+     
+    isolation: isolate;
+}
+
+.ba-bottom-leftb21bfb02832e9f359ffa2d4d1c4a2a7e.ba-label-bg::before,
+.ba-bottom-rightb21bfb02832e9f359ffa2d4d1c4a2a7e.ba-label-bg::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: -0.25em;
+    bottom: -0.25em;
+    left: -0.6em;
+    right: -0.6em;
+    background-color: var(--label-bg);
+    border-radius: 3px;
 }
 
 .ba-bottom-leftb21bfb02832e9f359ffa2d4d1c4a2a7e {
     left: 16px;
-    color: #FFFFFF;  
+    color: #FFFFFF;
+    z-index: 1;  
 }
+
 .ba-bottom-rightb21bfb02832e9f359ffa2d4d1c4a2a7e {
     right: 16px;
-    color: #FFFFFF;  
+    color: #FFFFFF;
+     
+}
+
+figure.custom-compare figcaption.custom-figure-caption {
+    margin-top: 0.35rem;
+    line-height: 1.45;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p {
+    margin: 0.2em 0;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p:first-child {
+    margin-top: 0;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p:last-child {
+    margin-bottom: 0;
 }
 
  
@@ -1441,40 +1498,150 @@ And the truth is if the resampling path right before final evaluation checks vis
 
 <script>
 (function($) {
-  function drags(dragElement, resizeElement, container) {
-    dragElement.on('mousedown.ba touchstart.ba', function(e) {
-      dragElement.addClass('ba-draggable');
-      resizeElement.addClass('ba-resizable');
+  var GESTURE_THRESHOLD_PX = 10;
 
-      var startX = e.pageX || e.originalEvent.touches[0].pageX;
-      var dragWidth = dragElement.outerWidth(),
-          posX = dragElement.offset().left + dragWidth - startX,
-          containerOffset = container.offset().left,
-          containerWidth = container.outerWidth();
+  function pageX(e) {
+    if (e.pageX != null) return e.pageX;
+    var t = e.originalEvent && e.originalEvent.touches;
+    return t && t.length ? t[0].pageX : 0;
+  }
 
-      var minLeft = containerOffset + 10;
-      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+  function pageY(e) {
+    if (e.pageY != null) return e.pageY;
+    var t = e.originalEvent && e.originalEvent.touches;
+    return t && t.length ? t[0].pageY : 0;
+  }
 
-      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
-        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
-        var leftValue = moveX + posX - dragWidth;
+  function isTouchPrimaryDevice() {
+    return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  }
 
-        if (leftValue < minLeft) leftValue = minLeft;
-        else if (leftValue > maxLeft) leftValue = maxLeft;
+   
+  function createSplitDragSession(container, handle, resize, mode) {
+    var dragWidth = handle.outerWidth();
+    var containerOffset = container.offset().left;
+    var containerWidth = container.outerWidth();
+    var minLeft = containerOffset + 10;
+    var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+    var posX = null;
 
-        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+    handle.addClass('ba-draggable');
+    resize.addClass('ba-resizable');
 
-        dragElement.css('left', percentage);
-        resizeElement.css('width', percentage);
+    function update(moveX) {
+      var leftValue = mode === 'relative' && posX !== null
+        ? moveX + posX - dragWidth
+        : moveX - dragWidth / 2;
+      if (leftValue < minLeft) leftValue = minLeft;
+      else if (leftValue > maxLeft) leftValue = maxLeft;
 
-        updateLinks(container, dragElement);
-      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
-        dragElement.removeClass('ba-draggable');
-        resizeElement.removeClass('ba-resizable');
-        $(this).off('.ba');
+      var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+      handle.css('left', percentage);
+      resize.css('width', percentage);
+      updateLinks(container, handle);
+    }
+
+    function end() {
+      handle.removeClass('ba-draggable');
+      resize.removeClass('ba-resizable');
+    }
+
+    return {
+      update: update,
+      end: end,
+      setRelativeAnchor: function(anchorX) {
+        posX = handle.offset().left + dragWidth - anchorX;
+      }
+    };
+  }
+
+  function startSplitDrag(container, handle, resize, e, mode) {
+    var session = createSplitDragSession(container, handle, resize, mode);
+    if (mode === 'relative') {
+      session.setRelativeAnchor(pageX(e));
+    }
+    session.update(pageX(e));
+
+    $(document)
+      .on('mousemove.ba touchmove.ba', function(ev) {
+        session.update(pageX(ev));
+        ev.preventDefault();
+      })
+      .on('mouseup.ba touchend.ba touchcancel.ba', function() {
+        session.end();
+        $(document).off('.ba');
       });
 
-      e.preventDefault();
+    e.preventDefault();
+  }
+
+   
+  function beginTouchGesture(container, handle, resize, e) {
+    var startX = pageX(e);
+    var startY = pageY(e);
+    var phase = 'pending';
+    var session = null;
+
+    function cleanup() {
+      $(document).off('.ba-gesture');
+      if (session) {
+        session.end();
+        session = null;
+      }
+      phase = null;
+    }
+
+    $(document)
+      .on('touchmove.ba-gesture', function(ev) {
+        var x = pageX(ev);
+        var y = pageY(ev);
+        var dx = Math.abs(x - startX);
+        var dy = Math.abs(y - startY);
+
+        if (phase === 'pending') {
+          if (dx < GESTURE_THRESHOLD_PX && dy < GESTURE_THRESHOLD_PX) {
+            return;
+          }
+          if (dy > dx) {
+            phase = 'scroll';
+            cleanup();
+            return;
+          }
+          if (dx > dy) {
+            phase = 'drag';
+            session = createSplitDragSession(container, handle, resize, 'absolute');
+            session.update(x);
+            ev.preventDefault();
+          }
+          return;
+        }
+
+        if (phase === 'drag' && session) {
+          session.update(x);
+          ev.preventDefault();
+        }
+      })
+      .on('touchend.ba-gesture touchcancel.ba-gesture', cleanup);
+  }
+
+  function setupDrag(container, handle, resize) {
+     
+    handle.on('mousedown.ba', function(e) {
+      startSplitDrag(container, handle, resize, e, 'relative');
+    });
+
+     
+    if (isTouchPrimaryDevice()) {
+      container.on('touchstart.ba', function(e) {
+        if ($(e.target).closest('.handle').length) return;
+        beginTouchGesture(container, handle, resize, e);
+      });
+    }
+
+     
+    handle.on('touchstart.ba', function(e) {
+      e.stopPropagation();
+      startSplitDrag(container, handle, resize, e, 'relative');
     });
   }
 
@@ -1505,7 +1672,7 @@ And the truth is if the resampling path right before final evaluation checks vis
     var width = container.width();
     resize.find('img').css('width', width + 'px');
 
-    drags(handle, resize, container);
+    setupDrag(container, handle, resize);
     updateLinks(container, handle);
 
     $(window).on('resize', function() {
@@ -1529,6 +1696,10 @@ $('#ba-slider-b21bfb02832e9f359ffa2d4d1c4a2a7e').beforeAfter();
 
  
  
+
+
+
+
  
  
 
@@ -1542,6 +1713,13 @@ $('#ba-slider-b21bfb02832e9f359ffa2d4d1c4a2a7e').beforeAfter();
     width: 100%;
     margin: auto;
     background-color: #FFFFFF;  
+}
+
+ 
+@media (hover: none) and (pointer: coarse) {
+    .ba-slider0498f65ffc3ed535c15b989a960a23c2 {
+        touch-action: pan-y;
+    }
 }
 
 .ba-slider0498f65ffc3ed535c15b989a960a23c2 img {
@@ -1592,15 +1770,56 @@ $('#ba-slider-b21bfb02832e9f359ffa2d4d1c4a2a7e').beforeAfter();
     bottom: 8px;
     font-weight: bold;
     white-space: nowrap;
+    line-height: 1.3;
+    pointer-events: none;
+}
+
+.ba-bottom-left0498f65ffc3ed535c15b989a960a23c2.ba-label-bg,
+.ba-bottom-right0498f65ffc3ed535c15b989a960a23c2.ba-label-bg {
+     
+    isolation: isolate;
+}
+
+.ba-bottom-left0498f65ffc3ed535c15b989a960a23c2.ba-label-bg::before,
+.ba-bottom-right0498f65ffc3ed535c15b989a960a23c2.ba-label-bg::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: -0.25em;
+    bottom: -0.25em;
+    left: -0.6em;
+    right: -0.6em;
+    background-color: var(--label-bg);
+    border-radius: 3px;
 }
 
 .ba-bottom-left0498f65ffc3ed535c15b989a960a23c2 {
     left: 16px;
-    color: #FFFFFF;  
+    color: #FFFFFF;
+    z-index: 1;  
 }
+
 .ba-bottom-right0498f65ffc3ed535c15b989a960a23c2 {
     right: 16px;
-    color: #FFFFFF;  
+    color: #FFFFFF;
+     
+}
+
+figure.custom-compare figcaption.custom-figure-caption {
+    margin-top: 0.35rem;
+    line-height: 1.45;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p {
+    margin: 0.2em 0;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p:first-child {
+    margin-top: 0;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p:last-child {
+    margin-bottom: 0;
 }
 
  
@@ -1650,40 +1869,150 @@ $('#ba-slider-b21bfb02832e9f359ffa2d4d1c4a2a7e').beforeAfter();
 
 <script>
 (function($) {
-  function drags(dragElement, resizeElement, container) {
-    dragElement.on('mousedown.ba touchstart.ba', function(e) {
-      dragElement.addClass('ba-draggable');
-      resizeElement.addClass('ba-resizable');
+  var GESTURE_THRESHOLD_PX = 10;
 
-      var startX = e.pageX || e.originalEvent.touches[0].pageX;
-      var dragWidth = dragElement.outerWidth(),
-          posX = dragElement.offset().left + dragWidth - startX,
-          containerOffset = container.offset().left,
-          containerWidth = container.outerWidth();
+  function pageX(e) {
+    if (e.pageX != null) return e.pageX;
+    var t = e.originalEvent && e.originalEvent.touches;
+    return t && t.length ? t[0].pageX : 0;
+  }
 
-      var minLeft = containerOffset + 10;
-      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+  function pageY(e) {
+    if (e.pageY != null) return e.pageY;
+    var t = e.originalEvent && e.originalEvent.touches;
+    return t && t.length ? t[0].pageY : 0;
+  }
 
-      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
-        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
-        var leftValue = moveX + posX - dragWidth;
+  function isTouchPrimaryDevice() {
+    return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  }
 
-        if (leftValue < minLeft) leftValue = minLeft;
-        else if (leftValue > maxLeft) leftValue = maxLeft;
+   
+  function createSplitDragSession(container, handle, resize, mode) {
+    var dragWidth = handle.outerWidth();
+    var containerOffset = container.offset().left;
+    var containerWidth = container.outerWidth();
+    var minLeft = containerOffset + 10;
+    var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+    var posX = null;
 
-        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+    handle.addClass('ba-draggable');
+    resize.addClass('ba-resizable');
 
-        dragElement.css('left', percentage);
-        resizeElement.css('width', percentage);
+    function update(moveX) {
+      var leftValue = mode === 'relative' && posX !== null
+        ? moveX + posX - dragWidth
+        : moveX - dragWidth / 2;
+      if (leftValue < minLeft) leftValue = minLeft;
+      else if (leftValue > maxLeft) leftValue = maxLeft;
 
-        updateLinks(container, dragElement);
-      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
-        dragElement.removeClass('ba-draggable');
-        resizeElement.removeClass('ba-resizable');
-        $(this).off('.ba');
+      var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+      handle.css('left', percentage);
+      resize.css('width', percentage);
+      updateLinks(container, handle);
+    }
+
+    function end() {
+      handle.removeClass('ba-draggable');
+      resize.removeClass('ba-resizable');
+    }
+
+    return {
+      update: update,
+      end: end,
+      setRelativeAnchor: function(anchorX) {
+        posX = handle.offset().left + dragWidth - anchorX;
+      }
+    };
+  }
+
+  function startSplitDrag(container, handle, resize, e, mode) {
+    var session = createSplitDragSession(container, handle, resize, mode);
+    if (mode === 'relative') {
+      session.setRelativeAnchor(pageX(e));
+    }
+    session.update(pageX(e));
+
+    $(document)
+      .on('mousemove.ba touchmove.ba', function(ev) {
+        session.update(pageX(ev));
+        ev.preventDefault();
+      })
+      .on('mouseup.ba touchend.ba touchcancel.ba', function() {
+        session.end();
+        $(document).off('.ba');
       });
 
-      e.preventDefault();
+    e.preventDefault();
+  }
+
+   
+  function beginTouchGesture(container, handle, resize, e) {
+    var startX = pageX(e);
+    var startY = pageY(e);
+    var phase = 'pending';
+    var session = null;
+
+    function cleanup() {
+      $(document).off('.ba-gesture');
+      if (session) {
+        session.end();
+        session = null;
+      }
+      phase = null;
+    }
+
+    $(document)
+      .on('touchmove.ba-gesture', function(ev) {
+        var x = pageX(ev);
+        var y = pageY(ev);
+        var dx = Math.abs(x - startX);
+        var dy = Math.abs(y - startY);
+
+        if (phase === 'pending') {
+          if (dx < GESTURE_THRESHOLD_PX && dy < GESTURE_THRESHOLD_PX) {
+            return;
+          }
+          if (dy > dx) {
+            phase = 'scroll';
+            cleanup();
+            return;
+          }
+          if (dx > dy) {
+            phase = 'drag';
+            session = createSplitDragSession(container, handle, resize, 'absolute');
+            session.update(x);
+            ev.preventDefault();
+          }
+          return;
+        }
+
+        if (phase === 'drag' && session) {
+          session.update(x);
+          ev.preventDefault();
+        }
+      })
+      .on('touchend.ba-gesture touchcancel.ba-gesture', cleanup);
+  }
+
+  function setupDrag(container, handle, resize) {
+     
+    handle.on('mousedown.ba', function(e) {
+      startSplitDrag(container, handle, resize, e, 'relative');
+    });
+
+     
+    if (isTouchPrimaryDevice()) {
+      container.on('touchstart.ba', function(e) {
+        if ($(e.target).closest('.handle').length) return;
+        beginTouchGesture(container, handle, resize, e);
+      });
+    }
+
+     
+    handle.on('touchstart.ba', function(e) {
+      e.stopPropagation();
+      startSplitDrag(container, handle, resize, e, 'relative');
     });
   }
 
@@ -1714,7 +2043,7 @@ $('#ba-slider-b21bfb02832e9f359ffa2d4d1c4a2a7e').beforeAfter();
     var width = container.width();
     resize.find('img').css('width', width + 'px');
 
-    drags(handle, resize, container);
+    setupDrag(container, handle, resize);
     updateLinks(container, handle);
 
     $(window).on('resize', function() {
@@ -1832,33 +2161,65 @@ $('#ba-slider-0498f65ffc3ed535c15b989a960a23c2').beforeAfter();
 
       <div class="">
         <style>
+     
+    :root {
+        --article-max-width: 90rem;  
+        --toc-max-width: 32rem;
+        --toc-min-width: 12rem;      
+        --toc-gap: 1rem;             
+        --toc-margin-right: 1rem;    
+         
+        --toc-show-min-width: calc(var(--article-max-width) + 2 * (var(--toc-min-width) + var(--toc-gap) + var(--toc-margin-right)));
+    }
+
     .toc {
+        display: none;
         position: fixed;
-        left: 50%;
-        top: 110px;
+        top: 70px;
         font-size: 0.8em;
-        width: 320px;
-        margin-left: 480px;
         padding-left: 20px;
         padding-bottom: 100px;
-        padding-top: 80px;
+        padding-top: 40px;
         overflow-y: auto;
         line-height: 1.7em;
         scroll-padding-top: 100px;
-        border-left: 3px solid rgba(128, 128, 128, 0.4);;
+        border-left: 3px solid rgba(128, 128, 128, 0.4);
+        max-height: calc(100vh - 12rem);
+        left: calc(50% + var(--article-max-width) / 2 + var(--toc-gap));
+        width: min(var(--toc-max-width), max(0px, calc((100vw - var(--article-max-width)) / 2 - var(--toc-gap) - var(--toc-margin-right))));
     }
 
-    .toc label {
+    @media (min-width: 90rem) {
+      .toc {
+        display: block;
+      }
+    }
+
+    @media (max-width: calc(var(--toc-show-min-width) - 1px)) {
+      .toc {
+        display: none !important;
+      }
+    }
+
+    .toc .toc-title {
+        display: block;
         font-size: 20px;
         font-weight: bold;
-        margin: 6.4rem 0 3.2rem 0;
+        margin: 3.5rem 0 3.2rem 0;
+        color: inherit;
+        text-decoration: none;
+        cursor: pointer;
     }
 
-    .toc a {
+    .toc .toc-title:hover {
+        text-decoration: underline;
+    }
+
+    .toc #TableOfContents a {
         filter: grayscale(90%);
     }
 
-    .toc a:hover {
+    .toc #TableOfContents a:hover {
         font-weight: bold;
         filter: grayscale(0%);
     }
@@ -1883,24 +2244,14 @@ $('#ba-slider-0498f65ffc3ed535c15b989a960a23c2').beforeAfter();
         list-style-type: circle;
     }
 
-    .toc li a.active {
+    .toc #TableOfContents li a.active {
         font-weight: bold;
         filter: grayscale(0%);
     }
 
-    .toc li a.semi_active {
+    .toc #TableOfContents li a.semi_active {
         font-weight: bold;
         filter: grayscale(60%);
-    }
-
-    @media (max-width: 1640px) {
-      main {
-        max-width: 100%;
-      }
-  
-      .toc {
-        display: none;
-      }
     }
 
 </style>
@@ -1916,7 +2267,7 @@ $('#ba-slider-0498f65ffc3ed535c15b989a960a23c2').beforeAfter();
 
 
 <div class="toc" style="display:none;">
-    <label>Contents</label>
+    <a class="toc-title" href="#post-start">Contents</a>
     <nav id="TableOfContents">
   <ul>
     <li><a href="#introduction">Introduction</a></li>
@@ -2131,7 +2482,10 @@ $('#ba-slider-0498f65ffc3ed535c15b989a960a23c2').beforeAfter();
 
     
       
-      <script src="/js/dark-mode.min.928a160d00dae3b92c8d5c8ed7b9435b4b6311f09bcd24f101165b7ff8a82f47.js"></script>
+      <script src="/js/dark-mode.min.fe7db0376c05c273207f25f84b558d955da8cc93ccd69c2714cbaae19ef11556.js"></script>
+    
+    <script src="/js/scroll-keys.js"></script>
+
     
 
     

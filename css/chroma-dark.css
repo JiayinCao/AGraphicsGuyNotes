@@ -1,0 +1,179 @@
+/* Hugo Chroma (dark): generated from `hugo gen chromastyles --style=b2`
+   Scoped to the site's dark colorscheme. */
+
+body.colorscheme-dark .bg { color: #e5e5e5; background-color: #000000; }
+body.colorscheme-dark .chroma { color: #e5e5e5; background-color: #000000; }
+body.colorscheme-dark .chroma .x {  }
+body.colorscheme-dark .chroma .err { color: #ff0000 }
+body.colorscheme-dark .chroma .cl {  }
+body.colorscheme-dark .chroma .lnlinks { outline: none; text-decoration: none; color: inherit }
+body.colorscheme-dark .chroma .lntd { vertical-align: top; padding: 0; margin: 0; border: 0; }
+body.colorscheme-dark .chroma .lntable { border-spacing: 0; padding: 0; margin: 0; border: 0; }
+body.colorscheme-dark .chroma .hl { background-color: #ffffcc }
+body.colorscheme-dark .chroma .lnt { white-space: pre; -webkit-user-select: none; user-select: none; margin-right: 0.4em; padding: 0 0.4em 0 0.4em;color: #727272 }
+body.colorscheme-dark .chroma .ln { white-space: pre; -webkit-user-select: none; user-select: none; margin-right: 0.4em; padding: 0 0.4em 0 0.4em;color: #727272 }
+body.colorscheme-dark .chroma .line { display: flex; }
+body.colorscheme-dark .chroma .k { color: #ffffff; font-weight: bold }
+body.colorscheme-dark .chroma .kc { color: #ffffff; font-weight: bold }
+body.colorscheme-dark .chroma .kd { color: #ffffff; font-weight: bold }
+body.colorscheme-dark .chroma .kn { color: #ffffff; font-weight: bold }
+body.colorscheme-dark .chroma .kp { color: #ffffff; font-weight: bold }
+body.colorscheme-dark .chroma .kr { color: #ffffff; font-weight: bold }
+body.colorscheme-dark .chroma .kt { color: #ffffff; font-weight: bold }
+body.colorscheme-dark .chroma .n {  }
+body.colorscheme-dark .chroma .na { color: #007f7f }
+body.colorscheme-dark .chroma .nb { color: #ffffff; font-weight: bold }
+body.colorscheme-dark .chroma .bp {  }
+body.colorscheme-dark .chroma .nc {  }
+body.colorscheme-dark .chroma .no {  }
+body.colorscheme-dark .chroma .nd {  }
+body.colorscheme-dark .chroma .ni {  }
+body.colorscheme-dark .chroma .ne {  }
+body.colorscheme-dark .chroma .nf {  }
+body.colorscheme-dark .chroma .fm {  }
+body.colorscheme-dark .chroma .nl {  }
+body.colorscheme-dark .chroma .nn {  }
+body.colorscheme-dark .chroma .nx {  }
+body.colorscheme-dark .chroma .py {  }
+body.colorscheme-dark .chroma .nt { font-weight: bold }
+body.colorscheme-dark .chroma .nv {  }
+body.colorscheme-dark .chroma .vc {  }
+body.colorscheme-dark .chroma .vg {  }
+body.colorscheme-dark .chroma .vi {  }
+body.colorscheme-dark .chroma .vm {  }
+body.colorscheme-dark .chroma .l {  }
+body.colorscheme-dark .chroma .ld { color: #ffff00; font-weight: bold }
+body.colorscheme-dark .chroma .s { color: #00ffff; font-weight: bold }
+body.colorscheme-dark .chroma .sa { color: #00ffff; font-weight: bold }
+body.colorscheme-dark .chroma .sb { color: #00ffff; font-weight: bold }
+body.colorscheme-dark .chroma .sc { color: #00ffff; font-weight: bold }
+body.colorscheme-dark .chroma .dl { color: #00ffff; font-weight: bold }
+body.colorscheme-dark .chroma .sd { color: #00ffff; font-weight: bold }
+body.colorscheme-dark .chroma .s2 { color: #00ffff; font-weight: bold }
+body.colorscheme-dark .chroma .se { color: #00ffff; font-weight: bold }
+body.colorscheme-dark .chroma .sh { color: #00ffff; font-weight: bold }
+body.colorscheme-dark .chroma .si { color: #00ffff; font-weight: bold }
+body.colorscheme-dark .chroma .sx { color: #00ffff; font-weight: bold }
+body.colorscheme-dark .chroma .sr { color: #00ffff; font-weight: bold }
+body.colorscheme-dark .chroma .s1 { color: #00ffff; font-weight: bold }
+body.colorscheme-dark .chroma .ss { color: #00ffff; font-weight: bold }
+body.colorscheme-dark .chroma .m { color: #ffff00; font-weight: bold }
+body.colorscheme-dark .chroma .mb { color: #ffff00; font-weight: bold }
+body.colorscheme-dark .chroma .mf { color: #ffff00; font-weight: bold }
+body.colorscheme-dark .chroma .mh { color: #ffff00; font-weight: bold }
+body.colorscheme-dark .chroma .mi { color: #ffff00; font-weight: bold }
+body.colorscheme-dark .chroma .il { color: #ffff00; font-weight: bold }
+body.colorscheme-dark .chroma .mo { color: #ffff00; font-weight: bold }
+body.colorscheme-dark .chroma .o {  }
+body.colorscheme-dark .chroma .ow {  }
+body.colorscheme-dark .chroma .p {  }
+body.colorscheme-dark .chroma .c { color: #007f7f }
+body.colorscheme-dark .chroma .ch { color: #007f7f }
+body.colorscheme-dark .chroma .cm { color: #007f7f }
+body.colorscheme-dark .chroma .c1 { color: #007f7f }
+body.colorscheme-dark .chroma .cs { color: #007f7f }
+body.colorscheme-dark .chroma .cp { color: #00ff00; font-weight: bold }
+body.colorscheme-dark .chroma .cpf { color: #00ff00; font-weight: bold }
+body.colorscheme-dark .chroma .g {  }
+body.colorscheme-dark .chroma .gd {  }
+body.colorscheme-dark .chroma .ge {  }
+body.colorscheme-dark .chroma .gr {  }
+body.colorscheme-dark .chroma .gh { font-weight: bold }
+body.colorscheme-dark .chroma .gi {  }
+body.colorscheme-dark .chroma .go {  }
+body.colorscheme-dark .chroma .gp {  }
+body.colorscheme-dark .chroma .gs { font-weight: bold }
+body.colorscheme-dark .chroma .gu { font-weight: bold }
+body.colorscheme-dark .chroma .gt {  }
+body.colorscheme-dark .chroma .gl { text-decoration: underline }
+body.colorscheme-dark .chroma .w {  }
+
+/* When colorscheme=auto and system prefers dark. */
+@media (prefers-color-scheme: dark) {
+  body.colorscheme-auto .bg { color: #e5e5e5; background-color: #000000; }
+  body.colorscheme-auto .chroma { color: #e5e5e5; background-color: #000000; }
+  body.colorscheme-auto .chroma .x {  }
+  body.colorscheme-auto .chroma .err { color: #ff0000 }
+  body.colorscheme-auto .chroma .cl {  }
+  body.colorscheme-auto .chroma .lnlinks { outline: none; text-decoration: none; color: inherit }
+  body.colorscheme-auto .chroma .lntd { vertical-align: top; padding: 0; margin: 0; border: 0; }
+  body.colorscheme-auto .chroma .lntable { border-spacing: 0; padding: 0; margin: 0; border: 0; }
+  body.colorscheme-auto .chroma .hl { background-color: #ffffcc }
+  body.colorscheme-auto .chroma .lnt { white-space: pre; -webkit-user-select: none; user-select: none; margin-right: 0.4em; padding: 0 0.4em 0 0.4em;color: #727272 }
+  body.colorscheme-auto .chroma .ln { white-space: pre; -webkit-user-select: none; user-select: none; margin-right: 0.4em; padding: 0 0.4em 0 0.4em;color: #727272 }
+  body.colorscheme-auto .chroma .line { display: flex; }
+  body.colorscheme-auto .chroma .k { color: #ffffff; font-weight: bold }
+  body.colorscheme-auto .chroma .kc { color: #ffffff; font-weight: bold }
+  body.colorscheme-auto .chroma .kd { color: #ffffff; font-weight: bold }
+  body.colorscheme-auto .chroma .kn { color: #ffffff; font-weight: bold }
+  body.colorscheme-auto .chroma .kp { color: #ffffff; font-weight: bold }
+  body.colorscheme-auto .chroma .kr { color: #ffffff; font-weight: bold }
+  body.colorscheme-auto .chroma .kt { color: #ffffff; font-weight: bold }
+  body.colorscheme-auto .chroma .n {  }
+  body.colorscheme-auto .chroma .na { color: #007f7f }
+  body.colorscheme-auto .chroma .nb { color: #ffffff; font-weight: bold }
+  body.colorscheme-auto .chroma .bp {  }
+  body.colorscheme-auto .chroma .nc {  }
+  body.colorscheme-auto .chroma .no {  }
+  body.colorscheme-auto .chroma .nd {  }
+  body.colorscheme-auto .chroma .ni {  }
+  body.colorscheme-auto .chroma .ne {  }
+  body.colorscheme-auto .chroma .nf {  }
+  body.colorscheme-auto .chroma .fm {  }
+  body.colorscheme-auto .chroma .nl {  }
+  body.colorscheme-auto .chroma .nn {  }
+  body.colorscheme-auto .chroma .nx {  }
+  body.colorscheme-auto .chroma .py {  }
+  body.colorscheme-auto .chroma .nt { font-weight: bold }
+  body.colorscheme-auto .chroma .nv {  }
+  body.colorscheme-auto .chroma .vc {  }
+  body.colorscheme-auto .chroma .vg {  }
+  body.colorscheme-auto .chroma .vi {  }
+  body.colorscheme-auto .chroma .vm {  }
+  body.colorscheme-auto .chroma .l {  }
+  body.colorscheme-auto .chroma .ld { color: #ffff00; font-weight: bold }
+  body.colorscheme-auto .chroma .s { color: #00ffff; font-weight: bold }
+  body.colorscheme-auto .chroma .sa { color: #00ffff; font-weight: bold }
+  body.colorscheme-auto .chroma .sb { color: #00ffff; font-weight: bold }
+  body.colorscheme-auto .chroma .sc { color: #00ffff; font-weight: bold }
+  body.colorscheme-auto .chroma .dl { color: #00ffff; font-weight: bold }
+  body.colorscheme-auto .chroma .sd { color: #00ffff; font-weight: bold }
+  body.colorscheme-auto .chroma .s2 { color: #00ffff; font-weight: bold }
+  body.colorscheme-auto .chroma .se { color: #00ffff; font-weight: bold }
+  body.colorscheme-auto .chroma .sh { color: #00ffff; font-weight: bold }
+  body.colorscheme-auto .chroma .si { color: #00ffff; font-weight: bold }
+  body.colorscheme-auto .chroma .sx { color: #00ffff; font-weight: bold }
+  body.colorscheme-auto .chroma .sr { color: #00ffff; font-weight: bold }
+  body.colorscheme-auto .chroma .s1 { color: #00ffff; font-weight: bold }
+  body.colorscheme-auto .chroma .ss { color: #00ffff; font-weight: bold }
+  body.colorscheme-auto .chroma .m { color: #ffff00; font-weight: bold }
+  body.colorscheme-auto .chroma .mb { color: #ffff00; font-weight: bold }
+  body.colorscheme-auto .chroma .mf { color: #ffff00; font-weight: bold }
+  body.colorscheme-auto .chroma .mh { color: #ffff00; font-weight: bold }
+  body.colorscheme-auto .chroma .mi { color: #ffff00; font-weight: bold }
+  body.colorscheme-auto .chroma .il { color: #ffff00; font-weight: bold }
+  body.colorscheme-auto .chroma .mo { color: #ffff00; font-weight: bold }
+  body.colorscheme-auto .chroma .o {  }
+  body.colorscheme-auto .chroma .ow {  }
+  body.colorscheme-auto .chroma .p {  }
+  body.colorscheme-auto .chroma .c { color: #007f7f }
+  body.colorscheme-auto .chroma .ch { color: #007f7f }
+  body.colorscheme-auto .chroma .cm { color: #007f7f }
+  body.colorscheme-auto .chroma .c1 { color: #007f7f }
+  body.colorscheme-auto .chroma .cs { color: #007f7f }
+  body.colorscheme-auto .chroma .cp { color: #00ff00; font-weight: bold }
+  body.colorscheme-auto .chroma .cpf { color: #00ff00; font-weight: bold }
+  body.colorscheme-auto .chroma .g {  }
+  body.colorscheme-auto .chroma .gd {  }
+  body.colorscheme-auto .chroma .ge {  }
+  body.colorscheme-auto .chroma .gr {  }
+  body.colorscheme-auto .chroma .gh { font-weight: bold }
+  body.colorscheme-auto .chroma .gi {  }
+  body.colorscheme-auto .chroma .go {  }
+  body.colorscheme-auto .chroma .gp {  }
+  body.colorscheme-auto .chroma .gs { font-weight: bold }
+  body.colorscheme-auto .chroma .gu { font-weight: bold }
+  body.colorscheme-auto .chroma .gt {  }
+  body.colorscheme-auto .chroma .gl { text-decoration: underline }
+  body.colorscheme-auto .chroma .w {  }
+}

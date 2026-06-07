@@ -24,6 +24,7 @@
 <meta property="article:modified_time" content="2020-11-13T00:00:00+00:00" />
 
 
+
     <title>
   Practical Tips for Implementing Subsurface Scattering in a Ray Tracer · A Graphics Guy&#39;s Note
 </title>
@@ -57,6 +58,10 @@
     
 
     
+      <link rel="stylesheet" href="/css/chroma-light.css" />
+    
+      <link rel="stylesheet" href="/css/chroma-dark.css" />
+    
       <link rel="stylesheet" href="/css/custom.css" />
     
 
@@ -64,7 +69,7 @@
       
       
         
-        <link rel="stylesheet" href="/main.min.c6871eec105836f05025bd3d682a4f431abfdb83d740febdda8f8be50661a7de.css" integrity="sha256-xoce7BBYNvBQJb09aCpPQxq/24PXQP692o&#43;L5QZhp94=" crossorigin="anonymous" media="screen" />
+        <link rel="stylesheet" href="/main.min.8e6e1803b3e0f99ca06e08fbf045b41900ee5c04fb5b804be5c987ee4c81c9f3.css" integrity="sha256-jm4YA7Pg&#43;Zygbgj78EW0GQDuXAT7W4BL5cmH7kyByfM=" crossorigin="anonymous" media="screen" />
       
     
 
@@ -117,7 +122,7 @@
 </style>
     
 
-    <meta name="generator" content="Hugo 0.117.0">
+    <meta name="generator" content="Hugo 0.120.4">
 
     <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
@@ -175,7 +180,7 @@
     <article>
       <header>
         <div class="post-title">
-          <h1 class="title">Practical Tips for Implementing Subsurface Scattering in a Ray Tracer</h1>
+          <h1 class="title" id="post-start" tabindex="-1">Practical Tips for Implementing Subsurface Scattering in a Ray Tracer</h1>
         </div>
         <div class="post-meta">
           <div class="date">
@@ -224,6 +229,10 @@ Most of this blog will be talking about the iterations that I made to make it mo
 
  
  
+
+
+
+
  
  
 
@@ -237,6 +246,13 @@ Most of this blog will be talking about the iterations that I made to make it mo
     width: 100%;
     margin: auto;
     background-color: #FFFFFF;  
+}
+
+ 
+@media (hover: none) and (pointer: coarse) {
+    .ba-slider1d9792c1cdd84287b704ca1876c4de13 {
+        touch-action: pan-y;
+    }
 }
 
 .ba-slider1d9792c1cdd84287b704ca1876c4de13 img {
@@ -287,15 +303,56 @@ Most of this blog will be talking about the iterations that I made to make it mo
     bottom: 8px;
     font-weight: bold;
     white-space: nowrap;
+    line-height: 1.3;
+    pointer-events: none;
+}
+
+.ba-bottom-left1d9792c1cdd84287b704ca1876c4de13.ba-label-bg,
+.ba-bottom-right1d9792c1cdd84287b704ca1876c4de13.ba-label-bg {
+     
+    isolation: isolate;
+}
+
+.ba-bottom-left1d9792c1cdd84287b704ca1876c4de13.ba-label-bg::before,
+.ba-bottom-right1d9792c1cdd84287b704ca1876c4de13.ba-label-bg::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: -0.25em;
+    bottom: -0.25em;
+    left: -0.6em;
+    right: -0.6em;
+    background-color: var(--label-bg);
+    border-radius: 3px;
 }
 
 .ba-bottom-left1d9792c1cdd84287b704ca1876c4de13 {
     left: 16px;
-    color: #FFFFFF;  
+    color: #FFFFFF;
+    z-index: 1;  
 }
+
 .ba-bottom-right1d9792c1cdd84287b704ca1876c4de13 {
     right: 16px;
-    color: #FFFFFF;  
+    color: #FFFFFF;
+     
+}
+
+figure.custom-compare figcaption.custom-figure-caption {
+    margin-top: 0.35rem;
+    line-height: 1.45;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p {
+    margin: 0.2em 0;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p:first-child {
+    margin-top: 0;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p:last-child {
+    margin-bottom: 0;
 }
 
  
@@ -326,40 +383,150 @@ Most of this blog will be talking about the iterations that I made to make it mo
 
 <script>
 (function($) {
-  function drags(dragElement, resizeElement, container) {
-    dragElement.on('mousedown.ba touchstart.ba', function(e) {
-      dragElement.addClass('ba-draggable');
-      resizeElement.addClass('ba-resizable');
+  var GESTURE_THRESHOLD_PX = 10;
 
-      var startX = e.pageX || e.originalEvent.touches[0].pageX;
-      var dragWidth = dragElement.outerWidth(),
-          posX = dragElement.offset().left + dragWidth - startX,
-          containerOffset = container.offset().left,
-          containerWidth = container.outerWidth();
+  function pageX(e) {
+    if (e.pageX != null) return e.pageX;
+    var t = e.originalEvent && e.originalEvent.touches;
+    return t && t.length ? t[0].pageX : 0;
+  }
 
-      var minLeft = containerOffset + 10;
-      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+  function pageY(e) {
+    if (e.pageY != null) return e.pageY;
+    var t = e.originalEvent && e.originalEvent.touches;
+    return t && t.length ? t[0].pageY : 0;
+  }
 
-      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
-        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
-        var leftValue = moveX + posX - dragWidth;
+  function isTouchPrimaryDevice() {
+    return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  }
 
-        if (leftValue < minLeft) leftValue = minLeft;
-        else if (leftValue > maxLeft) leftValue = maxLeft;
+   
+  function createSplitDragSession(container, handle, resize, mode) {
+    var dragWidth = handle.outerWidth();
+    var containerOffset = container.offset().left;
+    var containerWidth = container.outerWidth();
+    var minLeft = containerOffset + 10;
+    var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+    var posX = null;
 
-        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+    handle.addClass('ba-draggable');
+    resize.addClass('ba-resizable');
 
-        dragElement.css('left', percentage);
-        resizeElement.css('width', percentage);
+    function update(moveX) {
+      var leftValue = mode === 'relative' && posX !== null
+        ? moveX + posX - dragWidth
+        : moveX - dragWidth / 2;
+      if (leftValue < minLeft) leftValue = minLeft;
+      else if (leftValue > maxLeft) leftValue = maxLeft;
 
-        updateLinks(container, dragElement);
-      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
-        dragElement.removeClass('ba-draggable');
-        resizeElement.removeClass('ba-resizable');
-        $(this).off('.ba');
+      var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+      handle.css('left', percentage);
+      resize.css('width', percentage);
+      updateLinks(container, handle);
+    }
+
+    function end() {
+      handle.removeClass('ba-draggable');
+      resize.removeClass('ba-resizable');
+    }
+
+    return {
+      update: update,
+      end: end,
+      setRelativeAnchor: function(anchorX) {
+        posX = handle.offset().left + dragWidth - anchorX;
+      }
+    };
+  }
+
+  function startSplitDrag(container, handle, resize, e, mode) {
+    var session = createSplitDragSession(container, handle, resize, mode);
+    if (mode === 'relative') {
+      session.setRelativeAnchor(pageX(e));
+    }
+    session.update(pageX(e));
+
+    $(document)
+      .on('mousemove.ba touchmove.ba', function(ev) {
+        session.update(pageX(ev));
+        ev.preventDefault();
+      })
+      .on('mouseup.ba touchend.ba touchcancel.ba', function() {
+        session.end();
+        $(document).off('.ba');
       });
 
-      e.preventDefault();
+    e.preventDefault();
+  }
+
+   
+  function beginTouchGesture(container, handle, resize, e) {
+    var startX = pageX(e);
+    var startY = pageY(e);
+    var phase = 'pending';
+    var session = null;
+
+    function cleanup() {
+      $(document).off('.ba-gesture');
+      if (session) {
+        session.end();
+        session = null;
+      }
+      phase = null;
+    }
+
+    $(document)
+      .on('touchmove.ba-gesture', function(ev) {
+        var x = pageX(ev);
+        var y = pageY(ev);
+        var dx = Math.abs(x - startX);
+        var dy = Math.abs(y - startY);
+
+        if (phase === 'pending') {
+          if (dx < GESTURE_THRESHOLD_PX && dy < GESTURE_THRESHOLD_PX) {
+            return;
+          }
+          if (dy > dx) {
+            phase = 'scroll';
+            cleanup();
+            return;
+          }
+          if (dx > dy) {
+            phase = 'drag';
+            session = createSplitDragSession(container, handle, resize, 'absolute');
+            session.update(x);
+            ev.preventDefault();
+          }
+          return;
+        }
+
+        if (phase === 'drag' && session) {
+          session.update(x);
+          ev.preventDefault();
+        }
+      })
+      .on('touchend.ba-gesture touchcancel.ba-gesture', cleanup);
+  }
+
+  function setupDrag(container, handle, resize) {
+     
+    handle.on('mousedown.ba', function(e) {
+      startSplitDrag(container, handle, resize, e, 'relative');
+    });
+
+     
+    if (isTouchPrimaryDevice()) {
+      container.on('touchstart.ba', function(e) {
+        if ($(e.target).closest('.handle').length) return;
+        beginTouchGesture(container, handle, resize, e);
+      });
+    }
+
+     
+    handle.on('touchstart.ba', function(e) {
+      e.stopPropagation();
+      startSplitDrag(container, handle, resize, e, 'relative');
     });
   }
 
@@ -390,7 +557,7 @@ Most of this blog will be talking about the iterations that I made to make it mo
     var width = container.width();
     resize.find('img').css('width', width + 'px');
 
-    drags(handle, resize, container);
+    setupDrag(container, handle, resize);
     updateLinks(container, handle);
 
     $(window).on('resize', function() {
@@ -472,52 +639,52 @@ Those problems are addressed in PBRT 3rd edition. Please check <a href="http://w
 <p>In order to figure out how to integrate SSS implementation in a path tracer, it is necessary to know how a barebone path tracer works in general.
 My previous <a href="https://agraphicsguynotes.com/posts/basics_about_path_tracing/">blog post</a> mentioned some basics about it.
 Below is the pseudo-code of a minimal path tracer algorithm with BSSRDF in it.</p>
-<div class="highlight"><pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>color li(scene, ray, max_bounce_cnt){
-</span></span><span style="display:flex;"><span>    color ret(<span style="color:#ff0;font-weight:bold">0.0f</span>);
-</span></span><span style="display:flex;"><span>    <span style="color:#fff;font-weight:bold">int</span> bounces = <span style="color:#ff0;font-weight:bold">0</span>;
-</span></span><span style="display:flex;"><span>    <span style="color:#fff;font-weight:bold">auto</span> r = ray;
-</span></span><span style="display:flex;"><span>    color throughput(<span style="color:#ff0;font-weight:bold">1.0f</span>);
-</span></span><span style="display:flex;"><span>    <span style="color:#fff;font-weight:bold">while</span>( bounces &lt; max_bounce_cnt ){
-</span></span><span style="display:flex;"><span>        <span style="color:#007f7f">// 1 - Get the intersection between the ray and the scene.
-</span></span></span><span style="display:flex;"><span><span style="color:#007f7f"></span>        <span style="color:#007f7f">//     Bail if it hits nothing. This is commonly the place to return sky color,
-</span></span></span><span style="display:flex;"><span><span style="color:#007f7f"></span>        <span style="color:#007f7f">//     while it is skipped for simplicity since it is not relevant.
-</span></span></span><span style="display:flex;"><span><span style="color:#007f7f"></span>        Intersection intersection;
-</span></span><span style="display:flex;"><span>        <span style="color:#fff;font-weight:bold">if</span>( (intersection = get_intersect(scene, r)).IsInvalid() )
-</span></span><span style="display:flex;"><span>            <span style="color:#fff;font-weight:bold">break</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#007f7f">// 2 - Construct BSDF
-</span></span></span><span style="display:flex;"><span><span style="color:#007f7f"></span>        intersection.bsdf = construct_bsdf(intersection);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#007f7f">// 3 - Evaluate the contribution from light source
-</span></span></span><span style="display:flex;"><span><span style="color:#007f7f"></span>        ret += evaluate_light(intersection) * throughput;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#007f7f">// 4 - Importance sample for the bounced ray
-</span></span></span><span style="display:flex;"><span><span style="color:#007f7f"></span>        <span style="color:#fff;font-weight:bold">float</span> bsdf_pdf;
-</span></span><span style="display:flex;"><span>        vector dir;
-</span></span><span style="display:flex;"><span>        <span style="color:#fff;font-weight:bold">auto</span> bsdf_evaluation = intersection.bsdf-&gt;sample_f(&amp;dir, &amp;bsdf_pdf);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#007f7f">// 5 - Update throughput
-</span></span></span><span style="display:flex;"><span><span style="color:#007f7f"></span>        throughput *= bsdf_evaluation * dot(intersection.n, dir) / bsdf_pdf;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#007f7f">// 6 - Update the bounce ray
-</span></span></span><span style="display:flex;"><span><span style="color:#007f7f"></span>        r = Ray(intersection.position , dir);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#007f7f">// This is where we handle BSSRDF
-</span></span></span><span style="display:flex;"><span><span style="color:#007f7f"></span>        <span style="color:#fff;font-weight:bold">if</span>(intersection.bssrdf){
-</span></span><span style="display:flex;"><span>            &lt;&lt;&lt; Handle BSSRDF &gt;&gt;&gt;
-</span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#007f7f">// 7 - Russian roulette. rand() returns value from 0 to 1 randomly and 
-</span></span></span><span style="display:flex;"><span><span style="color:#007f7f"></span>        <span style="color:#007f7f">//     the random samples are uniformly distributed.
-</span></span></span><span style="display:flex;"><span><span style="color:#007f7f"></span>        <span style="color:#fff;font-weight:bold">if</span>(rand() &lt; <span style="color:#ff0;font-weight:bold">0.3f</span> &amp;&amp; bounces &gt; <span style="color:#ff0;font-weight:bold">3</span> )
-</span></span><span style="display:flex;"><span>            throughput /= <span style="color:#ff0;font-weight:bold">0.3f</span>;
-</span></span><span style="display:flex;"><span>        <span style="color:#fff;font-weight:bold">else</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#fff;font-weight:bold">break</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        ++bounces;
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#fff;font-weight:bold">return</span> ret;
-</span></span><span style="display:flex;"><span>}
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">color</span> <span class="nf">li</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">max_bounce_cnt</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="n">color</span> <span class="n">ret</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">bounces</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">r</span> <span class="o">=</span> <span class="n">ray</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">color</span> <span class="n">throughput</span><span class="p">(</span><span class="mf">1.0f</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span> <span class="n">bounces</span> <span class="o">&lt;</span> <span class="n">max_bounce_cnt</span> <span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 1 - Get the intersection between the ray and the scene.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">//     Bail if it hits nothing. This is commonly the place to return sky color,
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">//     while it is skipped for simplicity since it is not relevant.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">Intersection</span> <span class="n">intersection</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="p">(</span> <span class="p">(</span><span class="n">intersection</span> <span class="o">=</span> <span class="n">get_intersect</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="n">r</span><span class="p">)).</span><span class="n">IsInvalid</span><span class="p">()</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 2 - Construct BSDF
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">intersection</span><span class="p">.</span><span class="n">bsdf</span> <span class="o">=</span> <span class="n">construct_bsdf</span><span class="p">(</span><span class="n">intersection</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 3 - Evaluate the contribution from light source
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">ret</span> <span class="o">+=</span> <span class="n">evaluate_light</span><span class="p">(</span><span class="n">intersection</span><span class="p">)</span> <span class="o">*</span> <span class="n">throughput</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 4 - Importance sample for the bounced ray
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="kt">float</span> <span class="n">bsdf_pdf</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">vector</span> <span class="n">dir</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">bsdf_evaluation</span> <span class="o">=</span> <span class="n">intersection</span><span class="p">.</span><span class="n">bsdf</span><span class="o">-&gt;</span><span class="n">sample_f</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dir</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bsdf_pdf</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 5 - Update throughput
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">throughput</span> <span class="o">*=</span> <span class="n">bsdf_evaluation</span> <span class="o">*</span> <span class="n">dot</span><span class="p">(</span><span class="n">intersection</span><span class="p">.</span><span class="n">n</span><span class="p">,</span> <span class="n">dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">bsdf_pdf</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 6 - Update the bounce ray
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">r</span> <span class="o">=</span> <span class="n">Ray</span><span class="p">(</span><span class="n">intersection</span><span class="p">.</span><span class="n">position</span> <span class="p">,</span> <span class="n">dir</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// This is where we handle BSSRDF
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span><span class="p">(</span><span class="n">intersection</span><span class="p">.</span><span class="n">bssrdf</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">            <span class="o">&lt;&lt;&lt;</span> <span class="n">Handle</span> <span class="n">BSSRDF</span> <span class="o">&gt;&gt;&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 7 - Russian roulette. rand() returns value from 0 to 1 randomly and 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">//     the random samples are uniformly distributed.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span><span class="p">(</span><span class="n">rand</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.3f</span> <span class="o">&amp;&amp;</span> <span class="n">bounces</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">throughput</span> <span class="o">/=</span> <span class="mf">0.3f</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="o">++</span><span class="n">bounces</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></div><p>PBRT&rsquo;s path tracing implementation is a lot more complex than the above code. But in order to keep things in control, I stripped the irrelevant parts with only the core left.
 To make it clear, basically, it does the following things inside the loop (pretending that there is no bssrdf)</p>
 <ol>
@@ -533,32 +700,32 @@ To make it clear, basically, it does the following things inside the loop (prete
 But this is more than enough as a playground for us to introduce how a BSSRDF can fit in it.
 In the case there is bssrdf available, we only need to implement the branch of the condition.
 Following is the code snippet of &lt;&lt;&lt; Handle BSSRDF &gt;&gt;&gt;.</p>
-<div class="highlight"><pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#007f7f">// Take a random sample by projecting a ray.
-</span></span></span><span style="display:flex;"><span><span style="color:#007f7f"></span>Intersection bssrdf_intersection;
-</span></span><span style="display:flex;"><span><span style="color:#fff;font-weight:bold">float</span> bssrdf_pdf;
-</span></span><span style="display:flex;"><span><span style="color:#fff;font-weight:bold">const</span> <span style="color:#fff;font-weight:bold">auto</span> bssrdf_evaluation = intersection.bssrdf-&gt;sample_s(scene, 
-</span></span><span style="display:flex;"><span>                               &amp;bssrdf_pdf, &amp;bssrdf_intersection);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#007f7f">// Bail if there is no intersection.
-</span></span></span><span style="display:flex;"><span><span style="color:#007f7f"></span><span style="color:#fff;font-weight:bold">if</span>(bssrdf_intersection.IsInvalid())
-</span></span><span style="display:flex;"><span>    <span style="color:#fff;font-weight:bold">break</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#007f7f">// Update the throughput
-</span></span></span><span style="display:flex;"><span><span style="color:#007f7f"></span>throughput *= bssrdf_evaluation / bssrdf_pdf;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#007f7f">// Evaluate direct illumination
-</span></span></span><span style="display:flex;"><span><span style="color:#007f7f"></span>ret += evaluate_light(intersection) * throughput;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#007f7f">// Take another sample of direction for the bounce ray.
-</span></span></span><span style="display:flex;"><span><span style="color:#007f7f"></span><span style="color:#fff;font-weight:bold">float</span> bsdf_pdf;
-</span></span><span style="display:flex;"><span>vector dir;
-</span></span><span style="display:flex;"><span><span style="color:#fff;font-weight:bold">auto</span> bsdf_evaluation = bssrdf_intersection.bsdf-&gt;sample_f(&amp;dir, &amp;bsdf_pdf);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#007f7f">// Update throughput
-</span></span></span><span style="display:flex;"><span><span style="color:#007f7f"></span>throughput *= bsdf_evaluation * dot(intersection.n, dir) / bsdf_pdf;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#007f7f">// Update the bounce ray
-</span></span></span><span style="display:flex;"><span><span style="color:#007f7f"></span>r = Ray(intersection.position , dir);
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// Take a random sample by projecting a ray.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">Intersection</span> <span class="n">bssrdf_intersection</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">float</span> <span class="n">bssrdf_pdf</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">const</span> <span class="k">auto</span> <span class="n">bssrdf_evaluation</span> <span class="o">=</span> <span class="n">intersection</span><span class="p">.</span><span class="n">bssrdf</span><span class="o">-&gt;</span><span class="n">sample_s</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">                               <span class="o">&amp;</span><span class="n">bssrdf_pdf</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bssrdf_intersection</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Bail if there is no intersection.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">if</span><span class="p">(</span><span class="n">bssrdf_intersection</span><span class="p">.</span><span class="n">IsInvalid</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">    <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Update the throughput
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">throughput</span> <span class="o">*=</span> <span class="n">bssrdf_evaluation</span> <span class="o">/</span> <span class="n">bssrdf_pdf</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Evaluate direct illumination
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">ret</span> <span class="o">+=</span> <span class="n">evaluate_light</span><span class="p">(</span><span class="n">intersection</span><span class="p">)</span> <span class="o">*</span> <span class="n">throughput</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Take another sample of direction for the bounce ray.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">float</span> <span class="n">bsdf_pdf</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">vector</span> <span class="n">dir</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">bsdf_evaluation</span> <span class="o">=</span> <span class="n">bssrdf_intersection</span><span class="p">.</span><span class="n">bsdf</span><span class="o">-&gt;</span><span class="n">sample_f</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dir</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bsdf_pdf</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Update throughput
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">throughput</span> <span class="o">*=</span> <span class="n">bsdf_evaluation</span> <span class="o">*</span> <span class="n">dot</span><span class="p">(</span><span class="n">intersection</span><span class="p">.</span><span class="n">n</span><span class="p">,</span> <span class="n">dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">bsdf_pdf</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Update the bounce ray
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">r</span> <span class="o">=</span> <span class="n">Ray</span><span class="p">(</span><span class="n">intersection</span><span class="p">.</span><span class="n">position</span> <span class="p">,</span> <span class="n">dir</span><span class="p">);</span>
 </span></span></code></pre></div><p>What it does is pretty self-explanatory. Below is a breakdown of computation it does in order to evaluate BSSRDF.</p>
 <ul>
 <li>It first takes a sampled position near the shading point. The importance sampling of the diffusion profile happens under the hood.
@@ -613,6 +780,10 @@ It is worth mentioning that I clamped pixels with high radiance value to avoid f
 
  
  
+
+
+
+
  
  
 
@@ -626,6 +797,13 @@ It is worth mentioning that I clamped pixels with high radiance value to avoid f
     width: 100%;
     margin: auto;
     background-color: #FFFFFF;  
+}
+
+ 
+@media (hover: none) and (pointer: coarse) {
+    .ba-slidera88c3b9bbf4073074127b0afa2b16857 {
+        touch-action: pan-y;
+    }
 }
 
 .ba-slidera88c3b9bbf4073074127b0afa2b16857 img {
@@ -676,15 +854,56 @@ It is worth mentioning that I clamped pixels with high radiance value to avoid f
     bottom: 8px;
     font-weight: bold;
     white-space: nowrap;
+    line-height: 1.3;
+    pointer-events: none;
+}
+
+.ba-bottom-lefta88c3b9bbf4073074127b0afa2b16857.ba-label-bg,
+.ba-bottom-righta88c3b9bbf4073074127b0afa2b16857.ba-label-bg {
+     
+    isolation: isolate;
+}
+
+.ba-bottom-lefta88c3b9bbf4073074127b0afa2b16857.ba-label-bg::before,
+.ba-bottom-righta88c3b9bbf4073074127b0afa2b16857.ba-label-bg::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: -0.25em;
+    bottom: -0.25em;
+    left: -0.6em;
+    right: -0.6em;
+    background-color: var(--label-bg);
+    border-radius: 3px;
 }
 
 .ba-bottom-lefta88c3b9bbf4073074127b0afa2b16857 {
     left: 16px;
-    color: #FFFFFF;  
+    color: #FFFFFF;
+    z-index: 1;  
 }
+
 .ba-bottom-righta88c3b9bbf4073074127b0afa2b16857 {
     right: 16px;
-    color: #FFFFFF;  
+    color: #FFFFFF;
+     
+}
+
+figure.custom-compare figcaption.custom-figure-caption {
+    margin-top: 0.35rem;
+    line-height: 1.45;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p {
+    margin: 0.2em 0;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p:first-child {
+    margin-top: 0;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p:last-child {
+    margin-bottom: 0;
 }
 
  
@@ -715,40 +934,150 @@ It is worth mentioning that I clamped pixels with high radiance value to avoid f
 
 <script>
 (function($) {
-  function drags(dragElement, resizeElement, container) {
-    dragElement.on('mousedown.ba touchstart.ba', function(e) {
-      dragElement.addClass('ba-draggable');
-      resizeElement.addClass('ba-resizable');
+  var GESTURE_THRESHOLD_PX = 10;
 
-      var startX = e.pageX || e.originalEvent.touches[0].pageX;
-      var dragWidth = dragElement.outerWidth(),
-          posX = dragElement.offset().left + dragWidth - startX,
-          containerOffset = container.offset().left,
-          containerWidth = container.outerWidth();
+  function pageX(e) {
+    if (e.pageX != null) return e.pageX;
+    var t = e.originalEvent && e.originalEvent.touches;
+    return t && t.length ? t[0].pageX : 0;
+  }
 
-      var minLeft = containerOffset + 10;
-      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+  function pageY(e) {
+    if (e.pageY != null) return e.pageY;
+    var t = e.originalEvent && e.originalEvent.touches;
+    return t && t.length ? t[0].pageY : 0;
+  }
 
-      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
-        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
-        var leftValue = moveX + posX - dragWidth;
+  function isTouchPrimaryDevice() {
+    return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  }
 
-        if (leftValue < minLeft) leftValue = minLeft;
-        else if (leftValue > maxLeft) leftValue = maxLeft;
+   
+  function createSplitDragSession(container, handle, resize, mode) {
+    var dragWidth = handle.outerWidth();
+    var containerOffset = container.offset().left;
+    var containerWidth = container.outerWidth();
+    var minLeft = containerOffset + 10;
+    var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+    var posX = null;
 
-        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+    handle.addClass('ba-draggable');
+    resize.addClass('ba-resizable');
 
-        dragElement.css('left', percentage);
-        resizeElement.css('width', percentage);
+    function update(moveX) {
+      var leftValue = mode === 'relative' && posX !== null
+        ? moveX + posX - dragWidth
+        : moveX - dragWidth / 2;
+      if (leftValue < minLeft) leftValue = minLeft;
+      else if (leftValue > maxLeft) leftValue = maxLeft;
 
-        updateLinks(container, dragElement);
-      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
-        dragElement.removeClass('ba-draggable');
-        resizeElement.removeClass('ba-resizable');
-        $(this).off('.ba');
+      var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+      handle.css('left', percentage);
+      resize.css('width', percentage);
+      updateLinks(container, handle);
+    }
+
+    function end() {
+      handle.removeClass('ba-draggable');
+      resize.removeClass('ba-resizable');
+    }
+
+    return {
+      update: update,
+      end: end,
+      setRelativeAnchor: function(anchorX) {
+        posX = handle.offset().left + dragWidth - anchorX;
+      }
+    };
+  }
+
+  function startSplitDrag(container, handle, resize, e, mode) {
+    var session = createSplitDragSession(container, handle, resize, mode);
+    if (mode === 'relative') {
+      session.setRelativeAnchor(pageX(e));
+    }
+    session.update(pageX(e));
+
+    $(document)
+      .on('mousemove.ba touchmove.ba', function(ev) {
+        session.update(pageX(ev));
+        ev.preventDefault();
+      })
+      .on('mouseup.ba touchend.ba touchcancel.ba', function() {
+        session.end();
+        $(document).off('.ba');
       });
 
-      e.preventDefault();
+    e.preventDefault();
+  }
+
+   
+  function beginTouchGesture(container, handle, resize, e) {
+    var startX = pageX(e);
+    var startY = pageY(e);
+    var phase = 'pending';
+    var session = null;
+
+    function cleanup() {
+      $(document).off('.ba-gesture');
+      if (session) {
+        session.end();
+        session = null;
+      }
+      phase = null;
+    }
+
+    $(document)
+      .on('touchmove.ba-gesture', function(ev) {
+        var x = pageX(ev);
+        var y = pageY(ev);
+        var dx = Math.abs(x - startX);
+        var dy = Math.abs(y - startY);
+
+        if (phase === 'pending') {
+          if (dx < GESTURE_THRESHOLD_PX && dy < GESTURE_THRESHOLD_PX) {
+            return;
+          }
+          if (dy > dx) {
+            phase = 'scroll';
+            cleanup();
+            return;
+          }
+          if (dx > dy) {
+            phase = 'drag';
+            session = createSplitDragSession(container, handle, resize, 'absolute');
+            session.update(x);
+            ev.preventDefault();
+          }
+          return;
+        }
+
+        if (phase === 'drag' && session) {
+          session.update(x);
+          ev.preventDefault();
+        }
+      })
+      .on('touchend.ba-gesture touchcancel.ba-gesture', cleanup);
+  }
+
+  function setupDrag(container, handle, resize) {
+     
+    handle.on('mousedown.ba', function(e) {
+      startSplitDrag(container, handle, resize, e, 'relative');
+    });
+
+     
+    if (isTouchPrimaryDevice()) {
+      container.on('touchstart.ba', function(e) {
+        if ($(e.target).closest('.handle').length) return;
+        beginTouchGesture(container, handle, resize, e);
+      });
+    }
+
+     
+    handle.on('touchstart.ba', function(e) {
+      e.stopPropagation();
+      startSplitDrag(container, handle, resize, e, 'relative');
     });
   }
 
@@ -779,7 +1108,7 @@ It is worth mentioning that I clamped pixels with high radiance value to avoid f
     var width = container.width();
     resize.find('img').css('width', width + 'px');
 
-    drags(handle, resize, container);
+    setupDrag(container, handle, resize);
     updateLinks(container, handle);
 
     $(window).on('resize', function() {
@@ -810,6 +1139,10 @@ However, the biggest gain in terms of performance is that it opens a door for ou
 
  
  
+
+
+
+
  
  
 
@@ -823,6 +1156,13 @@ However, the biggest gain in terms of performance is that it opens a door for ou
     width: 70%;
     margin: auto;
     background-color: #FFFFFF;  
+}
+
+ 
+@media (hover: none) and (pointer: coarse) {
+    .ba-sliderdc405557b70643524e0e792520a81a8c {
+        touch-action: pan-y;
+    }
 }
 
 .ba-sliderdc405557b70643524e0e792520a81a8c img {
@@ -873,15 +1213,56 @@ However, the biggest gain in terms of performance is that it opens a door for ou
     bottom: 8px;
     font-weight: bold;
     white-space: nowrap;
+    line-height: 1.3;
+    pointer-events: none;
+}
+
+.ba-bottom-leftdc405557b70643524e0e792520a81a8c.ba-label-bg,
+.ba-bottom-rightdc405557b70643524e0e792520a81a8c.ba-label-bg {
+     
+    isolation: isolate;
+}
+
+.ba-bottom-leftdc405557b70643524e0e792520a81a8c.ba-label-bg::before,
+.ba-bottom-rightdc405557b70643524e0e792520a81a8c.ba-label-bg::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: -0.25em;
+    bottom: -0.25em;
+    left: -0.6em;
+    right: -0.6em;
+    background-color: var(--label-bg);
+    border-radius: 3px;
 }
 
 .ba-bottom-leftdc405557b70643524e0e792520a81a8c {
     left: 16px;
-    color: #FFFFFF;  
+    color: #FFFFFF;
+    z-index: 1;  
 }
+
 .ba-bottom-rightdc405557b70643524e0e792520a81a8c {
     right: 16px;
-    color: #FFFFFF;  
+    color: #FFFFFF;
+     
+}
+
+figure.custom-compare figcaption.custom-figure-caption {
+    margin-top: 0.35rem;
+    line-height: 1.45;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p {
+    margin: 0.2em 0;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p:first-child {
+    margin-top: 0;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p:last-child {
+    margin-bottom: 0;
 }
 
  
@@ -912,40 +1293,150 @@ However, the biggest gain in terms of performance is that it opens a door for ou
 
 <script>
 (function($) {
-  function drags(dragElement, resizeElement, container) {
-    dragElement.on('mousedown.ba touchstart.ba', function(e) {
-      dragElement.addClass('ba-draggable');
-      resizeElement.addClass('ba-resizable');
+  var GESTURE_THRESHOLD_PX = 10;
 
-      var startX = e.pageX || e.originalEvent.touches[0].pageX;
-      var dragWidth = dragElement.outerWidth(),
-          posX = dragElement.offset().left + dragWidth - startX,
-          containerOffset = container.offset().left,
-          containerWidth = container.outerWidth();
+  function pageX(e) {
+    if (e.pageX != null) return e.pageX;
+    var t = e.originalEvent && e.originalEvent.touches;
+    return t && t.length ? t[0].pageX : 0;
+  }
 
-      var minLeft = containerOffset + 10;
-      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+  function pageY(e) {
+    if (e.pageY != null) return e.pageY;
+    var t = e.originalEvent && e.originalEvent.touches;
+    return t && t.length ? t[0].pageY : 0;
+  }
 
-      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
-        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
-        var leftValue = moveX + posX - dragWidth;
+  function isTouchPrimaryDevice() {
+    return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  }
 
-        if (leftValue < minLeft) leftValue = minLeft;
-        else if (leftValue > maxLeft) leftValue = maxLeft;
+   
+  function createSplitDragSession(container, handle, resize, mode) {
+    var dragWidth = handle.outerWidth();
+    var containerOffset = container.offset().left;
+    var containerWidth = container.outerWidth();
+    var minLeft = containerOffset + 10;
+    var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+    var posX = null;
 
-        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+    handle.addClass('ba-draggable');
+    resize.addClass('ba-resizable');
 
-        dragElement.css('left', percentage);
-        resizeElement.css('width', percentage);
+    function update(moveX) {
+      var leftValue = mode === 'relative' && posX !== null
+        ? moveX + posX - dragWidth
+        : moveX - dragWidth / 2;
+      if (leftValue < minLeft) leftValue = minLeft;
+      else if (leftValue > maxLeft) leftValue = maxLeft;
 
-        updateLinks(container, dragElement);
-      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
-        dragElement.removeClass('ba-draggable');
-        resizeElement.removeClass('ba-resizable');
-        $(this).off('.ba');
+      var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+      handle.css('left', percentage);
+      resize.css('width', percentage);
+      updateLinks(container, handle);
+    }
+
+    function end() {
+      handle.removeClass('ba-draggable');
+      resize.removeClass('ba-resizable');
+    }
+
+    return {
+      update: update,
+      end: end,
+      setRelativeAnchor: function(anchorX) {
+        posX = handle.offset().left + dragWidth - anchorX;
+      }
+    };
+  }
+
+  function startSplitDrag(container, handle, resize, e, mode) {
+    var session = createSplitDragSession(container, handle, resize, mode);
+    if (mode === 'relative') {
+      session.setRelativeAnchor(pageX(e));
+    }
+    session.update(pageX(e));
+
+    $(document)
+      .on('mousemove.ba touchmove.ba', function(ev) {
+        session.update(pageX(ev));
+        ev.preventDefault();
+      })
+      .on('mouseup.ba touchend.ba touchcancel.ba', function() {
+        session.end();
+        $(document).off('.ba');
       });
 
-      e.preventDefault();
+    e.preventDefault();
+  }
+
+   
+  function beginTouchGesture(container, handle, resize, e) {
+    var startX = pageX(e);
+    var startY = pageY(e);
+    var phase = 'pending';
+    var session = null;
+
+    function cleanup() {
+      $(document).off('.ba-gesture');
+      if (session) {
+        session.end();
+        session = null;
+      }
+      phase = null;
+    }
+
+    $(document)
+      .on('touchmove.ba-gesture', function(ev) {
+        var x = pageX(ev);
+        var y = pageY(ev);
+        var dx = Math.abs(x - startX);
+        var dy = Math.abs(y - startY);
+
+        if (phase === 'pending') {
+          if (dx < GESTURE_THRESHOLD_PX && dy < GESTURE_THRESHOLD_PX) {
+            return;
+          }
+          if (dy > dx) {
+            phase = 'scroll';
+            cleanup();
+            return;
+          }
+          if (dx > dy) {
+            phase = 'drag';
+            session = createSplitDragSession(container, handle, resize, 'absolute');
+            session.update(x);
+            ev.preventDefault();
+          }
+          return;
+        }
+
+        if (phase === 'drag' && session) {
+          session.update(x);
+          ev.preventDefault();
+        }
+      })
+      .on('touchend.ba-gesture touchcancel.ba-gesture', cleanup);
+  }
+
+  function setupDrag(container, handle, resize) {
+     
+    handle.on('mousedown.ba', function(e) {
+      startSplitDrag(container, handle, resize, e, 'relative');
+    });
+
+     
+    if (isTouchPrimaryDevice()) {
+      container.on('touchstart.ba', function(e) {
+        if ($(e.target).closest('.handle').length) return;
+        beginTouchGesture(container, handle, resize, e);
+      });
+    }
+
+     
+    handle.on('touchstart.ba', function(e) {
+      e.stopPropagation();
+      startSplitDrag(container, handle, resize, e, 'relative');
     });
   }
 
@@ -976,7 +1467,7 @@ However, the biggest gain in terms of performance is that it opens a door for ou
     var width = container.width();
     resize.find('img').css('width', width + 'px');
 
-    drags(handle, resize, container);
+    setupDrag(container, handle, resize);
     updateLinks(container, handle);
 
     $(window).on('resize', function() {
@@ -1086,6 +1577,10 @@ It is worth noting that instead of having the same spp this time, I choose to co
 
  
  
+
+
+
+
  
  
 
@@ -1099,6 +1594,13 @@ It is worth noting that instead of having the same spp this time, I choose to co
     width: 70%;
     margin: auto;
     background-color: #FFFFFF;  
+}
+
+ 
+@media (hover: none) and (pointer: coarse) {
+    .ba-slidera83234c266e188debc03a310fe6b6382 {
+        touch-action: pan-y;
+    }
 }
 
 .ba-slidera83234c266e188debc03a310fe6b6382 img {
@@ -1149,15 +1651,56 @@ It is worth noting that instead of having the same spp this time, I choose to co
     bottom: 8px;
     font-weight: bold;
     white-space: nowrap;
+    line-height: 1.3;
+    pointer-events: none;
+}
+
+.ba-bottom-lefta83234c266e188debc03a310fe6b6382.ba-label-bg,
+.ba-bottom-righta83234c266e188debc03a310fe6b6382.ba-label-bg {
+     
+    isolation: isolate;
+}
+
+.ba-bottom-lefta83234c266e188debc03a310fe6b6382.ba-label-bg::before,
+.ba-bottom-righta83234c266e188debc03a310fe6b6382.ba-label-bg::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: -0.25em;
+    bottom: -0.25em;
+    left: -0.6em;
+    right: -0.6em;
+    background-color: var(--label-bg);
+    border-radius: 3px;
 }
 
 .ba-bottom-lefta83234c266e188debc03a310fe6b6382 {
     left: 16px;
-    color: #FFFFFF;  
+    color: #FFFFFF;
+    z-index: 1;  
 }
+
 .ba-bottom-righta83234c266e188debc03a310fe6b6382 {
     right: 16px;
-    color: #FFFFFF;  
+    color: #FFFFFF;
+     
+}
+
+figure.custom-compare figcaption.custom-figure-caption {
+    margin-top: 0.35rem;
+    line-height: 1.45;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p {
+    margin: 0.2em 0;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p:first-child {
+    margin-top: 0;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p:last-child {
+    margin-bottom: 0;
 }
 
  
@@ -1188,40 +1731,150 @@ It is worth noting that instead of having the same spp this time, I choose to co
 
 <script>
 (function($) {
-  function drags(dragElement, resizeElement, container) {
-    dragElement.on('mousedown.ba touchstart.ba', function(e) {
-      dragElement.addClass('ba-draggable');
-      resizeElement.addClass('ba-resizable');
+  var GESTURE_THRESHOLD_PX = 10;
 
-      var startX = e.pageX || e.originalEvent.touches[0].pageX;
-      var dragWidth = dragElement.outerWidth(),
-          posX = dragElement.offset().left + dragWidth - startX,
-          containerOffset = container.offset().left,
-          containerWidth = container.outerWidth();
+  function pageX(e) {
+    if (e.pageX != null) return e.pageX;
+    var t = e.originalEvent && e.originalEvent.touches;
+    return t && t.length ? t[0].pageX : 0;
+  }
 
-      var minLeft = containerOffset + 10;
-      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+  function pageY(e) {
+    if (e.pageY != null) return e.pageY;
+    var t = e.originalEvent && e.originalEvent.touches;
+    return t && t.length ? t[0].pageY : 0;
+  }
 
-      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
-        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
-        var leftValue = moveX + posX - dragWidth;
+  function isTouchPrimaryDevice() {
+    return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  }
 
-        if (leftValue < minLeft) leftValue = minLeft;
-        else if (leftValue > maxLeft) leftValue = maxLeft;
+   
+  function createSplitDragSession(container, handle, resize, mode) {
+    var dragWidth = handle.outerWidth();
+    var containerOffset = container.offset().left;
+    var containerWidth = container.outerWidth();
+    var minLeft = containerOffset + 10;
+    var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+    var posX = null;
 
-        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+    handle.addClass('ba-draggable');
+    resize.addClass('ba-resizable');
 
-        dragElement.css('left', percentage);
-        resizeElement.css('width', percentage);
+    function update(moveX) {
+      var leftValue = mode === 'relative' && posX !== null
+        ? moveX + posX - dragWidth
+        : moveX - dragWidth / 2;
+      if (leftValue < minLeft) leftValue = minLeft;
+      else if (leftValue > maxLeft) leftValue = maxLeft;
 
-        updateLinks(container, dragElement);
-      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
-        dragElement.removeClass('ba-draggable');
-        resizeElement.removeClass('ba-resizable');
-        $(this).off('.ba');
+      var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+      handle.css('left', percentage);
+      resize.css('width', percentage);
+      updateLinks(container, handle);
+    }
+
+    function end() {
+      handle.removeClass('ba-draggable');
+      resize.removeClass('ba-resizable');
+    }
+
+    return {
+      update: update,
+      end: end,
+      setRelativeAnchor: function(anchorX) {
+        posX = handle.offset().left + dragWidth - anchorX;
+      }
+    };
+  }
+
+  function startSplitDrag(container, handle, resize, e, mode) {
+    var session = createSplitDragSession(container, handle, resize, mode);
+    if (mode === 'relative') {
+      session.setRelativeAnchor(pageX(e));
+    }
+    session.update(pageX(e));
+
+    $(document)
+      .on('mousemove.ba touchmove.ba', function(ev) {
+        session.update(pageX(ev));
+        ev.preventDefault();
+      })
+      .on('mouseup.ba touchend.ba touchcancel.ba', function() {
+        session.end();
+        $(document).off('.ba');
       });
 
-      e.preventDefault();
+    e.preventDefault();
+  }
+
+   
+  function beginTouchGesture(container, handle, resize, e) {
+    var startX = pageX(e);
+    var startY = pageY(e);
+    var phase = 'pending';
+    var session = null;
+
+    function cleanup() {
+      $(document).off('.ba-gesture');
+      if (session) {
+        session.end();
+        session = null;
+      }
+      phase = null;
+    }
+
+    $(document)
+      .on('touchmove.ba-gesture', function(ev) {
+        var x = pageX(ev);
+        var y = pageY(ev);
+        var dx = Math.abs(x - startX);
+        var dy = Math.abs(y - startY);
+
+        if (phase === 'pending') {
+          if (dx < GESTURE_THRESHOLD_PX && dy < GESTURE_THRESHOLD_PX) {
+            return;
+          }
+          if (dy > dx) {
+            phase = 'scroll';
+            cleanup();
+            return;
+          }
+          if (dx > dy) {
+            phase = 'drag';
+            session = createSplitDragSession(container, handle, resize, 'absolute');
+            session.update(x);
+            ev.preventDefault();
+          }
+          return;
+        }
+
+        if (phase === 'drag' && session) {
+          session.update(x);
+          ev.preventDefault();
+        }
+      })
+      .on('touchend.ba-gesture touchcancel.ba-gesture', cleanup);
+  }
+
+  function setupDrag(container, handle, resize) {
+     
+    handle.on('mousedown.ba', function(e) {
+      startSplitDrag(container, handle, resize, e, 'relative');
+    });
+
+     
+    if (isTouchPrimaryDevice()) {
+      container.on('touchstart.ba', function(e) {
+        if ($(e.target).closest('.handle').length) return;
+        beginTouchGesture(container, handle, resize, e);
+      });
+    }
+
+     
+    handle.on('touchstart.ba', function(e) {
+      e.stopPropagation();
+      startSplitDrag(container, handle, resize, e, 'relative');
     });
   }
 
@@ -1252,7 +1905,7 @@ It is worth noting that instead of having the same spp this time, I choose to co
     var width = container.width();
     resize.find('img').css('width', width + 'px');
 
-    drags(handle, resize, container);
+    setupDrag(container, handle, resize);
     updateLinks(container, handle);
 
     $(window).on('resize', function() {
@@ -1285,6 +1938,10 @@ For example, the shots below clearly demonstrate the differences. The mean free 
 
  
  
+
+
+
+
  
  
 
@@ -1298,6 +1955,13 @@ For example, the shots below clearly demonstrate the differences. The mean free 
     width: 70%;
     margin: auto;
     background-color: #FFFFFF;  
+}
+
+ 
+@media (hover: none) and (pointer: coarse) {
+    .ba-slider0662fea70917668a921a23d43c10e1da {
+        touch-action: pan-y;
+    }
 }
 
 .ba-slider0662fea70917668a921a23d43c10e1da img {
@@ -1348,15 +2012,56 @@ For example, the shots below clearly demonstrate the differences. The mean free 
     bottom: 8px;
     font-weight: bold;
     white-space: nowrap;
+    line-height: 1.3;
+    pointer-events: none;
+}
+
+.ba-bottom-left0662fea70917668a921a23d43c10e1da.ba-label-bg,
+.ba-bottom-right0662fea70917668a921a23d43c10e1da.ba-label-bg {
+     
+    isolation: isolate;
+}
+
+.ba-bottom-left0662fea70917668a921a23d43c10e1da.ba-label-bg::before,
+.ba-bottom-right0662fea70917668a921a23d43c10e1da.ba-label-bg::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: -0.25em;
+    bottom: -0.25em;
+    left: -0.6em;
+    right: -0.6em;
+    background-color: var(--label-bg);
+    border-radius: 3px;
 }
 
 .ba-bottom-left0662fea70917668a921a23d43c10e1da {
     left: 16px;
-    color: #FFFFFF;  
+    color: #FFFFFF;
+    z-index: 1;  
 }
+
 .ba-bottom-right0662fea70917668a921a23d43c10e1da {
     right: 16px;
-    color: #FFFFFF;  
+    color: #FFFFFF;
+     
+}
+
+figure.custom-compare figcaption.custom-figure-caption {
+    margin-top: 0.35rem;
+    line-height: 1.45;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p {
+    margin: 0.2em 0;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p:first-child {
+    margin-top: 0;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p:last-child {
+    margin-bottom: 0;
 }
 
  
@@ -1387,40 +2092,150 @@ For example, the shots below clearly demonstrate the differences. The mean free 
 
 <script>
 (function($) {
-  function drags(dragElement, resizeElement, container) {
-    dragElement.on('mousedown.ba touchstart.ba', function(e) {
-      dragElement.addClass('ba-draggable');
-      resizeElement.addClass('ba-resizable');
+  var GESTURE_THRESHOLD_PX = 10;
 
-      var startX = e.pageX || e.originalEvent.touches[0].pageX;
-      var dragWidth = dragElement.outerWidth(),
-          posX = dragElement.offset().left + dragWidth - startX,
-          containerOffset = container.offset().left,
-          containerWidth = container.outerWidth();
+  function pageX(e) {
+    if (e.pageX != null) return e.pageX;
+    var t = e.originalEvent && e.originalEvent.touches;
+    return t && t.length ? t[0].pageX : 0;
+  }
 
-      var minLeft = containerOffset + 10;
-      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+  function pageY(e) {
+    if (e.pageY != null) return e.pageY;
+    var t = e.originalEvent && e.originalEvent.touches;
+    return t && t.length ? t[0].pageY : 0;
+  }
 
-      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
-        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
-        var leftValue = moveX + posX - dragWidth;
+  function isTouchPrimaryDevice() {
+    return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  }
 
-        if (leftValue < minLeft) leftValue = minLeft;
-        else if (leftValue > maxLeft) leftValue = maxLeft;
+   
+  function createSplitDragSession(container, handle, resize, mode) {
+    var dragWidth = handle.outerWidth();
+    var containerOffset = container.offset().left;
+    var containerWidth = container.outerWidth();
+    var minLeft = containerOffset + 10;
+    var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+    var posX = null;
 
-        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+    handle.addClass('ba-draggable');
+    resize.addClass('ba-resizable');
 
-        dragElement.css('left', percentage);
-        resizeElement.css('width', percentage);
+    function update(moveX) {
+      var leftValue = mode === 'relative' && posX !== null
+        ? moveX + posX - dragWidth
+        : moveX - dragWidth / 2;
+      if (leftValue < minLeft) leftValue = minLeft;
+      else if (leftValue > maxLeft) leftValue = maxLeft;
 
-        updateLinks(container, dragElement);
-      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
-        dragElement.removeClass('ba-draggable');
-        resizeElement.removeClass('ba-resizable');
-        $(this).off('.ba');
+      var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+      handle.css('left', percentage);
+      resize.css('width', percentage);
+      updateLinks(container, handle);
+    }
+
+    function end() {
+      handle.removeClass('ba-draggable');
+      resize.removeClass('ba-resizable');
+    }
+
+    return {
+      update: update,
+      end: end,
+      setRelativeAnchor: function(anchorX) {
+        posX = handle.offset().left + dragWidth - anchorX;
+      }
+    };
+  }
+
+  function startSplitDrag(container, handle, resize, e, mode) {
+    var session = createSplitDragSession(container, handle, resize, mode);
+    if (mode === 'relative') {
+      session.setRelativeAnchor(pageX(e));
+    }
+    session.update(pageX(e));
+
+    $(document)
+      .on('mousemove.ba touchmove.ba', function(ev) {
+        session.update(pageX(ev));
+        ev.preventDefault();
+      })
+      .on('mouseup.ba touchend.ba touchcancel.ba', function() {
+        session.end();
+        $(document).off('.ba');
       });
 
-      e.preventDefault();
+    e.preventDefault();
+  }
+
+   
+  function beginTouchGesture(container, handle, resize, e) {
+    var startX = pageX(e);
+    var startY = pageY(e);
+    var phase = 'pending';
+    var session = null;
+
+    function cleanup() {
+      $(document).off('.ba-gesture');
+      if (session) {
+        session.end();
+        session = null;
+      }
+      phase = null;
+    }
+
+    $(document)
+      .on('touchmove.ba-gesture', function(ev) {
+        var x = pageX(ev);
+        var y = pageY(ev);
+        var dx = Math.abs(x - startX);
+        var dy = Math.abs(y - startY);
+
+        if (phase === 'pending') {
+          if (dx < GESTURE_THRESHOLD_PX && dy < GESTURE_THRESHOLD_PX) {
+            return;
+          }
+          if (dy > dx) {
+            phase = 'scroll';
+            cleanup();
+            return;
+          }
+          if (dx > dy) {
+            phase = 'drag';
+            session = createSplitDragSession(container, handle, resize, 'absolute');
+            session.update(x);
+            ev.preventDefault();
+          }
+          return;
+        }
+
+        if (phase === 'drag' && session) {
+          session.update(x);
+          ev.preventDefault();
+        }
+      })
+      .on('touchend.ba-gesture touchcancel.ba-gesture', cleanup);
+  }
+
+  function setupDrag(container, handle, resize) {
+     
+    handle.on('mousedown.ba', function(e) {
+      startSplitDrag(container, handle, resize, e, 'relative');
+    });
+
+     
+    if (isTouchPrimaryDevice()) {
+      container.on('touchstart.ba', function(e) {
+        if ($(e.target).closest('.handle').length) return;
+        beginTouchGesture(container, handle, resize, e);
+      });
+    }
+
+     
+    handle.on('touchstart.ba', function(e) {
+      e.stopPropagation();
+      startSplitDrag(container, handle, resize, e, 'relative');
     });
   }
 
@@ -1451,7 +2266,7 @@ For example, the shots below clearly demonstrate the differences. The mean free 
     var width = container.width();
     resize.find('img').css('width', width + 'px');
 
-    drags(handle, resize, container);
+    setupDrag(container, handle, resize);
     updateLinks(container, handle);
 
     $(window).on('resize', function() {
@@ -1518,6 +2333,10 @@ For anyone, who is interested, <a href="https://github.com/JiayinCao/SORT/blob/m
 
  
  
+
+
+
+
  
  
 
@@ -1531,6 +2350,13 @@ For anyone, who is interested, <a href="https://github.com/JiayinCao/SORT/blob/m
     width: 100%;
     margin: auto;
     background-color: #FFFFFF;  
+}
+
+ 
+@media (hover: none) and (pointer: coarse) {
+    .ba-sliderade1b6f1ca02a923b999c7d0c1bbb77d {
+        touch-action: pan-y;
+    }
 }
 
 .ba-sliderade1b6f1ca02a923b999c7d0c1bbb77d img {
@@ -1581,15 +2407,56 @@ For anyone, who is interested, <a href="https://github.com/JiayinCao/SORT/blob/m
     bottom: 8px;
     font-weight: bold;
     white-space: nowrap;
+    line-height: 1.3;
+    pointer-events: none;
+}
+
+.ba-bottom-leftade1b6f1ca02a923b999c7d0c1bbb77d.ba-label-bg,
+.ba-bottom-rightade1b6f1ca02a923b999c7d0c1bbb77d.ba-label-bg {
+     
+    isolation: isolate;
+}
+
+.ba-bottom-leftade1b6f1ca02a923b999c7d0c1bbb77d.ba-label-bg::before,
+.ba-bottom-rightade1b6f1ca02a923b999c7d0c1bbb77d.ba-label-bg::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: -0.25em;
+    bottom: -0.25em;
+    left: -0.6em;
+    right: -0.6em;
+    background-color: var(--label-bg);
+    border-radius: 3px;
 }
 
 .ba-bottom-leftade1b6f1ca02a923b999c7d0c1bbb77d {
     left: 16px;
-    color: #FFFFFF;  
+    color: #FFFFFF;
+    z-index: 1;  
 }
+
 .ba-bottom-rightade1b6f1ca02a923b999c7d0c1bbb77d {
     right: 16px;
-    color: #FFFFFF;  
+    color: #FFFFFF;
+     
+}
+
+figure.custom-compare figcaption.custom-figure-caption {
+    margin-top: 0.35rem;
+    line-height: 1.45;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p {
+    margin: 0.2em 0;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p:first-child {
+    margin-top: 0;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p:last-child {
+    margin-bottom: 0;
 }
 
  
@@ -1620,40 +2487,150 @@ For anyone, who is interested, <a href="https://github.com/JiayinCao/SORT/blob/m
 
 <script>
 (function($) {
-  function drags(dragElement, resizeElement, container) {
-    dragElement.on('mousedown.ba touchstart.ba', function(e) {
-      dragElement.addClass('ba-draggable');
-      resizeElement.addClass('ba-resizable');
+  var GESTURE_THRESHOLD_PX = 10;
 
-      var startX = e.pageX || e.originalEvent.touches[0].pageX;
-      var dragWidth = dragElement.outerWidth(),
-          posX = dragElement.offset().left + dragWidth - startX,
-          containerOffset = container.offset().left,
-          containerWidth = container.outerWidth();
+  function pageX(e) {
+    if (e.pageX != null) return e.pageX;
+    var t = e.originalEvent && e.originalEvent.touches;
+    return t && t.length ? t[0].pageX : 0;
+  }
 
-      var minLeft = containerOffset + 10;
-      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+  function pageY(e) {
+    if (e.pageY != null) return e.pageY;
+    var t = e.originalEvent && e.originalEvent.touches;
+    return t && t.length ? t[0].pageY : 0;
+  }
 
-      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
-        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
-        var leftValue = moveX + posX - dragWidth;
+  function isTouchPrimaryDevice() {
+    return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  }
 
-        if (leftValue < minLeft) leftValue = minLeft;
-        else if (leftValue > maxLeft) leftValue = maxLeft;
+   
+  function createSplitDragSession(container, handle, resize, mode) {
+    var dragWidth = handle.outerWidth();
+    var containerOffset = container.offset().left;
+    var containerWidth = container.outerWidth();
+    var minLeft = containerOffset + 10;
+    var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+    var posX = null;
 
-        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+    handle.addClass('ba-draggable');
+    resize.addClass('ba-resizable');
 
-        dragElement.css('left', percentage);
-        resizeElement.css('width', percentage);
+    function update(moveX) {
+      var leftValue = mode === 'relative' && posX !== null
+        ? moveX + posX - dragWidth
+        : moveX - dragWidth / 2;
+      if (leftValue < minLeft) leftValue = minLeft;
+      else if (leftValue > maxLeft) leftValue = maxLeft;
 
-        updateLinks(container, dragElement);
-      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
-        dragElement.removeClass('ba-draggable');
-        resizeElement.removeClass('ba-resizable');
-        $(this).off('.ba');
+      var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+      handle.css('left', percentage);
+      resize.css('width', percentage);
+      updateLinks(container, handle);
+    }
+
+    function end() {
+      handle.removeClass('ba-draggable');
+      resize.removeClass('ba-resizable');
+    }
+
+    return {
+      update: update,
+      end: end,
+      setRelativeAnchor: function(anchorX) {
+        posX = handle.offset().left + dragWidth - anchorX;
+      }
+    };
+  }
+
+  function startSplitDrag(container, handle, resize, e, mode) {
+    var session = createSplitDragSession(container, handle, resize, mode);
+    if (mode === 'relative') {
+      session.setRelativeAnchor(pageX(e));
+    }
+    session.update(pageX(e));
+
+    $(document)
+      .on('mousemove.ba touchmove.ba', function(ev) {
+        session.update(pageX(ev));
+        ev.preventDefault();
+      })
+      .on('mouseup.ba touchend.ba touchcancel.ba', function() {
+        session.end();
+        $(document).off('.ba');
       });
 
-      e.preventDefault();
+    e.preventDefault();
+  }
+
+   
+  function beginTouchGesture(container, handle, resize, e) {
+    var startX = pageX(e);
+    var startY = pageY(e);
+    var phase = 'pending';
+    var session = null;
+
+    function cleanup() {
+      $(document).off('.ba-gesture');
+      if (session) {
+        session.end();
+        session = null;
+      }
+      phase = null;
+    }
+
+    $(document)
+      .on('touchmove.ba-gesture', function(ev) {
+        var x = pageX(ev);
+        var y = pageY(ev);
+        var dx = Math.abs(x - startX);
+        var dy = Math.abs(y - startY);
+
+        if (phase === 'pending') {
+          if (dx < GESTURE_THRESHOLD_PX && dy < GESTURE_THRESHOLD_PX) {
+            return;
+          }
+          if (dy > dx) {
+            phase = 'scroll';
+            cleanup();
+            return;
+          }
+          if (dx > dy) {
+            phase = 'drag';
+            session = createSplitDragSession(container, handle, resize, 'absolute');
+            session.update(x);
+            ev.preventDefault();
+          }
+          return;
+        }
+
+        if (phase === 'drag' && session) {
+          session.update(x);
+          ev.preventDefault();
+        }
+      })
+      .on('touchend.ba-gesture touchcancel.ba-gesture', cleanup);
+  }
+
+  function setupDrag(container, handle, resize) {
+     
+    handle.on('mousedown.ba', function(e) {
+      startSplitDrag(container, handle, resize, e, 'relative');
+    });
+
+     
+    if (isTouchPrimaryDevice()) {
+      container.on('touchstart.ba', function(e) {
+        if ($(e.target).closest('.handle').length) return;
+        beginTouchGesture(container, handle, resize, e);
+      });
+    }
+
+     
+    handle.on('touchstart.ba', function(e) {
+      e.stopPropagation();
+      startSplitDrag(container, handle, resize, e, 'relative');
     });
   }
 
@@ -1684,7 +2661,7 @@ For anyone, who is interested, <a href="https://github.com/JiayinCao/SORT/blob/m
     var width = container.width();
     resize.find('img').css('width', width + 'px');
 
-    drags(handle, resize, container);
+    setupDrag(container, handle, resize);
     updateLinks(container, handle);
 
     $(window).on('resize', function() {
@@ -1756,6 +2733,10 @@ I can&rsquo;t say I care too much about the brighter bounce, but I definitely do
 
  
  
+
+
+
+
  
  
 
@@ -1769,6 +2750,13 @@ I can&rsquo;t say I care too much about the brighter bounce, but I definitely do
     width: 70%;
     margin: auto;
     background-color: #FFFFFF;  
+}
+
+ 
+@media (hover: none) and (pointer: coarse) {
+    .ba-slider5d0af1e7f834029ae9f0b50b5b49da21 {
+        touch-action: pan-y;
+    }
 }
 
 .ba-slider5d0af1e7f834029ae9f0b50b5b49da21 img {
@@ -1819,15 +2807,56 @@ I can&rsquo;t say I care too much about the brighter bounce, but I definitely do
     bottom: 8px;
     font-weight: bold;
     white-space: nowrap;
+    line-height: 1.3;
+    pointer-events: none;
+}
+
+.ba-bottom-left5d0af1e7f834029ae9f0b50b5b49da21.ba-label-bg,
+.ba-bottom-right5d0af1e7f834029ae9f0b50b5b49da21.ba-label-bg {
+     
+    isolation: isolate;
+}
+
+.ba-bottom-left5d0af1e7f834029ae9f0b50b5b49da21.ba-label-bg::before,
+.ba-bottom-right5d0af1e7f834029ae9f0b50b5b49da21.ba-label-bg::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: -0.25em;
+    bottom: -0.25em;
+    left: -0.6em;
+    right: -0.6em;
+    background-color: var(--label-bg);
+    border-radius: 3px;
 }
 
 .ba-bottom-left5d0af1e7f834029ae9f0b50b5b49da21 {
     left: 16px;
-    color: #FFFFFF;  
+    color: #FFFFFF;
+    z-index: 1;  
 }
+
 .ba-bottom-right5d0af1e7f834029ae9f0b50b5b49da21 {
     right: 16px;
-    color: #FFFFFF;  
+    color: #FFFFFF;
+     
+}
+
+figure.custom-compare figcaption.custom-figure-caption {
+    margin-top: 0.35rem;
+    line-height: 1.45;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p {
+    margin: 0.2em 0;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p:first-child {
+    margin-top: 0;
+}
+
+figure.custom-compare figcaption.custom-figure-caption p:last-child {
+    margin-bottom: 0;
 }
 
  
@@ -1858,40 +2887,150 @@ I can&rsquo;t say I care too much about the brighter bounce, but I definitely do
 
 <script>
 (function($) {
-  function drags(dragElement, resizeElement, container) {
-    dragElement.on('mousedown.ba touchstart.ba', function(e) {
-      dragElement.addClass('ba-draggable');
-      resizeElement.addClass('ba-resizable');
+  var GESTURE_THRESHOLD_PX = 10;
 
-      var startX = e.pageX || e.originalEvent.touches[0].pageX;
-      var dragWidth = dragElement.outerWidth(),
-          posX = dragElement.offset().left + dragWidth - startX,
-          containerOffset = container.offset().left,
-          containerWidth = container.outerWidth();
+  function pageX(e) {
+    if (e.pageX != null) return e.pageX;
+    var t = e.originalEvent && e.originalEvent.touches;
+    return t && t.length ? t[0].pageX : 0;
+  }
 
-      var minLeft = containerOffset + 10;
-      var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+  function pageY(e) {
+    if (e.pageY != null) return e.pageY;
+    var t = e.originalEvent && e.originalEvent.touches;
+    return t && t.length ? t[0].pageY : 0;
+  }
 
-      dragElement.parents().on("mousemove.ba touchmove.ba", function(e) {
-        var moveX = e.pageX || e.originalEvent.touches[0].pageX;
-        var leftValue = moveX + posX - dragWidth;
+  function isTouchPrimaryDevice() {
+    return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  }
 
-        if (leftValue < minLeft) leftValue = minLeft;
-        else if (leftValue > maxLeft) leftValue = maxLeft;
+   
+  function createSplitDragSession(container, handle, resize, mode) {
+    var dragWidth = handle.outerWidth();
+    var containerOffset = container.offset().left;
+    var containerWidth = container.outerWidth();
+    var minLeft = containerOffset + 10;
+    var maxLeft = containerOffset + containerWidth - dragWidth - 10;
+    var posX = null;
 
-        var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+    handle.addClass('ba-draggable');
+    resize.addClass('ba-resizable');
 
-        dragElement.css('left', percentage);
-        resizeElement.css('width', percentage);
+    function update(moveX) {
+      var leftValue = mode === 'relative' && posX !== null
+        ? moveX + posX - dragWidth
+        : moveX - dragWidth / 2;
+      if (leftValue < minLeft) leftValue = minLeft;
+      else if (leftValue > maxLeft) leftValue = maxLeft;
 
-        updateLinks(container, dragElement);
-      }).on('mouseup.ba touchend.ba touchcancel.ba', function() {
-        dragElement.removeClass('ba-draggable');
-        resizeElement.removeClass('ba-resizable');
-        $(this).off('.ba');
+      var percentage = (leftValue + dragWidth / 2 - containerOffset) * 100 / containerWidth + '%';
+      handle.css('left', percentage);
+      resize.css('width', percentage);
+      updateLinks(container, handle);
+    }
+
+    function end() {
+      handle.removeClass('ba-draggable');
+      resize.removeClass('ba-resizable');
+    }
+
+    return {
+      update: update,
+      end: end,
+      setRelativeAnchor: function(anchorX) {
+        posX = handle.offset().left + dragWidth - anchorX;
+      }
+    };
+  }
+
+  function startSplitDrag(container, handle, resize, e, mode) {
+    var session = createSplitDragSession(container, handle, resize, mode);
+    if (mode === 'relative') {
+      session.setRelativeAnchor(pageX(e));
+    }
+    session.update(pageX(e));
+
+    $(document)
+      .on('mousemove.ba touchmove.ba', function(ev) {
+        session.update(pageX(ev));
+        ev.preventDefault();
+      })
+      .on('mouseup.ba touchend.ba touchcancel.ba', function() {
+        session.end();
+        $(document).off('.ba');
       });
 
-      e.preventDefault();
+    e.preventDefault();
+  }
+
+   
+  function beginTouchGesture(container, handle, resize, e) {
+    var startX = pageX(e);
+    var startY = pageY(e);
+    var phase = 'pending';
+    var session = null;
+
+    function cleanup() {
+      $(document).off('.ba-gesture');
+      if (session) {
+        session.end();
+        session = null;
+      }
+      phase = null;
+    }
+
+    $(document)
+      .on('touchmove.ba-gesture', function(ev) {
+        var x = pageX(ev);
+        var y = pageY(ev);
+        var dx = Math.abs(x - startX);
+        var dy = Math.abs(y - startY);
+
+        if (phase === 'pending') {
+          if (dx < GESTURE_THRESHOLD_PX && dy < GESTURE_THRESHOLD_PX) {
+            return;
+          }
+          if (dy > dx) {
+            phase = 'scroll';
+            cleanup();
+            return;
+          }
+          if (dx > dy) {
+            phase = 'drag';
+            session = createSplitDragSession(container, handle, resize, 'absolute');
+            session.update(x);
+            ev.preventDefault();
+          }
+          return;
+        }
+
+        if (phase === 'drag' && session) {
+          session.update(x);
+          ev.preventDefault();
+        }
+      })
+      .on('touchend.ba-gesture touchcancel.ba-gesture', cleanup);
+  }
+
+  function setupDrag(container, handle, resize) {
+     
+    handle.on('mousedown.ba', function(e) {
+      startSplitDrag(container, handle, resize, e, 'relative');
+    });
+
+     
+    if (isTouchPrimaryDevice()) {
+      container.on('touchstart.ba', function(e) {
+        if ($(e.target).closest('.handle').length) return;
+        beginTouchGesture(container, handle, resize, e);
+      });
+    }
+
+     
+    handle.on('touchstart.ba', function(e) {
+      e.stopPropagation();
+      startSplitDrag(container, handle, resize, e, 'relative');
     });
   }
 
@@ -1922,7 +3061,7 @@ I can&rsquo;t say I care too much about the brighter bounce, but I definitely do
     var width = container.width();
     resize.find('img').css('width', width + 'px');
 
-    drags(handle, resize, container);
+    setupDrag(container, handle, resize);
     updateLinks(container, handle);
 
     $(window).on('resize', function() {
@@ -1973,33 +3112,65 @@ Apart from the common subsurface scattering materials, like skin, wax, this algo
 
       <div class="">
         <style>
+     
+    :root {
+        --article-max-width: 90rem;  
+        --toc-max-width: 32rem;
+        --toc-min-width: 12rem;      
+        --toc-gap: 1rem;             
+        --toc-margin-right: 1rem;    
+         
+        --toc-show-min-width: calc(var(--article-max-width) + 2 * (var(--toc-min-width) + var(--toc-gap) + var(--toc-margin-right)));
+    }
+
     .toc {
+        display: none;
         position: fixed;
-        left: 50%;
-        top: 110px;
+        top: 70px;
         font-size: 0.8em;
-        width: 320px;
-        margin-left: 480px;
         padding-left: 20px;
         padding-bottom: 100px;
-        padding-top: 80px;
+        padding-top: 40px;
         overflow-y: auto;
         line-height: 1.7em;
         scroll-padding-top: 100px;
-        border-left: 3px solid rgba(128, 128, 128, 0.4);;
+        border-left: 3px solid rgba(128, 128, 128, 0.4);
+        max-height: calc(100vh - 12rem);
+        left: calc(50% + var(--article-max-width) / 2 + var(--toc-gap));
+        width: min(var(--toc-max-width), max(0px, calc((100vw - var(--article-max-width)) / 2 - var(--toc-gap) - var(--toc-margin-right))));
     }
 
-    .toc label {
+    @media (min-width: 90rem) {
+      .toc {
+        display: block;
+      }
+    }
+
+    @media (max-width: calc(var(--toc-show-min-width) - 1px)) {
+      .toc {
+        display: none !important;
+      }
+    }
+
+    .toc .toc-title {
+        display: block;
         font-size: 20px;
         font-weight: bold;
-        margin: 6.4rem 0 3.2rem 0;
+        margin: 3.5rem 0 3.2rem 0;
+        color: inherit;
+        text-decoration: none;
+        cursor: pointer;
     }
 
-    .toc a {
+    .toc .toc-title:hover {
+        text-decoration: underline;
+    }
+
+    .toc #TableOfContents a {
         filter: grayscale(90%);
     }
 
-    .toc a:hover {
+    .toc #TableOfContents a:hover {
         font-weight: bold;
         filter: grayscale(0%);
     }
@@ -2024,24 +3195,14 @@ Apart from the common subsurface scattering materials, like skin, wax, this algo
         list-style-type: circle;
     }
 
-    .toc li a.active {
+    .toc #TableOfContents li a.active {
         font-weight: bold;
         filter: grayscale(0%);
     }
 
-    .toc li a.semi_active {
+    .toc #TableOfContents li a.semi_active {
         font-weight: bold;
         filter: grayscale(60%);
-    }
-
-    @media (max-width: 1640px) {
-      main {
-        max-width: 100%;
-      }
-  
-      .toc {
-        display: none;
-      }
     }
 
 </style>
@@ -2057,7 +3218,7 @@ Apart from the common subsurface scattering materials, like skin, wax, this algo
 
 
 <div class="toc" style="display:none;">
-    <label>Contents</label>
+    <a class="toc-title" href="#post-start">Contents</a>
     <nav id="TableOfContents">
   <ul>
     <li><a href="#what-is-subsurface-scattering">What is Subsurface Scattering</a></li>
@@ -2278,7 +3439,10 @@ Apart from the common subsurface scattering materials, like skin, wax, this algo
 
     
       
-      <script src="/js/dark-mode.min.928a160d00dae3b92c8d5c8ed7b9435b4b6311f09bcd24f101165b7ff8a82f47.js"></script>
+      <script src="/js/dark-mode.min.fe7db0376c05c273207f25f84b558d955da8cc93ccd69c2714cbaae19ef11556.js"></script>
+    
+    <script src="/js/scroll-keys.js"></script>
+
     
 
     

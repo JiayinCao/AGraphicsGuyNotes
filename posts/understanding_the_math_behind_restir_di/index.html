@@ -27,6 +27,7 @@ The original papers are clearly the best resources to learn the tech. Due to the
 <meta property="article:modified_time" content="2022-12-05T00:00:00+00:00" />
 
 
+
     <title>
   Understanding The Math Behind ReSTIR DI · A Graphics Guy&#39;s Note
 </title>
@@ -60,6 +61,10 @@ The original papers are clearly the best resources to learn the tech. Due to the
     
 
     
+      <link rel="stylesheet" href="/css/chroma-light.css" />
+    
+      <link rel="stylesheet" href="/css/chroma-dark.css" />
+    
       <link rel="stylesheet" href="/css/custom.css" />
     
 
@@ -67,7 +72,7 @@ The original papers are clearly the best resources to learn the tech. Due to the
       
       
         
-        <link rel="stylesheet" href="/main.min.c6871eec105836f05025bd3d682a4f431abfdb83d740febdda8f8be50661a7de.css" integrity="sha256-xoce7BBYNvBQJb09aCpPQxq/24PXQP692o&#43;L5QZhp94=" crossorigin="anonymous" media="screen" />
+        <link rel="stylesheet" href="/main.min.8e6e1803b3e0f99ca06e08fbf045b41900ee5c04fb5b804be5c987ee4c81c9f3.css" integrity="sha256-jm4YA7Pg&#43;Zygbgj78EW0GQDuXAT7W4BL5cmH7kyByfM=" crossorigin="anonymous" media="screen" />
       
     
 
@@ -120,7 +125,7 @@ The original papers are clearly the best resources to learn the tech. Due to the
 </style>
     
 
-    <meta name="generator" content="Hugo 0.117.0">
+    <meta name="generator" content="Hugo 0.120.4">
 
     <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
@@ -178,7 +183,7 @@ The original papers are clearly the best resources to learn the tech. Due to the
     <article>
       <header>
         <div class="post-title">
-          <h1 class="title">Understanding The Math Behind ReSTIR DI</h1>
+          <h1 class="title" id="post-start" tabindex="-1">Understanding The Math Behind ReSTIR DI</h1>
         </div>
         <div class="post-meta">
           <div class="date">
@@ -839,22 +844,22 @@ So where does this N fit in the math?</p>
 <p>Mathematically, the likelihood of picking this sample will clearly be boosted by N times and since we feed it N times, the number of visited proposal samples in this reservoir would need to be bumped by N as well, not 1. However, we don&rsquo;t really need to feed the neighbor target sample by N times at all, we only need to feed it once, but with the weight scaled by N and bump the visited sample count by N in the current reservoir. This all can be done within O(1) time.</p>
 <p>I think it is clear at this point that the $N$ factor in $\hat{p}(x) W(x_M) N$ really is just a scaling factor. It marks how important we thin the sample should be. It is an over-optimistic scaling factor since those $N$ indirectly visisted sample count is the theoritical maximum. In reality, there could be some duplicated signal that reduces the efficiency of the sample.</p>
 <p>Below is the algorithm 4 in the original paper,</p>
-<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;display:grid;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;display:grid;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">2
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">3
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">4
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">5
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">6
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
 </span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;display:grid;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>function combineReservoirs(q, r1, r2, ..., rk)
-</span></span><span style="display:flex;"><span>  Reservoir s
-</span></span><span style="display:flex;"><span>  <span style="color:#fff;font-weight:bold">for</span> r in {r1, r2, ..., rk} do
-</span></span><span style="display:flex;"><span>    s.update(r.y, p_hat(r.y) * r.W * r.M)
-</span></span><span style="display:flex;"><span>  s.M = s1.M + s2.M + ... + sk.M
-</span></span><span style="display:flex;"><span>  s.W = s.w_sum / (p_hat(s.y) * s.M)</span></span></code></pre></td></tr></table>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">function</span> <span class="n">combineReservoirs</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="n">rk</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Reservoir</span> <span class="n">s</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="p">{</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="n">rk</span><span class="p">}</span> <span class="n">do</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">p_hat</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="o">.</span><span class="n">W</span> <span class="o">*</span> <span class="n">r</span><span class="o">.</span><span class="n">M</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="n">s</span><span class="o">.</span><span class="n">M</span> <span class="o">=</span> <span class="n">s1</span><span class="o">.</span><span class="n">M</span> <span class="o">+</span> <span class="n">s2</span><span class="o">.</span><span class="n">M</span> <span class="o">+</span> <span class="o">...</span> <span class="o">+</span> <span class="n">sk</span><span class="o">.</span><span class="n">M</span>
+</span></span><span class="line"><span class="cl">  <span class="n">s</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">w_sum</span> <span class="o">/</span> <span class="p">(</span><span class="n">p_hat</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="n">M</span><span class="p">)</span></span></span></code></pre></td></tr></table>
 </div>
 </div>
 <p>Please notice that the 4th line re-update the M of the reservoir even if it is already updated in the update function on the 3rd line already. It actually overrides that. The M is bumped by one in the update function as it assumes the incoming input sample is only one sample. However, as we essentially treat each target sample as it has multiple duplications and feed them multiple times, we would need to update the visited sample count properly.</p>
@@ -951,33 +956,65 @@ Hopefully, this would convince readers that this algorithm is indeed unbiased.</
 
       <div class="">
         <style>
+     
+    :root {
+        --article-max-width: 90rem;  
+        --toc-max-width: 32rem;
+        --toc-min-width: 12rem;      
+        --toc-gap: 1rem;             
+        --toc-margin-right: 1rem;    
+         
+        --toc-show-min-width: calc(var(--article-max-width) + 2 * (var(--toc-min-width) + var(--toc-gap) + var(--toc-margin-right)));
+    }
+
     .toc {
+        display: none;
         position: fixed;
-        left: 50%;
-        top: 110px;
+        top: 70px;
         font-size: 0.8em;
-        width: 320px;
-        margin-left: 480px;
         padding-left: 20px;
         padding-bottom: 100px;
-        padding-top: 80px;
+        padding-top: 40px;
         overflow-y: auto;
         line-height: 1.7em;
         scroll-padding-top: 100px;
-        border-left: 3px solid rgba(128, 128, 128, 0.4);;
+        border-left: 3px solid rgba(128, 128, 128, 0.4);
+        max-height: calc(100vh - 12rem);
+        left: calc(50% + var(--article-max-width) / 2 + var(--toc-gap));
+        width: min(var(--toc-max-width), max(0px, calc((100vw - var(--article-max-width)) / 2 - var(--toc-gap) - var(--toc-margin-right))));
     }
 
-    .toc label {
+    @media (min-width: 90rem) {
+      .toc {
+        display: block;
+      }
+    }
+
+    @media (max-width: calc(var(--toc-show-min-width) - 1px)) {
+      .toc {
+        display: none !important;
+      }
+    }
+
+    .toc .toc-title {
+        display: block;
         font-size: 20px;
         font-weight: bold;
-        margin: 6.4rem 0 3.2rem 0;
+        margin: 3.5rem 0 3.2rem 0;
+        color: inherit;
+        text-decoration: none;
+        cursor: pointer;
     }
 
-    .toc a {
+    .toc .toc-title:hover {
+        text-decoration: underline;
+    }
+
+    .toc #TableOfContents a {
         filter: grayscale(90%);
     }
 
-    .toc a:hover {
+    .toc #TableOfContents a:hover {
         font-weight: bold;
         filter: grayscale(0%);
     }
@@ -1002,24 +1039,14 @@ Hopefully, this would convince readers that this algorithm is indeed unbiased.</
         list-style-type: circle;
     }
 
-    .toc li a.active {
+    .toc #TableOfContents li a.active {
         font-weight: bold;
         filter: grayscale(0%);
     }
 
-    .toc li a.semi_active {
+    .toc #TableOfContents li a.semi_active {
         font-weight: bold;
         filter: grayscale(60%);
-    }
-
-    @media (max-width: 1640px) {
-      main {
-        max-width: 100%;
-      }
-  
-      .toc {
-        display: none;
-      }
     }
 
 </style>
@@ -1035,7 +1062,7 @@ Hopefully, this would convince readers that this algorithm is indeed unbiased.</
 
 
 <div class="toc" style="display:none;">
-    <label>Contents</label>
+    <a class="toc-title" href="#post-start">Contents</a>
     <nav id="TableOfContents">
   <ul>
     <li><a href="#preliminary-reading">Preliminary Reading</a>
@@ -1267,7 +1294,10 @@ Hopefully, this would convince readers that this algorithm is indeed unbiased.</
 
     
       
-      <script src="/js/dark-mode.min.928a160d00dae3b92c8d5c8ed7b9435b4b6311f09bcd24f101165b7ff8a82f47.js"></script>
+      <script src="/js/dark-mode.min.fe7db0376c05c273207f25f84b558d955da8cc93ccd69c2714cbaae19ef11556.js"></script>
+    
+    <script src="/js/scroll-keys.js"></script>
+
     
 
     

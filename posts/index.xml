@@ -6,7 +6,16 @@
     <description>Recent content in Posts on A Graphics Guy&#39;s Note</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 09 May 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://agraphicsguynotes.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 07 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://agraphicsguynotes.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Procedural UV Derivatives Evaluation in SORT Renderer</title>
+      <link>https://agraphicsguynotes.com/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/</link>
+      <pubDate>Sun, 07 Jun 2026 00:00:00 +0000</pubDate>
+      
+      <guid>https://agraphicsguynotes.com/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/</guid>
+      <description>In this post, I want to talk about a topic I have been meaning to write about for quite a few years: texture UV derivatives evaluation in my offline renderer, SORT (Simple Open Source Ray Tracer), which I&amp;rsquo;ll use throughout this post. It normally is not a major challenge. However, my own custom shading language[1] specifically designed for my renderer adds quite a lot of complexity in it. It was previously named as Tiny Shading Language and renamed as SORT Shading Language (SSL for short) as I fused it into my rendererer project.</description>
+    </item>
+    
     <item>
       <title>Understanding The Math Behind ReSTIR GI</title>
       <link>https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_gi/</link>
@@ -39,10 +48,10 @@ The original papers are clearly the best resources to learn the tech. Due to the
     
     <item>
       <title>Making a Shading Language for my Offline Renderer</title>
-      <link>https://agraphicsguynotes.com/posts/making_a_shading_lagnauge_for_my_offline_renderer/</link>
+      <link>https://agraphicsguynotes.com/posts/making_a_shading_langauge_for_my_offline_renderer/</link>
       <pubDate>Tue, 09 Mar 2021 00:00:00 +0000</pubDate>
       
-      <guid>https://agraphicsguynotes.com/posts/making_a_shading_lagnauge_for_my_offline_renderer/</guid>
+      <guid>https://agraphicsguynotes.com/posts/making_a_shading_langauge_for_my_offline_renderer/</guid>
       <description>As a graphics programmer, I don&amp;rsquo;t usually spend too much time on something that is not strictly related to computer graphics or game engine. However, I did spend four months in my spare time last year building a shading language for my renderer SORT, which I call Tiny Shading Language (TSL).
 In the beginning, I didn&amp;rsquo;t know how it would end up eventually due to the lack of knowledge about how compilers work in general, this is not something graphics programmers touch regularly.</description>
     </item>
