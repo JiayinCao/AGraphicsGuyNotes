@@ -3057,38 +3057,202 @@ $$
 <h2 id="applying-derivatives-in-mipmap-selection-in-sort">Applying Derivatives in Mipmap Selection in SORT</h2>
 <p>To evaluate the UV derivatives, I wired them into an early mipmap prototype in SORT. At zero manual bias, selection should stay as close as possible to the reference. Adding +1 or +2 bias should then make the image noticeably blurrier. If it does not, SORT doesn&rsquo;t choose the most optimal mipmap, hence it could waste memory unnecessarily in rendering with heavy asset. Expecting unbiased result is unrealistic as explained earlier.</p>
 <p>The figure below compares several selection strategies.</p>
-<figure class="image-switcher" id="isw-fa1b5f3f05" style="--image-switcher-width: 100%; --loupe-src-size: 128; --loupe-scale: 4;">
+<style>
+#isw-43d283f77f.image-switcher {
+  margin: 0;
+  padding: 0;
+  width: var(--image-switcher-width, 100%);
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+#isw-43d283f77f .image-switcher-viewport {
+  position: relative;
+  width: 100%;
+  line-height: 0;
+  cursor: pointer;
+  touch-action: none;
+}
+#isw-43d283f77f .image-switcher-viewport img.image-switcher-img {
+  display: none !important;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+#isw-43d283f77f .image-switcher-viewport img.image-switcher-img.is-active {
+  display: block !important;
+  position: relative;
+  z-index: 1;
+}
+#isw-43d283f77f .image-switcher-loupe-marker {
+  position: absolute;
+  box-sizing: border-box;
+  border: 2px solid #ff9800;
+  outline: 1px solid rgba(255, 255, 255, 0.85);
+  outline-offset: -1px;
+  background: rgba(255, 152, 0, 0.18);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+  cursor: move;
+  z-index: 5;
+  display: none;
+}
+#isw-43d283f77f .image-switcher-loupe-marker.is-visible {
+  display: block;
+}
+#isw-43d283f77f .image-switcher-loupe-marker.is-loupe-1 {
+  border-color: #03a9f4;
+  background: rgba(3, 169, 244, 0.18);
+  z-index: 6;
+}
+#isw-43d283f77f .image-switcher-loupe-marker.is-loupe-2 {
+  border-color: #8bc34a;
+  background: rgba(139, 195, 74, 0.18);
+  z-index: 7;
+}
+#isw-43d283f77f .image-switcher-loupe-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 0.65rem;
+  gap: 0.35rem;
+}
+#isw-43d283f77f .image-switcher-loupe-views {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+  width: 100%;
+}
+#isw-43d283f77f .image-switcher-loupe-view {
+  min-width: 0;
+}
+#isw-43d283f77f .image-switcher-loupe-view.is-loupe-0 .image-switcher-loupe-canvas {
+  border-color: #ff9800;
+}
+#isw-43d283f77f .image-switcher-loupe-view.is-loupe-1 .image-switcher-loupe-canvas {
+  border-color: #03a9f4;
+}
+#isw-43d283f77f .image-switcher-loupe-view.is-loupe-2 .image-switcher-loupe-canvas {
+  border-color: #8bc34a;
+}
+#isw-43d283f77f .image-switcher-loupe-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  border: 2px solid #bdbdbd;
+  background: #eeeeee;
+}
+body.colorscheme-dark #isw-43d283f77f .image-switcher-loupe-canvas {
+  border-color: #757575;
+  background: #424242;
+}
+@media (prefers-color-scheme: dark) {
+  body.colorscheme-auto #isw-43d283f77f .image-switcher-loupe-canvas {
+    border-color: #757575;
+    background: #424242;
+  }
+}
+#isw-43d283f77f .image-switcher-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.28rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+#isw-43d283f77f .image-switcher-btn {
+  font: inherit;
+  font-size: 0.82em;
+  line-height: 1.25;
+  padding: 0.35em 0.75em;
+  border: 1px solid #bdbdbd;
+  border-radius: 4px;
+  background: #f5f5f5;
+  color: #424242;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+#isw-43d283f77f .image-switcher-btn:hover {
+  background: #eeeeee;
+  border-color: #9e9e9e;
+}
+#isw-43d283f77f .image-switcher-btn.is-active {
+  background: #616161;
+  border-color: #616161;
+  color: #fafafa;
+}
+body.colorscheme-dark #isw-43d283f77f .image-switcher-btn {
+  background: #424242;
+  border-color: #757575;
+  color: #eeeeee;
+}
+body.colorscheme-dark #isw-43d283f77f .image-switcher-btn:hover {
+  background: #4f4f4f;
+  border-color: #9e9e9e;
+}
+body.colorscheme-dark #isw-43d283f77f .image-switcher-btn.is-active {
+  background: #bdbdbd;
+  border-color: #bdbdbd;
+  color: #212121;
+}
+@media (prefers-color-scheme: dark) {
+  body.colorscheme-auto #isw-43d283f77f .image-switcher-btn {
+    background: #424242;
+    border-color: #757575;
+    color: #eeeeee;
+  }
+  body.colorscheme-auto #isw-43d283f77f .image-switcher-btn:hover {
+    background: #4f4f4f;
+    border-color: #9e9e9e;
+  }
+  body.colorscheme-auto #isw-43d283f77f .image-switcher-btn.is-active {
+    background: #bdbdbd;
+    border-color: #bdbdbd;
+    color: #212121;
+  }
+}
+#isw-43d283f77f .custom-figure-caption {
+  text-align: center;
+  margin-top: 0.35rem;
+  line-height: 1.4;
+  font-size: 0.85em;
+}
+</style>
+
+<figure class="image-switcher" id="isw-43d283f77f" style="--image-switcher-width: 100%; --loupe-src-size: 128; --loupe-scale: 4;">
   <div class="image-switcher-viewport" aria-label="Drag the colored squares to inspect regions. Click elsewhere on the image to open it in a new tab."><img
         class="image-switcher-img"
         src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/ref.png"
         alt="Reference"
-        data-index="0"
-      ><img
+        data-index="0" style="display:none" hidden><img
         class="image-switcher-img"
         src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/mip_force_0.png"
         alt="Force mip 0"
-        data-index="1"
-      ><img
+        data-index="1" style="display:none" hidden><img
         class="image-switcher-img"
         src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/mip_offset_%28-1%29.png"
         alt="Mip bias −1"
-        data-index="2"
-      ><img
+        data-index="2" style="display:none" hidden><img
         class="image-switcher-img is-active"
         src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/mip_offset_0.png"
         alt="Mip bias 0"
-        data-index="3"
-      ><img
+        data-index="3" style="display:block"><img
         class="image-switcher-img"
         src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/mip_offset_1.png"
         alt="Mip bias &#43;1"
-        data-index="4"
-      ><img
+        data-index="4" style="display:none" hidden><img
+        class="image-switcher-img"
+        src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/mip_offset_2.png"
+        alt="Mip bias &#43;2"
+        data-index="5" style="display:none" hidden><img
         class="image-switcher-img"
         src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/pigmip.png"
         alt="Average Mip Selection"
-        data-index="5"
-      ><div class="image-switcher-loupe-marker is-loupe-0" data-loupe="0" aria-hidden="true"></div>
+        data-index="6" style="display:none" hidden><div class="image-switcher-loupe-marker is-loupe-0" data-loupe="0" aria-hidden="true"></div>
     <div class="image-switcher-loupe-marker is-loupe-1" data-loupe="1" aria-hidden="true"></div>
     <div class="image-switcher-loupe-marker is-loupe-2" data-loupe="2" aria-hidden="true"></div>
   </div>
@@ -3141,17 +3305,23 @@ $$
         role="tab"
         data-index="5"
         aria-selected="false"
+      >Mip bias &#43;2</button><button
+        type="button"
+        class="image-switcher-btn"
+        role="tab"
+        data-index="6"
+        aria-selected="false"
       >Average Mip Selection</button></div><figcaption class="custom-figure-caption">The <strong>reference</strong> uses 64 samples per pixel without the mip selection path under test. Other variants use one sample per pixel and either force a mip level or apply a manual mip bias. Asset courtesy of <a href="https://www.artstation.com/xuxiao305">Xiao Xu</a>.</figcaption></figure>
 
 <script>
 (function () {
-  var root = document.getElementById('isw-fa1b5f3f05');
+  var root = document.getElementById('isw-43d283f77f');
   if (!root) return;
 
   var LOUPE_COUNT = 3;
   var LOUPE_SRC = parseInt(root.style.getPropertyValue("--loupe-src-size"), 10) || 128;
   var LOUPE_SCALE = parseInt(root.style.getPropertyValue("--loupe-scale"), 10) || 4;
-  var LOUPE_STORAGE_KEY = "image-switcher-loupes-isw-fa1b5f3f05";
+  var LOUPE_STORAGE_KEY = "image-switcher-loupes-isw-43d283f77f";
   var LOUPE_BAKED = true;
 
   var viewport = root.querySelector(".image-switcher-viewport");
@@ -3334,7 +3504,14 @@ $$
 
   function show(index) {
     imgs.forEach(function (img, i) {
-      img.classList.toggle("is-active", i === index);
+      var on = i === index;
+      img.classList.toggle("is-active", on);
+      img.style.display = on ? "block" : "none";
+      if (on) {
+        img.removeAttribute("hidden");
+      } else {
+        img.setAttribute("hidden", "");
+      }
     });
     buttons.forEach(function (btn, i) {
       var on = i === index;
@@ -3443,28 +3620,190 @@ $$
 <li>We assumed each hit triangle behaves like an infinite plane, and the shaders in this asset read only <code>uvw</code> from the SSL global to drive texture coordinates. Under those conditions, mip selection for a small triangle may appear consistent even though not strictly identical. That can in theory produce discontinuities at triangle edges, especially when there is no trilinear sampling, but in practice they are hard to see. So I&rsquo;ll just leave it this way until it needs a solutioin next. Below is SORT&rsquo;s mip selection debug view for this shot.</li>
 </ul>
 <p>Last, let&rsquo;s compare the difference of mip selection method in a final render shot, which is what we care most at the end of the day.</p>
+<style>
+#isw-a90b73ba0d.image-switcher {
+  margin: 0;
+  padding: 0;
+  width: var(--image-switcher-width, 100%);
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+#isw-a90b73ba0d .image-switcher-viewport {
+  position: relative;
+  width: 100%;
+  line-height: 0;
+  cursor: pointer;
+  touch-action: none;
+}
+#isw-a90b73ba0d .image-switcher-viewport img.image-switcher-img {
+  display: none !important;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+#isw-a90b73ba0d .image-switcher-viewport img.image-switcher-img.is-active {
+  display: block !important;
+  position: relative;
+  z-index: 1;
+}
+#isw-a90b73ba0d .image-switcher-loupe-marker {
+  position: absolute;
+  box-sizing: border-box;
+  border: 2px solid #ff9800;
+  outline: 1px solid rgba(255, 255, 255, 0.85);
+  outline-offset: -1px;
+  background: rgba(255, 152, 0, 0.18);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+  cursor: move;
+  z-index: 5;
+  display: none;
+}
+#isw-a90b73ba0d .image-switcher-loupe-marker.is-visible {
+  display: block;
+}
+#isw-a90b73ba0d .image-switcher-loupe-marker.is-loupe-1 {
+  border-color: #03a9f4;
+  background: rgba(3, 169, 244, 0.18);
+  z-index: 6;
+}
+#isw-a90b73ba0d .image-switcher-loupe-marker.is-loupe-2 {
+  border-color: #8bc34a;
+  background: rgba(139, 195, 74, 0.18);
+  z-index: 7;
+}
+#isw-a90b73ba0d .image-switcher-loupe-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 0.65rem;
+  gap: 0.35rem;
+}
+#isw-a90b73ba0d .image-switcher-loupe-views {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+  width: 100%;
+}
+#isw-a90b73ba0d .image-switcher-loupe-view {
+  min-width: 0;
+}
+#isw-a90b73ba0d .image-switcher-loupe-view.is-loupe-0 .image-switcher-loupe-canvas {
+  border-color: #ff9800;
+}
+#isw-a90b73ba0d .image-switcher-loupe-view.is-loupe-1 .image-switcher-loupe-canvas {
+  border-color: #03a9f4;
+}
+#isw-a90b73ba0d .image-switcher-loupe-view.is-loupe-2 .image-switcher-loupe-canvas {
+  border-color: #8bc34a;
+}
+#isw-a90b73ba0d .image-switcher-loupe-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  border: 2px solid #bdbdbd;
+  background: #eeeeee;
+}
+body.colorscheme-dark #isw-a90b73ba0d .image-switcher-loupe-canvas {
+  border-color: #757575;
+  background: #424242;
+}
+@media (prefers-color-scheme: dark) {
+  body.colorscheme-auto #isw-a90b73ba0d .image-switcher-loupe-canvas {
+    border-color: #757575;
+    background: #424242;
+  }
+}
+#isw-a90b73ba0d .image-switcher-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.28rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+#isw-a90b73ba0d .image-switcher-btn {
+  font: inherit;
+  font-size: 0.82em;
+  line-height: 1.25;
+  padding: 0.35em 0.75em;
+  border: 1px solid #bdbdbd;
+  border-radius: 4px;
+  background: #f5f5f5;
+  color: #424242;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+#isw-a90b73ba0d .image-switcher-btn:hover {
+  background: #eeeeee;
+  border-color: #9e9e9e;
+}
+#isw-a90b73ba0d .image-switcher-btn.is-active {
+  background: #616161;
+  border-color: #616161;
+  color: #fafafa;
+}
+body.colorscheme-dark #isw-a90b73ba0d .image-switcher-btn {
+  background: #424242;
+  border-color: #757575;
+  color: #eeeeee;
+}
+body.colorscheme-dark #isw-a90b73ba0d .image-switcher-btn:hover {
+  background: #4f4f4f;
+  border-color: #9e9e9e;
+}
+body.colorscheme-dark #isw-a90b73ba0d .image-switcher-btn.is-active {
+  background: #bdbdbd;
+  border-color: #bdbdbd;
+  color: #212121;
+}
+@media (prefers-color-scheme: dark) {
+  body.colorscheme-auto #isw-a90b73ba0d .image-switcher-btn {
+    background: #424242;
+    border-color: #757575;
+    color: #eeeeee;
+  }
+  body.colorscheme-auto #isw-a90b73ba0d .image-switcher-btn:hover {
+    background: #4f4f4f;
+    border-color: #9e9e9e;
+  }
+  body.colorscheme-auto #isw-a90b73ba0d .image-switcher-btn.is-active {
+    background: #bdbdbd;
+    border-color: #bdbdbd;
+    color: #212121;
+  }
+}
+#isw-a90b73ba0d .custom-figure-caption {
+  text-align: center;
+  margin-top: 0.35rem;
+  line-height: 1.4;
+  font-size: 0.85em;
+}
+</style>
+
 <figure class="image-switcher" id="isw-a90b73ba0d" style="--image-switcher-width: 100%; --loupe-src-size: 128; --loupe-scale: 4;">
   <div class="image-switcher-viewport" aria-label="Drag the colored squares to inspect regions. Click elsewhere on the image to open it in a new tab."><img
         class="image-switcher-img"
         src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/car_ref.png"
         alt="Reference"
-        data-index="0"
-      ><img
+        data-index="0" style="display:none" hidden><img
         class="image-switcher-img is-active"
         src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/car_mipped.png"
         alt="Mip bias 0"
-        data-index="1"
-      ><img
+        data-index="1" style="display:block"><img
         class="image-switcher-img"
         src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/car_offset_1.png"
         alt="Mip bias −1"
-        data-index="2"
-      ><img
+        data-index="2" style="display:none" hidden><img
         class="image-switcher-img"
         src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/carmip.png"
         alt="Primary Bounce Average MipSelection"
-        data-index="3"
-      ><div class="image-switcher-loupe-marker is-loupe-0" data-loupe="0" aria-hidden="true"></div>
+        data-index="3" style="display:none" hidden><div class="image-switcher-loupe-marker is-loupe-0" data-loupe="0" aria-hidden="true"></div>
     <div class="image-switcher-loupe-marker is-loupe-1" data-loupe="1" aria-hidden="true"></div>
     <div class="image-switcher-loupe-marker is-loupe-2" data-loupe="2" aria-hidden="true"></div>
   </div>
@@ -3698,7 +4037,14 @@ $$
 
   function show(index) {
     imgs.forEach(function (img, i) {
-      img.classList.toggle("is-active", i === index);
+      var on = i === index;
+      img.classList.toggle("is-active", on);
+      img.style.display = on ? "block" : "none";
+      if (on) {
+        img.removeAttribute("hidden");
+      } else {
+        img.setAttribute("hidden", "");
+      }
     });
     buttons.forEach(function (btn, i) {
       var on = i === index;
