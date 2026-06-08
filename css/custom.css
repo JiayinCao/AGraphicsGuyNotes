@@ -23,7 +23,7 @@ body.colorscheme-dark .theme-svg-viewport {
 }
 
 .theme-svg-img {
-  display: none;
+  display: block;
   max-width: 100%;
   margin-left: auto;
   margin-right: auto;
@@ -36,12 +36,6 @@ body.colorscheme-dark .theme-svg-viewport {
   margin-left: auto;
   margin-right: auto;
 }
-
-.theme-svg-img.is-single {
-  display: block;
-}
-
-/* Themed SVG figures: color-scheme is set per figure in theme-svg-single.html. */
 
 .custom-figure img {
   display: block;
