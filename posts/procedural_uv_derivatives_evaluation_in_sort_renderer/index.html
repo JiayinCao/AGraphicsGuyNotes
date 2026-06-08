@@ -825,48 +825,12 @@ $$
 
 <p>The code above is written in SSL. Most authors would not write it exactly this way, especially with these variable names, but it is a correct decomposition of <span style="white-space: nowrap;"><a href="#eq_eq">equation 3</a></span>. I use this style to make the forward mode walkthrough easier to follow. Even when the source uses compound expressions, automatic differentiation still applies. The compiler lowers each line to primitive operations in the generated code.</p>
 <p>Below is the computation graph for the implementation above.</p>
-
-
-
-<div id="mermaid_eval_graph" class="mermaid-block" data-mermaid-id="1"><script type="text/plain" class="mermaid-source">
-flowchart TD
-    x1(x1)
-    x2(x2)
-
-    v0("v0 = x1 + 1")
-    v1("v1 = x1 * x2")
-    v2("v2 = v1 / v0")
-    v3("v3 = sin(v2)")
-    v4("v4 = log(1 + v2)")
-    v5("v5 = exp(x2)")
-    v6("v6 = tanh(x2)")
-    v7("v7 = v3 + v4")
-    v8("v8 = v7 - v5")
-    v9("v9 = v2 - v6")
-    v10("v10 = v8 * v9")
-    o("o = v10")
-
-    x1 --> v0
-    x1 --> v1
-    x2 --> v1
-    v0 --> v2
-    v1 --> v2
-    v2 --> v3
-    v2 --> v4
-    v2 --> v9
-    x2 --> v5
-    x2 --> v6
-    v3 --> v7
-    v4 --> v7
-    v7 --> v8
-    v5 --> v8
-    v6 --> v9
-    v8 --> v10
-    v9 --> v10
-    v10 --> o
-</script>
-<div class="mermaid-view"></div>
-</div>
+<figure class="theme-svg-figure">
+  <div class="theme-svg-viewport" style="width: 100%;">
+    <img class="theme-svg-img theme-svg-light" src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/eval_graph_light.svg" alt="Computation graph (theme-aware SVG)" loading="lazy" decoding="async">
+    <img class="theme-svg-img theme-svg-dark" src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/eval_graph_dark.svg" alt="Computation graph (theme-aware SVG)" loading="lazy" decoding="async">
+  </div>
+</figure>
 
 <p>The computation graph makes the dependencies between intermediate variables explicit. Another common representation is an evaluation trace, a sequence of variable definitions evaluated in order. Below is the trace at $(x_1, x_2) = (1.5, 0.5)$.</p>
 
@@ -1375,113 +1339,25 @@ Below is what that might look like, the same math as the <code>eval</code> funct
 </div>
 
 <p>Below is the computational graph for it.</p>
-
-
-
-<div id="mermaid_shader_entry_graph" class="mermaid-block" data-mermaid-id="2"><script type="text/plain" class="mermaid-source">
-flowchart TD
-    pos_g["position"]
-
-    global_input_pos("global_input_pos = global_value position")
-
-    pos_x("x = global_input_pos.x")
-    pos_y("y = global_input_pos.y")
-    pos_z("z = global_input_pos.z")
-
-    eval_node("v = eval_practical(y, z)")
-
-    tex_sample("basecolor = texture2d_sample(x, v)")
-
-    fake_normal("fake_normal = vector(0, 1, 0)")
-    closure_out("output = make_closure Lambert")
-    renderer_output("output")
-
-    pos_g --> global_input_pos
-    global_input_pos --> pos_x
-    global_input_pos --> pos_y
-    global_input_pos --> pos_z
-    pos_y --> eval_node
-    pos_z --> eval_node
-    eval_node --> tex_sample
-    pos_x --> tex_sample
-    tex_sample --> closure_out
-    fake_normal --> closure_out
-    closure_out --> renderer_output
-
-    style pos_g fill:#8ecf94,stroke:#4d9462
-    style global_input_pos fill:#8ecf94,stroke:#4d9462
-    style pos_x fill:#8ecf94,stroke:#4d9462
-    style pos_y fill:#8ecf94,stroke:#4d9462
-    style pos_z fill:#8ecf94,stroke:#4d9462
-    style eval_node fill:#8ecf94,stroke:#4d9462
-</script>
-<div class="mermaid-view"></div>
-</div>
+<figure class="theme-svg-figure">
+  <div class="theme-svg-viewport" style="width: 100%;">
+    <img class="theme-svg-img theme-svg-light" src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/shader_entry_graph_light.drawio.svg" alt="Shader entry computational graph" loading="lazy" decoding="async">
+    <img class="theme-svg-img theme-svg-dark" src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/shader_entry_graph_dark.drawio.svg" alt="Shader entry computational graph" loading="lazy" decoding="async">
+  </div>
+</figure>
 
 <p>The graph makes the dependency chain explicit. Nodes filled in dark green need derivative shadows. <code>texture2d_sample</code> needs screen space derivatives for both texture coordinates. Here texture coordinate is the local <code>x</code>, read from <code>position.x</code>, and <code>v</code> flows through <code>eval_practical</code> and its inputs <code>y</code> and <code>z</code>. Every green node needs derivative shadows, and they all trace back to the same SSL global block the host fills before execution. A few things are worth noting.</p>
 <ul>
-<li>The <code>eval_practical</code> subgraph is omitted to save space. We already saw it in <span style="white-space: nowrap;"><a href="#mermaid_eval_graph">the early computational graph</a></span>.</li>
+<li>The <code>eval_practical</code> subgraph is omitted to save space. We already saw it earlier.</li>
 <li>Anything that affects the texture coordinates fed into <code>texture2d_sample</code> needs a derivative shadow. Those nodes are marked with a dark green fill.</li>
 </ul>
 <p>In SORT renderer we only care about derivatives of texture coordinates, and of any intermediate value that feeds them, with respect to screen space. The problem is that screen space <code>x</code> and <code>y</code> never appear in this graph. They are not part of the SSL global. Without any information from the renderer about screen space coordinate, SSL has nothing to differentiate against, even with working forward mode AD inside the language. One step earlier in the pipeline, <code>position</code> comes from ray tracing and is itself a function of screen space coordinates, camera setup and scene asset. The complete picture looks like this.</p>
-
-
-
-<div id="mermaid_complete_shader_entry_graph" class="mermaid-block" data-mermaid-id="3" data-host-ssl-divider="true"><script type="text/plain" class="mermaid-source">
-flowchart TD
-    screen_sx["screen space x"]
-    screen_sy["screen space y"]
-    host_ssl_line[" "]
-
-    pos_g("position = f(x, y)")
-
-    global_input_pos("global_input_pos = global_value position")
-
-    pos_x("x = global_input_pos.x")
-    pos_y("y = global_input_pos.y")
-    pos_z("z = global_input_pos.z")
-
-    eval_node("v = eval_practical(y, z)")
-
-    tex_sample("basecolor = texture2d_sample(x, v)")
-
-    fake_normal("fake_normal = vector(0, 1, 0)")
-    closure_out("output = make_closure Lambert")
-    ssl_renderer_line[" "]
-    renderer_output("output")
-
-    screen_sx --> pos_g
-    screen_sy --> pos_g
-    pos_g --> global_input_pos
-    global_input_pos --> pos_x
-    global_input_pos --> pos_y
-    global_input_pos --> pos_z
-    pos_y --> eval_node
-    pos_z --> eval_node
-    eval_node --> tex_sample
-    pos_x --> tex_sample
-    tex_sample --> closure_out
-    fake_normal --> closure_out
-    closure_out --> renderer_output
-
-    pos_g ~~~ host_ssl_line
-    host_ssl_line ~~~ global_input_pos
-    closure_out ~~~ ssl_renderer_line
-    ssl_renderer_line ~~~ renderer_output
-
-    style screen_sx fill:#8ecf94,stroke:#4d9462
-    style screen_sy fill:#8ecf94,stroke:#4d9462
-    style pos_g fill:#8ecf94,stroke:#4d9462
-    style global_input_pos fill:#8ecf94,stroke:#4d9462
-    style pos_x fill:#8ecf94,stroke:#4d9462
-    style pos_y fill:#8ecf94,stroke:#4d9462
-    style pos_z fill:#8ecf94,stroke:#4d9462
-    style eval_node fill:#8ecf94,stroke:#4d9462
-    style host_ssl_line fill:transparent,stroke:transparent,color:transparent
-    style ssl_renderer_line fill:transparent,stroke:transparent,color:transparent
-</script>
-<div class="mermaid-view"></div>
-</div>
+<figure class="theme-svg-figure">
+  <div class="theme-svg-viewport" style="width: 100%;">
+    <img class="theme-svg-img theme-svg-light" src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/complete_shader_entry_graph_light.drawio.svg" alt="Shader entry computational graph" loading="lazy" decoding="async">
+    <img class="theme-svg-img theme-svg-dark" src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/complete_shader_entry_graph_dark.drawio.svg" alt="Shader entry computational graph" loading="lazy" decoding="async">
+  </div>
+</figure>
 
 <p>Most of this post is about automatically evaluating derivatives inside SSL, but the full pipeline needs more than that. To compute derivatives of the texture coordinates <code>x</code> and <code>v</code>, the host must pass not only <code>position</code> but also the screen space derivatives of <code>position</code>. Computing those values is the renderer&rsquo;s job. I will come back to how SORT does that <a href="#derivatives-of-inputs-fed-in-shading-languages">later</a>. For now, assume the host already has them.</p>
 <p>Once the renderer has those derivatives, it still needs a channel into SSL. The global block already carries primary values, so extending it to carry derivative shadows is the natural choice. Under the hood, the macros from the <span style="white-space: nowrap;"><a href="#code_ssl_hit_global_def">earlier block</a></span> expand to something like the following.</p>
@@ -1751,13 +1627,13 @@ The compiler can deduce that <code>ddx(ox)</code> is zero after the global deriv
 
 
 <style>
-  #compact-table-94 table {
+  #compact-table-93 table {
     margin: 0 0 1.5rem;
   }
 
    
-  #compact-table-94 table td,
-  #compact-table-94 table th {
+  #compact-table-93 table td,
+  #compact-table-93 table th {
     padding: 0.450rem 0.975rem;
     line-height: 1.980;
     vertical-align: middle;
@@ -1766,33 +1642,33 @@ The compiler can deduce that <code>ddx(ox)</code> is zero after the global deriv
     border-color: #000;
   }
 
-  body.colorscheme-dark #compact-table-94 table td,
-  body.colorscheme-dark #compact-table-94 table th {
+  body.colorscheme-dark #compact-table-93 table td,
+  body.colorscheme-dark #compact-table-93 table th {
     border-color: #dadada;
   }
 
   @media (prefers-color-scheme: dark) {
-    body.colorscheme-auto #compact-table-94 table td,
-    body.colorscheme-auto #compact-table-94 table th {
+    body.colorscheme-auto #compact-table-93 table td,
+    body.colorscheme-auto #compact-table-93 table th {
       border-color: #dadada;
     }
   }
 
-  #compact-table-94 .katex {
+  #compact-table-93 .katex {
     font-size: 1.462em;
   }
 
-  #compact-table-94 .katex-display {
+  #compact-table-93 .katex-display {
     margin: 0;
   }
 
-  #compact-table-94 .compact-table-note {
+  #compact-table-93 .compact-table-note {
     margin: 0 0 1.5rem;
     font-size: 0.85em;
     line-height: 1.45;
   }
 
-  #compact-table-94 .compact-table-note .katex {
+  #compact-table-93 .compact-table-note .katex {
     font-size: 1em;
   }
 
@@ -1800,7 +1676,7 @@ The compiler can deduce that <code>ddx(ox)</code> is zero after the global deriv
 
   
 </style>
-<div id="compact-table-94" class="compact-table">
+<div id="compact-table-93" class="compact-table">
 <table>
 <thead>
 <tr>
@@ -1900,13 +1776,13 @@ $$
 
 
 <style>
-  #compact-table-101 table {
+  #compact-table-100 table {
     margin: 0 0 1.5rem;
   }
 
    
-  #compact-table-101 table td,
-  #compact-table-101 table th {
+  #compact-table-100 table td,
+  #compact-table-100 table th {
     padding: 0.405rem 0.878rem;
     line-height: 1.782;
     vertical-align: middle;
@@ -1915,33 +1791,33 @@ $$
     border-color: #000;
   }
 
-  body.colorscheme-dark #compact-table-101 table td,
-  body.colorscheme-dark #compact-table-101 table th {
+  body.colorscheme-dark #compact-table-100 table td,
+  body.colorscheme-dark #compact-table-100 table th {
     border-color: #dadada;
   }
 
   @media (prefers-color-scheme: dark) {
-    body.colorscheme-auto #compact-table-101 table td,
-    body.colorscheme-auto #compact-table-101 table th {
+    body.colorscheme-auto #compact-table-100 table td,
+    body.colorscheme-auto #compact-table-100 table th {
       border-color: #dadada;
     }
   }
 
-  #compact-table-101 .katex {
+  #compact-table-100 .katex {
     font-size: 1.316em;
   }
 
-  #compact-table-101 .katex-display {
+  #compact-table-100 .katex-display {
     margin: 0;
   }
 
-  #compact-table-101 .compact-table-note {
+  #compact-table-100 .compact-table-note {
     margin: 0 0 1.5rem;
     font-size: 0.85em;
     line-height: 1.45;
   }
 
-  #compact-table-101 .compact-table-note .katex {
+  #compact-table-100 .compact-table-note .katex {
     font-size: 1em;
   }
 
@@ -1949,7 +1825,7 @@ $$
 
   
 </style>
-<div id="compact-table-101" class="compact-table">
+<div id="compact-table-100" class="compact-table">
 <table>
 <thead>
 <tr>
@@ -2055,13 +1931,13 @@ Dropping arbitrary external calls does not mean SSL can do without <code>sin</co
 
 
 <style>
-  #compact-table-103 table {
+  #compact-table-102 table {
     margin: 0 0 1.5rem;
   }
 
    
-  #compact-table-103 table td,
-  #compact-table-103 table th {
+  #compact-table-102 table td,
+  #compact-table-102 table th {
     padding: 0.405rem 0.878rem;
     line-height: 1.782;
     vertical-align: middle;
@@ -2070,33 +1946,33 @@ Dropping arbitrary external calls does not mean SSL can do without <code>sin</co
     border-color: #000;
   }
 
-  body.colorscheme-dark #compact-table-103 table td,
-  body.colorscheme-dark #compact-table-103 table th {
+  body.colorscheme-dark #compact-table-102 table td,
+  body.colorscheme-dark #compact-table-102 table th {
     border-color: #dadada;
   }
 
   @media (prefers-color-scheme: dark) {
-    body.colorscheme-auto #compact-table-103 table td,
-    body.colorscheme-auto #compact-table-103 table th {
+    body.colorscheme-auto #compact-table-102 table td,
+    body.colorscheme-auto #compact-table-102 table th {
       border-color: #dadada;
     }
   }
 
-  #compact-table-103 .katex {
+  #compact-table-102 .katex {
     font-size: 1.316em;
   }
 
-  #compact-table-103 .katex-display {
+  #compact-table-102 .katex-display {
     margin: 0;
   }
 
-  #compact-table-103 .compact-table-note {
+  #compact-table-102 .compact-table-note {
     margin: 0 0 1.5rem;
     font-size: 0.85em;
     line-height: 1.45;
   }
 
-  #compact-table-103 .compact-table-note .katex {
+  #compact-table-102 .compact-table-note .katex {
     font-size: 1em;
   }
 
@@ -2104,7 +1980,7 @@ Dropping arbitrary external calls does not mean SSL can do without <code>sin</co
 
   
 </style>
-<div id="compact-table-103" class="compact-table">
+<div id="compact-table-102" class="compact-table">
 <table>
 <thead>
 <tr>
@@ -2251,13 +2127,13 @@ I&rsquo;ve listed the symbols we will use to represent these properties in the d
 
 
 <style>
-  #compact-table-105 table {
+  #compact-table-104 table {
     margin: 0 0 1.5rem;
   }
 
    
-  #compact-table-105 table td,
-  #compact-table-105 table th {
+  #compact-table-104 table td,
+  #compact-table-104 table th {
     padding: 0.405rem 0.878rem;
     line-height: 1.782;
     vertical-align: middle;
@@ -2266,33 +2142,33 @@ I&rsquo;ve listed the symbols we will use to represent these properties in the d
     border-color: #000;
   }
 
-  body.colorscheme-dark #compact-table-105 table td,
-  body.colorscheme-dark #compact-table-105 table th {
+  body.colorscheme-dark #compact-table-104 table td,
+  body.colorscheme-dark #compact-table-104 table th {
     border-color: #dadada;
   }
 
   @media (prefers-color-scheme: dark) {
-    body.colorscheme-auto #compact-table-105 table td,
-    body.colorscheme-auto #compact-table-105 table th {
+    body.colorscheme-auto #compact-table-104 table td,
+    body.colorscheme-auto #compact-table-104 table th {
       border-color: #dadada;
     }
   }
 
-  #compact-table-105 .katex {
+  #compact-table-104 .katex {
     font-size: 1.316em;
   }
 
-  #compact-table-105 .katex-display {
+  #compact-table-104 .katex-display {
     margin: 0;
   }
 
-  #compact-table-105 .compact-table-note {
+  #compact-table-104 .compact-table-note {
     margin: 0 0 1.5rem;
     font-size: 0.85em;
     line-height: 1.45;
   }
 
-  #compact-table-105 .compact-table-note .katex {
+  #compact-table-104 .compact-table-note .katex {
     font-size: 1em;
   }
 
@@ -2300,7 +2176,7 @@ I&rsquo;ve listed the symbols we will use to represent these properties in the d
 
   
 </style>
-<div id="compact-table-105" class="compact-table">
+<div id="compact-table-104" class="compact-table">
 <table>
 <thead>
 <tr>
@@ -2730,13 +2606,13 @@ $$
 
 
 <style>
-  #compact-table-155 table {
+  #compact-table-154 table {
     margin: 0 0 0.65rem;
   }
 
    
-  #compact-table-155 table td,
-  #compact-table-155 table th {
+  #compact-table-154 table td,
+  #compact-table-154 table th {
     padding: 0.405rem 0.878rem;
     line-height: 1.782;
     vertical-align: middle;
@@ -2745,33 +2621,33 @@ $$
     border-color: #000;
   }
 
-  body.colorscheme-dark #compact-table-155 table td,
-  body.colorscheme-dark #compact-table-155 table th {
+  body.colorscheme-dark #compact-table-154 table td,
+  body.colorscheme-dark #compact-table-154 table th {
     border-color: #dadada;
   }
 
   @media (prefers-color-scheme: dark) {
-    body.colorscheme-auto #compact-table-155 table td,
-    body.colorscheme-auto #compact-table-155 table th {
+    body.colorscheme-auto #compact-table-154 table td,
+    body.colorscheme-auto #compact-table-154 table th {
       border-color: #dadada;
     }
   }
 
-  #compact-table-155 .katex {
+  #compact-table-154 .katex {
     font-size: 1.316em;
   }
 
-  #compact-table-155 .katex-display {
+  #compact-table-154 .katex-display {
     margin: 0;
   }
 
-  #compact-table-155 .compact-table-note {
+  #compact-table-154 .compact-table-note {
     margin: 0 0 1.5rem;
     font-size: 0.85em;
     line-height: 1.45;
   }
 
-  #compact-table-155 .compact-table-note .katex {
+  #compact-table-154 .compact-table-note .katex {
     font-size: 1em;
   }
 
@@ -2779,16 +2655,16 @@ $$
 
   
    
-  #compact-table-155 tr:has(> td:first-child:empty) td {
+  #compact-table-154 tr:has(> td:first-child:empty) td {
     border-top: none;
   }
 
-  #compact-table-155 tr:has(+ tr > td:first-child:empty) td {
+  #compact-table-154 tr:has(+ tr > td:first-child:empty) td {
     border-bottom: none;
   }
   
 </style>
-<div id="compact-table-155" class="compact-table">
+<div id="compact-table-154" class="compact-table">
 <table>
 <thead>
 <tr>
@@ -2881,13 +2757,13 @@ $$
 
 
 <style>
-  #compact-table-161 table {
+  #compact-table-160 table {
     margin: 0 0 0.65rem;
   }
 
    
-  #compact-table-161 table td,
-  #compact-table-161 table th {
+  #compact-table-160 table td,
+  #compact-table-160 table th {
     padding: 0.405rem 0.878rem;
     line-height: 1.782;
     vertical-align: middle;
@@ -2896,56 +2772,56 @@ $$
     border-color: #000;
   }
 
-  body.colorscheme-dark #compact-table-161 table td,
-  body.colorscheme-dark #compact-table-161 table th {
+  body.colorscheme-dark #compact-table-160 table td,
+  body.colorscheme-dark #compact-table-160 table th {
     border-color: #dadada;
   }
 
   @media (prefers-color-scheme: dark) {
-    body.colorscheme-auto #compact-table-161 table td,
-    body.colorscheme-auto #compact-table-161 table th {
+    body.colorscheme-auto #compact-table-160 table td,
+    body.colorscheme-auto #compact-table-160 table th {
       border-color: #dadada;
     }
   }
 
-  #compact-table-161 .katex {
+  #compact-table-160 .katex {
     font-size: 1.316em;
   }
 
-  #compact-table-161 .katex-display {
+  #compact-table-160 .katex-display {
     margin: 0;
   }
 
-  #compact-table-161 .compact-table-note {
+  #compact-table-160 .compact-table-note {
     margin: 0 0 1.5rem;
     font-size: 0.85em;
     line-height: 1.45;
   }
 
-  #compact-table-161 .compact-table-note .katex {
+  #compact-table-160 .compact-table-note .katex {
     font-size: 1em;
   }
 
   
-  #compact-table-161 table {
+  #compact-table-160 table {
     table-layout: fixed;
     width: 100%;
   }
 
-  #compact-table-161 table th:first-child,
-  #compact-table-161 table td:first-child {
+  #compact-table-160 table th:first-child,
+  #compact-table-160 table td:first-child {
     width: 34%;
   }
 
-  #compact-table-161 table th:not(:first-child),
-  #compact-table-161 table td:not(:first-child) {
+  #compact-table-160 table th:not(:first-child),
+  #compact-table-160 table td:not(:first-child) {
     width: calc(66% / 5);
   }
   
 
   
 </style>
-<div id="compact-table-161" class="compact-table compact-table-striped-groups-3">
+<div id="compact-table-160" class="compact-table compact-table-striped-groups-3">
 <table>
 <thead>
 <tr>
@@ -4170,13 +4046,24 @@ body.colorscheme-dark #isw-a90b73ba0d .image-switcher-btn.is-active {
   width: 100%;
   line-height: 0;
 }
+#ffg-e7bc87f94f .focus-figure-drag-link {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: block;
+  text-decoration: none;
+  color: transparent;
+  background: transparent;
+  cursor: auto;
+}
 #ffg-e7bc87f94f .focus-figure-viewport img {
   display: block;
   width: 100%;
   height: auto;
   margin: 0;
-  user-select: none;
-  -webkit-user-drag: none;
+  user-select: auto;
+  -webkit-user-drag: auto;
+  pointer-events: auto;
 }
 #ffg-e7bc87f94f .focus-figure-marker {
   position: absolute;
@@ -4255,7 +4142,8 @@ body.colorscheme-dark #ffg-e7bc87f94f .focus-figure-overlay {
 
 <figure class="focus-figure" id="ffg-e7bc87f94f" style="--focus-figure-width: 100%; --focus-size: 48; --overlay-scale: 40;">
   <div class="focus-figure-viewport">
-    <img class="focus-figure-img" src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/texture.png" alt="Image">
+    <img class="focus-figure-img" src="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/texture.png" alt="Image" draggable="true">
+    <a class="focus-figure-drag-link" href="/img/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/texture.png" aria-label="Drag texture image to a new tab"></a>
     <svg class="focus-figure-connectors" aria-hidden="true"></svg>
     <div class="focus-figure-marker" aria-hidden="true"></div>
     <canvas class="focus-figure-overlay" aria-label="Magnified region"></canvas>
@@ -4276,12 +4164,34 @@ body.colorscheme-dark #ffg-e7bc87f94f .focus-figure-overlay {
   var OVERLAY_FOLLOWS_FOCUS = false;
 
   var img = root.querySelector(".focus-figure-img");
+  var dragLink = root.querySelector(".focus-figure-drag-link");
   var connectors = root.querySelector(".focus-figure-connectors");
   var marker = root.querySelector(".focus-figure-marker");
   var canvas = root.querySelector(".focus-figure-overlay");
   var ctx = canvas.getContext("2d");
   var SVG_NS = "http://www.w3.org/2000/svg";
   ctx.imageSmoothingEnabled = false;
+
+  
+  img.setAttribute("draggable", "true");
+  img.addEventListener("dragstart", function (event) {
+    if (!event.dataTransfer) return;
+    event.dataTransfer.setData("text/uri-list", img.src);
+    event.dataTransfer.setData("text/plain", img.src);
+    event.dataTransfer.effectAllowed = "copy";
+  });
+  if (dragLink) {
+    
+    dragLink.addEventListener("click", function (event) {
+      event.preventDefault();
+    });
+    dragLink.addEventListener("dragstart", function (event) {
+      if (!event.dataTransfer) return;
+      event.dataTransfer.setData("text/uri-list", img.src);
+      event.dataTransfer.setData("text/plain", img.src);
+      event.dataTransfer.effectAllowed = "copyLink";
+    });
+  }
 
   function displayedImgBox() {
     var width = img.clientWidth;
@@ -4921,14 +4831,6 @@ The benchmarks suggest the cost is manageable. Compile time can rise for shaders
       <script src="/js/dark-mode.min.fe7db0376c05c273207f25f84b558d955da8cc93ccd69c2714cbaae19ef11556.js"></script>
     
     <script src="/js/scroll-keys.js"></script>
-
-    
-      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-      
-        
-        <script src="/js/mermaid-init.min.2da1073784fbe86a409f83be1bfdd68013e01e5715125b2edff09b49931f0796.js"></script>
-      
-    
 
     
 
