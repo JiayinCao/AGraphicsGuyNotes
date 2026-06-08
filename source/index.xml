@@ -5,42 +5,51 @@
     <link>https://agraphicsguynotes.com/source/</link>
     <description>Recent content in Sources on A Graphics Guy&#39;s Note</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en</language>
-    <atom:link href="https://agraphicsguynotes.com/source/index.xml" rel="self" type="application/rss+xml" />
+    <language>en</language><atom:link href="https://agraphicsguynotes.com/source/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>shader A (no_deriv.ssl)</title>
       <link>https://agraphicsguynotes.com/source/no_deriv/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
       <guid>https://agraphicsguynotes.com/source/no_deriv/</guid>
-      <description>&lt;!DOCTYPE html&gt;shader A (no_deriv.ssl)// Benchmark case: no screen-space derivatives used (deriv-on vs deriv-off should match).float wave_mix(float a, float b, float phase) {float w = sin(phase) * 0.5f &amp;#43; cos(phase * 0.73f) * 0.5f;return a * w &amp;#43; b * (1.0f - w);}float rational_shape(float x, float denom) {float num = x * x &amp;#43; 1.0f;return num / (denom &amp;#43; 2.0f);}float soften(float t) {return t / (1.</description>
+      <description>&lt;!DOCTYPE html&gt; shader A (no_deriv.ssl) // Benchmark case: no screen-space derivatives used (deriv-on vs deriv-off should match). float wave_mix(float a, float b, float phase) { float w = sin(phase) * 0.5f &amp;#43; cos(phase * 0.73f) * 0.5f; return a * w &amp;#43; b * (1.0f - w); } float rational_shape(float x, float denom) { float num = x * x &amp;#43; 1.0f; return num / (denom &amp;#43; 2.0f); } float soften(float t) { return t / (1.</description>
     </item>
+    
     <item>
       <title>shader B (deriv_minimal.ssl)</title>
       <link>https://agraphicsguynotes.com/source/deriv_minimal/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
       <guid>https://agraphicsguynotes.com/source/deriv_minimal/</guid>
-      <description>&lt;!DOCTYPE html&gt;shader B (deriv_minimal.ssl)// Benchmark case: primary value path &amp;#43; minimal live ddx/ddy on y = x1*x2/(x1&amp;#43;1).float wave_mix(float a, float b, float phase) {float w = sin(phase) * 0.5f &amp;#43; cos(phase * 0.73f) * 0.5f;return a * w &amp;#43; b * (1.0f - w);}float rational_shape(float x, float denom) {float num = x * x &amp;#43; 1.0f;return num / (denom &amp;#43; 2.0f);}float soften(float t) {return t / (1.</description>
+      <description>&lt;!DOCTYPE html&gt; shader B (deriv_minimal.ssl) // Benchmark case: primary value path &amp;#43; minimal live ddx/ddy on y = x1*x2/(x1&amp;#43;1). float wave_mix(float a, float b, float phase) { float w = sin(phase) * 0.5f &amp;#43; cos(phase * 0.73f) * 0.5f; return a * w &amp;#43; b * (1.0f - w); } float rational_shape(float x, float denom) { float num = x * x &amp;#43; 1.0f; return num / (denom &amp;#43; 2.0f); } float soften(float t) { return t / (1.</description>
     </item>
+    
     <item>
       <title>shader C (no_deriv_2k.ssl)</title>
       <link>https://agraphicsguynotes.com/source/no_deriv_2k/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
       <guid>https://agraphicsguynotes.com/source/no_deriv_2k/</guid>
-      <description>&lt;!DOCTYPE html&gt;shader C (no_deriv_2k.ssl)// ssl_benchmark no_deriv_2k — ~2000 lines, no ddx/ddy (see bench_no_deriv_2k_generator.h) texture2d g_tex; float nd2k_osc_0(float a, float b, float c, out float ox) { float o0 = sin(a * 2.25999999f &amp;#43; c); float o1 = cos(b * 6.35600042f - a); float o2 = sin((a &amp;#43; b) * 2.52000022f) * cos(c * 2.25999999f); float bank = o0 &amp;#43; o1 * 0.5f &amp;#43; o2 * 0.25f; ox = bank &amp;#43; c * 6.</description>
+      <description>&lt;!DOCTYPE html&gt; shader C (no_deriv_2k.ssl) // ssl_benchmark no_deriv_2k — ~2000 lines, no ddx/ddy (see bench_no_deriv_2k_generator.h) texture2d g_tex; float nd2k_osc_0(float a, float b, float c, out float ox) { float o0 = sin(a * 2.25999999f &amp;#43; c); float o1 = cos(b * 6.35600042f - a); float o2 = sin((a &amp;#43; b) * 2.52000022f) * cos(c * 2.25999999f); float bank = o0 &amp;#43; o1 * 0.5f &amp;#43; o2 * 0.25f; ox = bank &amp;#43; c * 6.</description>
     </item>
+    
     <item>
       <title>shader D (deriv_2k.ssl)</title>
       <link>https://agraphicsguynotes.com/source/deriv_2k/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
       <guid>https://agraphicsguynotes.com/source/deriv_2k/</guid>
-      <description>&lt;!DOCTYPE html&gt;shader D (deriv_2k.ssl)// ssl_benchmark deriv_2k — ~2000 lines, derivative-heavy (see bench_deriv_2k_generator.h) texture2d g_tex; float d2k_osc_0(float a, float b, float c, out float ox) { float o0 = sin(a * 2.25999999f &amp;#43; c); float o1 = cos(b * 6.35600042f - a); float o2 = sin((a &amp;#43; b) * 2.52000022f) * cos(c * 2.25999999f); float bank = o0 &amp;#43; o1 * 0.5f &amp;#43; o2 * 0.25f; ox = bank &amp;#43; c * 6.</description>
+      <description>&lt;!DOCTYPE html&gt; shader D (deriv_2k.ssl) // ssl_benchmark deriv_2k — ~2000 lines, derivative-heavy (see bench_deriv_2k_generator.h) texture2d g_tex; float d2k_osc_0(float a, float b, float c, out float ox) { float o0 = sin(a * 2.25999999f &amp;#43; c); float o1 = cos(b * 6.35600042f - a); float o2 = sin((a &amp;#43; b) * 2.52000022f) * cos(c * 2.25999999f); float bank = o0 &amp;#43; o1 * 0.5f &amp;#43; o2 * 0.25f; ox = bank &amp;#43; c * 6.</description>
     </item>
+    
     <item>
       <title>shader E (deriv_fold_2k.ssl)</title>
       <link>https://agraphicsguynotes.com/source/deriv_fold_2k/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
       <guid>https://agraphicsguynotes.com/source/deriv_fold_2k/</guid>
-      <description>&lt;!DOCTYPE html&gt;shader E (deriv_fold_2k.ssl)// ssl_benchmark deriv_fold_2k — ~2000 lines, ddx/ddy fold to zero (see bench_deriv_fold_2k_generator.h) texture2d g_tex; float df2k_fold_h0() { float a = 1.0f; float b = sin(a) &amp;#43; 15.7999992f; return ddx(b) &amp;#43; ddy(b); } float df2k_fold_h1() { float a = 1.16999996f; float b = sin(a) &amp;#43; 33.7999992f; return ddx(b) &amp;#43; ddy(b); } float df2k_fold_h2() { float a = 1.34000003f; float b = sin(a) &amp;#43; 29.2799988f; return ddx(b) &amp;#43; ddy(b); } float df2k_osc_0(float a, float b, float c, out float ox) { float o0 = sin(a * 2.</description>
+      <description>&lt;!DOCTYPE html&gt; shader E (deriv_fold_2k.ssl) // ssl_benchmark deriv_fold_2k — ~2000 lines, ddx/ddy fold to zero (see bench_deriv_fold_2k_generator.h) texture2d g_tex; float df2k_fold_h0() { float a = 1.0f; float b = sin(a) &amp;#43; 15.7999992f; return ddx(b) &amp;#43; ddy(b); } float df2k_fold_h1() { float a = 1.16999996f; float b = sin(a) &amp;#43; 33.7999992f; return ddx(b) &amp;#43; ddy(b); } float df2k_fold_h2() { float a = 1.34000003f; float b = sin(a) &amp;#43; 29.2799988f; return ddx(b) &amp;#43; ddy(b); } float df2k_osc_0(float a, float b, float c, out float ox) { float o0 = sin(a * 2.</description>
     </item>
+    
   </channel>
 </rss>
