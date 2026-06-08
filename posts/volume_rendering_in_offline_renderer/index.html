@@ -136,6 +136,16 @@ In case someone is not familiar with what volume rendering is, the above texture
   <body class="colorscheme-auto"
         onload=""
   >
+    <script>
+      (function () {
+        var theme = localStorage.getItem("colorscheme");
+        if (!theme) {
+          return;
+        }
+        document.body.classList.remove("colorscheme-auto", "colorscheme-light", "colorscheme-dark");
+        document.body.classList.add("colorscheme-" + theme);
+      })();
+    </script>
     <main class="wrapper">
       <nav class="navigation">
   <section class="container">
@@ -660,7 +670,8 @@ $$  L(p(0)) = \int_0^{\infty} e^{- \int_{0}^{t} \sigma (p)dt&#39;} S(p) = \int_
 
     
       
-      <script src="/js/dark-mode.min.fe7db0376c05c273207f25f84b558d955da8cc93ccd69c2714cbaae19ef11556.js"></script>
+      <script src="/js/dark-mode.min.937249bc5a087cf9cbcb232f306ed98929498bd90394a62f254bdccabf530d56.js"></script>
+    
     
     <script src="/js/scroll-keys.js"></script>
 

@@ -41,28 +41,7 @@ body.colorscheme-dark .theme-svg-viewport {
   display: block;
 }
 
-body.colorscheme-light .theme-svg-light,
-body.colorscheme-dark .theme-svg-dark {
-  display: block;
-}
-
-@media (prefers-color-scheme: dark) {
-  body.colorscheme-auto .theme-svg-light {
-    display: none;
-  }
-  body.colorscheme-auto .theme-svg-dark {
-    display: block;
-  }
-}
-
-@media (prefers-color-scheme: light) {
-  body.colorscheme-auto .theme-svg-light {
-    display: block;
-  }
-  body.colorscheme-auto .theme-svg-dark {
-    display: none;
-  }
-}
+/* Themed SVG figures: color-scheme is set per figure in theme-svg-single.html. */
 
 .custom-figure img {
   display: block;

@@ -136,6 +136,16 @@ This is a memo for me recording the derivation of specular reflection in a more 
   <body class="colorscheme-auto"
         onload=""
   >
+    <script>
+      (function () {
+        var theme = localStorage.getItem("colorscheme");
+        if (!theme) {
+          return;
+        }
+        document.body.classList.remove("colorscheme-auto", "colorscheme-light", "colorscheme-dark");
+        document.body.classList.add("colorscheme-" + theme);
+      })();
+    </script>
     <main class="wrapper">
       <nav class="navigation">
   <section class="container">
@@ -578,7 +588,8 @@ $$ f(\omega_i , \omega_o) = ( 1 - F_r(\omega_i) ) \dfrac{{\eta_o}^2}{{\eta_i}^2}
 
     
       
-      <script src="/js/dark-mode.min.fe7db0376c05c273207f25f84b558d955da8cc93ccd69c2714cbaae19ef11556.js"></script>
+      <script src="/js/dark-mode.min.937249bc5a087cf9cbcb232f306ed98929498bd90394a62f254bdccabf530d56.js"></script>
+    
     
     <script src="/js/scroll-keys.js"></script>
 

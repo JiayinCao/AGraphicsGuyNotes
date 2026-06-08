@@ -136,6 +136,16 @@ When the term first came out, I was totally no idea what this new stuff is. And 
   <body class="colorscheme-auto"
         onload=""
   >
+    <script>
+      (function () {
+        var theme = localStorage.getItem("colorscheme");
+        if (!theme) {
+          return;
+        }
+        document.body.classList.remove("colorscheme-auto", "colorscheme-light", "colorscheme-dark");
+        document.body.classList.add("colorscheme-" + theme);
+      })();
+    </script>
     <main class="wrapper">
       <nav class="navigation">
   <section class="container">
@@ -622,7 +632,8 @@ $$ R = R(0) &#43; ( 1 - R(0) ) ( 1 - cos\theta)^5$$
 
     
       
-      <script src="/js/dark-mode.min.fe7db0376c05c273207f25f84b558d955da8cc93ccd69c2714cbaae19ef11556.js"></script>
+      <script src="/js/dark-mode.min.937249bc5a087cf9cbcb232f306ed98929498bd90394a62f254bdccabf530d56.js"></script>
+    
     
     <script src="/js/scroll-keys.js"></script>
 
