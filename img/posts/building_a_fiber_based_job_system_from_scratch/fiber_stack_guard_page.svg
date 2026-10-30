@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="fiber-stack-guard" width="900" height="485" viewBox="0 75 900 485" role="img" aria-labelledby="fsg-title fsg-desc">
+  <title id="fsg-title">Fiber stack allocation with a guard page</title>
+  <desc id="fsg-desc">SORT's Linux and macOS stack layout with overflow checks enabled. Higher addresses are at the top. The usable stack is rounded up to a whole number of pages and is readable and writable. The stack grows downward from occupied stack frames into unused stack space. One inaccessible guard page lies immediately below the usable stack. Accessing it causes a memory protection fault. Sizes are not to scale.</desc>
+  <style>
+    #fiber-stack-guard {
+      color-scheme: light dark;
+      --ink: light-dark(#24282d, #e0e0e0);
+      --muted: light-dark(#59636c, #b8c0c7);
+      --line: light-dark(#66727c, #a8b2ba);
+      --used: light-dark(#f9dfd1, #49382e);
+      --free: light-dark(#edf3f5, #293338);
+      --danger: light-dark(#ad3535, #f29494);
+      --guard: light-dark(#f6dddd, #4b3030);
+      font: 16px Arial, Helvetica, sans-serif;
+      width: 100%; height: auto;
+    }
+    #fiber-stack-guard text { fill: var(--ink); }
+    #fiber-stack-guard .muted { fill: var(--muted); font-size: 14px; }
+    #fiber-stack-guard .bold { font-weight: 600; }
+    #fiber-stack-guard .line { fill: none; stroke: var(--line); stroke-width: 1.5; }
+    #fiber-stack-guard .danger { fill: var(--danger); }
+    #fiber-stack-guard .fault { fill: none; stroke: var(--danger); stroke-width: 2; }
+  </style>
+
+  <text x="220" y="91" class="muted">Higher addresses</text>
+  <rect x="220" y="110" width="330" height="135" fill="var(--used)"/>
+  <rect x="220" y="245" width="330" height="155" fill="var(--free)"/>
+  <path d="M220 155H550 M220 200H550" class="line"/>
+  <text x="385" y="139" text-anchor="middle">Earlier function calls</text>
+  <text x="385" y="184" text-anchor="middle">…</text>
+  <text x="385" y="229" text-anchor="middle">Current function call</text>
+  <rect x="220" y="110" width="330" height="290" class="line"/>
+  <path d="M220 245H550" class="line" stroke-dasharray="6 5"/>
+  <text x="385" y="310" text-anchor="middle">Unused stack space</text>
+  <text x="385" y="335" text-anchor="middle" class="muted">Available for further growth</text>
+
+  <path d="M175 140V365 M167 353L175 365L183 353" class="line"/>
+  <text x="155" y="265" text-anchor="middle" transform="rotate(-90 155 265)">Stack growth</text>
+  <path d="M550 245H590" class="line"/>
+  <text x="605" y="250" class="muted">Current stack pointer</text>
+  <path d="M565 110H580V235 M580 255V400H565" class="line"/>
+  <text x="605" y="139" class="bold">Usable stack</text>
+  <text x="605" y="165" class="muted">Read / write</text>
+  <text x="605" y="191" class="muted">Requested size rounded up</text>
+  <text x="605" y="211" class="muted">to a page boundary</text>
+
+  <rect x="220" y="400" width="330" height="80" fill="var(--guard)" stroke="var(--danger)" stroke-width="2"/>
+  <text x="385" y="432" text-anchor="middle" class="bold danger">Guard page</text>
+  <text x="385" y="457" text-anchor="middle" class="danger">No access · One OS page</text>
+  <path d="M550 440H590" class="fault"/>
+  <text x="605" y="432" class="bold danger">Access causes a fault</text>
+  <text x="605" y="457" class="muted">Outside the usable stack</text>
+  <text x="220" y="506" class="muted">Lower addresses · Allocation base</text>
+  <text x="450" y="545" text-anchor="middle">Total allocation = page-aligned usable stack + one guard page</text>
+</svg>

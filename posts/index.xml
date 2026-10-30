@@ -13,7 +13,33 @@
       <pubDate>Sun, 07 Jun 2026 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/</guid>
-      <description>In this post, I want to talk about a topic I have been meaning to write about for quite a few years: texture UV derivatives evaluation in my offline renderer, SORT (Simple Open Source Ray Tracer), which I&amp;rsquo;ll use throughout this post. It normally is not a major challenge. However, my own custom shading language[1] specifically designed for my renderer adds quite a lot of complexity in it. It was previously named as Tiny Shading Language and renamed as SORT Shading Language (SSL for short) as I fused it into my rendererer project.</description>
+      <description>&lt;p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;/p&gt;
+&lt;p&gt;In this post, I want to talk about a topic I have been meaning to write about for quite a few years: texture UV derivatives evaluation in my offline renderer, &lt;a href=&#34;https://sort-renderer.com&#34;&gt;SORT (Simple Open Source Ray Tracer)&lt;/a&gt;, which I&amp;rsquo;ll use throughout this post. It normally is not a major challenge. However, my own custom shading language&lt;sup class=&#34;ref-cite&#34; style=&#34;font-size: 0.7em; vertical-align: super; white-space: nowrap;&#34;&gt;&lt;a href=&#34;#ref-ref_tag__mslor&#34; style=&#34;text-decoration: none;&#34;&gt;[1]&lt;/a&gt;&lt;/sup&gt; specifically designed for my renderer adds quite a lot of complexity in it. It was previously named as Tiny Shading Language and renamed as SORT Shading Language (SSL for short) as I fused it into my rendererer project.
+This article may not be useful to everyone, but it should be relevant if you are interested in implementing an offline renderer and shading language yourself.
+If that describes you, I hope this post is useful, because this particular combination of topics is rarely discussed in one place.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -22,8 +48,31 @@
       <pubDate>Fri, 09 May 2025 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_gi/</guid>
-      <description>Recently, I had the pleasure of contributing to Nvidia’s Zorah project, the flagship demo for the RTX 50 Series GPUs. My primary role was to provide technical support for light transport in Zorah, which included collaborating with my colleague Daqi Lin to implement a brand new ReSTIR-based global illumination solution, specifically, ReSTIR PT[1], within the NvRTX branch of Unreal Engine.
-A GDC presentation video on Zorah was released a few weeks ago.</description>
+      <description>&lt;p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;/p&gt;
+&lt;p&gt;Recently, I had the pleasure of contributing to Nvidia’s Zorah project, the flagship demo for the RTX 50 Series GPUs. My primary role was to provide technical support for light transport in Zorah, which included collaborating with my colleague &lt;a href=&#34;https://research.nvidia.com/person/daqi-lin&#34;&gt;Daqi Lin&lt;/a&gt; to implement a brand new ReSTIR-based global illumination solution, specifically, ReSTIR PT&lt;sup class=&#34;ref-cite&#34; style=&#34;font-size: 0.7em; vertical-align: super; white-space: nowrap;&#34;&gt;&lt;a href=&#34;#ref-ref_tag__restir_gris&#34; style=&#34;text-decoration: none;&#34;&gt;[1]&lt;/a&gt;&lt;/sup&gt;, within the &lt;a href=&#34;https://developer.nvidia.com/game-engines/unreal-engine/rtx-branch&#34;&gt;NvRTX branch&lt;/a&gt; of Unreal Engine.&lt;/p&gt;
+&lt;p&gt;A GDC presentation video on Zorah was released a few weeks ago. If it slipped past your radar, here it is for your convenience.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -32,8 +81,10 @@ A GDC presentation video on Zorah was released a few weeks ago.</description>
       <pubDate>Sat, 26 Aug 2023 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/fiber_in_cpp_understanding_the_basics/</guid>
-      <description>Fiber, a less known concept compared with coroutine, is a pretty powerful addition to cooperative multitasking. As a graphics programmer in game industry, I totally appreciate the great flexibility that fiber brings on the table. As a matter of fact, I feel the tech is a little bit underappreciated due to the lack of sufficient public materials talking about fibers.
-In this blog post, I will put down some of my learnings about fiber basics.</description>
+      <description>&lt;p&gt;Fiber, a less known concept compared with coroutine, is a pretty powerful addition to cooperative multitasking.
+As a graphics programmer in game industry, I totally appreciate the great flexibility that fiber brings on the table.
+As a matter of fact, I feel the tech is a little bit underappreciated due to the lack of sufficient public materials talking about fibers.&lt;/p&gt;
+&lt;p&gt;In this blog post, I will put down some of my learnings about fiber basics. Everything mentioned in this post will be specifically about C++ even though similar concept exist in other languages as well. Readers who have zero knowledge about fibers will be learning what it is and how we can take advantages of it in graphics rendering.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -42,8 +93,9 @@ In this blog post, I will put down some of my learnings about fiber basics.</des
       <pubDate>Mon, 05 Dec 2022 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/understanding_the_math_behind_restir_di/</guid>
-      <description>Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReSTIR (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like ReSTIR DI, ReSTIR GI, ReSTIR PT, Volumetric ReSTIR, etc.
-The original papers are clearly the best resources to learn the tech. Due to the complexity of the algorithm, understanding the theory and math remains challenging for graphics programmers who are not very familiar with sampling methods.</description>
+      <description>&lt;p&gt;Ever since the introduction of RTX technology, the industry pushed really hard on real time GI solutions. ReSTIR (Reservoir Spatio-Temporal Importance Resampling) is one of the new popular topics lately. The algorithm can be applied in multiple applications, there are several different variations of the algorithm, like &lt;a href=&#34;https://research.nvidia.com/publication/2020-07_spatiotemporal-reservoir-resampling-real-time-ray-tracing-dynamic-direct&#34;&gt;ReSTIR DI&lt;/a&gt;, &lt;a href=&#34;https://research.nvidia.com/publication/2021-06_restir-gi-path-resampling-real-time-path-tracing&#34;&gt;ReSTIR GI&lt;/a&gt;, &lt;a href=&#34;https://research.nvidia.com/publication/2022-07_generalized-resampled-importance-sampling-foundations-restir&#34;&gt;ReSTIR PT&lt;/a&gt;, &lt;a href=&#34;https://graphics.cs.utah.edu/research/projects/volumetric-restir/&#34;&gt;Volumetric ReSTIR&lt;/a&gt;, etc.&lt;/p&gt;
+&lt;p&gt;The original papers are clearly the best resources to learn the tech. Due to the complexity of the algorithm, understanding the theory and math remains challenging for graphics programmers who are not very familiar with sampling methods. There are also a few blog posts &lt;sup&gt;&lt;a href=&#34;http://www.zyanidelab.com/how-to-add-thousands-of-lights-to-your-renderer/&#34;&gt;[5]&lt;/a&gt; &lt;a href=&#34;https://gamehacker1999.github.io/posts/restir/&#34;&gt;[6]&lt;/a&gt;&lt;/sup&gt;
+ available. However, there are still some fundamental mathematical questions not answered in the posts, which are fairly important for us to understand why the math works the way it does in ReSTIR.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -52,8 +104,8 @@ The original papers are clearly the best resources to learn the tech. Due to the
       <pubDate>Tue, 09 Mar 2021 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/making_a_shading_langauge_for_my_offline_renderer/</guid>
-      <description>As a graphics programmer, I don&amp;rsquo;t usually spend too much time on something that is not strictly related to computer graphics or game engine. However, I did spend four months in my spare time last year building a shading language for my renderer SORT, which I call Tiny Shading Language (TSL).
-In the beginning, I didn&amp;rsquo;t know how it would end up eventually due to the lack of knowledge about how compilers work in general, this is not something graphics programmers touch regularly.</description>
+      <description>&lt;p&gt;As a graphics programmer, I don&amp;rsquo;t usually spend too much time on something that is not strictly related to computer graphics or game engine. However, I did spend four months in my spare time last year building a shading language for my renderer &lt;a href=&#34;https://sort-renderer.com&#34;&gt;SORT&lt;/a&gt;, which I call &lt;a href=&#34;https://tiny-shading-language.com/&#34;&gt;Tiny Shading Language (TSL)&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;In the beginning, I didn&amp;rsquo;t know how it would end up eventually due to the lack of knowledge about how compilers work in general, this is not something graphics programmers touch regularly. However, it does turn out without too much work, this thing can be done by one person in a few months.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -62,7 +114,8 @@ In the beginning, I didn&amp;rsquo;t know how it would end up eventually due to 
       <pubDate>Fri, 13 Nov 2020 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/</guid>
-      <description>Subsurface scattering has always been a challenge in computer graphics. Even in offline rendering, some of the common practical solutions are nowhere near unbiased. In certain algorithms, there are some pretty aggressive assumptions made to make things under control. However, despite the complexity in subsurface scattering algorithms, it is by no means a feature that can be missing from a practical rendering engine. Major commercial renderers, like Arnold, Cinema 4D, etc, all have very sophisticated and solid implementation of SSS.</description>
+      <description>&lt;p&gt;Subsurface scattering has always been a challenge in computer graphics. Even in offline rendering, some of the common practical solutions are nowhere near unbiased. In certain algorithms, there are some pretty aggressive assumptions made to make things under control.
+However, despite the complexity in subsurface scattering algorithms, it is by no means a feature that can be missing from a practical rendering engine. Major commercial renderers, like &lt;a href=&#34;https://www.arnoldrenderer.com/&#34;&gt;Arnold&lt;/a&gt;, &lt;a href=&#34;https://www.maxon.net/en-us/products/cinema-4d/overview/&#34;&gt;Cinema 4D&lt;/a&gt;, etc, all have very sophisticated and solid implementation of SSS. Robust implementation of SSS also exists in open-source projects, like &lt;a href=&#34;https://www.cycles-renderer.org/&#34;&gt;Cycles&lt;/a&gt; and &lt;a href=&#34;https://luxcorerender.org/&#34;&gt;luxcorerenderer&lt;/a&gt;, and even some research-based projects maintained by only a handful of people, like &lt;a href=&#34;https://pbrt.org/&#34;&gt;PBRT&lt;/a&gt; and &lt;a href=&#34;https://www.mitsuba-renderer.org/&#34;&gt;mitsuba&lt;/a&gt;. What is even amazing is that real-time rendering also has practical and efficient subsurface scattering implementation. In game industry, there is no shortage of amazing games with stunning and convincing skin rendering, for example, like &lt;a href=&#34;https://www.playstation.com/en-us/games/the-last-of-us-part-ii-ps4/&#34;&gt;the Last of Us Part II&lt;/a&gt;.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -71,7 +124,7 @@ In the beginning, I didn&amp;rsquo;t know how it would end up eventually due to 
       <pubDate>Thu, 29 Nov 2018 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/basic_color_science_for_graphcis_engineer/</guid>
-      <description>For more than a decade, we have been doing HDR rendering in our game engines, which means the intermediate render targets won&amp;rsquo;t be limited by the precision of the color formats. It is an even more important concept after the emerging of physically based rendering, which is almost what everyone does these days. However, after so much effort rendering everything in linear color space, it is quite wasteful that we can only display colors with only limited chromaticity and luminance defined by sRGB space due to limitations of LDR monitor and TVs.</description>
+      <description>&lt;p&gt;For more than a decade, we have been doing HDR rendering in our game engines, which means the intermediate render targets won&amp;rsquo;t be limited by the precision of the color formats. It is an even more important concept after the emerging of physically based rendering, which is almost what everyone does these days. However, after so much effort rendering everything in linear color space, it is quite wasteful that we can only display colors with only limited chromaticity and luminance defined by sRGB space due to limitations of LDR monitor and TVs.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -80,7 +133,7 @@ In the beginning, I didn&amp;rsquo;t know how it would end up eventually due to 
       <pubDate>Wed, 18 Jul 2018 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/sample_anisotropic_microfacet_brdf/</guid>
-      <description>I am working on material system in my renderer recently. My old implementation of microfacet models only supports isotropic BRDF, as a result of which, it can&amp;rsquo;t render something like brushed metals in my renderer. After spending three days in my spare time to extend the system to support anisotropic microfacet BRDF, I easily noticed how much mathematics that it needs to understand all the importance sampling methods. The fact that $ \theta $ and $ \phi $ are somewhat correlated makes the importance sampling a lot more complex than isotropic model.</description>
+      <description>&lt;p&gt;I am working on material system in my renderer recently. My old implementation of microfacet models only supports isotropic BRDF, as a result of which, it can&amp;rsquo;t render something like brushed metals in my renderer. After spending three days in my spare time to extend the system to support anisotropic microfacet BRDF, I easily noticed how much mathematics that it needs to understand all the importance sampling methods. The fact that $ \theta $ and $ \phi $ are somewhat correlated makes the importance sampling a lot more complex than isotropic model. For a detailed derivation of isotropic microfacet importance sampling, please check out my previous &lt;a href=&#34;https://agraphicsguynotes.com/posts/sample_microfacet_brdf/&#34;&gt;blog&lt;/a&gt;. I strongly suggest checking it out if the math formula in this blog confuses you because there are a lot of basics that I won&amp;rsquo;t mention in this blog.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -89,7 +142,7 @@ In the beginning, I didn&amp;rsquo;t know how it would end up eventually due to 
       <pubDate>Fri, 09 Mar 2018 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/how_does_pbrt_verify_bxdf/</guid>
-      <description>Unit test for BXDF in offline rendering turns out to be way more important than what I thought it would be. I still remember it took me quite a long time when I debugged my bi-directional path tracing algorithm before I noticed there was a little BXDF bug, which easily led to some divergence between BDPT and path tracing. Life will be much easier if we could find any potential BXDF problem at the very beginning.</description>
+      <description>&lt;p&gt;Unit test for BXDF in offline rendering turns out to be way more important than what I thought it would be. I still remember it took me quite a long time when I debugged my bi-directional path tracing algorithm before I noticed there was a little BXDF bug, which easily led to some divergence between BDPT and path tracing. Life will be much easier if we could find any potential BXDF problem at the very beginning.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -98,8 +151,52 @@ In the beginning, I didn&amp;rsquo;t know how it would end up eventually due to 
       <pubDate>Thu, 10 Nov 2016 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/volume_rendering_in_offline_renderer/</guid>
-      <description>Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.
-In case someone is not familiar with what volume rendering is, the above textures are attached for your references.</description>
+      <description>&lt;p&gt;Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.&lt;/p&gt;
+
+
+
+
+
+
+
+  
+
+
+&lt;figure class=&#34;multi-images&#34;&gt;
+&lt;div class=&#34;multi-images-grid&#34; style=&#34;--images-per-row: 2;&#34;&gt;
+
+  
+  
+  
+  &lt;div class=&#34;multi-images-item&#34;&gt;
+        &lt;a href=&#34;https://agraphicsguynotes.com/img/posts/volume_rendering_in_offline_renderer/no_volume.png&#34;&gt;
+        &lt;img
+            src=&#34;https://agraphicsguynotes.com/img/posts/volume_rendering_in_offline_renderer/no_volume.png&#34;
+            style=&#34;width:100%&#34;
+            alt=&#34;&#34;&gt;
+        &lt;/a&gt;
+  &lt;/div&gt;
+  
+
+  
+  
+  
+  &lt;div class=&#34;multi-images-item&#34;&gt;
+        &lt;a href=&#34;https://agraphicsguynotes.com/img/posts/volume_rendering_in_offline_renderer/with_volume.png&#34;&gt;
+        &lt;img
+            src=&#34;https://agraphicsguynotes.com/img/posts/volume_rendering_in_offline_renderer/with_volume.png&#34;
+            style=&#34;width:100%&#34;
+            alt=&#34;&#34;&gt;
+        &lt;/a&gt;
+  &lt;/div&gt;
+  
+
+&lt;/div&gt;
+&lt;figcaption class=&#34;custom-figure-caption&#34;&gt;&lt;strong&gt;Figure 1&lt;/strong&gt;: Examples of volume rendering in SORT.&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+
+&lt;p&gt;In case someone is not familiar with what volume rendering is, the above textures are attached for your references. One can easily notice that the fog on the right image greatly enhances the fidelity of the scene to a whole new different level. For a detailed explanation of volume rendering, it is suggested to check out this wiki page. Volume rendering is commonly used as fog, water etc. And mastering the basics behind it is of great importance because it also serves the basic theory of sub-surface scattering, which is very common even in real time 3D applications, like video games.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -108,7 +205,7 @@ In case someone is not familiar with what volume rendering is, the above texture
       <pubDate>Wed, 07 Sep 2016 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/image_based_lighting_in_offline_and_realtime_rendering/</guid>
-      <description>Image-based lighting is a practical way to enhance the visual quality of computer graphics. I used to be confused by it until I read the book &amp;ldquo;High Dynamic Range Imaging&amp;rdquo;, which provides a very clear explanation about IBL. And I actually have implemented the algorithm in my offline renderer before, it was just that I didn&amp;rsquo;t know it is IBL. The book PBRT has some materials talking about it without explicitly mentioning the term.</description>
+      <description>&lt;p&gt;Image-based lighting is a practical way to enhance the visual quality of computer graphics. I used to be confused by it until I read the book &amp;ldquo;&lt;a href=&#34;https://books.google.com/books?hl=zh-CN&amp;amp;lr=&amp;amp;id=w1i_1kejoYcC&amp;amp;oi=fnd&amp;amp;pg=PP2&amp;amp;dq=high&amp;#43;dynamic&amp;#43;range&amp;#43;imaging&amp;#43;2nd&amp;#43;edition&amp;amp;ots=4i3Y3AMLtz&amp;amp;sig=qsyJ3UxHv4XuxRKGFauG2G-kOXY#v=onepage&amp;amp;q=high%20dynamic%20range%20imaging%202nd%20edition&amp;amp;f=false&#34;&gt;High Dynamic Range Imaging&lt;/a&gt;&amp;rdquo;, which provides a very clear explanation about IBL. And I actually have implemented the algorithm in my offline renderer before, it was just that I didn&amp;rsquo;t know it is IBL. The book &lt;a href=&#34;https://pbrt.org/&#34;&gt;PBRT&lt;/a&gt; has some materials talking about it without explicitly mentioning the term. Following images are generated with IBL in my renderer, except that the last one uses a single directional light.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -117,7 +214,7 @@ In case someone is not familiar with what volume rendering is, the above texture
       <pubDate>Mon, 08 Feb 2016 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/instant_radiosity_in_my_renderer/</guid>
-      <description>I read about this instant radiosity algorithm in the book physically based rendering 3rd these days. It is mentioned as instant global illumination though, they are actually the same thing. I thought it should be a good algorithm until I have implemented in renderer, I&amp;rsquo;m afraid that it is not quite an efficient one. Although it is also unbiased like path tracing and bidirectional path tracing, the convergence speed is just terribly low comparing with the others.</description>
+      <description>&lt;p&gt;I read about this instant radiosity algorithm in the book physically based rendering 3rd these days. It is mentioned as instant global illumination though, they are actually the same thing. I thought it should be a good algorithm until I have implemented in renderer, I&amp;rsquo;m afraid that it is not quite an efficient one. Although it is also unbiased like path tracing and bidirectional path tracing, the convergence speed is just terribly low comparing with the others. It can barely show pure specular materials objects, it definitely needs special handling on delta bsdf. Since it is already implemented, I&amp;rsquo;ll put some notes on it.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -126,7 +223,7 @@ In case someone is not familiar with what volume rendering is, the above texture
       <pubDate>Thu, 04 Feb 2016 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/the_missing_primary_ray_pdf_in_path_tracing/</guid>
-      <description>I was always wondering why don&amp;rsquo;t we take the PDF of primary ray into account in a path tracer. Sadly there aren&amp;rsquo;t many resources available explaining it. I guess the book Physically based rendering 3rd will provide some explanation, however it is not released yet. After some searching on the internet, I finally got something to explain it. It actually gets cancelled with the terms in importance function and LTE. It gets cancelled in a very elegant way that we don&amp;rsquo;t need to put any resources on it at all, which is why many open-source ray tracer don&amp;rsquo;t consider it in the first place.</description>
+      <description>&lt;p&gt;I was always wondering why don&amp;rsquo;t we take the PDF of primary ray into account in a path tracer. Sadly there aren&amp;rsquo;t many resources available explaining it. I guess the book Physically based rendering 3rd will provide some explanation, however it is not released yet. After some searching on the internet, I finally got something to explain it. It actually gets cancelled with the terms in importance function and LTE. It gets cancelled in a very elegant way that we don&amp;rsquo;t need to put any resources on it at all, which is why many open-source ray tracer don&amp;rsquo;t consider it in the first place. In this blog, I&amp;rsquo;m gonna explain the detailed math behind the whole theory.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -135,7 +232,7 @@ In case someone is not familiar with what volume rendering is, the above texture
       <pubDate>Sat, 16 Jan 2016 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/practical_implementation_of_mis_in_bidirectional_path_tracing/</guid>
-      <description>In my previous post, I talked some basic stuff about naive bidirectional path tracing. However it is hard to show any real value since there are always too much noise comparing with best solutions depending on the scene to be rendered. That is because the contribution of each specific path is not properly weighted. And multiple importance sampling can be the key to the issue, the following comparison shows big difference between different methods.</description>
+      <description>&lt;p&gt;In my previous &lt;a href=&#34;https://agraphicsguynotes.com/posts/naive_bidirectional_path_tracing/&#34;&gt;post&lt;/a&gt;, I talked some basic stuff about naive bidirectional path tracing. However it is hard to show any real value since there are always too much noise comparing with best solutions depending on the scene to be rendered. That is because the contribution of each specific path is not properly weighted. And multiple importance sampling can be the key to the issue, the following comparison shows big difference between different methods. All of the images are generated with my open-source &lt;a href=&#34;https://sort-renderer.com&#34;&gt;renderer&lt;/a&gt;.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -144,7 +241,7 @@ In case someone is not familiar with what volume rendering is, the above texture
       <pubDate>Sun, 03 Jan 2016 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/naive_bidirectional_path_tracing/</guid>
-      <description>I posted a blog about path tracing some time ago, I didn&amp;rsquo;t regard it as a simple algorithm until I got my hands dirty on bidirectional path tracing. It really took me quite a while to get everything hooked up. Getting BDPT (short for bidirectional path tracing) converging to the same result with path tracing is far from a trivial task, any tiny bug hidden in the renderer will drag you into a nightmare.</description>
+      <description>&lt;p&gt;I posted a &lt;a href=&#34;https://agraphicsguynotes.com/posts/basics_about_path_tracing/&#34;&gt;blog&lt;/a&gt; about path tracing some time ago, I didn&amp;rsquo;t regard it as a simple algorithm until I got my hands dirty on bidirectional path tracing. It really took me quite a while to get everything hooked up. Getting BDPT (short for bidirectional path tracing) converging to the same result with path tracing is far from a trivial task, any tiny bug hidden in the renderer will drag you into a nightmare. Those kind of bugs are not the same with the ones that usually appear in real time rendering, like the ones that can easily be exposed with some tools like Nsight, it may cost much more time if only a small component is missing in the target equations, which are totally crazy math.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -153,8 +250,14 @@ In case someone is not familiar with what volume rendering is, the above texture
       <pubDate>Sat, 05 Dec 2015 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/physically_based_shading_in_games/</guid>
-      <description>Physically based shading has been around for years, it not only eases the workflow for artist, but also delivers high quality shading with neglectable overhead, I see no reason to avoid it in today&amp;rsquo;s game. Here is an image taken from UE4 document.
-When the term first came out, I was totally no idea what this new stuff is. And it took me quite a while to get some basic idea on it because there are so many materials and some of them are a little confusing.</description>
+      <description>&lt;p&gt;Physically based shading has been around for years, it not only eases the workflow for artist, but also delivers high quality shading with neglectable overhead, I see no reason to avoid it in today&amp;rsquo;s game. Here is an image taken from UE4 document.&lt;/p&gt;
+&lt;figure&gt;&lt;img src=&#34;https://agraphicsguynotes.com/img/posts/physically_based_shading_in_games/measured_materials.png&#34;
+    alt=&#34;Examples of measured material properties.&#34; width=&#34;800&#34;&gt;&lt;figcaption class=&#34;custom-figure-caption&#34;&gt;&lt;strong&gt;Figure 1&lt;/strong&gt;: 
+      Examples of measured material properties.
+    &lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;When the term first came out, I was totally no idea what this new stuff is. And it took me quite a while to get some basic idea on it because there are so many materials and some of them are a little confusing. I can&amp;rsquo;t say that I fully understand all of the theory simply because I don&amp;rsquo;t, however I would still like to write something that I knew and list something useful that I found in this blog. Hopefully it can be helpful for someone.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -163,8 +266,14 @@ When the term first came out, I was totally no idea what this new stuff is. And 
       <pubDate>Wed, 11 Nov 2015 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/glass_material_simulated_by_microfacet_bxdf/</guid>
-      <description>Microfacet model can not only be used for rough metal, it can also be used to simulate rough glass material. This blog is about rendering glass material with microfacet model. Basically all of the theory comes from this paper. Different from the pure refraction model mentioned in my previous blog, the bxdf mentioned here can also refract a single incident ray into multiple directions instead of just one.
-The above image is generated with my renderer.</description>
+      <description>&lt;p&gt;Microfacet model can not only be used for rough metal, it can also be used to simulate rough glass material. This blog is about rendering glass material with microfacet model. Basically all of the theory comes from this &lt;a href=&#34;https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.html&#34;&gt;paper&lt;/a&gt;. Different from the pure refraction model mentioned in my previous blog, the bxdf mentioned here can also refract a single incident ray into multiple directions instead of just one.&lt;/p&gt;
+&lt;figure&gt;&lt;img src=&#34;https://agraphicsguynotes.com/img/posts/glass_material_simulated_by_microfacet_bxdf/refract_microfacet.png&#34;
+    alt=&#34;Glass rendered with a microfacet model.&#34; width=&#34;800&#34;&gt;&lt;figcaption class=&#34;custom-figure-caption&#34;&gt;&lt;strong&gt;Figure 1&lt;/strong&gt;: 
+      Glass rendered with a microfacet model.
+    &lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;The above image is generated with &lt;a href=&#34;https://sort-renderer.com&#34;&gt;my renderer&lt;/a&gt;. Each pixel takes 1024 samples and it took me an hour to finish it. As we can see from this image, this bxdf model handles both reflection and refraction. The roughness parameter for both of the objects is 0.04, which makes them look quite similar to combination of pure reflection and refraction bxdf.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -173,8 +282,14 @@ The above image is generated with my renderer.</description>
       <pubDate>Sun, 01 Nov 2015 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/sample_microfacet_brdf/</guid>
-      <description>I&amp;rsquo;m working on microfacet brdf model for my renderer these days, noticing that it is more than necessary to provide a separate sampling method for microfacet brdf instead of using the default one, which is usually used for diffuse like surfaces and highly inefficient for brdf with spiky shape, such as mirror like surfaces. The following image is one generated by the default sampling method:
-The left monkey has pure reflection brdf which is mentioned in my previous blog post, the right one uses the microfacet model with zero as roughness value.</description>
+      <description>&lt;p&gt;I&amp;rsquo;m working on microfacet brdf model for my renderer these days, noticing that it is more than necessary to provide a separate sampling method for microfacet brdf instead of using the default one, which is usually used for diffuse like surfaces and highly inefficient for brdf with spiky shape, such as mirror like surfaces. The following image is one generated by the default sampling method:&lt;/p&gt;
+&lt;figure&gt;&lt;a href=&#34;https://agraphicsguynotes.com/img/posts/sample_microfacet_brdf/oldsampling.png&#34;&gt;&lt;img src=&#34;https://agraphicsguynotes.com/img/posts/sample_microfacet_brdf/oldsampling.png&#34;
+    alt=&#34;Microfacet materials rendered with the original sampling method.&#34; width=&#34;700&#34;&gt;&lt;/a&gt;&lt;figcaption class=&#34;custom-figure-caption&#34;&gt;&lt;strong&gt;Figure 1&lt;/strong&gt;: 
+      Microfacet materials rendered with the original sampling method.
+    &lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;The left monkey has pure reflection brdf which is mentioned in my previous blog &lt;a href=&#34;https://agraphicsguynotes.com/posts/derivation_of_pure_specular_reflection_brdf/&#34;&gt;post&lt;/a&gt;, the right one uses the microfacet model with zero as roughness value. I was expecting similar result for both of the monkeys while things turned out to be wrong here, we can barely see the reflection from the monkey. Actually there is nothing wrong, the fact is that the convergence rate of default sampling the microfacet model with 0 roughness is extremely low. As long as there are enough samples, it will reach the appearance similar to the left one. However the number of samples being enough can be arbitrarily high depending on how spiky your brdf is.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -183,8 +298,8 @@ The left monkey has pure reflection brdf which is mentioned in my previous blog 
       <pubDate>Thu, 22 Oct 2015 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/derivation_of_pure_specular_reflection_brdf/</guid>
-      <description>The book &amp;ldquo;Physically Based Rendering&amp;rdquo; already explains it, however I found it a little bit confusing the first time I read the chapters, which are chapters 8.2.2/8.2.3. And I also saw that there is one error of this chapter mentioned by Jérémy Riviere in the errata page. Although he provides a correct change on the equation however it is not clearly connected with the following context.
-This is a memo for me recording the derivation of specular reflection in a more clear way.</description>
+      <description>&lt;p&gt;The book &amp;ldquo;Physically Based Rendering&amp;rdquo; already explains it, however I found it a little bit confusing the first time I read the chapters, which are chapters 8.2.2/8.2.3. And I also saw that there is one error of this chapter mentioned by Jérémy Riviere in the &lt;a href=&#34;https://www.pbrt.org/errata-2ed.html&#34;&gt;errata page&lt;/a&gt;. Although he provides a correct change on the equation however it is not clearly connected with the following context.&lt;/p&gt;
+&lt;p&gt;This is a memo for me recording the derivation of specular reflection in a more clear way.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -193,8 +308,9 @@ This is a memo for me recording the derivation of specular reflection in a more 
       <pubDate>Mon, 10 Aug 2015 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/monte_carlo_integral_with_multiple_importance_sampling/</guid>
-      <description>The book physically based rendering doesn&amp;rsquo;t spend too much effort explaining MIS, however it does mention it. In order to be more familiar with MIS(Multiple Importance Sampling), I spent some time reading Veach&amp;rsquo;s thesis. The whole thesis is relatively long, however the chapter about MIS is kind of independent to the other ones. Worth taking some notes in case I forget later.
-Monte Carlo Integral Monte Carlo tries to solve integral problem by random sampling.</description>
+      <description>&lt;p&gt;The book physically based rendering doesn&amp;rsquo;t spend too much effort explaining MIS, however it does mention it. In order to be more familiar with MIS(Multiple Importance Sampling), I spent some time reading Veach&amp;rsquo;s thesis. The whole thesis is relatively long, however the chapter about MIS is kind of independent to the other ones. Worth taking some notes in case I forget later.&lt;/p&gt;
+&lt;h1 id=&#34;monte-carlo-integral&#34;&gt;Monte Carlo Integral&lt;/h1&gt;
+&lt;p&gt;Monte Carlo tries to solve integral problem by random sampling. Basically it takes N independent samples randomly across the whole domain and use these samples to evaluate the integral.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -203,8 +319,14 @@ Monte Carlo Integral Monte Carlo tries to solve integral problem by random samp
       <pubDate>Mon, 20 Jul 2015 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/basics_about_path_tracing/</guid>
-      <description>I tried path tracing two years ago in my ray tracer. However without taking some notes, I&amp;rsquo;ve already forgotten almost everything about it. Recently I reviewed the theory and the code, picked up something from it. I&amp;rsquo;d like to take some notes so that I can get it immediately next time I forget it. Before everything, here is a Cornell box scene rendered with path tracing:
-I really want to render something different using my ray tracer, however it doesn&amp;rsquo;t have a GUI editor so far.</description>
+      <description>&lt;p&gt;I tried path tracing two years ago in my ray tracer. However without taking some notes, I&amp;rsquo;ve already forgotten almost everything about it. Recently I reviewed the theory and the code, picked up something from it. I&amp;rsquo;d like to take some notes so that I can get it immediately next time I forget it. Before everything, here is a Cornell box scene rendered with path tracing:&lt;/p&gt;
+&lt;figure&gt;&lt;img src=&#34;https://agraphicsguynotes.com/img/posts/basics_about_path_tracing/pathtracing_ref.png&#34;
+    alt=&#34;A Cornell box rendered with path tracing.&#34; width=&#34;800&#34;&gt;&lt;figcaption class=&#34;custom-figure-caption&#34;&gt;&lt;strong&gt;Figure 1&lt;/strong&gt;: 
+      A Cornell box rendered with path tracing.
+    &lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;I really want to render something different using my ray tracer, however it doesn&amp;rsquo;t have a GUI editor so far. Everything is through script and editing a scene through script is really a painful experience. I do plan to add GUI support using QT, however I don&amp;rsquo;t have time for it these days. Hopefully I will have some time in the near future.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -213,7 +335,7 @@ I really want to render something different using my ray tracer, however it does
       <pubDate>Wed, 24 Jun 2015 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/directional_light_map_from_the_groud_up/</guid>
-      <description>A couple of days ago, an artist asked me what exactly a directional light map is. I found this page talking about the solutions in Unity 3D and explained to him. And I am reading the book &amp;ldquo;Real time rendering“ these days, it also talks about directional light map, which gives a more detailed and low-level explanation on it. Sounds like a very interesting topic, so I decided to take some notes.</description>
+      <description>&lt;p&gt;A couple of days ago, an artist asked me what exactly a directional light map is. I found this &lt;a href=&#34;https://docs.unity3d.com/Manual/LightmappingDirectional.html&#34;&gt;page&lt;/a&gt; talking about the solutions in Unity 3D and explained to him. And I am reading the book &amp;ldquo;Real time rendering“ these days, it also talks about directional light map, which gives a more detailed and low-level explanation on it. Sounds like a very interesting topic, so I decided to take some notes.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -222,8 +344,9 @@ I really want to render something different using my ray tracer, however it does
       <pubDate>Wed, 17 Jun 2015 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/unleash_the_power_of_direct3d_12/</guid>
-      <description>Direct3D12 is about to come. There are several presentations available in GDC this and last year talking about the new features in it. I&amp;rsquo;m gonna list some of the changes that D3D12 introduces in this post. It only covers some of the changes.
-The big picture Different from its predecessors, D3D12 mainly aims at reducing CPU overhead. Improving CPU performance is the first priority in this new API. Of course that&amp;rsquo;s not to say there is nothing more.</description>
+      <description>&lt;p&gt;Direct3D12 is about to come. There are several presentations available in GDC this and last year talking about the new features in it. I&amp;rsquo;m gonna list some of the changes that D3D12 introduces in this post. It only covers some of the changes.&lt;/p&gt;
+&lt;h1 id=&#34;the-big-picture&#34;&gt;The big picture&lt;/h1&gt;
+&lt;p&gt;Different from its predecessors, D3D12 mainly aims at reducing CPU overhead. Improving CPU performance is the first priority in this new API. Of course that&amp;rsquo;s not to say there is nothing more. Besides better CPU performance, it has some feature improving GPU performance. Apart from performance improvement, there are also some new graphics features available on latest hardware, such as conservative rasterization, raster ordered view, etc. In this article, I&amp;rsquo;m gonna talk something about the new features in D3D12 that improves performance. New graphics features are won&amp;rsquo;t be mentioned.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -232,8 +355,13 @@ The big picture Different from its predecessors, D3D12 mainly aims at reducing C
       <pubDate>Tue, 16 Jun 2015 00:00:00 +0000</pubDate>
       
       <guid>https://agraphicsguynotes.com/posts/tessellation_on_d3d11/</guid>
-      <description>One of the most important changes that DX11 has made is the brand new feature called tessellation. By introducing three more stages, graphics programmer can tessellate their triangles on the fly. There are some benefits:
-Models with more geometry detail. With phong tessellation, it smoothes the silhouette so that no sharp edge corner will be visible. Combined with displacement map, tessellation can produce bump surfaces in a much more realistic way than what can be achieved with normal map or POM.</description>
+      <description>&lt;p&gt;One of the most important changes that DX11 has made is the brand new feature called tessellation. By introducing three more stages, graphics programmer can tessellate their triangles on the fly. There are some benefits:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Models with more geometry detail. With phong tessellation, it smoothes the silhouette so that no sharp edge corner will be visible.  Combined with displacement map, tessellation can produce bump surfaces in a much more realistic way than what can be achieved with normal map or POM.&lt;/li&gt;
+&lt;li&gt;Less calculation on full detailed model. It saves a lot of time by placing intense computation, like bone matrix multiplication, in vertex shader which only processes control points of the model.&lt;/li&gt;
+&lt;li&gt;Dynamic LOD. Since tessellation factors, which determines how to tessellate the object, are calculated on the fly during rendering, level of detail can be decided based on factors like distance, angle, etc.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In this article, I&amp;rsquo;d like to mention some detail that I learned about tessellation.&lt;/p&gt;</description>
     </item>
     
   </channel>

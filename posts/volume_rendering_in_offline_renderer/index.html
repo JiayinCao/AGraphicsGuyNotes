@@ -8,23 +8,65 @@
 
     <meta name="author" content="Jiayin Cao">
     <meta name="description" content="Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.
-In case someone is not familiar with what volume rendering is, the above textures are attached for your references.">
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+  
+  
+  
+        
+        
+        
+  
+  
+
+  
+  
+  
+  
+        
+        
+        
+  
+  
+
+
+Figure 1: Examples of volume rendering in SORT.
+
+
+
+In case someone is not familiar with what volume rendering is, the above textures are attached for your references. One can easily notice that the fog on the right image greatly enhances the fidelity of the scene to a whole new different level. For a detailed explanation of volume rendering, it is suggested to check out this wiki page. Volume rendering is commonly used as fog, water etc. And mastering the basics behind it is of great importance because it also serves the basic theory of sub-surface scattering, which is very common even in real time 3D applications, like video games.">
     <meta name="keywords" content="blog,developer,personal">
 
-    <meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://agraphicsguynotes.com/img/cover.png"/>
+    
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://agraphicsguynotes.com/img/cover.png">
+  <meta name="twitter:title" content="Volume Rendering in Offline Renderer">
+  <meta name="twitter:description" content="Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.
+Figure 1: Examples of volume rendering in SORT.In case someone is not familiar with what volume rendering is, the above textures are attached for your references. One can easily notice that the fog on the right image greatly enhances the fidelity of the scene to a whole new different level. For a detailed explanation of volume rendering, it is suggested to check out this wiki page. Volume rendering is commonly used as fog, water etc. And mastering the basics behind it is of great importance because it also serves the basic theory of sub-surface scattering, which is very common even in real time 3D applications, like video games.">
 
-<meta name="twitter:title" content="Volume Rendering in Offline Renderer"/>
-<meta name="twitter:description" content="Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.
-In case someone is not familiar with what volume rendering is, the above textures are attached for your references."/>
-
-    <meta property="og:title" content="Volume Rendering in Offline Renderer" />
-<meta property="og:description" content="Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.
-In case someone is not familiar with what volume rendering is, the above textures are attached for your references." />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://agraphicsguynotes.com/posts/volume_rendering_in_offline_renderer/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2016-11-10T00:00:00+00:00" />
-<meta property="article:modified_time" content="2016-11-10T00:00:00+00:00" />
+    <meta property="og:url" content="https://agraphicsguynotes.com/posts/volume_rendering_in_offline_renderer/">
+  <meta property="og:site_name" content="A Graphics Guy&#39;s Note">
+  <meta property="og:title" content="Volume Rendering in Offline Renderer">
+  <meta property="og:description" content="Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.
+Figure 1: Examples of volume rendering in SORT.In case someone is not familiar with what volume rendering is, the above textures are attached for your references. One can easily notice that the fog on the right image greatly enhances the fidelity of the scene to a whole new different level. For a detailed explanation of volume rendering, it is suggested to check out this wiki page. Volume rendering is commonly used as fog, water etc. And mastering the basics behind it is of great importance because it also serves the basic theory of sub-surface scattering, which is very common even in real time 3D applications, like video games.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2016-11-10T00:00:00+00:00">
+    <meta property="article:modified_time" content="2016-11-10T00:00:00+00:00">
+    <meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png">
 
 
     <title>
@@ -65,6 +107,8 @@ In case someone is not familiar with what volume rendering is, the above texture
       <link rel="stylesheet" href="/css/chroma-dark.css" />
     
       <link rel="stylesheet" href="/css/custom.css" />
+    
+      <link rel="stylesheet" href="/css/code-listing.css" />
     
 
     
@@ -124,7 +168,7 @@ In case someone is not familiar with what volume rendering is, the above texture
 </style>
     
 
-    <meta name="generator" content="Hugo 0.117.0">
+    <meta name="generator" content="Hugo 0.159.2">
 
     <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
@@ -218,28 +262,21 @@ In case someone is not familiar with what volume rendering is, the above texture
         <p>Finally, I have some time reading books, spending several days digesting the volume rendering part of PBRT, there are loads of stuff that interest me. Instead of repeating the theory in it, I decided to put some key points in my blog with some brief introduction and then provide some derivations which are not mentioned in the book.</p>
 
 
-<style>
-    .row {
-        display: -ms-flexbox;  
-        display: flex;
-        -ms-flex-wrap: wrap;  
-        flex-wrap: wrap;
-        padding: 0 4px;
-    }
-    
-     
-    .column {
-        -ms-flex: 33%;  
-        flex: 33%;
-        padding: 0 4px;
-    }
-</style>
-<div class="row">
+
+
+
+
+
+  
+
+
+<figure class="multi-images">
+<div class="multi-images-grid" style="--images-per-row: 2;">
 
   
   
   
-  <div class="column">
+  <div class="multi-images-item">
         <a href="/img/posts/volume_rendering_in_offline_renderer/no_volume.png">
         <img
             src="/img/posts/volume_rendering_in_offline_renderer/no_volume.png"
@@ -252,7 +289,7 @@ In case someone is not familiar with what volume rendering is, the above texture
   
   
   
-  <div class="column">
+  <div class="multi-images-item">
         <a href="/img/posts/volume_rendering_in_offline_renderer/with_volume.png">
         <img
             src="/img/posts/volume_rendering_in_offline_renderer/with_volume.png"
@@ -263,6 +300,9 @@ In case someone is not familiar with what volume rendering is, the above texture
   
 
 </div>
+<figcaption class="custom-figure-caption"><strong>Figure 1</strong>: Examples of volume rendering in SORT.</figcaption>
+</figure>
+
 
 <p>In case someone is not familiar with what volume rendering is, the above textures are attached for your references. One can easily notice that the fog on the right image greatly enhances the fidelity of the scene to a whole new different level. For a detailed explanation of volume rendering, it is suggested to check out this wiki page. Volume rendering is commonly used as fog, water etc. And mastering the basics behind it is of great importance because it also serves the basic theory of sub-surface scattering, which is very common even in real time 3D applications, like video games.</p>
 <h1 id="how-light-interacts-with-volume">How Light Interacts with Volume</h1>
@@ -285,7 +325,10 @@ In case someone is not familiar with what volume rendering is, the above texture
 <p>Comparing with real-time rendering solution, I kind of like offline solution due to its consistence among all situation like fog, light shaft or even water. I am no expert of physics, my take on them is that all of them are a set of particles at a micro level. They are actually the same except that the difference is how particles interact with each other.</p>
 <h2 id="absorption">Absorption</h2>
 <p>Let&rsquo;s start from absorption. Assuming we have a volume with its particles uniformly distributed inside it, light attenuation due to absorption will be the same at all points along the ray.</p>
-<figure><img src="/img/posts/volume_rendering_in_offline_renderer/absorption.png"/>
+<figure><img src="/img/posts/volume_rendering_in_offline_renderer/absorption.png"
+    alt="Light attenuation through an absorbing medium."><figcaption class="custom-figure-caption"><strong>Figure 2</strong>: 
+      Light attenuation through an absorbing medium.
+    </figcaption>
 </figure>
 
 <p>We have the following equation at a micro level:</p>
@@ -337,7 +380,10 @@ $$ L_i(p,\omega) = \int_0^{\infty} T_r(p&#39; \rightarrow p) S(p&#39;, -\omega) 
 
 $$ L(p,-\omega) = \int_0^{\infty} T_r(p&#39; \rightarrow p) S(p&#39;, -\omega) dt $$
 <p>If you look at the picture below, you will find that this description is even better than the previous one, although both make perfect sense. What it says is that the radiance at point p along direction -w due to in-scattering is actually the accumulation of all in-scattering radiance at all points along direction -w attenuated by its corresponding beam transmittance.</p>
-<figure><img src="/img/posts/volume_rendering_in_offline_renderer/volume_rendering.png"/>
+<figure><img src="/img/posts/volume_rendering_in_offline_renderer/volume_rendering.png"
+    alt="Beam transmittance describes the attenuation of radiance traveling from $p&rsquo;$ to $p$ due to absorption and out-scattering."><figcaption class="custom-figure-caption"><strong>Figure 3</strong>: 
+      Beam transmittance describes the attenuation of radiance traveling from $p&rsquo;$ to $p$ due to absorption and out-scattering.
+    </figcaption>
 </figure>
 
 <p>In order to derive from the first equation to the second one, we need to handle one small issue. Notice that the first equation proceed along the direction w, while the second one goes just in the opposite way. I choose to invert the first equation in my derivation. It becomes this:</p>
@@ -362,7 +408,7 @@ $$  L(p(0)) = \int_0^{\infty} e^{- \int_{0}^{t} \sigma (p)dt&#39;} S(p) = \int_
 <h1 id="references">References</h1>
 <p>[1] <a href="http://pbrt.org/">Physically Based Rendering, second edition</a><br>
 [2] <a href="https://www.math.ucdavis.edu/~thomases/W11_16C1_lec_1_7_11.pdf">UCDavis, Mathematics. First order linear differential equation</a><br>
-[3] <a href="https://www.shadertoy.com/view/XlBSRz#">Volumetric Integration</a></p>
+[3] <a href="https://www.shadertoy.com/view/XlBSRz">Volumetric Integration</a></p>
 
       </div>
 
@@ -670,7 +716,7 @@ $$  L(p(0)) = \int_0^{\infty} e^{- \int_{0}^{t} \sigma (p)dt&#39;} S(p) = \int_
 
     
       
-      <script src="/js/dark-mode.min.f7a0c7c5d46ac9b8d5d7cd8641fe9a41deb129c48a488caf293c9eb5992bd1bd.js"></script>
+      <script src="/js/dark-mode.min.0b1e3ddf7d7cebe6389de0d30470fa17b9fdc860f16e31884b90bfdd2d69d40d.js"></script>
     
     
     <script src="/js/scroll-keys.js"></script>

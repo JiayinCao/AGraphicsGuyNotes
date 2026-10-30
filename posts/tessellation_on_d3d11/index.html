@@ -8,23 +8,32 @@
 
     <meta name="author" content="Jiayin Cao">
     <meta name="description" content="One of the most important changes that DX11 has made is the brand new feature called tessellation. By introducing three more stages, graphics programmer can tessellate their triangles on the fly. There are some benefits:
-Models with more geometry detail. With phong tessellation, it smoothes the silhouette so that no sharp edge corner will be visible. Combined with displacement map, tessellation can produce bump surfaces in a much more realistic way than what can be achieved with normal map or POM.">
+
+Models with more geometry detail. With phong tessellation, it smoothes the silhouette so that no sharp edge corner will be visible.  Combined with displacement map, tessellation can produce bump surfaces in a much more realistic way than what can be achieved with normal map or POM.
+Less calculation on full detailed model. It saves a lot of time by placing intense computation, like bone matrix multiplication, in vertex shader which only processes control points of the model.
+Dynamic LOD. Since tessellation factors, which determines how to tessellate the object, are calculated on the fly during rendering, level of detail can be decided based on factors like distance, angle, etc.
+
+In this article, I&rsquo;d like to mention some detail that I learned about tessellation.">
     <meta name="keywords" content="blog,developer,personal">
 
-    <meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://agraphicsguynotes.com/img/cover.png"/>
+    
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://agraphicsguynotes.com/img/cover.png">
+  <meta name="twitter:title" content="Tessellation on DX11">
+  <meta name="twitter:description" content="One of the most important changes that DX11 has made is the brand new feature called tessellation. By introducing three more stages, graphics programmer can tessellate their triangles on the fly. There are some benefits:
+Models with more geometry detail. With phong tessellation, it smoothes the silhouette so that no sharp edge corner will be visible. Combined with displacement map, tessellation can produce bump surfaces in a much more realistic way than what can be achieved with normal map or POM. Less calculation on full detailed model. It saves a lot of time by placing intense computation, like bone matrix multiplication, in vertex shader which only processes control points of the model. Dynamic LOD. Since tessellation factors, which determines how to tessellate the object, are calculated on the fly during rendering, level of detail can be decided based on factors like distance, angle, etc. In this article, I’d like to mention some detail that I learned about tessellation.">
 
-<meta name="twitter:title" content="Tessellation on DX11"/>
-<meta name="twitter:description" content="One of the most important changes that DX11 has made is the brand new feature called tessellation. By introducing three more stages, graphics programmer can tessellate their triangles on the fly. There are some benefits:
-Models with more geometry detail. With phong tessellation, it smoothes the silhouette so that no sharp edge corner will be visible. Combined with displacement map, tessellation can produce bump surfaces in a much more realistic way than what can be achieved with normal map or POM."/>
-
-    <meta property="og:title" content="Tessellation on DX11" />
-<meta property="og:description" content="One of the most important changes that DX11 has made is the brand new feature called tessellation. By introducing three more stages, graphics programmer can tessellate their triangles on the fly. There are some benefits:
-Models with more geometry detail. With phong tessellation, it smoothes the silhouette so that no sharp edge corner will be visible. Combined with displacement map, tessellation can produce bump surfaces in a much more realistic way than what can be achieved with normal map or POM." />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://agraphicsguynotes.com/posts/tessellation_on_d3d11/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2015-06-16T00:00:00+00:00" />
-<meta property="article:modified_time" content="2015-06-16T00:00:00+00:00" />
+    <meta property="og:url" content="https://agraphicsguynotes.com/posts/tessellation_on_d3d11/">
+  <meta property="og:site_name" content="A Graphics Guy&#39;s Note">
+  <meta property="og:title" content="Tessellation on DX11">
+  <meta property="og:description" content="One of the most important changes that DX11 has made is the brand new feature called tessellation. By introducing three more stages, graphics programmer can tessellate their triangles on the fly. There are some benefits:
+Models with more geometry detail. With phong tessellation, it smoothes the silhouette so that no sharp edge corner will be visible. Combined with displacement map, tessellation can produce bump surfaces in a much more realistic way than what can be achieved with normal map or POM. Less calculation on full detailed model. It saves a lot of time by placing intense computation, like bone matrix multiplication, in vertex shader which only processes control points of the model. Dynamic LOD. Since tessellation factors, which determines how to tessellate the object, are calculated on the fly during rendering, level of detail can be decided based on factors like distance, angle, etc. In this article, I’d like to mention some detail that I learned about tessellation.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2015-06-16T00:00:00+00:00">
+    <meta property="article:modified_time" content="2015-06-16T00:00:00+00:00">
+    <meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png">
 
 
     <title>
@@ -66,6 +75,8 @@ Models with more geometry detail. With phong tessellation, it smoothes the silho
     
       <link rel="stylesheet" href="/css/custom.css" />
     
+      <link rel="stylesheet" href="/css/code-listing.css" />
+    
 
     
       
@@ -98,7 +109,7 @@ Models with more geometry detail. With phong tessellation, it smoothes the silho
 
     
 
-    <meta name="generator" content="Hugo 0.117.0">
+    <meta name="generator" content="Hugo 0.159.2">
 
     <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
@@ -205,28 +216,21 @@ Models with more geometry detail. With phong tessellation, it smoothes the silho
 <p>Here is a comparison between tessellation, POM and normal map, those captures come from the detail tessellation demo from D3D SDK. The left one is normal map, the quality quickly breaks down when viewed at a wide angle. POM solves the problem with a ray marching method, however it still shows artifacts at the silhouette of objects. SPOM can solve the problem, however it is far beyond the topic of this blog. Tessellation gives the perfect result, the rocks look really bumpy here.</p>
 
 
-<style>
-    .row {
-        display: -ms-flexbox;  
-        display: flex;
-        -ms-flex-wrap: wrap;  
-        flex-wrap: wrap;
-        padding: 0 4px;
-    }
-    
-     
-    .column {
-        -ms-flex: 33%;  
-        flex: 33%;
-        padding: 0 4px;
-    }
-</style>
-<div class="row">
+
+
+
+
+
+  
+
+
+<figure class="multi-images">
+<div class="multi-images-grid" style="--images-per-row: 3;">
 
   
   
   
-  <div class="column">
+  <div class="multi-images-item">
         <a href="/img/posts/tessellation_on_d3d11/normalmap.jpg">
         <img
             src="/img/posts/tessellation_on_d3d11/normalmap.jpg"
@@ -239,7 +243,7 @@ Models with more geometry detail. With phong tessellation, it smoothes the silho
   
   
   
-  <div class="column">
+  <div class="multi-images-item">
         <a href="/img/posts/tessellation_on_d3d11/pom.jpg">
         <img
             src="/img/posts/tessellation_on_d3d11/pom.jpg"
@@ -252,7 +256,7 @@ Models with more geometry detail. With phong tessellation, it smoothes the silho
   
   
   
-  <div class="column">
+  <div class="multi-images-item">
         <a href="/img/posts/tessellation_on_d3d11/tessellation.jpg">
         <img
             src="/img/posts/tessellation_on_d3d11/tessellation.jpg"
@@ -263,6 +267,9 @@ Models with more geometry detail. With phong tessellation, it smoothes the silho
   
 
 </div>
+<figcaption class="custom-figure-caption"><strong>Figure 1</strong>: Comparing normal mapping, parallax occlusion mapping, and tessellation.</figcaption>
+</figure>
+
 
 <h1 id="more-detail">More Detail</h1>
 <p>Before diving into the details, let&rsquo;s see how to enable tessellation through the API. There is no specific functions to enable tessellation. To enable it, you need to create a valid hull shader and domain shader. By binding those shaders in the context, tessellation will be enabled. Of course it is necessary to adjust your shader code in VS. Without tessellation, vertex shader normally outputs at least clip space position. With tessellation, VS can choose only to pass the data to hull shader most of the time.</p>
@@ -270,68 +277,71 @@ Models with more geometry detail. With phong tessellation, it smoothes the silho
 <h2 id="hull-shader">Hull Shader</h2>
 <p>Let&rsquo;s talk about hull shader then. A hull shader is the first of the three new stages to implement tessellation. There are two functions, constant function and hull shader.</p>
 <p>A constant function runs on a per-batch basis, it outputs some constant data for tessellator and domain shader. &ldquo;SV_TessFactor&rdquo; and &ldquo;SV_InsideTessFactor&rdquo; are needed by tessellator. And each different type of primitive may need different number of these factors. For example, there should be one inner tess-factor and three outer tess-factors in the constant data. A constant function is also free to generate more data, tessellator will ignore them, however they could be consumed by domain shader. Here is a simple constant function that tessellates all of the triangles:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#define MAX_POINTS 32
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="c1">// Control point, this is generated from VS
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">struct</span> <span class="nc">VS_CONTROL_POINT_OUTPUT</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">float3</span> <span class="nl">vPosition</span> <span class="p">:</span> <span class="n">WORLDPOS</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">float2</span> <span class="nl">vUV</span>       <span class="p">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">float3</span> <span class="nl">vTangent</span>  <span class="p">:</span> <span class="n">TANGENT</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">};</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// Hull shader output
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">struct</span> <span class="nc">HS_CONSTANT_DATA_OUTPUT</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">float</span> <span class="n">Edges</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">:</span> <span class="n">SV_TessFactor</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">float</span> <span class="nl">Inside</span> <span class="p">:</span> <span class="n">SV_InsideTessFactor</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">};</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// Hull shader Entry
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">HS_CONSTANT_DATA_OUTPUT</span> <span class="nf">ConstantHS</span><span class="p">(</span> <span class="n">InputPatch</span><span class="o">&lt;</span><span class="n">VS_CONTROL_POINT_OUTPUT</span><span class="p">,</span> <span class="n">MAX_POINTS</span><span class="o">&gt;</span> <span class="n">ip</span><span class="p">,</span> 
-</span></span><span class="line"><span class="cl">                                    <span class="n">uint</span> <span class="nl">i</span> <span class="p">:</span> <span class="n">SV_OutputControlPointID</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">                                    <span class="n">uint</span> <span class="nl">PatchID</span> <span class="p">:</span> <span class="n">SV_PrimitiveID</span> <span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">HS_CONSTANT_DATA_OUTPUT</span> <span class="n">output</span>  <span class="o">=</span> <span class="p">(</span><span class="n">HS_CONSTANT_DATA_OUTPUT</span><span class="p">)</span><span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="c1">// In this simple example, density is purely a constant, but it could be anything
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// calculated from the input data.
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="kt">float</span> <span class="n">density</span> <span class="o">=</span> <span class="mf">64.0f</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">	<span class="n">output</span><span class="p">.</span><span class="n">Edges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">density</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">	<span class="n">output</span><span class="p">.</span><span class="n">Edges</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">density</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">	<span class="n">output</span><span class="p">.</span><span class="n">Edges</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">density</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">	<span class="n">output</span><span class="p">.</span><span class="n">Inside</span> <span class="o">=</span> <span class="n">density</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">output</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>In a real scenario, you may want to adjust your tessellation factor based on information that is already available. Dynamic LOD could be done here through calculating the tessellation factors based on distance between eye point and patch. Apart from all, one can also set up 0 as a factor, it is a valid number for tessellation factor. And tessellator will automatically drop the patch with a zero tessellation factor. Since SV_POSITION is not determined yet, it is impossible for the hardware to do clipping. However it is totally valid to do some culling in this function. If you are certain that the patch won&rsquo;t be visible at all, you can set 0 as its tessellation factor to prevent it from further processing. Just be very careful when trying hull culling, because it may reject patches that could be visible after displacement.</p>
+<figure class="code-figure"><div class="code-listing" data-codetype="cpp"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="cp">#define MAX_POINTS 32
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="c1">// Control point, this is generated from VS
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="k">struct</span> <span class="nc">VS_CONTROL_POINT_OUTPUT</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    <span class="n">float3</span> <span class="nl">vPosition</span> <span class="p">:</span> <span class="n">WORLDPOS</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">    <span class="n">float2</span> <span class="nl">vUV</span>       <span class="p">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    <span class="n">float3</span> <span class="nl">vTangent</span>  <span class="p">:</span> <span class="n">TANGENT</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">
+</span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="c1">// Hull shader output
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="k">struct</span> <span class="nc">HS_CONSTANT_DATA_OUTPUT</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">    <span class="kt">float</span> <span class="n">Edges</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">:</span> <span class="n">SV_TessFactor</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">    <span class="kt">float</span> <span class="nl">Inside</span> <span class="p">:</span> <span class="n">SV_InsideTessFactor</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">
+</span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="c1">// Hull shader Entry
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="n">HS_CONSTANT_DATA_OUTPUT</span> <span class="nf">ConstantHS</span><span class="p">(</span> <span class="n">InputPatch</span><span class="o">&lt;</span><span class="n">VS_CONTROL_POINT_OUTPUT</span><span class="p">,</span> <span class="n">MAX_POINTS</span><span class="o">&gt;</span> <span class="n">ip</span><span class="p">,</span> 
+</span></span><span class="line"><span class="ln">20</span><span class="cl">                                    <span class="n">uint</span> <span class="nl">i</span> <span class="p">:</span> <span class="n">SV_OutputControlPointID</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">                                    <span class="n">uint</span> <span class="nl">PatchID</span> <span class="p">:</span> <span class="n">SV_PrimitiveID</span> <span class="p">)</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">    <span class="n">HS_CONSTANT_DATA_OUTPUT</span> <span class="n">output</span>  <span class="o">=</span> <span class="p">(</span><span class="n">HS_CONSTANT_DATA_OUTPUT</span><span class="p">)</span><span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">
+</span></span><span class="line"><span class="ln">25</span><span class="cl">    <span class="c1">// In this simple example, density is purely a constant, but it could be anything
+</span></span></span><span class="line"><span class="ln">26</span><span class="cl">    <span class="c1">// calculated from the input data.
+</span></span></span><span class="line"><span class="ln">27</span><span class="cl">	<span class="kt">float</span> <span class="n">density</span> <span class="o">=</span> <span class="mf">64.0f</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">28</span><span class="cl">	<span class="n">output</span><span class="p">.</span><span class="n">Edges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">density</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">29</span><span class="cl">	<span class="n">output</span><span class="p">.</span><span class="n">Edges</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">density</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">30</span><span class="cl">	<span class="n">output</span><span class="p">.</span><span class="n">Edges</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">density</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">31</span><span class="cl">	<span class="n">output</span><span class="p">.</span><span class="n">Inside</span> <span class="o">=</span> <span class="n">density</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">32</span><span class="cl">    <span class="k">return</span> <span class="n">output</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">33</span><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><figcaption class="code-figure-caption"><strong>Listing 1</strong>: A hull shader patch constant function.</figcaption>
+</figure>
+
+<p>In a real scenario, you may want to adjust your tessellation factor based on information that is already available. Dynamic LOD could be done here through calculating the tessellation factors based on distance between eye point and patch. Apart from all, one can also set up 0 as a factor, it is a valid number for tessellation factor. And tessellator will automatically drop the patch with a zero tessellation factor. Since SV_POSITION is not determined yet, it is impossible for the hardware to do clipping. However it is totally valid to do some culling in this function. If you are certain that the patch won&rsquo;t be visible at all, you can set 0 as its tessellation factor to prevent it from further processing. Just be very careful when trying hull culling, because it may reject patches that could be visible after displacement.</p>
 <p>A Hull shader is the per-control point function. Sometimes, it just passes the data through. Here is some piece of code of a hull shader:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">struct</span> <span class="nc">HS_OUTPUT</span><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">float3</span> <span class="nl">vPosition</span> <span class="p">:</span> <span class="n">WORLDPOS</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">float2</span> <span class="nl">vUV</span>       <span class="p">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">float3</span> <span class="nl">vTangent</span>  <span class="p">:</span> <span class="n">TANGENT</span><span class="p">;</span> 
-</span></span><span class="line"><span class="cl"><span class="p">};</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="n">domain</span><span class="p">(</span><span class="s">&#34;tri&#34;</span><span class="p">)]</span>
-</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="n">partitioning</span><span class="p">(</span><span class="s">&#34;pow2&#34;</span><span class="p">)]</span>
-</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="n">outputtopology</span><span class="p">(</span><span class="s">&#34;triangle_cw&#34;</span><span class="p">)]</span>
-</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="n">outputcontrolpoints</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
-</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="n">patchconstantfunc</span><span class="p">(</span><span class="s">&#34;ConstantsHS&#34;</span><span class="p">)]</span>
-</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="n">maxtessfactor</span><span class="p">(</span><span class="mf">64.0</span><span class="p">)]</span>
-</span></span><span class="line"><span class="cl"><span class="n">HS_CONTROL_POINT_OUTPUT</span> <span class="n">HS</span><span class="p">(</span> <span class="n">InputPatch</span><span class="o">&lt;</span><span class="n">VS_CONTROL_POINT_OUTPUT</span><span class="p">,</span> <span class="n">MAX_POINTS</span><span class="o">&gt;</span> <span class="n">ip</span><span class="p">,</span> 
-</span></span><span class="line"><span class="cl">                            <span class="n">uint</span> <span class="nl">i</span> <span class="p">:</span> <span class="n">SV_OutputControlPointID</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">                            <span class="n">uint</span> <span class="nl">PatchID</span> <span class="p">:</span> <span class="n">SV_PrimitiveID</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">HS_CONTROL_POINT_OUTPUT</span> <span class="n">output</span> <span class="o">=</span> <span class="p">(</span><span class="n">HS_CONTROL_POINT_OUTPUT</span><span class="p">)</span><span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="c1">// Copy inputs to outputs
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">output</span><span class="p">.</span><span class="n">vPosition</span> <span class="o">=</span> <span class="n">inputPatch</span><span class="p">[</span><span class="n">uCPID</span><span class="p">].</span><span class="n">vPosition</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">output</span><span class="p">.</span><span class="n">vUV</span> <span class="o">=</span> <span class="n">inputPatch</span><span class="p">[</span><span class="n">uCPID</span><span class="p">].</span><span class="n">vUV</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">output</span><span class="p">.</span><span class="n">vTangent</span> <span class="o">=</span> <span class="n">inputPatch</span><span class="p">[</span><span class="n">uCPID</span><span class="p">].</span><span class="n">vUV</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">output</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>Different from the constant function or other c functions, there are some parameters setup before the functions. Most of them are self-explanatory. Refer to <a href="https://docs.microsoft.com/en-us/windows/win32/direct3d11/direct3d-11-advanced-stages-hull-shader-design?redirectedfrom=MSDN">here</a> if you are confused by any of them. In Unreal Engine 4, more information will be generated in hull shader instead of just passing through the original data. Some of information will be used to fix some crack issues introduced in tessellation. Other information will be used to generate curved surface from control points.</p>
+<figure class="code-figure"><div class="code-listing" data-codetype="cpp"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="k">struct</span> <span class="nc">HS_OUTPUT</span><span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">    <span class="n">float3</span> <span class="nl">vPosition</span> <span class="p">:</span> <span class="n">WORLDPOS</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="n">float2</span> <span class="nl">vUV</span>       <span class="p">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    <span class="n">float3</span> <span class="nl">vTangent</span>  <span class="p">:</span> <span class="n">TANGENT</span><span class="p">;</span> 
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="p">[</span><span class="n">domain</span><span class="p">(</span><span class="s">&#34;tri&#34;</span><span class="p">)]</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="p">[</span><span class="n">partitioning</span><span class="p">(</span><span class="s">&#34;pow2&#34;</span><span class="p">)]</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="p">[</span><span class="n">outputtopology</span><span class="p">(</span><span class="s">&#34;triangle_cw&#34;</span><span class="p">)]</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="p">[</span><span class="n">outputcontrolpoints</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="p">[</span><span class="n">patchconstantfunc</span><span class="p">(</span><span class="s">&#34;ConstantsHS&#34;</span><span class="p">)]</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="p">[</span><span class="n">maxtessfactor</span><span class="p">(</span><span class="mf">64.0</span><span class="p">)]</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="n">HS_CONTROL_POINT_OUTPUT</span> <span class="n">HS</span><span class="p">(</span> <span class="n">InputPatch</span><span class="o">&lt;</span><span class="n">VS_CONTROL_POINT_OUTPUT</span><span class="p">,</span> <span class="n">MAX_POINTS</span><span class="o">&gt;</span> <span class="n">ip</span><span class="p">,</span> 
+</span></span><span class="line"><span class="ln">14</span><span class="cl">                            <span class="n">uint</span> <span class="nl">i</span> <span class="p">:</span> <span class="n">SV_OutputControlPointID</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">                            <span class="n">uint</span> <span class="nl">PatchID</span> <span class="p">:</span> <span class="n">SV_PrimitiveID</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">    <span class="n">HS_CONTROL_POINT_OUTPUT</span> <span class="n">output</span> <span class="o">=</span> <span class="p">(</span><span class="n">HS_CONTROL_POINT_OUTPUT</span><span class="p">)</span><span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl">
+</span></span><span class="line"><span class="ln">19</span><span class="cl">    <span class="c1">// Copy inputs to outputs
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl">    <span class="n">output</span><span class="p">.</span><span class="n">vPosition</span> <span class="o">=</span> <span class="n">inputPatch</span><span class="p">[</span><span class="n">uCPID</span><span class="p">].</span><span class="n">vPosition</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">    <span class="n">output</span><span class="p">.</span><span class="n">vUV</span> <span class="o">=</span> <span class="n">inputPatch</span><span class="p">[</span><span class="n">uCPID</span><span class="p">].</span><span class="n">vUV</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl">    <span class="n">output</span><span class="p">.</span><span class="n">vTangent</span> <span class="o">=</span> <span class="n">inputPatch</span><span class="p">[</span><span class="n">uCPID</span><span class="p">].</span><span class="n">vUV</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">
+</span></span><span class="line"><span class="ln">24</span><span class="cl">    <span class="k">return</span> <span class="n">output</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><figcaption class="code-figure-caption"><strong>Listing 2</strong>: A hull shader control point function.</figcaption>
+</figure>
+
+<p>Different from the constant function or other c functions, there are some parameters setup before the functions. Most of them are self-explanatory. Refer to <a href="https://docs.microsoft.com/en-us/windows/win32/direct3d11/direct3d-11-advanced-stages-hull-shader-design?redirectedfrom=MSDN">here</a> if you are confused by any of them. In Unreal Engine 4, more information will be generated in hull shader instead of just passing through the original data. Some of information will be used to fix some crack issues introduced in tessellation. Other information will be used to generate curved surface from control points.</p>
 <h2 id="tessellator">Tessellator</h2>
 <p>There is not much to say about tessellator since it is non-programmable. However understanding the exact way of tessellating primitives will help even if you are not in control of every thing.</p>
 <p>A triangle is taken as an example here. Other primitives like quad behave in a similar way. There are five steps:</p>
@@ -342,12 +352,18 @@ Models with more geometry detail. With phong tessellation, it smoothes the silho
 <li>The outer edges are then subdivided according to the three outer tessellation factor.</li>
 <li>The outer ring is filled with triangles by connecting the points from step 2 with the points from step 4.</li>
 </ul>
-<figure><a href="/img/posts/tessellation_on_d3d11/tess_step.png"><img src="/img/posts/tessellation_on_d3d11/tess_step.png" width="500"/></a>
+<figure><a href="/img/posts/tessellation_on_d3d11/tess_step.png"><img src="/img/posts/tessellation_on_d3d11/tess_step.png"
+    alt="The stages of tessellating a patch." width="500"></a><figcaption class="custom-figure-caption"><strong>Figure 2</strong>: 
+      The stages of tessellating a patch.
+    </figcaption>
 </figure>
 
 <p>The graph is taken from &ldquo;An Introduction to Tessellation Shaders&rdquo; in OpenGL Insights. For this very case, the outer tessellation factors are 3,3,2, and the inner one is 5.</p>
 <p>Another detail deserves our attention is how to divide a specific edge given a tess-factor.</p>
-<figure><a href="/img/posts/tessellation_on_d3d11/divide.png"><img src="/img/posts/tessellation_on_d3d11/divide.png" width="500"/></a>
+<figure><a href="/img/posts/tessellation_on_d3d11/divide.png"><img src="/img/posts/tessellation_on_d3d11/divide.png"
+    alt="Dividing an edge using tessellation factors." width="500"></a><figcaption class="custom-figure-caption"><strong>Figure 3</strong>: 
+      Dividing an edge using tessellation factors.
+    </figcaption>
 </figure>
 
 <p>The above graph reveals some detail here. I am not gonna dig into it because it is not mentioned in DX SDK doc and may be different on different platforms. However one important thing to be noticed here is that we have a sudden change as tess factor goes from 2.0 to 2.5 in the first column. &ldquo;Equal&rdquo;, &ldquo;Even&rdquo; and &ldquo;Odd&rdquo; are actually the partitioning parameter setup in hull shader. With &ldquo;equal&rdquo; as partitioning method, you may have a sudden change even if you tess factor changes smoothly, that means you may have a similar sudden change in the shape of the geometry. In order to avoid it, choose the other two if possible.</p>
@@ -364,7 +380,10 @@ Models with more geometry detail. With phong tessellation, it smoothes the silho
 <p>As it implies by its name, flat tessellation just interpolate position values linearly, which will be totally flat. It doesn&rsquo;t make much sense to use the method alone. Usually it is combined with displacement map to create a bumpy surface.</p>
 <h3 id="pn-tessellation">PN tessellation</h3>
 <p>PN tessellation treats the control points as bezier control points of a curved surface. Different from flat tessellation, PN tessellation will change the shape of the silhouette even if there is no displacement map attached. Its goal is to smooth the silhouette of objects to avoid edge corners. For a further detailed explanation, please check it <a href="http://ogldev.atspace.co.uk/www/tutorial31/tutorial31.html">here</a>. And since UE4 is open-sourced, you can also get its implementation from github.</p>
-<figure><a href="/img/posts/tessellation_on_d3d11/pn.png"><img src="/img/posts/tessellation_on_d3d11/pn.png" width="300"/></a>
+<figure><a href="/img/posts/tessellation_on_d3d11/pn.png"><img src="/img/posts/tessellation_on_d3d11/pn.png"
+    alt="Smoothing a surface with PN tessellation." width="300"></a><figcaption class="custom-figure-caption"><strong>Figure 4</strong>: 
+      Smoothing a surface with PN tessellation.
+    </figcaption>
 </figure>
 
 <p>As we can see from the above image, the silhouette will be smoother with PN tessellation.</p>
@@ -704,7 +723,7 @@ Models with more geometry detail. With phong tessellation, it smoothes the silho
 
     
       
-      <script src="/js/dark-mode.min.f7a0c7c5d46ac9b8d5d7cd8641fe9a41deb129c48a488caf293c9eb5992bd1bd.js"></script>
+      <script src="/js/dark-mode.min.0b1e3ddf7d7cebe6389de0d30470fa17b9fdc860f16e31884b90bfdd2d69d40d.js"></script>
     
     
     <script src="/js/scroll-keys.js"></script>

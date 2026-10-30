@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="background-fiber-stacks" width="760" height="604" viewBox="0 0 760 604" role="img" aria-labelledby="bfs-title bfs-description">
+  <title id="bfs-title">Three threads, separate background stacks</title>
+  <desc id="bfs-description">The main thread and two worker threads each switch from an original thread fiber stack to a separate background fiber stack. The main thread stack includes job system initialization. Worker stacks show InitializeWorker. All three show ConvertThreadToFiber, and SwitchToFiber. Background stacks share FiberEntry and SchedulerLoop. Each rectangle represents a stack, with newer frames toward the top and room for growth. Solid arrows leave the thread stacks on the right and point left into FiberEntry on the aligned background stacks. Dashed spawn arrows connect InitializeWorkers on the main thread to ThreadEntry on each worker thread. Calls are illustrative and sizes are not to scale.</desc>
+  <style>
+  #background-fiber-stacks {
+    color-scheme: light dark;
+    --ink: light-dark(#222222, #dddddd);
+    --secondary: light-dark(#62676e, #b0b5bb);
+    --outline: light-dark(#81868b, #969da5);
+    --divider: light-dark(#d3d6d9, #4c535a);
+    --thread: light-dark(#d2e1ed, #36414a);
+    --fiber: light-dark(#d1e7e2, #33433f);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    width: 100%;
+    height: auto;
+  }
+  #background-fiber-stacks text { fill: var(--ink); }
+  #background-fiber-stacks .lane-title { font-size: 14px; font-weight: 600; }
+  #background-fiber-stacks .secondary { fill: var(--secondary); }
+  #background-fiber-stacks .frame { font-family: Consolas, 'Liberation Mono', monospace; }
+  #background-fiber-stacks .thread-stack {
+    --outline: light-dark(#245f96, #91c4f2);
+    --divider: light-dark(#a3bfd5, #576f83);
+    --growth: light-dark(#eaf1f7, #2b3239);
+  }
+  #background-fiber-stacks .fiber-stack {
+    --outline: light-dark(#126d60, #7ed8c2);
+    --divider: light-dark(#9ec9bf, #537c70);
+    --growth: light-dark(#e9f3f0, #29342f);
+  }
+  #background-fiber-stacks .growth-fill { fill: var(--growth); }
+  #background-fiber-stacks .outline { fill: none; stroke: var(--outline); stroke-width: 1.25; }
+  #background-fiber-stacks .divider { stroke: var(--divider); stroke-width: 1; }
+  #background-fiber-stacks .thread-fill { fill: var(--thread); }
+  #background-fiber-stacks .fiber-fill { fill: var(--fiber); }
+  #background-fiber-stacks .switch { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+  #background-fiber-stacks .spawn { fill: none; stroke: var(--secondary); stroke-width: 1.25; stroke-dasharray: 5 4; }
+  #background-fiber-stacks .spawn-head { fill: none; stroke: var(--secondary); stroke-width: 1.25; }
+</style>
+  <text x="0.0" y="26" class="lane-title" text-anchor="start">Main thread</text>
+  <line x1="0.0" y1="40" x2="226.66666666666666" y2="40" class="divider" />
+  <g transform="translate(0.0000, 92)">
+    <g class="fiber-stack">
+      <text x="1" y="19" class="" text-anchor="start">Background fiber stack</text>
+      <rect x="1" y="32" width="182.66666666666666" height="72" class="growth-fill" />
+      <rect x="1" y="104" width="182.66666666666666" height="52" class="fiber-fill" />
+      <rect x="1" y="32" width="182.66666666666666" height="124" class="outline" />
+      <text x="92.33333333333333" y="72" class="secondary" text-anchor="middle">Stack growth ↑</text>
+      <line x1="1" y1="104" x2="183.66666666666666" y2="104" class="divider" />
+      <text x="92.33333333333333" y="121" class="frame" text-anchor="middle">SchedulerLoop()</text>
+      <line x1="1" y1="130" x2="183.66666666666666" y2="130" class="divider" />
+      <text x="92.33333333333333" y="147" class="frame" text-anchor="middle">FiberEntry()</text>
+    </g>
+    <g class="thread-stack">
+      <text x="1" y="263" class="" text-anchor="start">Thread stack</text>
+      <rect x="1" y="276" width="182.66666666666666" height="64" class="growth-fill" />
+      <rect x="1" y="340" width="182.66666666666666" height="156" class="thread-fill" />
+      <rect x="1" y="276" width="182.66666666666666" height="220" class="outline" />
+      <text x="92.33333333333333" y="312" class="secondary" text-anchor="middle">Stack growth ↑</text>
+      <line x1="1" y1="340" x2="183.66666666666666" y2="340" class="divider" />
+      <text x="92.33333333333333" y="357" class="frame" text-anchor="middle">SwitchToFiber()</text>
+      <line x1="1" y1="366" x2="183.66666666666666" y2="366" class="divider" />
+      <text x="92.33333333333333" y="383" class="frame" text-anchor="middle">ConvertThreadToFiber()</text>
+      <line x1="1" y1="392" x2="183.66666666666666" y2="392" class="divider" />
+      <text x="92.33333333333333" y="409" class="frame" text-anchor="middle">InitializeWorkers()</text>
+      <line x1="1" y1="418" x2="183.66666666666666" y2="418" class="divider" />
+      <text x="92.33333333333333" y="435" class="frame" text-anchor="middle">InitializeJobSystem()</text>
+      <line x1="1" y1="444" x2="183.66666666666666" y2="444" class="divider" />
+      <text x="92.33333333333333" y="461" class="frame" text-anchor="middle">main()</text>
+      <line x1="1" y1="470" x2="183.66666666666666" y2="470" class="divider" />
+      <text x="92.33333333333333" y="487" class="frame" text-anchor="middle">RuntimeEntry()</text>
+    </g>
+    <path class="switch" d="M 188.66666666666666 340 H 215.66666666666666 Q 221.66666666666666 340 221.66666666666666 334 V 149 Q 221.66666666666666 143 215.66666666666666 143 H 188.66666666666666 m 6 -5 l -6 5 6 5" />
+  </g>
+  <text x="266.66666666666663" y="26" class="lane-title" text-anchor="start">Worker thread 1</text>
+  <line x1="266.66666666666663" y1="40" x2="493.33333333333326" y2="40" class="divider" />
+  <g transform="translate(266.6667, 40)">
+    <g class="fiber-stack">
+      <text x="1" y="19" class="" text-anchor="start">Background fiber stack</text>
+      <rect x="1" y="32" width="182.66666666666666" height="72" class="growth-fill" />
+      <rect x="1" y="104" width="182.66666666666666" height="52" class="fiber-fill" />
+      <rect x="1" y="32" width="182.66666666666666" height="124" class="outline" />
+      <text x="92.33333333333333" y="72" class="secondary" text-anchor="middle">Stack growth ↑</text>
+      <line x1="1" y1="104" x2="183.66666666666666" y2="104" class="divider" />
+      <text x="92.33333333333333" y="121" class="frame" text-anchor="middle">SchedulerLoop()</text>
+      <line x1="1" y1="130" x2="183.66666666666666" y2="130" class="divider" />
+      <text x="92.33333333333333" y="147" class="frame" text-anchor="middle">FiberEntry()</text>
+    </g>
+    <g class="thread-stack">
+      <text x="1" y="263" class="" text-anchor="start">Thread stack</text>
+      <rect x="1" y="276" width="182.66666666666666" height="64" class="growth-fill" />
+      <rect x="1" y="340" width="182.66666666666666" height="104" class="thread-fill" />
+      <rect x="1" y="276" width="182.66666666666666" height="168" class="outline" />
+      <text x="92.33333333333333" y="312" class="secondary" text-anchor="middle">Stack growth ↑</text>
+      <line x1="1" y1="340" x2="183.66666666666666" y2="340" class="divider" />
+      <text x="92.33333333333333" y="357" class="frame" text-anchor="middle">SwitchToFiber()</text>
+      <line x1="1" y1="366" x2="183.66666666666666" y2="366" class="divider" />
+      <text x="92.33333333333333" y="383" class="frame" text-anchor="middle">ConvertThreadToFiber()</text>
+      <line x1="1" y1="392" x2="183.66666666666666" y2="392" class="divider" />
+      <text x="92.33333333333333" y="409" class="frame" text-anchor="middle">InitializeWorker()</text>
+      <line x1="1" y1="418" x2="183.66666666666666" y2="418" class="divider" />
+      <text x="92.33333333333333" y="435" class="frame" text-anchor="middle">ThreadEntry()</text>
+    </g>
+    <path class="switch" d="M 188.66666666666666 340 H 215.66666666666666 Q 221.66666666666666 340 221.66666666666666 334 V 149 Q 221.66666666666666 143 215.66666666666666 143 H 188.66666666666666 m 6 -5 l -6 5 6 5" />
+  </g>
+  <text x="533.3333333333333" y="26" class="lane-title" text-anchor="start">Worker thread 2</text>
+  <line x1="533.3333333333333" y1="40" x2="759.9999999999999" y2="40" class="divider" />
+  <g transform="translate(533.3333, 40)">
+    <g class="fiber-stack">
+      <text x="1" y="19" class="" text-anchor="start">Background fiber stack</text>
+      <rect x="1" y="32" width="182.66666666666666" height="72" class="growth-fill" />
+      <rect x="1" y="104" width="182.66666666666666" height="52" class="fiber-fill" />
+      <rect x="1" y="32" width="182.66666666666666" height="124" class="outline" />
+      <text x="92.33333333333333" y="72" class="secondary" text-anchor="middle">Stack growth ↑</text>
+      <line x1="1" y1="104" x2="183.66666666666666" y2="104" class="divider" />
+      <text x="92.33333333333333" y="121" class="frame" text-anchor="middle">SchedulerLoop()</text>
+      <line x1="1" y1="130" x2="183.66666666666666" y2="130" class="divider" />
+      <text x="92.33333333333333" y="147" class="frame" text-anchor="middle">FiberEntry()</text>
+    </g>
+    <g class="thread-stack">
+      <text x="1" y="263" class="" text-anchor="start">Thread stack</text>
+      <rect x="1" y="276" width="182.66666666666666" height="64" class="growth-fill" />
+      <rect x="1" y="340" width="182.66666666666666" height="104" class="thread-fill" />
+      <rect x="1" y="276" width="182.66666666666666" height="168" class="outline" />
+      <text x="92.33333333333333" y="312" class="secondary" text-anchor="middle">Stack growth ↑</text>
+      <line x1="1" y1="340" x2="183.66666666666666" y2="340" class="divider" />
+      <text x="92.33333333333333" y="357" class="frame" text-anchor="middle">SwitchToFiber()</text>
+      <line x1="1" y1="366" x2="183.66666666666666" y2="366" class="divider" />
+      <text x="92.33333333333333" y="383" class="frame" text-anchor="middle">ConvertThreadToFiber()</text>
+      <line x1="1" y1="392" x2="183.66666666666666" y2="392" class="divider" />
+      <text x="92.33333333333333" y="409" class="frame" text-anchor="middle">InitializeWorker()</text>
+      <line x1="1" y1="418" x2="183.66666666666666" y2="418" class="divider" />
+      <text x="92.33333333333333" y="435" class="frame" text-anchor="middle">ThreadEntry()</text>
+    </g>
+    <path class="switch" d="M 188.66666666666666 340 H 215.66666666666666 Q 221.66666666666666 340 221.66666666666666 334 V 149 Q 221.66666666666666 143 215.66666666666666 143 H 188.66666666666666 m 6 -5 l -6 5 6 5" />
+  </g>
+  <path class="spawn" d="M 188.66666666666666 497 H 221.66666666666666 V 518 H 625.6666666666666" />
+  <path class="spawn" d="M 359 518 V 488" />
+  <path class="spawn-head" d="M 354 494 L 359 488 L 364 494" />
+  <path class="spawn" d="M 625.6666666666666 518 V 488" />
+  <path class="spawn-head" d="M 620.6666666666666 494 L 625.6666666666666 488 L 630.6666666666666 494" />
+  <text x="250.66666666666666" y="508" class="secondary" text-anchor="middle">spawn</text>
+</svg>

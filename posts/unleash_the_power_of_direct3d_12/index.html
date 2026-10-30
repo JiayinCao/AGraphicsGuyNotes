@@ -8,23 +8,28 @@
 
     <meta name="author" content="Jiayin Cao">
     <meta name="description" content="Direct3D12 is about to come. There are several presentations available in GDC this and last year talking about the new features in it. I&rsquo;m gonna list some of the changes that D3D12 introduces in this post. It only covers some of the changes.
-The big picture Different from its predecessors, D3D12 mainly aims at reducing CPU overhead. Improving CPU performance is the first priority in this new API. Of course that&rsquo;s not to say there is nothing more.">
+The big picture
+Different from its predecessors, D3D12 mainly aims at reducing CPU overhead. Improving CPU performance is the first priority in this new API. Of course that&rsquo;s not to say there is nothing more. Besides better CPU performance, it has some feature improving GPU performance. Apart from performance improvement, there are also some new graphics features available on latest hardware, such as conservative rasterization, raster ordered view, etc. In this article, I&rsquo;m gonna talk something about the new features in D3D12 that improves performance. New graphics features are won&rsquo;t be mentioned.">
     <meta name="keywords" content="blog,developer,personal">
 
-    <meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://agraphicsguynotes.com/img/cover.png"/>
+    
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://agraphicsguynotes.com/img/cover.png">
+  <meta name="twitter:title" content="Unleash the power of Direct3D 12">
+  <meta name="twitter:description" content="Direct3D12 is about to come. There are several presentations available in GDC this and last year talking about the new features in it. I’m gonna list some of the changes that D3D12 introduces in this post. It only covers some of the changes.
+The big picture Different from its predecessors, D3D12 mainly aims at reducing CPU overhead. Improving CPU performance is the first priority in this new API. Of course that’s not to say there is nothing more. Besides better CPU performance, it has some feature improving GPU performance. Apart from performance improvement, there are also some new graphics features available on latest hardware, such as conservative rasterization, raster ordered view, etc. In this article, I’m gonna talk something about the new features in D3D12 that improves performance. New graphics features are won’t be mentioned.">
 
-<meta name="twitter:title" content="Unleash the power of Direct3D 12"/>
-<meta name="twitter:description" content="Direct3D12 is about to come. There are several presentations available in GDC this and last year talking about the new features in it. I&rsquo;m gonna list some of the changes that D3D12 introduces in this post. It only covers some of the changes.
-The big picture Different from its predecessors, D3D12 mainly aims at reducing CPU overhead. Improving CPU performance is the first priority in this new API. Of course that&rsquo;s not to say there is nothing more."/>
-
-    <meta property="og:title" content="Unleash the power of Direct3D 12" />
-<meta property="og:description" content="Direct3D12 is about to come. There are several presentations available in GDC this and last year talking about the new features in it. I&rsquo;m gonna list some of the changes that D3D12 introduces in this post. It only covers some of the changes.
-The big picture Different from its predecessors, D3D12 mainly aims at reducing CPU overhead. Improving CPU performance is the first priority in this new API. Of course that&rsquo;s not to say there is nothing more." />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://agraphicsguynotes.com/posts/unleash_the_power_of_direct3d_12/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2015-06-17T00:00:00+00:00" />
-<meta property="article:modified_time" content="2015-06-17T00:00:00+00:00" />
+    <meta property="og:url" content="https://agraphicsguynotes.com/posts/unleash_the_power_of_direct3d_12/">
+  <meta property="og:site_name" content="A Graphics Guy&#39;s Note">
+  <meta property="og:title" content="Unleash the power of Direct3D 12">
+  <meta property="og:description" content="Direct3D12 is about to come. There are several presentations available in GDC this and last year talking about the new features in it. I’m gonna list some of the changes that D3D12 introduces in this post. It only covers some of the changes.
+The big picture Different from its predecessors, D3D12 mainly aims at reducing CPU overhead. Improving CPU performance is the first priority in this new API. Of course that’s not to say there is nothing more. Besides better CPU performance, it has some feature improving GPU performance. Apart from performance improvement, there are also some new graphics features available on latest hardware, such as conservative rasterization, raster ordered view, etc. In this article, I’m gonna talk something about the new features in D3D12 that improves performance. New graphics features are won’t be mentioned.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2015-06-17T00:00:00+00:00">
+    <meta property="article:modified_time" content="2015-06-17T00:00:00+00:00">
+    <meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png">
 
 
     <title>
@@ -66,6 +71,8 @@ The big picture Different from its predecessors, D3D12 mainly aims at reducing C
     
       <link rel="stylesheet" href="/css/custom.css" />
     
+      <link rel="stylesheet" href="/css/code-listing.css" />
+    
 
     
       
@@ -98,7 +105,7 @@ The big picture Different from its predecessors, D3D12 mainly aims at reducing C
 
     
 
-    <meta name="generator" content="Hugo 0.117.0">
+    <meta name="generator" content="Hugo 0.159.2">
 
     <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
@@ -571,7 +578,7 @@ And similar APIs, like Vulkan, Metal, share a common way of how modern graphics 
 
     
       
-      <script src="/js/dark-mode.min.f7a0c7c5d46ac9b8d5d7cd8641fe9a41deb129c48a488caf293c9eb5992bd1bd.js"></script>
+      <script src="/js/dark-mode.min.0b1e3ddf7d7cebe6389de0d30470fa17b9fdc860f16e31884b90bfdd2d69d40d.js"></script>
     
     
     <script src="/js/scroll-keys.js"></script>

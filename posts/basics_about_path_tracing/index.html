@@ -8,23 +8,32 @@
 
     <meta name="author" content="Jiayin Cao">
     <meta name="description" content="I tried path tracing two years ago in my ray tracer. However without taking some notes, I&rsquo;ve already forgotten almost everything about it. Recently I reviewed the theory and the code, picked up something from it. I&rsquo;d like to take some notes so that I can get it immediately next time I forget it. Before everything, here is a Cornell box scene rendered with path tracing:
-I really want to render something different using my ray tracer, however it doesn&rsquo;t have a GUI editor so far.">
+Figure 1: 
+      A Cornell box rendered with path tracing.
+    
+
+
+I really want to render something different using my ray tracer, however it doesn&rsquo;t have a GUI editor so far. Everything is through script and editing a scene through script is really a painful experience. I do plan to add GUI support using QT, however I don&rsquo;t have time for it these days. Hopefully I will have some time in the near future.">
     <meta name="keywords" content="blog,developer,personal">
 
-    <meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://agraphicsguynotes.com/img/cover.png"/>
+    
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://agraphicsguynotes.com/img/cover.png">
+  <meta name="twitter:title" content="Basics about path tracing">
+  <meta name="twitter:description" content="I tried path tracing two years ago in my ray tracer. However without taking some notes, I’ve already forgotten almost everything about it. Recently I reviewed the theory and the code, picked up something from it. I’d like to take some notes so that I can get it immediately next time I forget it. Before everything, here is a Cornell box scene rendered with path tracing:
+Figure 1: A Cornell box rendered with path tracing.I really want to render something different using my ray tracer, however it doesn’t have a GUI editor so far. Everything is through script and editing a scene through script is really a painful experience. I do plan to add GUI support using QT, however I don’t have time for it these days. Hopefully I will have some time in the near future.">
 
-<meta name="twitter:title" content="Basics about path tracing"/>
-<meta name="twitter:description" content="I tried path tracing two years ago in my ray tracer. However without taking some notes, I&rsquo;ve already forgotten almost everything about it. Recently I reviewed the theory and the code, picked up something from it. I&rsquo;d like to take some notes so that I can get it immediately next time I forget it. Before everything, here is a Cornell box scene rendered with path tracing:
-I really want to render something different using my ray tracer, however it doesn&rsquo;t have a GUI editor so far."/>
-
-    <meta property="og:title" content="Basics about path tracing" />
-<meta property="og:description" content="I tried path tracing two years ago in my ray tracer. However without taking some notes, I&rsquo;ve already forgotten almost everything about it. Recently I reviewed the theory and the code, picked up something from it. I&rsquo;d like to take some notes so that I can get it immediately next time I forget it. Before everything, here is a Cornell box scene rendered with path tracing:
-I really want to render something different using my ray tracer, however it doesn&rsquo;t have a GUI editor so far." />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://agraphicsguynotes.com/posts/basics_about_path_tracing/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2015-07-20T00:00:00+00:00" />
-<meta property="article:modified_time" content="2015-07-20T00:00:00+00:00" />
+    <meta property="og:url" content="https://agraphicsguynotes.com/posts/basics_about_path_tracing/">
+  <meta property="og:site_name" content="A Graphics Guy&#39;s Note">
+  <meta property="og:title" content="Basics about path tracing">
+  <meta property="og:description" content="I tried path tracing two years ago in my ray tracer. However without taking some notes, I’ve already forgotten almost everything about it. Recently I reviewed the theory and the code, picked up something from it. I’d like to take some notes so that I can get it immediately next time I forget it. Before everything, here is a Cornell box scene rendered with path tracing:
+Figure 1: A Cornell box rendered with path tracing.I really want to render something different using my ray tracer, however it doesn’t have a GUI editor so far. Everything is through script and editing a scene through script is really a painful experience. I do plan to add GUI support using QT, however I don’t have time for it these days. Hopefully I will have some time in the near future.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2015-07-20T00:00:00+00:00">
+    <meta property="article:modified_time" content="2015-07-20T00:00:00+00:00">
+    <meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png">
 
 
     <title>
@@ -65,6 +74,8 @@ I really want to render something different using my ray tracer, however it does
       <link rel="stylesheet" href="/css/chroma-dark.css" />
     
       <link rel="stylesheet" href="/css/custom.css" />
+    
+      <link rel="stylesheet" href="/css/code-listing.css" />
     
 
     
@@ -124,7 +135,7 @@ I really want to render something different using my ray tracer, however it does
 </style>
     
 
-    <meta name="generator" content="Hugo 0.117.0">
+    <meta name="generator" content="Hugo 0.159.2">
 
     <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
@@ -216,7 +227,10 @@ I really want to render something different using my ray tracer, however it does
       <div>
         
         <p>I tried path tracing two years ago in my ray tracer. However without taking some notes, I&rsquo;ve already forgotten almost everything about it. Recently I reviewed the theory and the code, picked up something from it. I&rsquo;d like to take some notes so that I can get it immediately next time I forget it. Before everything, here is a Cornell box scene rendered with path tracing:</p>
-<figure><img src="/img/posts/basics_about_path_tracing/pathtracing_ref.png" width="800"/>
+<figure><img src="/img/posts/basics_about_path_tracing/pathtracing_ref.png"
+    alt="A Cornell box rendered with path tracing." width="800"><figcaption class="custom-figure-caption"><strong>Figure 1</strong>: 
+      A Cornell box rendered with path tracing.
+    </figcaption>
 </figure>
 
 <p>I really want to render something different using my ray tracer, however it doesn&rsquo;t have a GUI editor so far. Everything is through script and editing a scene through script is really a painful experience. I do plan to add GUI support using QT, however I don&rsquo;t have time for it these days. Hopefully I will have some time in the near future.</p>
@@ -271,7 +285,10 @@ $$ { L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) &#43; \sum\limits_{n=1}^{\infty
 <p>The first point is determined by your camera ray, it is fixed. To generate the second point, we need to sample a direction from the first point. Again, there are infinite number of pdf. The rule is that the more the pdf looks like the function to be integrated, which is the multiplication of brdf, cosine and radiance in this case, the faster it converges to accurate result. This is importance sampling. Actually switching from sampling surfaces to sampling solid angle is already some kind of importance sampling, because it increases the chances of non-zero contribution paths.</p>
 <p>The issue here is that we have totally no idea on what the distribution of radiance is almost all time. There is no way to generate a pdf that is similar to the function to be integrated. Typically sampling a direction by a cosine-weighted pdf works pretty well in practice. Special care needs to be paid for delta surfaces, like mirror. After sampling a direction, it is easy and straight forward to find the second point in the path we are looking for. And then repeat the process again and again until you have n-1 vertices in your path.</p>
 <p>For the last vertex, it should be exactly on a light surface. This time sampling a point on light surfaces is better than sampling brdf alone because sampling brdf will probably miss the light. Of course that&rsquo;s for diffuse surfaces. For delta surfaces or highly glossy surfaces, sampling a brdf will be better.</p>
-<figure><img src="/img/posts/basics_about_path_tracing/mis.png" width="800"/>
+<figure><img src="/img/posts/basics_about_path_tracing/mis.png"
+    alt="Comparing BRDF sampling and light sampling." width="800"><figcaption class="custom-figure-caption"><strong>Figure 2</strong>: 
+      Comparing BRDF sampling and light sampling.
+    </figcaption>
 </figure>
 
 <p>Here is an example taken from here. The image on the left samples light source, the glossier the surface is, the worse the result is. As for the middle one which samples brdf, we can see there is extremely low convergence rate for small light sources. The right most one uses multiple importance sampling, it gives pretty good result. And for the best part, you don&rsquo;t even need to know which pdf is similar to the integrated function, it just works.</p>
@@ -611,7 +628,7 @@ $$ { L(x_{1} \to x_{0}) = L_{e}(x_{1} \to x_{0}) &#43; P(0) &#43; P(1) &#43; P(2
 
     
       
-      <script src="/js/dark-mode.min.f7a0c7c5d46ac9b8d5d7cd8641fe9a41deb129c48a488caf293c9eb5992bd1bd.js"></script>
+      <script src="/js/dark-mode.min.0b1e3ddf7d7cebe6389de0d30470fa17b9fdc860f16e31884b90bfdd2d69d40d.js"></script>
     
     
     <script src="/js/scroll-keys.js"></script>

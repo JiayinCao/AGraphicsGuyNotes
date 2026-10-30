@@ -7,21 +7,25 @@
     <meta http-equiv="Content-Language" content="en">
 
     <meta name="author" content="Jiayin Cao">
-    <meta name="description" content="Image-based lighting is a practical way to enhance the visual quality of computer graphics. I used to be confused by it until I read the book &ldquo;High Dynamic Range Imaging&rdquo;, which provides a very clear explanation about IBL. And I actually have implemented the algorithm in my offline renderer before, it was just that I didn&rsquo;t know it is IBL. The book PBRT has some materials talking about it without explicitly mentioning the term.">
+    <meta name="description" content="Image-based lighting is a practical way to enhance the visual quality of computer graphics. I used to be confused by it until I read the book &ldquo;High Dynamic Range Imaging&rdquo;, which provides a very clear explanation about IBL. And I actually have implemented the algorithm in my offline renderer before, it was just that I didn&rsquo;t know it is IBL. The book PBRT has some materials talking about it without explicitly mentioning the term. Following images are generated with IBL in my renderer, except that the last one uses a single directional light.">
     <meta name="keywords" content="blog,developer,personal">
 
-    <meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://agraphicsguynotes.com/img/cover.png"/>
+    
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://agraphicsguynotes.com/img/cover.png">
+  <meta name="twitter:title" content="Image Based Lighting in Offline and Real-time Rendering">
+  <meta name="twitter:description" content="Image-based lighting is a practical way to enhance the visual quality of computer graphics. I used to be confused by it until I read the book “High Dynamic Range Imaging”, which provides a very clear explanation about IBL. And I actually have implemented the algorithm in my offline renderer before, it was just that I didn’t know it is IBL. The book PBRT has some materials talking about it without explicitly mentioning the term. Following images are generated with IBL in my renderer, except that the last one uses a single directional light.">
 
-<meta name="twitter:title" content="Image Based Lighting in Offline and Real-time Rendering"/>
-<meta name="twitter:description" content="Image-based lighting is a practical way to enhance the visual quality of computer graphics. I used to be confused by it until I read the book &ldquo;High Dynamic Range Imaging&rdquo;, which provides a very clear explanation about IBL. And I actually have implemented the algorithm in my offline renderer before, it was just that I didn&rsquo;t know it is IBL. The book PBRT has some materials talking about it without explicitly mentioning the term."/>
-
-    <meta property="og:title" content="Image Based Lighting in Offline and Real-time Rendering" />
-<meta property="og:description" content="Image-based lighting is a practical way to enhance the visual quality of computer graphics. I used to be confused by it until I read the book &ldquo;High Dynamic Range Imaging&rdquo;, which provides a very clear explanation about IBL. And I actually have implemented the algorithm in my offline renderer before, it was just that I didn&rsquo;t know it is IBL. The book PBRT has some materials talking about it without explicitly mentioning the term." />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://agraphicsguynotes.com/posts/image_based_lighting_in_offline_and_realtime_rendering/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2016-09-07T00:00:00+00:00" />
-<meta property="article:modified_time" content="2016-09-07T00:00:00+00:00" />
+    <meta property="og:url" content="https://agraphicsguynotes.com/posts/image_based_lighting_in_offline_and_realtime_rendering/">
+  <meta property="og:site_name" content="A Graphics Guy&#39;s Note">
+  <meta property="og:title" content="Image Based Lighting in Offline and Real-time Rendering">
+  <meta property="og:description" content="Image-based lighting is a practical way to enhance the visual quality of computer graphics. I used to be confused by it until I read the book “High Dynamic Range Imaging”, which provides a very clear explanation about IBL. And I actually have implemented the algorithm in my offline renderer before, it was just that I didn’t know it is IBL. The book PBRT has some materials talking about it without explicitly mentioning the term. Following images are generated with IBL in my renderer, except that the last one uses a single directional light.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2016-09-07T00:00:00+00:00">
+    <meta property="article:modified_time" content="2016-09-07T00:00:00+00:00">
+    <meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png">
 
 
     <title>
@@ -62,6 +66,8 @@
       <link rel="stylesheet" href="/css/chroma-dark.css" />
     
       <link rel="stylesheet" href="/css/custom.css" />
+    
+      <link rel="stylesheet" href="/css/code-listing.css" />
     
 
     
@@ -121,7 +127,7 @@
 </style>
     
 
-    <meta name="generator" content="Hugo 0.117.0">
+    <meta name="generator" content="Hugo 0.159.2">
 
     <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
@@ -201,7 +207,7 @@
             </span>
             <span class="reading-time">
               <i class="fa fa-clock-o" aria-hidden="true"></i>
-              6-minute read
+              7-minute read
             </span>
           </div>
           
@@ -212,31 +218,28 @@
       
       <div>
         
-        <p>Image-based lighting is a practical way to enhance the visual quality of computer graphics. I used to be confused by it until I read the book &ldquo;<a href="https://books.google.com/books?hl=zh-CN&amp;lr=&amp;id=w1i_1kejoYcC&amp;oi=fnd&amp;pg=PP2&amp;dq=high+dynamic+range+imaging+2nd+edition&amp;ots=4i3Y3AMLtz&amp;sig=qsyJ3UxHv4XuxRKGFauG2G-kOXY#v=onepage&amp;q=high%20dynamic%20range%20imaging%202nd%20edition&amp;f=false">High Dynamic Range Imaging</a>&rdquo;, which provides a very clear explanation about IBL. And I actually have implemented the algorithm in my offline renderer before, it was just that I didn&rsquo;t know it is IBL. The book <a href="https://pbrt.org/">PBRT</a> has some materials talking about it without explicitly mentioning the term. Following images are generated with IBL in my renderer, except that the last one uses a single directional light.</p>
-<p>
+        <p>Image-based lighting is a practical way to enhance the visual quality of computer graphics. I used to be confused by it until I read the book &ldquo;<a href="https://books.google.com/books?hl=zh-CN&amp;lr=&amp;id=w1i_1kejoYcC&amp;oi=fnd&amp;pg=PP2&amp;dq=high&#43;dynamic&#43;range&#43;imaging&#43;2nd&#43;edition&amp;ots=4i3Y3AMLtz&amp;sig=qsyJ3UxHv4XuxRKGFauG2G-kOXY#v=onepage&amp;q=high%20dynamic%20range%20imaging%202nd%20edition&amp;f=false">High Dynamic Range Imaging</a>&rdquo;, which provides a very clear explanation about IBL. And I actually have implemented the algorithm in my offline renderer before, it was just that I didn&rsquo;t know it is IBL. The book <a href="https://pbrt.org/">PBRT</a> has some materials talking about it without explicitly mentioning the term. Following images are generated with IBL in my renderer, except that the last one uses a single directional light.</p>
 
-<style>
-    .row {
-        display: -ms-flexbox;  
-        display: flex;
-        -ms-flex-wrap: wrap;  
-        flex-wrap: wrap;
-        padding: 0 4px;
-    }
+
+
+
+
+
+
+  
     
-     
-    .column {
-        -ms-flex: 33%;  
-        flex: 33%;
-        padding: 0 4px;
-    }
-</style>
-<div class="row">
+      
+    
+  
+
+
+<figure class="multi-images">
+<div class="multi-images-grid" style="--images-per-row: 2;">
 
   
   
   
-  <div class="column">
+  <div class="multi-images-item">
         <a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/ibl1.png">
         <img
             src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/ibl1.png"
@@ -249,7 +252,7 @@
   
   
   
-  <div class="column">
+  <div class="multi-images-item">
         <a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/ibl3.png">
         <img
             src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/ibl3.png"
@@ -259,32 +262,10 @@
   </div>
   
 
-</div>
-
-
-
-<style>
-    .row {
-        display: -ms-flexbox;  
-        display: flex;
-        -ms-flex-wrap: wrap;  
-        flex-wrap: wrap;
-        padding: 0 4px;
-    }
-    
-     
-    .column {
-        -ms-flex: 33%;  
-        flex: 33%;
-        padding: 0 4px;
-    }
-</style>
-<div class="row">
-
   
   
   
-  <div class="column">
+  <div class="multi-images-item">
         <a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/ibl2.png">
         <img
             src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/ibl2.png"
@@ -297,7 +278,7 @@
   
   
   
-  <div class="column">
+  <div class="multi-images-item">
         <a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/non_ibl.png">
         <img
             src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/non_ibl.png"
@@ -308,7 +289,10 @@
   
 
 </div>
-</p>
+<figcaption class="custom-figure-caption"><strong>Figure 1</strong>: Examples of image-based lighting. The bottom-right image uses a single directional light.</figcaption>
+</figure>
+
+
 <p>As we can see from the above images, IBL generated images looks way more promising than the one with a directional light. The real beauty of it is that with physically based shading everything looks great in different lighting environments without the need to change material parameters at all.</p>
 <h1 id="ibl-in-offline-rendering">IBL in Offline Rendering</h1>
 <p>Unlike IBL in real-time rendering, offline ray tracers can easily achieve unbiased result with IBL without compromising anything. The techs involved in generating the above images are introduced in my previous blogs, like
@@ -318,7 +302,10 @@
 I won&rsquo;t repeat them again in this blog.</p>
 <p>First thing first, what is image based lighting. My take on it is that IBL uses a special HDR map recording all incoming radiance from different solid angles to simulate complex lighting environment. It is pretty much like the spherical reflection map we used to render reflective materials in the old days. For old-school reflective materials in real time rendering, only one texture sampling is necessary, which makes the algorithm feasible even in fixed function pipe. Since not all materials need only one texture sampling, using the HDR image to render other materials is a challenging task. The essential difference between the two lies in the fact that pure reflective BRDF is actually delta function, which will reduce the dimension of the integral. In offline rendering, since speed is not the most sensitive thing, one can always use Monte-Carlo method to evaluate the integral of rendering equation. So, in a nut-shell, IBL is a technique that uses HDR environment light to light 3d objects in the scene.</p>
 <p>Below is an HDR image used in the first images shown above. Of course, it has been converted into LDR since majority displays on the market doesn&rsquo;t support HDR.</p>
-<figure><a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/glacier_latlong.png"><img src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/glacier_latlong.png" width="700"/></a>
+<figure><a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/glacier_latlong.png"><img src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/glacier_latlong.png"
+    alt="A latitude-longitude environment map." width="700"></a><figcaption class="custom-figure-caption"><strong>Figure 2</strong>: 
+      A latitude-longitude environment map.
+    </figcaption>
 </figure>
 
 <p>The only important thing that is not mentioned in my previous blog is how to do importance sampling with the HDR image. It is actually quite simple, just a discretized inversion method. Please refer to the book <a href="https://pbrt.org/">PBRT</a> for further detail implementation of it.</p>
@@ -330,7 +317,10 @@ I won&rsquo;t repeat them again in this blog.</p>
 
 $$ \dfrac{1}{N} \sum_{k=1}^{N} \dfrac{L_i(l_k) f(l_k,v) cos\theta_{l_k}}{p(l_k,v)} \approx (\dfrac{1}{N} \sum_{k=1}^{N} L_i(l_k) ) (\dfrac{1}{N} \sum_{k=1}^{N} \dfrac{f(l_k,v) cos\theta_{l_k}}{p(l_k,v)} ) $$
 <p>The approximation is not exactly 100% accurate. However, the bias introduced in a real rendering scene can be barely noticed.</p>
-<figure><a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/s2013_pbs_epic_slides-17-dragged.png"><img src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/s2013_pbs_epic_slides-17-dragged.png" width="700"/></a>
+<figure><a href="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/s2013_pbs_epic_slides-17-dragged.png"><img src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/s2013_pbs_epic_slides-17-dragged.png"
+    alt="The split-sum approximation for image-based lighting." width="700"></a><figcaption class="custom-figure-caption"><strong>Figure 3</strong>: 
+      The split-sum approximation for image-based lighting.
+    </figcaption>
 </figure>
 
 <p>The above slide comes from UE4&rsquo;s presentation in Siggraph 2013, I can barely tell the difference between the balls in the first two rows. Clearly, the split sum is an acceptable approximation in real time rendering. However, the goal here is to reduce the number of sampling in IBL tech, splitting the equation is only the beginning, it doesn&rsquo;t reduce anything yet at all. The golden idea here is to pre-compute some computation heavy task first before real-time rendering happens.</p>
@@ -354,13 +344,18 @@ $$ F(w_i,h) = F_0 &#43; ( 1 - F_0 ) ( 1 - w_i h )^5 $$
 
 $$ \int_H f(w_i,w_o) cos\theta_{w_i} dw_i = F_0 \int_H \frac{f(w_i,w_o) cos\theta_{w_i}}{F( w_i, h )} ( 1 - ( 1 - w_i h )^5 ) d w_i &#43;\int_H \frac{f(w_i,w_o) cos\theta_{w_i}}{F( w_i, h )} ( 1 - w_i h )^5 d w_i $$
 <p>Don&rsquo;t be scared by the complex equation, it is actually clearer than it used to be before. Now, we only need to evaluate the first and second integral on the right side before-hand, leaving the F0 or albedo evaluation in the real time rendering.</p>
-<figure><img src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/env_brdf.png" width="300"/>
+<figure><img src="/img/posts/image_based_lighting_in_offline_and_realtime_rendering/env_brdf.png"
+    alt="The precomputed environment BRDF lookup texture." width="300"><figcaption class="custom-figure-caption"><strong>Figure 4</strong>: 
+      The precomputed environment BRDF lookup texture.
+    </figcaption>
 </figure>
 
 <p>With only two dimensions in the equation, we can save the pre-computed information in one single texture. And the above texture is one example of it. During pixel shading, one can simply estimate the integral with the following calculation:</p>
 
 $$ EnvBRDF = Color * tex2d( cos\theta_o , roughness ).x &#43; tex2d( cos\theta_o , roughness ).y $$
 <p>It looks simpler enough to me. Only one texture sampling to evaluate the second integral of the split sum!</p>
+
+<figure>
 
 
 
@@ -542,6 +537,9 @@ sliderJQuery(function( $ ) {
       resetAutoSlide();
 });
 </script>
+<figcaption class="custom-figure-caption"><strong>Figure 5</strong>: Comparing image-based lighting approximations.</figcaption>
+</figure>
+
 <p>Above is a comparison between the reference, split sum and the simplified method in real time rendering. Pretty cool approximation.</p>
 <h1 id="references">References</h1>
 <p>[1] High Dynamic Range Imaging<br>
@@ -849,7 +847,7 @@ sliderJQuery(function( $ ) {
 
     
       
-      <script src="/js/dark-mode.min.f7a0c7c5d46ac9b8d5d7cd8641fe9a41deb129c48a488caf293c9eb5992bd1bd.js"></script>
+      <script src="/js/dark-mode.min.0b1e3ddf7d7cebe6389de0d30470fa17b9fdc860f16e31884b90bfdd2d69d40d.js"></script>
     
     
     <script src="/js/scroll-keys.js"></script>

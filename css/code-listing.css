@@ -1,0 +1,140 @@
+/* Visual Studio palettes for the shared code_block shortcode.
+   Light palette: https://github.com/alecthomas/chroma/blob/master/styles/vs.xml
+   Dark palette: https://github.com/highlightjs/highlight.js/blob/main/src/styles/vs2015.css
+   Chroma supplies lexical tokens, not Visual Studio's semantic classifications. */
+.content .code-figure {
+  margin: 2rem 0;
+  min-width: 0;
+}
+
+.code-figure .highlight,
+.code-figure .highlight > div,
+.code-figure .highlight pre {
+  margin-bottom: 0;
+}
+
+.code-figure-caption {
+  margin-top: 0;
+  font-size: 0.85em;
+  line-height: inherit;
+}
+
+.code-listing {
+  text-align: left;
+  --code-background: #ffffff;
+  --code-foreground: #000000;
+  --code-keyword: #0000ff;
+  --code-type: #2b91af;
+  --code-string: #a31515;
+  --code-number: #000000;
+  --code-comment: #008000;
+  --code-preprocessor: #0000ff;
+  --code-line-number: #707070;
+  --code-highlight: #e5e5e5;
+}
+
+body.colorscheme-dark .code-listing {
+  --code-background: #1e1e1e;
+  --code-foreground: #dcdcdc;
+  --code-keyword: #569cd6;
+  --code-type: #4ec9b0;
+  --code-string: #d69d85;
+  --code-number: #b8d7a3;
+  --code-comment: #57a64a;
+  --code-preprocessor: #9b9b9b;
+  --code-line-number: #858585;
+  --code-highlight: #333333;
+}
+
+@media (prefers-color-scheme: dark) {
+  body.colorscheme-auto .code-listing {
+    --code-background: #1e1e1e;
+    --code-foreground: #dcdcdc;
+    --code-keyword: #569cd6;
+    --code-type: #4ec9b0;
+    --code-string: #d69d85;
+    --code-number: #b8d7a3;
+    --code-comment: #57a64a;
+    --code-preprocessor: #9b9b9b;
+    --code-line-number: #858585;
+    --code-highlight: #333333;
+  }
+}
+
+body .code-listing .chroma {
+  color: var(--code-foreground);
+  background-color: var(--code-background);
+  font-family: Consolas, "Cascadia Mono", "Liberation Mono", monospace;
+  tab-size: 4;
+}
+
+body .code-listing .chroma code {
+  font-family: inherit;
+  color: inherit;
+  background-color: transparent;
+}
+
+/* Reset the global Chroma palette, including its bold and italic tokens. */
+body .code-listing .chroma [class] {
+  color: inherit;
+  background-color: transparent;
+  font-weight: normal;
+  font-style: normal;
+}
+
+body .code-listing .chroma :is(.k, .kc, .kd, .kn, .kp, .kr, .kt, .ow) {
+  color: var(--code-keyword);
+}
+
+body .code-listing .chroma :is(.nc, .ne) {
+  color: var(--code-type);
+}
+
+body .code-listing .chroma :is(.s, .sa, .sb, .sc, .dl, .sd, .s2, .se, .sh, .si, .sx, .sr, .s1, .ss) {
+  color: var(--code-string);
+}
+
+body .code-listing .chroma :is(.m, .mb, .mf, .mh, .mi, .il, .mo) {
+  color: var(--code-number);
+}
+
+body .code-listing .chroma :is(.c, .ch, .cm, .c1, .cs) {
+  color: var(--code-comment);
+}
+
+body .code-listing .chroma .cp {
+  color: var(--code-preprocessor);
+}
+
+body .code-listing .chroma .cpf {
+  color: var(--code-string);
+}
+
+body .code-listing .chroma :is(.ln, .lnt) {
+  color: var(--code-line-number);
+  min-width: 2.5ch;
+  text-align: right;
+  user-select: none;
+}
+
+body .code-listing .chroma .hl {
+  background-color: var(--code-highlight);
+}
+
+/* Assembly uses the same VS palette, with explicit instruction/register tokens.
+   Keep debugger addresses subdued and separate from instruction operands. */
+body .code-listing .chroma .asm-instruction {
+  color: var(--code-keyword);
+}
+
+body .code-listing .chroma :is(.asm-register, .asm-label) {
+  color: var(--code-type);
+}
+
+body .code-listing .chroma .asm-address {
+  color: var(--code-line-number);
+}
+
+body .code-listing .chroma .asm-directive {
+  color: var(--code-preprocessor);
+}

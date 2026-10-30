@@ -10,18 +10,22 @@
     <meta name="description" content="A couple of days ago, an artist asked me what exactly a directional light map is. I found this page talking about the solutions in Unity 3D and explained to him. And I am reading the book &ldquo;Real time rendering“ these days, it also talks about directional light map, which gives a more detailed and low-level explanation on it. Sounds like a very interesting topic, so I decided to take some notes.">
     <meta name="keywords" content="blog,developer,personal">
 
-    <meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://agraphicsguynotes.com/img/cover.png"/>
+    
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://agraphicsguynotes.com/img/cover.png">
+  <meta name="twitter:title" content="Directional Light Map from the Ground Up">
+  <meta name="twitter:description" content="A couple of days ago, an artist asked me what exactly a directional light map is. I found this page talking about the solutions in Unity 3D and explained to him. And I am reading the book “Real time rendering“ these days, it also talks about directional light map, which gives a more detailed and low-level explanation on it. Sounds like a very interesting topic, so I decided to take some notes.">
 
-<meta name="twitter:title" content="Directional Light Map from the Ground Up"/>
-<meta name="twitter:description" content="A couple of days ago, an artist asked me what exactly a directional light map is. I found this page talking about the solutions in Unity 3D and explained to him. And I am reading the book &ldquo;Real time rendering“ these days, it also talks about directional light map, which gives a more detailed and low-level explanation on it. Sounds like a very interesting topic, so I decided to take some notes."/>
-
-    <meta property="og:title" content="Directional Light Map from the Ground Up" />
-<meta property="og:description" content="A couple of days ago, an artist asked me what exactly a directional light map is. I found this page talking about the solutions in Unity 3D and explained to him. And I am reading the book &ldquo;Real time rendering“ these days, it also talks about directional light map, which gives a more detailed and low-level explanation on it. Sounds like a very interesting topic, so I decided to take some notes." />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://agraphicsguynotes.com/posts/directional_light_map_from_the_groud_up/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png"/><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2015-06-24T00:00:00+00:00" />
-<meta property="article:modified_time" content="2015-06-24T00:00:00+00:00" />
+    <meta property="og:url" content="https://agraphicsguynotes.com/posts/directional_light_map_from_the_groud_up/">
+  <meta property="og:site_name" content="A Graphics Guy&#39;s Note">
+  <meta property="og:title" content="Directional Light Map from the Ground Up">
+  <meta property="og:description" content="A couple of days ago, an artist asked me what exactly a directional light map is. I found this page talking about the solutions in Unity 3D and explained to him. And I am reading the book “Real time rendering“ these days, it also talks about directional light map, which gives a more detailed and low-level explanation on it. Sounds like a very interesting topic, so I decided to take some notes.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2015-06-24T00:00:00+00:00">
+    <meta property="article:modified_time" content="2015-06-24T00:00:00+00:00">
+    <meta property="og:image" content="https://agraphicsguynotes.com/img/cover.png">
 
 
     <title>
@@ -62,6 +66,8 @@
       <link rel="stylesheet" href="/css/chroma-dark.css" />
     
       <link rel="stylesheet" href="/css/custom.css" />
+    
+      <link rel="stylesheet" href="/css/code-listing.css" />
     
 
     
@@ -121,7 +127,7 @@
 </style>
     
 
-    <meta name="generator" content="Hugo 0.117.0">
+    <meta name="generator" content="Hugo 0.159.2">
 
     <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
@@ -216,28 +222,21 @@
 <p>Although directional light map is nothing new, it is widely used in multiple commercial game engines, like Unreal Engine, Unity 3D and Source Engine. It is an advanced version of classical light map that everyone knows about. Traditional light map won&rsquo;t consider normal map variance, which leads to very flat and diffuse look on surfaces. Directional light map tries to solve the problem by baking more information so that it will take normal map into account.</p>
 
 
-<style>
-    .row {
-        display: -ms-flexbox;  
-        display: flex;
-        -ms-flex-wrap: wrap;  
-        flex-wrap: wrap;
-        padding: 0 4px;
-    }
-    
-     
-    .column {
-        -ms-flex: 33%;  
-        flex: 33%;
-        padding: 0 4px;
-    }
-</style>
-<div class="row">
+
+
+
+
+
+  
+
+
+<figure class="multi-images">
+<div class="multi-images-grid" style="--images-per-row: 2;">
 
   
   
   
-  <div class="column">
+  <div class="multi-images-item">
         <a href="/img/posts/directional_light_map_from_the_ground_up/1345306920_9262.png">
         <img
             src="/img/posts/directional_light_map_from_the_ground_up/1345306920_9262.png"
@@ -250,7 +249,7 @@
   
   
   
-  <div class="column">
+  <div class="multi-images-item">
         <a href="/img/posts/directional_light_map_from_the_ground_up/1345309000_1629.png">
         <img
             src="/img/posts/directional_light_map_from_the_ground_up/1345309000_1629.png"
@@ -261,6 +260,9 @@
   
 
 </div>
+<figcaption class="custom-figure-caption"><strong>Figure 1</strong>: Comparing traditional and directional light maps.</figcaption>
+</figure>
+
 
 <p>Left image shows the old light map technique. Right image demonstrates how directional light map can greatly enhance visual quality. As we can see from the two, it is apparent that directional light map shows more detail than a light map does.</p>
 <p>What exactly is a light map from the perspective of mathematics. The answer is quite simple, it stores irradiance values for each sampled location on surface. Instead of talking about directional light map alone, I decided to start from the very basic, the rendering equation. Hopefully it will gives the reader a more low-level and mathematics interpretation and a deeper understanding of this method.</p>
@@ -309,8 +311,11 @@ $$ f(\omega_{i}, \omega_{o}) = \dfrac{\rho_{d}}{\pi} $$
 $$ {L_{o}(\omega_{o}) = \dfrac{\rho_{d}}{\pi} * \int L_{i}(\omega_{i}) *cos(\theta_{i}) d\omega_{i}} $$
 <p>The lucky thing is that the integral part of this equation turns out to be irradiance. And irradiance is what needs to be stored in light map. As a matter of fact, light map was also named irradiance map by some people.</p>
 <h2 id="radiosity-algorithm">Radiosity Algorithm</h2>
-<p>Radiosity is usually the algorithm for calculating those values. Basically it divides the scene into many small patches and generates form factors between each two patches and then makes some interations. During the first iteration, only emissive patches have energy, they distribute those energy to other visible patches. After the first iteration, patches directly visible to emissive patches receive some energy, however there won&rsquo;t be effects like color bleeding or multiple light bounces. Some patches will be totally black. With the second iteration, there are more patches with energy that can be distributed to other patches. Even if patches not directly visible to emissive patches, usually light sources, will be lit this time. After several rounds of iteration, it will reach equilibrium. It should give a good result. Check <a href="https://en.wikipedia.org/wiki/Radiosity_(computer_graphics)">here</a> for more detailed explanation.</p>
-<figure><img src="/img/posts/directional_light_map_from_the_ground_up/680px-radiosity_progress.png"/>
+<p>Radiosity is usually the algorithm for calculating those values. Basically it divides the scene into many small patches and generates form factors between each two patches and then makes some interations. During the first iteration, only emissive patches have energy, they distribute those energy to other visible patches. After the first iteration, patches directly visible to emissive patches receive some energy, however there won&rsquo;t be effects like color bleeding or multiple light bounces. Some patches will be totally black. With the second iteration, there are more patches with energy that can be distributed to other patches. Even if patches not directly visible to emissive patches, usually light sources, will be lit this time. After several rounds of iteration, it will reach equilibrium. It should give a good result. Check <a href="https://en.wikipedia.org/wiki/Radiosity_%28computer_graphics%29">here</a> for more detailed explanation.</p>
+<figure><img src="/img/posts/directional_light_map_from_the_ground_up/680px-radiosity_progress.png"
+    alt="Successive iterations of radiosity."><figcaption class="custom-figure-caption"><strong>Figure 2</strong>: 
+      Successive iterations of radiosity.
+    </figcaption>
 </figure>
 
 <p>The algorithm is not suitable for non-lambertian brdf surfaces. For example, mirrors will not be rendered correctly with this technique alone because the lambertian brdf is totally different from a highly reflective brdf. And it is extremely slow.</p>
@@ -327,7 +332,10 @@ $$ {L_{o}(\omega_{o}) = \dfrac{\rho_{d}}{\pi} * \int L_{i}(\omega_{i}) *cos(\the
 <h2 id="radiosity-normal-map">Radiosity Normal Map</h2>
 <p>A much more practical solution is proposed by Valve, it is called radiosity normal map by them. It is not physically correct, however it works pretty well in the real case.</p>
 <p>Instead of integrating over the hemisphere around geometry normal, three different basis are used during baking irradiance. That gives three different irradiance value for each sampled position.</p>
-<figure><img src="/img/posts/directional_light_map_from_the_ground_up/basis.png" width="300"/>
+<figure><img src="/img/posts/directional_light_map_from_the_ground_up/basis.png"
+    alt="The three basis directions used for directional light maps." width="300"><figcaption class="custom-figure-caption"><strong>Figure 3</strong>: 
+      The three basis directions used for directional light maps.
+    </figcaption>
 </figure>
 
 <p>Those three basis are not arbitrarily chosen. They are pairwise orthogonal and cover the whole hemisphere. The reconstruction process is relatively simple:</p>
@@ -660,7 +668,7 @@ $$ \begin{array} {lcl} color &amp;=&amp; dot( normal , basis[0] )^2 * lightmap\_
 
     
       
-      <script src="/js/dark-mode.min.f7a0c7c5d46ac9b8d5d7cd8641fe9a41deb129c48a488caf293c9eb5992bd1bd.js"></script>
+      <script src="/js/dark-mode.min.0b1e3ddf7d7cebe6389de0d30470fa17b9fdc860f16e31884b90bfdd2d69d40d.js"></script>
     
     
     <script src="/js/scroll-keys.js"></script>

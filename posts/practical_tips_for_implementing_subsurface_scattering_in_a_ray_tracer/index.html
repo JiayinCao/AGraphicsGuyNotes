@@ -10,18 +10,22 @@
     <meta name="description" content="This blog is about the iterations I made during implementing subsurface scattering in my renderer.">
     <meta name="keywords" content="blog,developer,personal">
 
-    <meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://agraphicsguynotes.com/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/sss_dragon.png"/>
+    
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://agraphicsguynotes.com/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/sss_dragon.png">
+  <meta name="twitter:title" content="Practical Tips for Implementing Subsurface Scattering in a Ray Tracer">
+  <meta name="twitter:description" content="This blog is about the iterations I made during implementing subsurface scattering in my renderer.">
 
-<meta name="twitter:title" content="Practical Tips for Implementing Subsurface Scattering in a Ray Tracer"/>
-<meta name="twitter:description" content="This blog is about the iterations I made during implementing subsurface scattering in my renderer."/>
-
-    <meta property="og:title" content="Practical Tips for Implementing Subsurface Scattering in a Ray Tracer" />
-<meta property="og:description" content="This blog is about the iterations I made during implementing subsurface scattering in my renderer." />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://agraphicsguynotes.com/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/sss_dragon.png" /><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2020-11-13T00:00:00+00:00" />
-<meta property="article:modified_time" content="2020-11-13T00:00:00+00:00" />
+    <meta property="og:url" content="https://agraphicsguynotes.com/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/">
+  <meta property="og:site_name" content="A Graphics Guy&#39;s Note">
+  <meta property="og:title" content="Practical Tips for Implementing Subsurface Scattering in a Ray Tracer">
+  <meta property="og:description" content="This blog is about the iterations I made during implementing subsurface scattering in my renderer.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2020-11-13T00:00:00+00:00">
+    <meta property="article:modified_time" content="2020-11-13T00:00:00+00:00">
+    <meta property="og:image" content="https://agraphicsguynotes.com/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/sss_dragon.png">
 
 
     <title>
@@ -62,6 +66,8 @@
       <link rel="stylesheet" href="/css/chroma-dark.css" />
     
       <link rel="stylesheet" href="/css/custom.css" />
+    
+      <link rel="stylesheet" href="/css/code-listing.css" />
     
 
     
@@ -121,7 +127,7 @@
 </style>
     
 
-    <meta name="generator" content="Hugo 0.117.0">
+    <meta name="generator" content="Hugo 0.159.2">
 
     <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
@@ -201,7 +207,7 @@
             </span>
             <span class="reading-time">
               <i class="fa fa-clock-o" aria-hidden="true"></i>
-              36-minute read
+              37-minute read
             </span>
           </div>
           
@@ -216,7 +222,10 @@
 However, despite the complexity in subsurface scattering algorithms, it is by no means a feature that can be missing from a practical rendering engine. Major commercial renderers, like <a href="https://www.arnoldrenderer.com/">Arnold</a>, <a href="https://www.maxon.net/en-us/products/cinema-4d/overview/">Cinema 4D</a>, etc, all have very sophisticated and solid implementation of SSS. Robust implementation of SSS also exists in open-source projects, like <a href="https://www.cycles-renderer.org/">Cycles</a> and <a href="https://luxcorerender.org/">luxcorerenderer</a>, and even some research-based projects maintained by only a handful of people, like <a href="https://pbrt.org/">PBRT</a> and <a href="https://www.mitsuba-renderer.org/">mitsuba</a>. What is even amazing is that real-time rendering also has practical and efficient subsurface scattering implementation. In game industry, there is no shortage of amazing games with stunning and convincing skin rendering, for example, like <a href="https://www.playstation.com/en-us/games/the-last-of-us-part-ii-ps4/">the Last of Us Part II</a>.</p>
 <p>I happened to have some time last year and eventually finished an implementation that I&rsquo;m satisfied with after quite a few iterations. Following is a shot using <a href="https://sort-renderer.com">my renderer</a> and it is a good example demonstrating the SSS feature in it.
 Also, all other images in this blog are rendered using my renderer too.</p>
-<figure><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/blender_splash.png"/>
+<figure><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/blender_splash.png"
+    alt="The Junk Shop, Blender 2.81&rsquo;s splash scene, rendered with subsurface scattering in SORT. Scene by Alex Treviño; original concept by Anaïs Maamar."><figcaption class="custom-figure-caption"><strong>Figure 1</strong>: 
+      <a href="https://download.blender.org/archive/gallery/blender-splash-screens/blender-2-81/">The Junk Shop</a>, Blender 2.81&rsquo;s splash scene, rendered with subsurface scattering in SORT. Scene by Alex Treviño; original concept by Anaïs Maamar.
+    </figcaption>
 </figure>
 
 <p>There are quite some resources about SSS theories on the internet.
@@ -229,8 +238,6 @@ It is highly suggested to read PBRT&rsquo;s SSS chapter first before moving forw
 Most of this blog will be talking about the iterations that I made to make it more robust.</p>
 <h1 id="what-is-subsurface-scattering">What is Subsurface Scattering</h1>
 <p>Below is a comparison of a dragon with and without subsurface scattering.</p>
-
-
 
 
 
@@ -348,7 +355,6 @@ Most of this blog will be talking about the iterations that I made to make it mo
 }
 
 figure.custom-compare figcaption.custom-figure-caption {
-    margin-top: 0.35rem;
     line-height: 1.45;
 }
 
@@ -383,6 +389,8 @@ figure.custom-compare figcaption.custom-figure-caption p:last-child {
         
         
     </div>
+    
+        <figcaption class="custom-figure-caption"><strong>Figure 2</strong>: Comparing the dragon with and without subsurface scattering.</figcaption>
     
 </figure>
 
@@ -630,7 +638,10 @@ which is also implemented in PBRT 3rd edition.
 The basic idea is to assume the geometry is totally flat and randomly pick a sample on the disk that floats right above the shading point.
 With the point picked on the disk, it then projects a ray (the green one) in the opposite direction of the surface normal at the shading point.
 The intersection of the short ray with the original geometry will be the sampled point.</p>
-<figure><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/projection.png" width="550"/>
+<figure><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/projection.png"
+    alt="Sampling a surface point by projecting a ray." width="550"><figcaption class="custom-figure-caption"><strong>Figure 3</strong>: 
+      Sampling a surface point by projecting a ray.
+    </figcaption>
 </figure>
 
 <p>In the above image,  $r_{max}$ 
@@ -648,53 +659,55 @@ Those problems are addressed in PBRT 3rd edition. Please check <a href="http://w
 <p>In order to figure out how to integrate SSS implementation in a path tracer, it is necessary to know how a barebone path tracer works in general.
 My previous <a href="https://agraphicsguynotes.com/posts/basics_about_path_tracing/">blog post</a> mentioned some basics about it.
 Below is the pseudo-code of a minimal path tracer algorithm with BSSRDF in it.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">color</span> <span class="nf">li</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">max_bounce_cnt</span><span class="p">){</span>
-</span></span><span class="line"><span class="cl">    <span class="n">color</span> <span class="n">ret</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">bounces</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">r</span> <span class="o">=</span> <span class="n">ray</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">color</span> <span class="n">throughput</span><span class="p">(</span><span class="mf">1.0f</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span> <span class="n">bounces</span> <span class="o">&lt;</span> <span class="n">max_bounce_cnt</span> <span class="p">){</span>
-</span></span><span class="line"><span class="cl">        <span class="c1">// 1 - Get the intersection between the ray and the scene.
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">//     Bail if it hits nothing. This is commonly the place to return sky color,
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">//     while it is skipped for simplicity since it is not relevant.
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">Intersection</span> <span class="n">intersection</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="p">(</span> <span class="p">(</span><span class="n">intersection</span> <span class="o">=</span> <span class="n">get_intersect</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="n">r</span><span class="p">)).</span><span class="n">IsInvalid</span><span class="p">()</span> <span class="p">)</span>
-</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">        <span class="c1">// 2 - Construct BSDF
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">intersection</span><span class="p">.</span><span class="n">bsdf</span> <span class="o">=</span> <span class="n">construct_bsdf</span><span class="p">(</span><span class="n">intersection</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">        <span class="c1">// 3 - Evaluate the contribution from light source
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">ret</span> <span class="o">+=</span> <span class="n">evaluate_light</span><span class="p">(</span><span class="n">intersection</span><span class="p">)</span> <span class="o">*</span> <span class="n">throughput</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">        <span class="c1">// 4 - Importance sample for the bounced ray
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="kt">float</span> <span class="n">bsdf_pdf</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">        <span class="n">vector</span> <span class="n">dir</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">bsdf_evaluation</span> <span class="o">=</span> <span class="n">intersection</span><span class="p">.</span><span class="n">bsdf</span><span class="o">-&gt;</span><span class="n">sample_f</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dir</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bsdf_pdf</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">        <span class="c1">// 5 - Update throughput
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">throughput</span> <span class="o">*=</span> <span class="n">bsdf_evaluation</span> <span class="o">*</span> <span class="n">dot</span><span class="p">(</span><span class="n">intersection</span><span class="p">.</span><span class="n">n</span><span class="p">,</span> <span class="n">dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">bsdf_pdf</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">        <span class="c1">// 6 - Update the bounce ray
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">r</span> <span class="o">=</span> <span class="n">Ray</span><span class="p">(</span><span class="n">intersection</span><span class="p">.</span><span class="n">position</span> <span class="p">,</span> <span class="n">dir</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">        <span class="c1">// This is where we handle BSSRDF
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span><span class="p">(</span><span class="n">intersection</span><span class="p">.</span><span class="n">bssrdf</span><span class="p">){</span>
-</span></span><span class="line"><span class="cl">            <span class="o">&lt;&lt;&lt;</span> <span class="n">Handle</span> <span class="n">BSSRDF</span> <span class="o">&gt;&gt;&gt;</span>
-</span></span><span class="line"><span class="cl">        <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">        <span class="c1">// 7 - Russian roulette. rand() returns value from 0 to 1 randomly and 
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">//     the random samples are uniformly distributed.
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span><span class="p">(</span><span class="n">rand</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.3f</span> <span class="o">&amp;&amp;</span> <span class="n">bounces</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="p">)</span>
-</span></span><span class="line"><span class="cl">            <span class="n">throughput</span> <span class="o">/=</span> <span class="mf">0.3f</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">        <span class="k">else</span>
-</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">        <span class="o">++</span><span class="n">bounces</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>PBRT&rsquo;s path tracing implementation is a lot more complex than the above code. But in order to keep things in control, I stripped the irrelevant parts with only the core left.
+<figure class="code-figure"><div class="code-listing" data-codetype="cpp"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="n">color</span> <span class="nf">li</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">max_bounce_cnt</span><span class="p">){</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">    <span class="n">color</span> <span class="n">ret</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="kt">int</span> <span class="n">bounces</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    <span class="k">auto</span> <span class="n">r</span> <span class="o">=</span> <span class="n">ray</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    <span class="n">color</span> <span class="n">throughput</span><span class="p">(</span><span class="mf">1.0f</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    <span class="k">while</span><span class="p">(</span> <span class="n">bounces</span> <span class="o">&lt;</span> <span class="n">max_bounce_cnt</span> <span class="p">){</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">        <span class="c1">// 1 - Get the intersection between the ray and the scene.
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl">        <span class="c1">//     Bail if it hits nothing. This is commonly the place to return sky color,
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl">        <span class="c1">//     while it is skipped for simplicity since it is not relevant.
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl">        <span class="n">Intersection</span> <span class="n">intersection</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">        <span class="k">if</span><span class="p">(</span> <span class="p">(</span><span class="n">intersection</span> <span class="o">=</span> <span class="n">get_intersect</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="n">r</span><span class="p">)).</span><span class="n">IsInvalid</span><span class="p">()</span> <span class="p">)</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">
+</span></span><span class="line"><span class="ln">14</span><span class="cl">        <span class="c1">// 2 - Construct BSDF
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl">        <span class="n">intersection</span><span class="p">.</span><span class="n">bsdf</span> <span class="o">=</span> <span class="n">construct_bsdf</span><span class="p">(</span><span class="n">intersection</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">
+</span></span><span class="line"><span class="ln">17</span><span class="cl">        <span class="c1">// 3 - Evaluate the contribution from light source
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl">        <span class="n">ret</span> <span class="o">+=</span> <span class="n">evaluate_light</span><span class="p">(</span><span class="n">intersection</span><span class="p">)</span> <span class="o">*</span> <span class="n">throughput</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">
+</span></span><span class="line"><span class="ln">20</span><span class="cl">        <span class="c1">// 4 - Importance sample for the bounced ray
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl">        <span class="kt">float</span> <span class="n">bsdf_pdf</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl">        <span class="n">vector</span> <span class="n">dir</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">        <span class="k">auto</span> <span class="n">bsdf_evaluation</span> <span class="o">=</span> <span class="n">intersection</span><span class="p">.</span><span class="n">bsdf</span><span class="o">-&gt;</span><span class="n">sample_f</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dir</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bsdf_pdf</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">
+</span></span><span class="line"><span class="ln">25</span><span class="cl">        <span class="c1">// 5 - Update throughput
+</span></span></span><span class="line"><span class="ln">26</span><span class="cl">        <span class="n">throughput</span> <span class="o">*=</span> <span class="n">bsdf_evaluation</span> <span class="o">*</span> <span class="n">dot</span><span class="p">(</span><span class="n">intersection</span><span class="p">.</span><span class="n">n</span><span class="p">,</span> <span class="n">dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">bsdf_pdf</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">27</span><span class="cl">
+</span></span><span class="line"><span class="ln">28</span><span class="cl">        <span class="c1">// 6 - Update the bounce ray
+</span></span></span><span class="line"><span class="ln">29</span><span class="cl">        <span class="n">r</span> <span class="o">=</span> <span class="n">Ray</span><span class="p">(</span><span class="n">intersection</span><span class="p">.</span><span class="n">position</span> <span class="p">,</span> <span class="n">dir</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">30</span><span class="cl">
+</span></span><span class="line"><span class="ln">31</span><span class="cl">        <span class="c1">// This is where we handle BSSRDF
+</span></span></span><span class="line"><span class="ln">32</span><span class="cl">        <span class="k">if</span><span class="p">(</span><span class="n">intersection</span><span class="p">.</span><span class="n">bssrdf</span><span class="p">){</span>
+</span></span><span class="line"><span class="ln">33</span><span class="cl">            <span class="o">&lt;&lt;&lt;</span> <span class="n">Handle</span> <span class="n">BSSRDF</span> <span class="o">&gt;&gt;&gt;</span>
+</span></span><span class="line"><span class="ln">34</span><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="ln">35</span><span class="cl">
+</span></span><span class="line"><span class="ln">36</span><span class="cl">        <span class="c1">// 7 - Russian roulette. rand() returns value from 0 to 1 randomly and 
+</span></span></span><span class="line"><span class="ln">37</span><span class="cl">        <span class="c1">//     the random samples are uniformly distributed.
+</span></span></span><span class="line"><span class="ln">38</span><span class="cl">        <span class="k">if</span><span class="p">(</span><span class="n">rand</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.3f</span> <span class="o">&amp;&amp;</span> <span class="n">bounces</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="p">)</span>
+</span></span><span class="line"><span class="ln">39</span><span class="cl">            <span class="n">throughput</span> <span class="o">/=</span> <span class="mf">0.3f</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">40</span><span class="cl">        <span class="k">else</span>
+</span></span><span class="line"><span class="ln">41</span><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">42</span><span class="cl">
+</span></span><span class="line"><span class="ln">43</span><span class="cl">        <span class="o">++</span><span class="n">bounces</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">44</span><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="ln">45</span><span class="cl">    <span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">46</span><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><figcaption class="code-figure-caption"><strong>Listing 1</strong>: A minimal path tracer with BSSRDF support.</figcaption>
+</figure>
+
+<p>PBRT&rsquo;s path tracing implementation is a lot more complex than the above code. But in order to keep things in control, I stripped the irrelevant parts with only the core left.
 To make it clear, basically, it does the following things inside the loop (pretending that there is no bssrdf)</p>
 <ol>
 <li>For each ray, try getting the nearest intersection with the scene first. If the ray hits nothing, it will simply break out of the loop.</li>
@@ -709,33 +722,35 @@ To make it clear, basically, it does the following things inside the loop (prete
 But this is more than enough as a playground for us to introduce how a BSSRDF can fit in it.
 In the case there is bssrdf available, we only need to implement the branch of the condition.
 Following is the code snippet of &lt;&lt;&lt; Handle BSSRDF &gt;&gt;&gt;.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// Take a random sample by projecting a ray.
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">Intersection</span> <span class="n">bssrdf_intersection</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="kt">float</span> <span class="n">bssrdf_pdf</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">const</span> <span class="k">auto</span> <span class="n">bssrdf_evaluation</span> <span class="o">=</span> <span class="n">intersection</span><span class="p">.</span><span class="n">bssrdf</span><span class="o">-&gt;</span><span class="n">sample_s</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> 
-</span></span><span class="line"><span class="cl">                               <span class="o">&amp;</span><span class="n">bssrdf_pdf</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bssrdf_intersection</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// Bail if there is no intersection.
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">if</span><span class="p">(</span><span class="n">bssrdf_intersection</span><span class="p">.</span><span class="n">IsInvalid</span><span class="p">())</span>
-</span></span><span class="line"><span class="cl">    <span class="k">break</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// Update the throughput
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">throughput</span> <span class="o">*=</span> <span class="n">bssrdf_evaluation</span> <span class="o">/</span> <span class="n">bssrdf_pdf</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// Evaluate direct illumination
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">ret</span> <span class="o">+=</span> <span class="n">evaluate_light</span><span class="p">(</span><span class="n">intersection</span><span class="p">)</span> <span class="o">*</span> <span class="n">throughput</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// Take another sample of direction for the bounce ray.
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">float</span> <span class="n">bsdf_pdf</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="n">vector</span> <span class="n">dir</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">bsdf_evaluation</span> <span class="o">=</span> <span class="n">bssrdf_intersection</span><span class="p">.</span><span class="n">bsdf</span><span class="o">-&gt;</span><span class="n">sample_f</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dir</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bsdf_pdf</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// Update throughput
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">throughput</span> <span class="o">*=</span> <span class="n">bsdf_evaluation</span> <span class="o">*</span> <span class="n">dot</span><span class="p">(</span><span class="n">intersection</span><span class="p">.</span><span class="n">n</span><span class="p">,</span> <span class="n">dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">bsdf_pdf</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// Update the bounce ray
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">r</span> <span class="o">=</span> <span class="n">Ray</span><span class="p">(</span><span class="n">intersection</span><span class="p">.</span><span class="n">position</span> <span class="p">,</span> <span class="n">dir</span><span class="p">);</span>
-</span></span></code></pre></div><p>What it does is pretty self-explanatory. Below is a breakdown of computation it does in order to evaluate BSSRDF.</p>
+<figure class="code-figure"><div class="code-listing" data-codetype="cpp"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1">// Take a random sample by projecting a ray.
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="n">Intersection</span> <span class="n">bssrdf_intersection</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="kt">float</span> <span class="n">bssrdf_pdf</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="k">const</span> <span class="k">auto</span> <span class="n">bssrdf_evaluation</span> <span class="o">=</span> <span class="n">intersection</span><span class="p">.</span><span class="n">bssrdf</span><span class="o">-&gt;</span><span class="n">sample_s</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> 
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">                               <span class="o">&amp;</span><span class="n">bssrdf_pdf</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bssrdf_intersection</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="c1">// Bail if there is no intersection.
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="k">if</span><span class="p">(</span><span class="n">bssrdf_intersection</span><span class="p">.</span><span class="n">IsInvalid</span><span class="p">())</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">
+</span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="c1">// Update the throughput
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="n">throughput</span> <span class="o">*=</span> <span class="n">bssrdf_evaluation</span> <span class="o">/</span> <span class="n">bssrdf_pdf</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">
+</span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="c1">// Evaluate direct illumination
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="n">ret</span> <span class="o">+=</span> <span class="n">evaluate_light</span><span class="p">(</span><span class="n">intersection</span><span class="p">)</span> <span class="o">*</span> <span class="n">throughput</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">
+</span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="c1">// Take another sample of direction for the bounce ray.
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="kt">float</span> <span class="n">bsdf_pdf</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="n">vector</span> <span class="n">dir</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="k">auto</span> <span class="n">bsdf_evaluation</span> <span class="o">=</span> <span class="n">bssrdf_intersection</span><span class="p">.</span><span class="n">bsdf</span><span class="o">-&gt;</span><span class="n">sample_f</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dir</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bsdf_pdf</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">
+</span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="c1">// Update throughput
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="n">throughput</span> <span class="o">*=</span> <span class="n">bsdf_evaluation</span> <span class="o">*</span> <span class="n">dot</span><span class="p">(</span><span class="n">intersection</span><span class="p">.</span><span class="n">n</span><span class="p">,</span> <span class="n">dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">bsdf_pdf</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">
+</span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="c1">// Update the bounce ray
+</span></span></span><span class="line"><span class="ln">26</span><span class="cl"><span class="n">r</span> <span class="o">=</span> <span class="n">Ray</span><span class="p">(</span><span class="n">intersection</span><span class="p">.</span><span class="n">position</span> <span class="p">,</span> <span class="n">dir</span><span class="p">);</span></span></span></code></pre></div></div><figcaption class="code-figure-caption"><strong>Listing 2</strong>: Handling a BSSRDF sample in the path tracer.</figcaption>
+</figure>
+
+<p>What it does is pretty self-explanatory. Below is a breakdown of computation it does in order to evaluate BSSRDF.</p>
 <ul>
 <li>It first takes a sampled position near the shading point. The importance sampling of the diffusion profile happens under the hood.
 One important detail to be noted here is that the interface <strong>sample_s</strong> will silently add a fake brdf in the bsdf of the intersection for importance sampling the ray direction of the next iteration in the loop.</li>
@@ -772,7 +787,10 @@ This is already 1k samples and even by bumping the spp up to 8k, fireflies won&r
 The firefly problem renders the algorithm impractical in my renderer since it is so obvious.
 Of course, we can also rely on some post-processing, like a denoiser, to mitigate the problem.
 But it would be nice to know what the sources of the problems are and fix them for real.</p>
-<figure><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/iteration0.png" width="600"/>
+<figure><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/iteration0.png"
+    alt="The initial subsurface scattering implementation." width="600"><figcaption class="custom-figure-caption"><strong>Figure 4</strong>: 
+      The initial subsurface scattering implementation.
+    </figcaption>
 </figure>
 
 <h3 id="dont-evaluate-sss-unnecessarily">Don&rsquo;t Evaluate SSS Unnecessarily</h3>
@@ -780,8 +798,6 @@ But it would be nice to know what the sources of the problems are and fix them f
 Taking the advantage of the assumption, I chose to silently replace SSS objects with lambert if the previous reflection model has SSS.
 Below is a comparison of the same shot with and without the trick, the difference is barely noticeable to me.
 It is worth mentioning that I clamped pixels with high radiance value to avoid fireflies in both shots.</p>
-
-
 
 
 
@@ -899,7 +915,6 @@ It is worth mentioning that I clamped pixels with high radiance value to avoid f
 }
 
 figure.custom-compare figcaption.custom-figure-caption {
-    margin-top: 0.35rem;
     line-height: 1.45;
 }
 
@@ -934,6 +949,8 @@ figure.custom-compare figcaption.custom-figure-caption p:last-child {
         
         
     </div>
+    
+        <figcaption class="custom-figure-caption"><strong>Figure 5</strong>: Comparing results with and without consecutive subsurface scattering bounces.</figcaption>
     
 </figure>
 
@@ -1144,8 +1161,6 @@ However, the biggest gain in terms of performance is that it opens a door for ou
 
 
 
-
-
  
  
 
@@ -1258,7 +1273,6 @@ However, the biggest gain in terms of performance is that it opens a door for ou
 }
 
 figure.custom-compare figcaption.custom-figure-caption {
-    margin-top: 0.35rem;
     line-height: 1.45;
 }
 
@@ -1293,6 +1307,8 @@ figure.custom-compare figcaption.custom-figure-caption p:last-child {
         
         
     </div>
+    
+        <figcaption class="custom-figure-caption"><strong>Figure 6</strong>: Results with and without consecutive SSS bounces.</figcaption>
     
 </figure>
 
@@ -1529,7 +1545,10 @@ Although the Disney distance profile can be analytically sampled with a perfect 
 Rays won&rsquo;t bounce between complex meshes with SSS materials.
 Of course, light does bounce between complex shapes with SSS materials in reality, but without a good importance sampling algorithm and distance profile, this will easily lead to fireflies.
 And considering the multi-bounces inside SSS materials don&rsquo;t have the biggest impact on the final visual, I chose to ignore it by replacing SSS with lambert if necessary.</p>
-<figure><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/bounces_diagram.png"/>
+<figure><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/bounces_diagram.png"
+    alt="Paths with multiple subsurface scattering bounces."><figcaption class="custom-figure-caption"><strong>Figure 7</strong>: 
+      Paths with multiple subsurface scattering bounces.
+    </figcaption>
 </figure>
 
 <h4 id="the-catch-of-replacing-sss-with-lambert">The Catch of Replacing SSS with Lambert</h4>
@@ -1567,7 +1586,10 @@ However, we have five times more chances of picking the red point than any of th
 To manually make things worse, if we place a light source near one of the green dots.
 We will have a much bigger contribution by picking the green dot that is near to the light source with a five times lower chance of picking it.
 This is a very typical example of why this importance sampling algorithm is not efficient in some cases. It can even get worse in practical situations.</p>
-<figure><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/diagram_multi_intersection.png" width="700px"/>
+<figure><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/diagram_multi_intersection.png"
+    alt="Multiple surface intersections along a sampling ray." width="700px"><figcaption class="custom-figure-caption"><strong>Figure 8</strong>: 
+      Multiple surface intersections along a sampling ray.
+    </figcaption>
 </figure>
 
 <p>It would be very hard to uniformly sample all intersections in this algorithm globally since we don&rsquo;t know how many intersections there will be in total.
@@ -1577,8 +1599,6 @@ This was not possible before the first iteration since rays will grow exponentia
 But since I have it implemented, I can totally consider evaluating all intersections instead of just randomly picking one of them.
 Following is a comparison of the shots with and without this method, it is obvious how efficient it is after this iteration.
 It is worth noting that instead of having the same spp this time, I choose to configure the settings differently so that the rendering time is roughly the same, which makes the comparison fairer.</p>
-
-
 
 
 
@@ -1696,7 +1716,6 @@ It is worth noting that instead of having the same spp this time, I choose to co
 }
 
 figure.custom-compare figcaption.custom-figure-caption {
-    margin-top: 0.35rem;
     line-height: 1.45;
 }
 
@@ -1731,6 +1750,8 @@ figure.custom-compare figcaption.custom-figure-caption p:last-child {
         
         
     </div>
+    
+        <figcaption class="custom-figure-caption"><strong>Figure 9</strong>: Results with and without this optimization.</figcaption>
     
 </figure>
 
@@ -1943,8 +1964,6 @@ For example, the shots below clearly demonstrate the differences. The mean free 
 
 
 
-
-
  
  
 
@@ -2057,7 +2076,6 @@ For example, the shots below clearly demonstrate the differences. The mean free 
 }
 
 figure.custom-compare figcaption.custom-figure-caption {
-    margin-top: 0.35rem;
     line-height: 1.45;
 }
 
@@ -2092,6 +2110,8 @@ figure.custom-compare figcaption.custom-figure-caption p:last-child {
         
         
     </div>
+    
+        <figcaption class="custom-figure-caption"><strong>Figure 10</strong>: Smoothing the transition as the mean free path approaches zero.</figcaption>
     
 </figure>
 
@@ -2318,7 +2338,10 @@ This can be easily integrated in the above pseudo-code. However, there are some 
 <li>The path tracing, bidirectional path tracing algorithms will have to treat everything like a BSSRDF, which won&rsquo;t be efficient in terms of performance.</li>
 </ul>
 <p>Eventually, I ended up with the other solution, both BXDF and BSSRDF derive from what I call scattering unit. All scattering units are held in a structure named scattering event, which is what I used to replace BSDF in my old system. The biggest difference introduced here is that scattering event can also hold multiple BSSRDFs along with BXDFs. A subtle difference here is that instead of holding an array of scattering units, the scattering event data structure chooses to hold two separate arrays, with one for BXDFs and the other for BSSRDFs, since they behave very differently compared with each other. This way it allows me to put the interfaces of BXDF and BSSRDF one level lower than their base class.</p>
-<figure><a href="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/class_diagram.png"><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/class_diagram.png"/></a>
+<figure><a href="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/class_diagram.png"><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/class_diagram.png"
+    alt="Class hierarchy for combining BXDFs and BSSRDFs in SORT&rsquo;s scattering system."></a><figcaption class="custom-figure-caption"><strong>Figure 11</strong>: 
+      Class hierarchy for combining BXDFs and BSSRDFs in SORT&rsquo;s scattering system.
+    </figcaption>
 </figure>
 
 <p>Above is a simplified class diagram that demonstrates what I implemented in my renderer.
@@ -2333,8 +2356,6 @@ However, it gives a good explanation of what the big picture is.</p>
 <p>Ideally, I would like to put the pseudo-code here too.
 But in order to avoid a too much longer post, I chose to skip it since it is not that hard to implement.
 For anyone, who is interested, <a href="https://github.com/JiayinCao/SORT/blob/master/src/integrator/pathtracing.cpp">here</a> is the implementation in my renderer.</p>
-
-
 
 
 
@@ -2452,7 +2473,6 @@ For anyone, who is interested, <a href="https://github.com/JiayinCao/SORT/blob/m
 }
 
 figure.custom-compare figcaption.custom-figure-caption {
-    margin-top: 0.35rem;
     line-height: 1.45;
 }
 
@@ -2487,6 +2507,8 @@ figure.custom-compare figcaption.custom-figure-caption p:last-child {
         
         
     </div>
+    
+        <figcaption class="custom-figure-caption"><strong>Figure 12</strong>: Comparing single and multiple BSSRDFs on Digital Emily.</figcaption>
     
 </figure>
 
@@ -2688,7 +2710,10 @@ $('#ba-slider-ade1b6f1ca02a923b999c7d0c1bbb77d').beforeAfter();
 The difference is very subtle, but it is visible in the dark area on her face.
 Also, apart from blending subsurface scattering, this material also blends sss with regular brdf to simulate a bit of specular light on her face.
 Below is the shader graph of this material used to render the shot. Click it for an enlarged image if it is not clear enough.</p>
-<figure><a href="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/shader_graph.png"><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/shader_graph.png"/></a>
+<figure><a href="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/shader_graph.png"><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/shader_graph.png"
+    alt="The shader graph for the skin material."></a><figcaption class="custom-figure-caption"><strong>Figure 13</strong>: 
+      The shader graph for the skin material.
+    </figcaption>
 </figure>
 
 <h1 id="optimizations">Optimizations</h1>
@@ -2698,7 +2723,10 @@ Below is the shader graph of this material used to render the shot. Click it for
 This naive implementation is simple in the way that it doesn&rsquo;t require any changes in the spatial acceleration structure. The algorithm to find the K nearest intersection is totally limited in SSS implementation itself. While it does comes at a cost of performing duplicated evaluation multiple times. Imagine in a case, where there are only five primitives in a leaf node, all of which intersect with the ray to be tested, and they are also the first five intersections. If our K is 4 in this case, we will have to perform the ray primitive intersection 20 times just to get the nearest 4 intersections in this leaf. This doesn&rsquo;t even count the workload to iterate the traversal to the leaf node, which is also duplicated by 4 times.</p>
 <p>A slightly advanced approach to solving this problem is to introduce a dedicated interface to return K nearest intersections along the ray. This does require keeping a list of intersection history, which takes a bit of extra memory during intersection evaluation.
 But it efficiently avoids all the above-mentioned duplicated computation during finding the K nearest intersections.  In my renderer, I chose to implement the algorithm in all of my spatial data structures, including kd-tree, BVH, OBVH, QBVH, uniform grid, octree.</p>
-<figure><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/cartoon_head.png"/>
+<figure><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/cartoon_head.png"
+    alt="A cartoon head rendered with subsurface scattering."><figcaption class="custom-figure-caption"><strong>Figure 14</strong>: 
+      A cartoon head rendered with subsurface scattering.
+    </figcaption>
 </figure>
 
 <p>Above is another example generated in my renderer.
@@ -2733,8 +2761,6 @@ Though these are not the best demo cases for showing SSS features since both of 
 With a concrete wall roughly in the middle of the Cornell box, the sphere with SSS material is pretty much the only way that light can path through from the right side of the Cornell box to the left side.
 If we ignore SSS from all non-spiky shape BRDF, we will lose all light contribution on the left side of the Cornell Box. Another slight subtle difference is the top right corner gets a bit stronger bounced light contribution. This is probably because SSS will lose some energy when it fails to find samples on the surface of the same mesh object.
 I can&rsquo;t say I care too much about the brighter bounce, but I definitely don&rsquo;t like losing the nice feature of allowing light penetrating through SSS objects. Eventually, I didn&rsquo;t choose to implement this in my renderer.</p>
-
-
 
 
 
@@ -2852,7 +2878,6 @@ I can&rsquo;t say I care too much about the brighter bounce, but I definitely do
 }
 
 figure.custom-compare figcaption.custom-figure-caption {
-    margin-top: 0.35rem;
     line-height: 1.45;
 }
 
@@ -2887,6 +2912,8 @@ figure.custom-compare figcaption.custom-figure-caption p:last-child {
         
         
     </div>
+    
+        <figcaption class="custom-figure-caption"><strong>Figure 15</strong>: Inconsistent results caused by the failed attempt.</figcaption>
     
 </figure>
 
@@ -3093,7 +3120,10 @@ There is just not a clear boundary between rough materials and smooth ones.</p>
 <p>In this blog, I mentioned my iterations during implementing subsurface scattering.
 These iterations allow me to render subsurface scattering in a more efficient way.
 Apart from the common subsurface scattering materials, like skin, wax, this algorithm can also be used to approximate juice sometimes, like in the image below. I believe there could be a better way to render this, but it is always good to know more applications of the algorithm.</p>
-<figure><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/orange_juice.png" width="700"/>
+<figure><img src="/img/posts/practical_tips_for_implementing_subsurface_scattering_in_a_ray_tracer/orange_juice.png"
+    alt="Approximating orange juice with subsurface scattering." width="700"><figcaption class="custom-figure-caption"><strong>Figure 16</strong>: 
+      Approximating orange juice with subsurface scattering.
+    </figcaption>
 </figure>
 
 <p>However, there are still some unsolved problems remained and potential improvements to be done in the future,</p>
@@ -3448,7 +3478,7 @@ Apart from the common subsurface scattering materials, like skin, wax, this algo
 
     
       
-      <script src="/js/dark-mode.min.f7a0c7c5d46ac9b8d5d7cd8641fe9a41deb129c48a488caf293c9eb5992bd1bd.js"></script>
+      <script src="/js/dark-mode.min.0b1e3ddf7d7cebe6389de0d30470fa17b9fdc860f16e31884b90bfdd2d69d40d.js"></script>
     
     
     <script src="/js/scroll-keys.js"></script>

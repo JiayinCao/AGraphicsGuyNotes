@@ -1,0 +1,191 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="sort-job-architecture" width="1282" height="1460" viewBox="0 0 1282 1460" role="img" aria-labelledby="sja-title sja-desc">
+  <title id="sja-title">SORT job system architecture</title>
+  <desc id="sja-desc">Incoming jobs are queued in the incoming job pool. Each of N worker threads has a thread fiber paired with a background fiber that runs the scheduling loop. The M job contexts are shared across workers, and their count is independent of N. Each job context owns a worker fiber and can resume on any worker thread. New jobs are paired with an idle job context; resumable contexts retain a worker fiber and a paused job ready to continue. Running contexts contain a worker fiber and a running job. Synchronization primitives track paused job contexts waiting for dependencies. A waiting context is placed in the ready job context pool when notified, and a completed context returns to the idle job context pool with its worker fiber and no job. The I/O thread executes jobs directly without a fiber.</desc>
+  <style>
+    #sort-job-architecture {
+      color-scheme: light dark;
+      --ink: light-dark(#222222, #dddddd);
+      --secondary: light-dark(#555555, #aaaaaa);
+      --accent: light-dark(#59636e, #a0a9b3);
+      --tint: light-dark(#f2f3f4, #2a2c2e);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 22px;
+    }
+    #sort-job-architecture text { fill: var(--ink); font-weight: 700; }
+    #sort-job-architecture .note { font-size: 18px; fill: var(--secondary); font-weight: 400; }
+    #sort-job-architecture .label { font-size: 18px; font-weight: 400; }
+    #sort-job-architecture .box,
+    #sort-job-architecture .context { fill: none; stroke: var(--accent); stroke-width: 1.8; }
+    #sort-job-architecture rect.box,
+    #sort-job-architecture rect.context { fill: var(--tint); }
+    #sort-job-architecture .boundary { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 10 6; }
+    #sort-job-architecture .system-boundary { fill: none; stroke: var(--accent); stroke-width: 2; }
+    /* Opaque fills keep each object type consistent inside any container. */
+    #sort-job-architecture .type-thread {
+      --accent: light-dark(#245f96, #91c4f2);
+      --tint: light-dark(#d2e1ed, #36414a);
+    }
+    #sort-job-architecture .type-fiber {
+      --accent: light-dark(#126d60, #7ed8c2);
+      --tint: light-dark(#d1e7e2, #33433f);
+    }
+    #sort-job-architecture .type-task {
+      --accent: light-dark(#88530d, #edbd70);
+      --tint: light-dark(#f3e4c9, #473e30);
+    }
+    #sort-job-architecture .context {
+      --accent: light-dark(#69458f, #c5a5ee);
+      --tint: light-dark(#eae4f2, #36313b);
+    }
+    #sort-job-architecture .type-sync {
+      --accent: light-dark(#963e58, #eca1b8);
+      --tint: light-dark(#f1e3e8, #3a3034);
+    }
+    #sort-job-architecture .edge { fill: none; stroke: var(--ink); stroke-width: 1.5; marker-end: url(#sja-arrow); }
+    #sort-job-architecture .rule { stroke: var(--ink); stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="sja-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M1 1 L9 5 L1 9" style="fill:none;stroke:var(--ink);stroke-width:1.3"/>
+    </marker>
+  </defs>
+
+  <!-- Task inputs remain outside the job system. -->
+  <rect x="900" y="40" width="300" height="90" rx="8" class="box type-task"/>
+  <text x="1050" y="92" text-anchor="middle">Job</text>
+  <rect x="480" y="40" width="300" height="90" rx="8" class="box type-task"/>
+  <text x="630" y="92" text-anchor="middle">I/O Job</text>
+
+  <rect x="16" y="190" width="1250" height="1250" rx="16" class="system-boundary"/>
+  <text x="40" y="224">Job System</text>
+  <path id="sja-queue-task" d="M1050 130 V248" class="edge"/>
+  <text x="1064" y="164" class="label">queuing job</text>
+  <path id="sja-queue-io-task" d="M630 130 V248" class="edge"/>
+  <text x="644" y="164" class="label">queuing job</text>
+
+  <!-- Both pending pools and the dedicated I/O thread share the second row. -->
+  <g transform="translate(0 190)">
+  <rect x="900" y="60" width="300" height="155" rx="8" class="box"/>
+  <text x="1050" y="87" text-anchor="middle">Incoming Job Pool</text>
+  <g id="sja-pending-tasks" class="type-task">
+    <path d="M945 118 Q945 110 953 110 H1167 Q1175 110 1175 118 V162 Q1175 170 1167 170 H1162" class="box"/>
+    <path d="M940 123 Q940 115 948 115 H1162 Q1170 115 1170 123 V167 Q1170 175 1162 175 H1157" class="box"/>
+    <path d="M935 128 Q935 120 943 120 H1157 Q1165 120 1165 128 V172 Q1165 180 1157 180 H1152" class="box"/>
+    <rect x="930" y="125" width="230" height="60" rx="8" class="box type-task"/>
+    <text x="1045" y="162" text-anchor="middle">Job</text>
+  </g>
+  </g>
+  <g transform="translate(0 -1075)">
+  <rect x="480" y="1325" width="300" height="155" rx="8" class="box"/>
+  <text x="630" y="1352" text-anchor="middle">I/O Job Pool</text>
+  <g id="sja-pending-io-tasks" class="type-task">
+    <path d="M525 1383 Q525 1375 533 1375 H747 Q755 1375 755 1383 V1427 Q755 1435 747 1435 H742" class="box"/>
+    <path d="M520 1388 Q520 1380 528 1380 H742 Q750 1380 750 1388 V1432 Q750 1440 742 1440 H737" class="box"/>
+    <path d="M515 1393 Q515 1385 523 1385 H737 Q745 1385 745 1393 V1437 Q745 1445 737 1445 H732" class="box"/>
+    <rect x="510" y="1390" width="230" height="60" rx="8" class="box type-task"/>
+    <text x="625" y="1427" text-anchor="middle">I/O Job</text>
+  </g>
+  </g>
+  <rect x="40" y="265" width="300" height="120" rx="8" class="box type-thread"/>
+  <text x="190" y="325" text-anchor="middle" dominant-baseline="middle">I/O thread</text>
+  <path id="sja-io-dequeue" d="M480 325 H342" class="edge"/>
+  <text x="410" y="311" text-anchor="middle" class="label">dequeue</text>
+  <path d="M1050 405 V533" class="edge"/>
+  <text x="1036" y="440" text-anchor="end" class="label">acquire a new job</text>
+
+  <g transform="translate(0 220)">
+  <!-- Each worker has a thread node and its two dedicated fibers. -->
+  <path d="M56 252 Q56 244 64 244 H1238 Q1246 244 1246 252 V446 Q1246 454 1238 454 H1230" class="boundary"/>
+  <path d="M48 260 Q48 252 56 252 H1230 Q1238 252 1238 260 V454 Q1238 462 1230 462 H1222" class="boundary"/>
+  <rect x="40" y="260" width="1190" height="210" rx="8" class="boundary"/>
+  <text x="65" y="290">Per-worker resources</text>
+  <rect x="70" y="315" width="250" height="110" rx="8" class="box type-thread"/>
+  <text x="195" y="370" text-anchor="middle" dominant-baseline="middle">Worker thread</text>
+  <rect x="480" y="315" width="260" height="110" rx="8" class="box type-fiber"/>
+  <text x="610" y="370" text-anchor="middle" dominant-baseline="middle">Thread fiber</text>
+  <rect x="900" y="315" width="300" height="110" rx="8" class="box type-fiber"/>
+  <text x="1050" y="370" text-anchor="middle" dominant-baseline="middle">Background fiber</text>
+  <path d="M320 370 H478" class="edge"/>
+  <text x="400" y="350" text-anchor="middle" class="label">convert to fiber</text>
+  <path d="M740 345 H898" class="edge"/>
+  <text x="819" y="332" text-anchor="middle" class="label">start</text>
+  <path d="M900 400 H742" class="edge"/>
+  <text x="819" y="423" text-anchor="middle" class="label">stop</text>
+
+  <!-- Shared pools contain reusable JobContexts, separate from worker threads. -->
+  <g class="task-contexts">
+  <rect x="40" y="600" width="350" height="250" rx="8" class="box"/>
+  <text x="215" y="635" text-anchor="middle">Ready Job Context Pool</text>
+  <g id="sja-resumable-contexts">
+    <path d="M85 658 Q85 650 93 650 H362 Q370 650 370 658 V802 Q370 810 362 810 H357" class="context"/>
+    <path d="M80 663 Q80 655 88 655 H357 Q365 655 365 663 V807 Q365 815 357 815 H352" class="context"/>
+    <path d="M75 668 Q75 660 83 660 H352 Q360 660 360 668 V812 Q360 820 352 820 H347" class="context"/>
+    <path d="M70 673 Q70 665 78 665 H347 Q355 665 355 673 V817 Q355 825 347 825 H342" class="context"/>
+    <rect x="65" y="670" width="285" height="160" rx="8" class="context"/>
+    <text x="207.5" y="698" text-anchor="middle">JobContext</text>
+    <rect x="85" y="710" width="245" height="45" rx="8" class="box type-fiber"/>
+    <text x="207.5" y="739" text-anchor="middle">Worker Fiber</text>
+    <rect x="85" y="765" width="245" height="45" rx="8" class="box type-task"/>
+    <text x="207.5" y="794" text-anchor="middle">Paused Job</text>
+  </g>
+
+  <rect x="440" y="600" width="350" height="250" rx="8" class="box"/>
+  <text x="615" y="635" text-anchor="middle">Idle Job Context Pool</text>
+  <g id="sja-idle-contexts">
+    <path d="M485 658 Q485 650 493 650 H762 Q770 650 770 658 V802 Q770 810 762 810 H757" class="context"/>
+    <path d="M480 663 Q480 655 488 655 H757 Q765 655 765 663 V807 Q765 815 757 815 H752" class="context"/>
+    <path d="M475 668 Q475 660 483 660 H752 Q760 660 760 668 V812 Q760 820 752 820 H747" class="context"/>
+    <path d="M470 673 Q470 665 478 665 H747 Q755 665 755 673 V817 Q755 825 747 825 H742" class="context"/>
+    <rect x="465" y="670" width="285" height="160" rx="8" class="context"/>
+    <text x="607.5" y="698" text-anchor="middle">JobContext</text>
+    <rect x="485" y="730" width="245" height="60" rx="8" class="box type-fiber"/>
+    <text x="607.5" y="766" text-anchor="middle">Worker Fiber</text>
+  </g>
+  <path d="M215 600 V500 H940 V427" class="edge"/>
+  <text x="480" y="525" text-anchor="middle" class="label">resume a paused job context</text>
+  <path d="M615 600 V540 H980 V427" class="edge"/>
+  <text x="755" y="565" text-anchor="middle" class="label">acquire an idle job context</text>
+
+  <!-- Running contexts contain only the worker fiber and running task. -->
+  <g id="sja-running-contexts">
+    <path d="M920 588 Q920 580 928 580 H1212 Q1220 580 1220 588 V822 Q1220 830 1212 830 H1207" class="context"/>
+    <path d="M915 593 Q915 585 923 585 H1207 Q1215 585 1215 593 V827 Q1215 835 1207 835 H1202" class="context"/>
+    <path d="M910 598 Q910 590 918 590 H1202 Q1210 590 1210 598 V832 Q1210 840 1202 840 H1197" class="context"/>
+    <path d="M905 603 Q905 595 913 595 H1197 Q1205 595 1205 603 V837 Q1205 845 1197 845 H1192" class="context"/>
+    <rect x="900" y="600" width="300" height="250" rx="8" class="context"/>
+    <text x="1050" y="635" text-anchor="middle">JobContext</text>
+    <rect x="925" y="660" width="250" height="70" rx="8" class="box type-fiber"/>
+    <text x="1050" y="702" text-anchor="middle">Worker Fiber</text>
+    <rect x="925" y="745" width="250" height="70" rx="8" class="box type-task"/>
+    <text x="1050" y="787" text-anchor="middle">Running Job</text>
+  </g>
+  <path d="M1030 425 V580" class="edge"/>
+  <text x="1044" y="560" class="label">run / resume</text>
+  <path d="M1180 580 V427" class="edge"/>
+  <text x="1166" y="505" text-anchor="end" class="label">wait / finish</text>
+  <path d="M900 725 H792" class="edge"/>
+  <text x="845" y="750" text-anchor="middle" class="label">finish</text>
+  <!-- Synchronization primitives track paused contexts until notification. -->
+  <g id="sja-synchronization-primitives" transform="translate(-390 -80)">
+    <path d="M870 988 Q870 980 878 980 H1212 Q1220 980 1220 988 V1242 Q1220 1250 1212 1250 H1207" class="box type-sync"/>
+    <path d="M865 993 Q865 985 873 985 H1207 Q1215 985 1215 993 V1247 Q1215 1255 1207 1255 H1202" class="box type-sync"/>
+    <path d="M860 998 Q860 990 868 990 H1202 Q1210 990 1210 998 V1252 Q1210 1260 1202 1260 H1197" class="box type-sync"/>
+    <path d="M855 1003 Q855 995 863 995 H1197 Q1205 995 1205 1003 V1257 Q1205 1265 1197 1265 H1192" class="box type-sync"/>
+    <rect x="850" y="1000" width="350" height="270" rx="8" class="box type-sync"/>
+    <text x="1025" y="1035" text-anchor="middle">Synchronization primitive</text>
+    <rect x="875" y="1060" width="300" height="185" rx="8" class="context"/>
+    <text x="1025" y="1090" text-anchor="middle">Paused JobContext</text>
+    <rect x="895" y="1110" width="260" height="50" rx="8" class="box type-fiber"/>
+    <text x="1025" y="1142" text-anchor="middle">Worker Fiber</text>
+    <rect x="895" y="1175" width="260" height="50" rx="8" class="box type-task"/>
+    <text x="1025" y="1207" text-anchor="middle">Paused Job</text>
+  </g>
+  <path id="sja-context-to-wait" d="M1100 850 V1055 H830" class="edge"/>
+  <text x="965" y="1080" text-anchor="middle" class="label">wait</text>
+  <!-- Notification moves a tracked context into the ready job context pool. -->
+  <path id="sja-context-to-ready" d="M460 1055 H215 V852" class="edge"/>
+  <text x="337.5" y="1080" text-anchor="middle" class="label">notify / wake</text>
+  </g>
+
+  </g>
+</svg>

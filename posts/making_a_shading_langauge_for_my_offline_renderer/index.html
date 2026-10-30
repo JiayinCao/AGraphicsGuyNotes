@@ -10,18 +10,22 @@
     <meta name="description" content="I made a shading language for my ray tracer last year. This blog has some notes of my thoughts in my shading language system design.">
     <meta name="keywords" content="blog,developer,personal">
 
-    <meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://agraphicsguynotes.com/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/tsl_example.jpg"/>
+    
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://agraphicsguynotes.com/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/tsl_example.jpg">
+  <meta name="twitter:title" content="Making a Shading Language for my Offline Renderer">
+  <meta name="twitter:description" content="I made a shading language for my ray tracer last year. This blog has some notes of my thoughts in my shading language system design.">
 
-<meta name="twitter:title" content="Making a Shading Language for my Offline Renderer"/>
-<meta name="twitter:description" content="I made a shading language for my ray tracer last year. This blog has some notes of my thoughts in my shading language system design."/>
-
-    <meta property="og:title" content="Making a Shading Language for my Offline Renderer" />
-<meta property="og:description" content="I made a shading language for my ray tracer last year. This blog has some notes of my thoughts in my shading language system design." />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://agraphicsguynotes.com/posts/making_a_shading_langauge_for_my_offline_renderer/" /><meta property="og:image" content="https://agraphicsguynotes.com/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/tsl_example.jpg" /><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2021-03-09T00:00:00+00:00" />
-<meta property="article:modified_time" content="2021-03-09T00:00:00+00:00" />
+    <meta property="og:url" content="https://agraphicsguynotes.com/posts/making_a_shading_langauge_for_my_offline_renderer/">
+  <meta property="og:site_name" content="A Graphics Guy&#39;s Note">
+  <meta property="og:title" content="Making a Shading Language for my Offline Renderer">
+  <meta property="og:description" content="I made a shading language for my ray tracer last year. This blog has some notes of my thoughts in my shading language system design.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2021-03-09T00:00:00+00:00">
+    <meta property="article:modified_time" content="2021-03-09T00:00:00+00:00">
+    <meta property="og:image" content="https://agraphicsguynotes.com/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/tsl_example.jpg">
 
 
     <title>
@@ -63,6 +67,8 @@
     
       <link rel="stylesheet" href="/css/custom.css" />
     
+      <link rel="stylesheet" href="/css/code-listing.css" />
+    
 
     
       
@@ -95,7 +101,7 @@
 
     
 
-    <meta name="generator" content="Hugo 0.117.0">
+    <meta name="generator" content="Hugo 0.159.2">
 
     <link rel="stylesheet" href="/css/print.css" media="print">
   </head>
@@ -175,7 +181,7 @@
             </span>
             <span class="reading-time">
               <i class="fa fa-clock-o" aria-hidden="true"></i>
-              29-minute read
+              30-minute read
             </span>
           </div>
           
@@ -191,7 +197,10 @@
 <p>In this blog, I will briefly cover some of my thoughts in designing this shading language library. To be more specific, this blog is about how the system is designed and how it works with an offline CPU renderer, instead of the detailed language implementation.</p>
 <p>The following is a screenshot of the <a href="https://github.com/JiayinCao/Tiny-Shading-Language/tree/master/src/tsl_sample">example tutorial</a> that comes with the TSL library.
 The patterns on the surface of the two spheres are procedurally generated in TSL.</p>
-<figure><img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/tsl_example.jpg" width="700"/>
+<figure><img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/tsl_example.jpg"
+    alt="Procedural patterns generated with TSL." width="700"><figcaption class="custom-figure-caption"><strong>Figure 1</strong>: 
+      Procedural patterns generated with TSL.
+    </figcaption>
 </figure>
 
 <h1 id="motivation">Motivation</h1>
@@ -201,7 +210,7 @@ There are generally several reasons,</p>
 <ul>
 <li>By working on my own shading language, I can learn everything from scratch by myself. This is clearly the biggest reason that I chose to work on it. The knowledge gained in the process of making it would be valuable to my career in the future, at least it should have some indirect impact on my work. It should allow me to have a much deeper understanding of how a programming language compiler works.</li>
 <li>Having my own code base will allow me to change the library anyway I see fit. This alone offers me a lot more flexibility than OSL since I&rsquo;m not familiar with their implementation.</li>
-<li>Since Apple is currently in the transition from Intel chips to ARM, future MacOSs will be shipped on ARM architecture. Building OSL on ARM will require building all its dependencies on ARM too. If there is any implementation that is x86 specific in any of its dependencies, I will have to find a workaround implementation on ARM too. Without OSL on ARM, there is no way to port my renderer on Apple Silicon. Supporting Apple Silicon is in OSL&rsquo;s roadmap, but it is unclear when it will be available by the time this blog was written.</li>
+<li>Since Apple is currently in the transition from Intel chips to ARM, future versions of macOS will be shipped on ARM architecture. Building OSL on ARM will require building all its dependencies on ARM too. If there is any implementation that is x86 specific in any of its dependencies, I will have to find a workaround implementation on ARM too. Without OSL on ARM, there is no way to port my renderer on Apple Silicon. Supporting Apple Silicon is in OSL&rsquo;s roadmap, but it is unclear when it will be available by the time this blog was written.</li>
 <li>OSL heavily uses this library called <a href="https://sites.google.com/site/openimageio/home">Open Image IO</a>, which is another open-source project. While OIIO further depends on several other small libraries like, <a href="https://www.openexr.com/">OpenExr</a>, <a href="http://www.libpng.org/pub/png/libpng.html">libpng</a>, <a href="http://www.libtiff.org/">libtiff</a> and a few others. Some of the basic data structures are only defined in OIIO, so decoupling OSL with OIIO would require quite some work. This was one of the options that I have considered, but after a second thought, it will also make updating OSL in my renderer very hard since it is locally modified.</li>
 <li>Having too many dependencies does make OSL a bit &lsquo;heavy&rsquo; than expected. My original expectation was just to have one OSL lib as dependencies, it certainly didn&rsquo;t end up the way I planned. Eventually, there are other libs too and on some platforms, some of the libraries have to be dynamically linked too. Ideally, I could have spent much more time to make sure all of the dependencies are statically compiled, but it is way more sophisticated than it sounds. I wouldn&rsquo;t want to spend too much time building those libraries from source code. Also, some of the pre-compiled libraries are OS-dependent on Ubuntu, which means that I will have to compile it another time on another version of Ubuntu. At the end of the day, after solving all these problems, features in OIIO are not even used in my renderer at all and I do not have a plan to use them in my renderer since doing it from scratch would be lots of fun, it is a dependency purely because OSL needs it.</li>
 </ul>
@@ -209,13 +218,16 @@ There are generally several reasons,</p>
 <p>With the above-mentioned reasons, I hope I have made it clear why I decided to implement my own shading language. Of course, I am fully aware that my own implementation will be way less robust than OSL since there is a team behind it and this tech has been involved for more than ten years. So my next question after finalizing my decision was whether this is doable by myself in a few months, I definitely didn&rsquo;t want to deviate from my trail too much, I&rsquo;m a graphics programmer anyway, no one will expect me to know too many details in designing a compiler.</p>
 <h1 id="taking-advantage-of-existed-work">Taking Advantage of Existed Work</h1>
 <p>The image below demonstrates some basic stages of compiling a programming language into machine code
-<figure><img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/compiler_stages.png"/>
+<figure><img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/compiler_stages.png"
+    alt="The stages of compiling a shading language."><figcaption class="custom-figure-caption"><strong>Figure 2</strong>: 
+      The stages of compiling a shading language.
+    </figcaption>
 </figure>
 </p>
 <p>Starting from scratch and making everything by myself sounds crazy and it is not likely that I can finish everything in a few months.
 After some basic research and learning, I found some useful tools that could help me make my shading language a reality.</p>
 <ul>
-<li><strong><a href="https://en.wikipedia.org/wiki/Flex_(lexical_analyser_generator)">Flex</a></strong><br>
+<li><strong><a href="https://en.wikipedia.org/wiki/Flex_%28lexical_analyser_generator%29">Flex</a></strong><br>
 Flex is one of the commonly used tools as a lexical analyzer. Taking a string stream, it will basically tokenize all of the string in a pre-defined manner.</li>
 <li><strong><a href="https://en.wikipedia.org/wiki/GNU_Bison">Bison</a></strong><br>
 Bison is a syntax analyzer. It will take tokens generated from Flex and generate an <a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree">abstract syntax tree</a>.</li>
@@ -282,41 +294,48 @@ Here it is worth mentioning that closure concept is just a place holder with its
 <p>Shader unit template is the very basic compilation unit of TSL shaders. The corresponding concept in OSL is called shader layer.
 A shader unit template is nothing but a piece of shader code that will be compiled independently.</p>
 <p>For example, the following code is an example of shader unit template source code</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="cm">/*
-</span></span></span><span class="line"><span class="cl"><span class="cm"> * Shader entry for the shader unit template that makes a lamber closure
-</span></span></span><span class="line"><span class="cl"><span class="cm"> */</span>
-</span></span><span class="line"><span class="cl"><span class="n">shader</span> <span class="nf">make_closure_lambert</span><span class="p">(</span> <span class="n">in</span>  <span class="n">color</span>   <span class="n">basecolor</span><span class="p">,</span>  <span class="c1">// input basecolor
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                             <span class="n">in</span>  <span class="n">vector</span>  <span class="n">normal</span><span class="p">,</span>     <span class="c1">// intput normal
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                             <span class="n">out</span> <span class="n">closure</span> <span class="n">o0</span>          <span class="c1">// output closure
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                           <span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="c1">// making a lambert closure with basecolor and its normal
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">o0</span> <span class="o">=</span> <span class="n">make_closure</span><span class="o">&lt;</span><span class="n">lambert</span><span class="o">&gt;</span><span class="p">(</span> <span class="n">basecolor</span> <span class="p">,</span> <span class="n">normal</span> <span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>This piece of shader code can be compiled into a shader unit template object. It has one output argument, which is a closure that indicates a lambert BRDF. Of course, it is eventually up to my renderer to explain how to interpret this into the final BRDF, which could totally be another type of BRDF too. But commonly, I don&rsquo;t do it that way.</p>
+<figure class="code-figure"><div class="code-listing" data-codetype="cpp"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="cm">/*
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="cm"> * Shader entry for the shader unit template that makes a lamber closure
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="cm"> */</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="n">shader</span> <span class="nf">make_closure_lambert</span><span class="p">(</span> <span class="n">in</span>  <span class="n">color</span>   <span class="n">basecolor</span><span class="p">,</span>  <span class="c1">// input basecolor
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl">                             <span class="n">in</span>  <span class="n">vector</span>  <span class="n">normal</span><span class="p">,</span>     <span class="c1">// intput normal
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl">                             <span class="n">out</span> <span class="n">closure</span> <span class="n">o0</span>          <span class="c1">// output closure
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl">                           <span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    <span class="c1">// making a lambert closure with basecolor and its normal
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl">    <span class="n">o0</span> <span class="o">=</span> <span class="n">make_closure</span><span class="o">&lt;</span><span class="n">lambert</span><span class="o">&gt;</span><span class="p">(</span> <span class="n">basecolor</span> <span class="p">,</span> <span class="n">normal</span> <span class="p">);</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><figcaption class="code-figure-caption"><strong>Listing 1</strong>: A shader unit template.</figcaption>
+</figure>
+
+<p>This piece of shader code can be compiled into a shader unit template object. It has one output argument, which is a closure that indicates a lambert BRDF. Of course, it is eventually up to my renderer to explain how to interpret this into the final BRDF, which could totally be another type of BRDF too. But commonly, I don&rsquo;t do it that way.</p>
 <p>It is almost a perfect match for a node in a graph-based material system like what Blender offers.
 Following is an example of a SORT material in Blender,</p>
-<figure><a href="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/shader_graph.png"><img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/shader_graph.png"/></a>
+<figure><a href="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/shader_graph.png"><img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/shader_graph.png"
+    alt="A SORT material shader graph in Blender."></a><figcaption class="custom-figure-caption"><strong>Figure 3</strong>: 
+      A SORT material shader graph in Blender.
+    </figcaption>
 </figure>
 
 <p>As we can see, the above shader unit template can be used as the representation of the diffuse node in this graph.
 Both of them take two arguments as inputs and output one argument. Of course, shader unit template doesn&rsquo;t have to output closure all the time. For example, the image node in the above texture could be defined this way</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">texture2d</span> <span class="n">g_texture</span><span class="p">;</span>  <span class="c1">// texture handle
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">shader</span> <span class="nf">ImageShaderLinear</span><span class="p">(</span> <span class="n">vector</span> <span class="n">UVCoordinate</span> <span class="p">,</span>
-</span></span><span class="line"><span class="cl">                          <span class="kt">float</span>  <span class="n">UVTiling</span> <span class="p">,</span>
-</span></span><span class="line"><span class="cl">                          <span class="n">out</span> <span class="n">color</span> <span class="n">Result</span> <span class="p">,</span>
-</span></span><span class="line"><span class="cl">                          <span class="n">out</span> <span class="kt">float</span> <span class="n">Alpha</span> <span class="p">,</span>
-</span></span><span class="line"><span class="cl">                          <span class="n">out</span> <span class="kt">float</span> <span class="n">Red</span> <span class="p">,</span>
-</span></span><span class="line"><span class="cl">                          <span class="n">out</span> <span class="kt">float</span> <span class="n">Green</span> <span class="p">,</span>
-</span></span><span class="line"><span class="cl">                          <span class="n">out</span> <span class="kt">float</span> <span class="n">Blue</span> <span class="p">){</span>
-</span></span><span class="line"><span class="cl">    <span class="n">vector</span> <span class="n">scaledUV</span> <span class="o">=</span> <span class="n">UVCoordinate</span> <span class="o">*</span> <span class="n">UVTiling</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Result</span> <span class="o">=</span> <span class="n">texture2d_sample</span><span class="o">&lt;</span><span class="n">g_texture</span><span class="o">&gt;</span><span class="p">(</span> <span class="n">scaledUV</span><span class="p">.</span><span class="n">x</span> <span class="p">,</span> <span class="n">scaledUV</span><span class="p">.</span><span class="n">y</span> <span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Red</span> <span class="o">=</span> <span class="n">Result</span><span class="p">.</span><span class="n">x</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Green</span> <span class="o">=</span> <span class="n">Result</span><span class="p">.</span><span class="n">y</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Blue</span> <span class="o">=</span> <span class="n">Result</span><span class="p">.</span><span class="n">z</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Alpha</span> <span class="o">=</span> <span class="n">texture2d_sample_alpha</span><span class="o">&lt;</span><span class="n">g_texture</span><span class="o">&gt;</span><span class="p">(</span> <span class="n">scaledUV</span><span class="p">.</span><span class="n">x</span> <span class="p">,</span> <span class="n">scaledUV</span><span class="p">.</span><span class="n">y</span> <span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>As a matter of fact, this is exactly how this node is defined in my renderer with TSL.</p>
+<figure class="code-figure"><div class="code-listing" data-codetype="cpp"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="n">texture2d</span> <span class="n">g_texture</span><span class="p">;</span>  <span class="c1">// texture handle
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="n">shader</span> <span class="nf">ImageShaderLinear</span><span class="p">(</span> <span class="n">vector</span> <span class="n">UVCoordinate</span> <span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">                          <span class="kt">float</span>  <span class="n">UVTiling</span> <span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">                          <span class="n">out</span> <span class="n">color</span> <span class="n">Result</span> <span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">                          <span class="n">out</span> <span class="kt">float</span> <span class="n">Alpha</span> <span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">                          <span class="n">out</span> <span class="kt">float</span> <span class="n">Red</span> <span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">                          <span class="n">out</span> <span class="kt">float</span> <span class="n">Green</span> <span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">                          <span class="n">out</span> <span class="kt">float</span> <span class="n">Blue</span> <span class="p">){</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    <span class="n">vector</span> <span class="n">scaledUV</span> <span class="o">=</span> <span class="n">UVCoordinate</span> <span class="o">*</span> <span class="n">UVTiling</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">    <span class="n">Result</span> <span class="o">=</span> <span class="n">texture2d_sample</span><span class="o">&lt;</span><span class="n">g_texture</span><span class="o">&gt;</span><span class="p">(</span> <span class="n">scaledUV</span><span class="p">.</span><span class="n">x</span> <span class="p">,</span> <span class="n">scaledUV</span><span class="p">.</span><span class="n">y</span> <span class="p">);</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">    <span class="n">Red</span> <span class="o">=</span> <span class="n">Result</span><span class="p">.</span><span class="n">x</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">    <span class="n">Green</span> <span class="o">=</span> <span class="n">Result</span><span class="p">.</span><span class="n">y</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">    <span class="n">Blue</span> <span class="o">=</span> <span class="n">Result</span><span class="p">.</span><span class="n">z</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">    <span class="n">Alpha</span> <span class="o">=</span> <span class="n">texture2d_sample_alpha</span><span class="o">&lt;</span><span class="n">g_texture</span><span class="o">&gt;</span><span class="p">(</span> <span class="n">scaledUV</span><span class="p">.</span><span class="n">x</span> <span class="p">,</span> <span class="n">scaledUV</span><span class="p">.</span><span class="n">y</span> <span class="p">);</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><figcaption class="code-figure-caption"><strong>Listing 2</strong>: A texture sampling shader unit.</figcaption>
+</figure>
+
+<p>As a matter of fact, this is exactly how this node is defined in my renderer with TSL.</p>
 <p>Careful readers might have noticed that we haven&rsquo;t got a chance to specify the value of some of the input arguments, like the normal in diffuse TSL shader code. And both of the two input arguments are not set with values in the texture sampling TSL code. These will be set during shader group template construction.
 A benefit of this design is that shader code doesn&rsquo;t need to be recompiled just because the default value for arguments are different.
 This means that the upper limit of the number of shader compilation is decided by the number of shader types, which commonly matches the type of material nodes. It is totally independent of the occurrences of each shader node in SORT materials.</p>
@@ -333,49 +352,55 @@ Shader group template commonly takes the following information</p>
 <li>The default value for arguments in shader unit templates</li>
 <li>Exposed arguments of the shader group templates</li>
 </ul>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="c1">// the shader group template that represent the material
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">auto</span> <span class="n">shader_group</span> <span class="o">=</span> <span class="n">shading_context</span><span class="o">-&gt;</span><span class="n">begin_shader_group_template</span><span class="p">(</span><span class="s">&#34;example material&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// add the two shader units in this group
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">add_shader_unit</span><span class="p">(</span><span class="s">&#34;blend_unit&#34;</span><span class="p">,</span> <span class="n">shader_unit_blend</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">add_shader_unit</span><span class="p">(</span><span class="s">&#34;diffuse_unit&#34;</span><span class="p">,</span> <span class="n">shader_unit_diffuse</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">add_shader_unit</span><span class="p">(</span><span class="s">&#34;mirror_unit&#34;</span><span class="p">,</span> <span class="n">shader_unit_mirror</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">add_shader_unit</span><span class="p">(</span><span class="s">&#34;texture_unit&#34;</span><span class="p">,</span> <span class="n">shader_unit_texture</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// setup connections between shader units
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">connect_shader_units</span><span class="p">(</span><span class="s">&#34;diffuse_unit&#34;</span><span class="p">,</span> <span class="s">&#34;o0&#34;</span><span class="p">,</span> <span class="s">&#34;shader_unit_blend&#34;</span><span class="p">,</span> <span class="s">&#34;in_bxdf0&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">connect_shader_units</span><span class="p">(</span><span class="s">&#34;mirror_unit&#34;</span><span class="p">,</span> <span class="s">&#34;o0&#34;</span><span class="p">,</span> <span class="s">&#34;shader_unit_blend&#34;</span><span class="p">,</span> <span class="s">&#34;in_bxdf1&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">connect_shader_units</span><span class="p">(</span><span class="s">&#34;texture_unit&#34;</span><span class="p">,</span> <span class="s">&#34;Result&#34;</span><span class="p">,</span> <span class="s">&#34;diffuse_unit&#34;</span><span class="p">,</span> <span class="s">&#34;basecolor&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// Setup the default value for arguments
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">init_shader_input</span><span class="p">(</span><span class="s">&#34;texture_unit&#34;</span><span class="p">,</span> <span class="s">&#34;UVCoordinate&#34;</span><span class="p">,</span> <span class="n">Tsl_Namespace</span><span class="o">::</span><span class="n">make_tsl_global_ref</span><span class="p">(</span><span class="s">&#34;uvw&#34;</span><span class="p">));</span>
-</span></span><span class="line"><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">init_shader_input</span><span class="p">(</span><span class="s">&#34;texture_unit&#34;</span><span class="p">,</span> <span class="s">&#34;UVTiling&#34;</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">init_shader_input</span><span class="p">(</span><span class="s">&#34;diffuse_unit&#34;</span><span class="p">,</span> <span class="s">&#34;normal&#34;</span><span class="p">,</span> <span class="n">Tsl_Namespace</span><span class="o">::</span><span class="n">make_float3</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">));</span>
-</span></span><span class="line"><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">init_shader_input</span><span class="p">(</span><span class="s">&#34;mirror_unit&#34;</span><span class="p">,</span> <span class="s">&#34;normal&#34;</span><span class="p">,</span> <span class="n">Tsl_Namespace</span><span class="o">::</span><span class="n">make_float3</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">));</span>
-</span></span><span class="line"><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">init_shader_input</span><span class="p">(</span><span class="s">&#34;mirror_unit&#34;</span><span class="p">,</span> <span class="s">&#34;basecolor&#34;</span><span class="p">,</span> <span class="n">Tsl_Namespace</span><span class="o">::</span><span class="n">make_float3</span><span class="p">(</span><span class="mf">1.0f</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">));</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// Expose arguments for the shader group template
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">expose_shader_argument</span><span class="p">(</span><span class="s">&#34;blend_unit&#34;</span><span class="p">,</span> <span class="s">&#34;out_bxdf&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// indicate to the library the construction of shader group template is done
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">shading_context</span><span class="o">-&gt;</span><span class="n">end_shader_group_template</span><span class="p">(</span><span class="n">shader_group</span><span class="p">.</span><span class="n">get</span><span class="p">());</span>
-</span></span></code></pre></div><p>Most of the above code is pretty self-explanatory. One detail that deserves our attention is the default value for UVCoordinate argument in texture_unit. Since the above code happens during shader initialization, there is no exact data of texture coordinate at this point at all. TSL allows its users to delay the value setup by referring to a global constant to be set up right before shader execution.</p>
+<figure class="code-figure"><div class="code-listing" data-codetype="cpp"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1">// the shader group template that represent the material
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="k">auto</span> <span class="n">shader_group</span> <span class="o">=</span> <span class="n">shading_context</span><span class="o">-&gt;</span><span class="n">begin_shader_group_template</span><span class="p">(</span><span class="s">&#34;example material&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="c1">// add the two shader units in this group
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">add_shader_unit</span><span class="p">(</span><span class="s">&#34;blend_unit&#34;</span><span class="p">,</span> <span class="n">shader_unit_blend</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">add_shader_unit</span><span class="p">(</span><span class="s">&#34;diffuse_unit&#34;</span><span class="p">,</span> <span class="n">shader_unit_diffuse</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">add_shader_unit</span><span class="p">(</span><span class="s">&#34;mirror_unit&#34;</span><span class="p">,</span> <span class="n">shader_unit_mirror</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">add_shader_unit</span><span class="p">(</span><span class="s">&#34;texture_unit&#34;</span><span class="p">,</span> <span class="n">shader_unit_texture</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">
+</span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="c1">// setup connections between shader units
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">connect_shader_units</span><span class="p">(</span><span class="s">&#34;diffuse_unit&#34;</span><span class="p">,</span> <span class="s">&#34;o0&#34;</span><span class="p">,</span> <span class="s">&#34;shader_unit_blend&#34;</span><span class="p">,</span> <span class="s">&#34;in_bxdf0&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">connect_shader_units</span><span class="p">(</span><span class="s">&#34;mirror_unit&#34;</span><span class="p">,</span> <span class="s">&#34;o0&#34;</span><span class="p">,</span> <span class="s">&#34;shader_unit_blend&#34;</span><span class="p">,</span> <span class="s">&#34;in_bxdf1&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">connect_shader_units</span><span class="p">(</span><span class="s">&#34;texture_unit&#34;</span><span class="p">,</span> <span class="s">&#34;Result&#34;</span><span class="p">,</span> <span class="s">&#34;diffuse_unit&#34;</span><span class="p">,</span> <span class="s">&#34;basecolor&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">
+</span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="c1">// Setup the default value for arguments
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">init_shader_input</span><span class="p">(</span><span class="s">&#34;texture_unit&#34;</span><span class="p">,</span> <span class="s">&#34;UVCoordinate&#34;</span><span class="p">,</span> <span class="n">Tsl_Namespace</span><span class="o">::</span><span class="n">make_tsl_global_ref</span><span class="p">(</span><span class="s">&#34;uvw&#34;</span><span class="p">));</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">init_shader_input</span><span class="p">(</span><span class="s">&#34;texture_unit&#34;</span><span class="p">,</span> <span class="s">&#34;UVTiling&#34;</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">init_shader_input</span><span class="p">(</span><span class="s">&#34;diffuse_unit&#34;</span><span class="p">,</span> <span class="s">&#34;normal&#34;</span><span class="p">,</span> <span class="n">Tsl_Namespace</span><span class="o">::</span><span class="n">make_float3</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">));</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">init_shader_input</span><span class="p">(</span><span class="s">&#34;mirror_unit&#34;</span><span class="p">,</span> <span class="s">&#34;normal&#34;</span><span class="p">,</span> <span class="n">Tsl_Namespace</span><span class="o">::</span><span class="n">make_float3</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">));</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">init_shader_input</span><span class="p">(</span><span class="s">&#34;mirror_unit&#34;</span><span class="p">,</span> <span class="s">&#34;basecolor&#34;</span><span class="p">,</span> <span class="n">Tsl_Namespace</span><span class="o">::</span><span class="n">make_float3</span><span class="p">(</span><span class="mf">1.0f</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">));</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">
+</span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="c1">// Expose arguments for the shader group template
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="n">shader_group</span><span class="o">-&gt;</span><span class="n">expose_shader_argument</span><span class="p">(</span><span class="s">&#34;blend_unit&#34;</span><span class="p">,</span> <span class="s">&#34;out_bxdf&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">
+</span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="c1">// indicate to the library the construction of shader group template is done
+</span></span></span><span class="line"><span class="ln">26</span><span class="cl"><span class="n">shading_context</span><span class="o">-&gt;</span><span class="n">end_shader_group_template</span><span class="p">(</span><span class="n">shader_group</span><span class="p">.</span><span class="n">get</span><span class="p">());</span></span></span></code></pre></div></div><figcaption class="code-figure-caption"><strong>Listing 3</strong>: Building a shader group template.</figcaption>
+</figure>
+
+<p>Most of the above code is pretty self-explanatory. One detail that deserves our attention is the default value for UVCoordinate argument in texture_unit. Since the above code happens during shader initialization, there is no exact data of texture coordinate at this point at all. TSL allows its users to delay the value setup by referring to a global constant to be set up right before shader execution.</p>
 <p>The above code just demonstrates a simple shader graph. In real-world practical examples, there are cases the shader group template could be a lot more sophisticated than the above code. But the general idea holds the same.</p>
 <h2 id="tsl-global-constant">TSL Global Constant</h2>
 <p>It is more than necessary for the host program to provide some input so that shader can be executed with correct information. Such inputs are commonly texture coordinate, vertex position, vertex normal, etc. Basically, it is per shader execution data that can&rsquo;t be defined during shader authoring or shader compilation. These data will only be available right before shader execution.</p>
 <p>To pass the correct information, it is first necessary to define the memory layout of the data structure.
 And this memory layout needs to be visible to both of TSL shader code and host c++ program. In order to make things easier for TSL users, I made a macro inside TSL library. So to define a global constant, we only need to write down the following code</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// Following code needs to appear in a header file
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">DECLARE_TSLGLOBAL_BEGIN</span><span class="p">(</span><span class="n">TslGlobal</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="nf">DECLARE_TSLGLOBAL_VAR</span><span class="p">(</span><span class="n">Tsl_float3</span><span class="p">,</span> <span class="n">uvw</span><span class="p">)</span>          <span class="c1">// UV coordinate, W is preserved for now.
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">DECLARE_TSLGLOBAL_VAR</span><span class="p">(</span><span class="n">Tsl_float3</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>     <span class="c1">// this is world space position
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">DECLARE_TSLGLOBAL_END</span><span class="p">()</span>
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// Following code should typically appear in a cpp file
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">IMPLEMENT_TSLGLOBAL_BEGIN</span><span class="p">(</span><span class="n">TslGlobal</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="nf">IMPLEMENT_TSLGLOBAL_VAR</span><span class="p">(</span><span class="n">Tsl_float3</span><span class="p">,</span> <span class="n">uvw</span><span class="p">)</span>          <span class="c1">// UV coordinate, W is preserved for now.
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">IMPLEMENT_TSLGLOBAL_VAR</span><span class="p">(</span><span class="n">Tsl_float3</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>     <span class="c1">// This is world space position
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">IMPLEMENT_TSLGLOBAL_END</span><span class="p">()</span>
-</span></span></code></pre></div><p>The above code will silently create a data structure called TslGlobal and make it visible to both the shader code and its host program.
+<figure class="code-figure"><div id="code_tsl_global_declaration" class="code-listing" data-codetype="cpp"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">// Following code needs to appear in a header file
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="n">DECLARE_TSLGLOBAL_BEGIN</span><span class="p">(</span><span class="n">TslGlobal</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="n">DECLARE_TSLGLOBAL_VAR</span><span class="p">(</span><span class="n">Tsl_float3</span><span class="p">,</span> <span class="n">uvw</span><span class="p">)</span>          <span class="c1">// UV coordinate, W is preserved for now.
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="n">DECLARE_TSLGLOBAL_VAR</span><span class="p">(</span><span class="n">Tsl_float3</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>     <span class="c1">// this is world space position
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="n">DECLARE_TSLGLOBAL_END</span><span class="p">()</span></span></span></code></pre></div></div><figcaption class="code-figure-caption"><strong>Listing 4</strong>: Declaring global shader variables in a header file.</figcaption>
+</figure>
+
+<figure class="code-figure"><div id="code_tsl_global_definition" class="code-listing" data-codetype="cpp"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">// Following code should typically appear in a cpp file
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="n">IMPLEMENT_TSLGLOBAL_BEGIN</span><span class="p">(</span><span class="n">TslGlobal</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="n">IMPLEMENT_TSLGLOBAL_VAR</span><span class="p">(</span><span class="n">Tsl_float3</span><span class="p">,</span> <span class="n">uvw</span><span class="p">)</span>          <span class="c1">// UV coordinate, W is preserved for now.
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="n">IMPLEMENT_TSLGLOBAL_VAR</span><span class="p">(</span><span class="n">Tsl_float3</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>     <span class="c1">// This is world space position
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="n">IMPLEMENT_TSLGLOBAL_END</span><span class="p">()</span></span></span></code></pre></div></div><figcaption class="code-figure-caption"><strong>Listing 5</strong>: Defining global shader variables in a source file.</figcaption>
+</figure>
+
+<p>The above code will silently create a data structure called TslGlobal and make it visible to both the shader code and its host program.
 Right before shader execution, this data structure needs to be filled so that shaders can be executed with the correct data.
 Inside a shader kernel, one can use <code>global_value&lt;uvw&gt;</code> to access <code>uvw</code> defined above. The same applies to any other parameters defined in TslGlobal data structure.</p>
 <p>It is technically possible to have different constant data layout for different shaders. But I didn&rsquo;t choose to do it to avoid the cost of run-time branching even though modern CPUs might be good at branch prediction.</p>
@@ -384,24 +409,32 @@ Inside a shader kernel, one can use <code>global_value&lt;uvw&gt;</code> to acce
 It is shader instance that eventually holds the JITed function pointer for the host program to call.</p>
 <p>A shader instance is thread-safe in the way that it can be used to execute shader on multiple threads simultaneously with no performance penalty.</p>
 <p>Following is a piece of host c++ code demonstrating how to execute a TSL shader</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">ExecuteSurfaceShader</span><span class="p">(</span> <span class="n">Tsl_Namespace</span><span class="o">::</span><span class="n">ShaderInstance</span><span class="o">*</span> <span class="n">shader</span> <span class="p">,</span> <span class="n">BSDF</span><span class="o">&amp;</span> <span class="n">bsdf</span> <span class="p">){</span>
-</span></span><span class="line"><span class="cl">    <span class="c1">// get the surface intersection data
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">const</span> <span class="n">SurfaceInteraction</span><span class="o">&amp;</span> <span class="n">intersection</span> <span class="o">=</span> <span class="n">bsdf</span><span class="p">.</span><span class="n">GetInteraction</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="c1">// fill in the tsl global constant
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">TslGlobal</span> <span class="n">global</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">global</span><span class="p">.</span><span class="n">uvw</span> <span class="o">=</span> <span class="n">make_float3</span><span class="p">(</span><span class="n">intersection</span><span class="p">.</span><span class="n">u</span><span class="p">,</span> <span class="n">intersection</span><span class="p">.</span><span class="n">v</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">global</span><span class="p">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">make_float3</span><span class="p">(</span><span class="n">intersection</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">intersection</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">y</span><span class="p">,</span> <span class="n">intersection</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">z</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="c1">// shader execution
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ClosureTreeNodeBase</span><span class="o">*</span> <span class="n">closure</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">raw_function</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="p">)(</span><span class="n">ClosureTreeNodeBase</span><span class="o">**</span><span class="p">,</span> <span class="n">TslGlobal</span><span class="o">*</span><span class="p">))</span><span class="n">shader</span><span class="o">-&gt;</span><span class="n">get_function</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">    <span class="n">raw_function</span><span class="p">(</span><span class="o">&amp;</span><span class="n">closure</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">global</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="c1">// parse the surface shader
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ProcessSurfaceClosure</span><span class="p">(</span><span class="n">closure</span><span class="p">,</span> <span class="n">bsdf</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><h2 id="closure">Closure</h2>
+<figure class="code-figure"><div class="code-listing" data-codetype="cpp"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="kt">void</span> <span class="nf">ExecuteSurfaceShader</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">    <span class="n">Tsl_Namespace</span><span class="o">::</span><span class="n">ShaderInstance</span><span class="o">*</span> <span class="n">shader</span><span class="p">,</span> <span class="n">BSDF</span><span class="o">&amp;</span> <span class="n">bsdf</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="c1">// get the surface intersection data
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl">    <span class="k">const</span> <span class="n">SurfaceInteraction</span><span class="o">&amp;</span> <span class="n">intersection</span> <span class="o">=</span> <span class="n">bsdf</span><span class="p">.</span><span class="n">GetInteraction</span><span class="p">();</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    <span class="c1">// fill in the tsl global constant
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl">    <span class="n">TslGlobal</span> <span class="n">global</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    <span class="n">global</span><span class="p">.</span><span class="n">uvw</span> <span class="o">=</span> <span class="n">make_float3</span><span class="p">(</span><span class="n">intersection</span><span class="p">.</span><span class="n">u</span><span class="p">,</span> <span class="n">intersection</span><span class="p">.</span><span class="n">v</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    <span class="n">global</span><span class="p">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">make_float3</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">        <span class="n">intersection</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">x</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">        <span class="n">intersection</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">y</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">        <span class="n">intersection</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">z</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">
+</span></span><span class="line"><span class="ln">14</span><span class="cl">    <span class="c1">// shader execution
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl">    <span class="n">ClosureTreeNodeBase</span><span class="o">*</span> <span class="n">closure</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">    <span class="k">auto</span> <span class="n">raw_function</span> <span class="o">=</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">        <span class="p">(</span><span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="p">)(</span><span class="n">ClosureTreeNodeBase</span><span class="o">**</span><span class="p">,</span> <span class="n">TslGlobal</span><span class="o">*</span><span class="p">))</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl">        <span class="n">shader</span><span class="o">-&gt;</span><span class="n">get_function</span><span class="p">();</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">    <span class="n">raw_function</span><span class="p">(</span><span class="o">&amp;</span><span class="n">closure</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">global</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">
+</span></span><span class="line"><span class="ln">21</span><span class="cl">    <span class="c1">// parse the surface shader
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl">    <span class="n">ProcessSurfaceClosure</span><span class="p">(</span><span class="n">closure</span><span class="p">,</span> <span class="n">bsdf</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><figcaption class="code-figure-caption"><strong>Listing 6</strong>: Executing a TSL shader from C++.</figcaption>
+</figure>
+
+<h2 id="closure">Closure</h2>
 <p>TSL&rsquo;s closure tree concept is very similar to OSL&rsquo;s closure tree, if not the same.
 The introduction of closure tree is probably the biggest difference between TSL and GPU shaders.</p>
 <p>Closure is a concept for deferred execution. It is something to be evaluated later, but the real evaluation is left to the renderers, not the shaders. And it should have enough signal for renderers to pick them up. This usually means that closure will have its type id and of course, the arguments constructing the closure, which will be evaluated in TSL shader execution.</p>
@@ -413,25 +446,33 @@ And most importantly, BSDF reconstruction doesn&rsquo;t need to be done before T
 <h3 id="closure-type">Closure Type</h3>
 <p>Closure is like an indication of BXDF, with specific types and arguments so that it has enough information for renderers to reconstruct the BSDF of its interest. Of course, TSL library itself will have absolutely no knowledge of what type of BXDFs are supported by renderers. It is up to us to register a closure type in renderers before compiling shaders. And renderers need to parse them correspondingly when needed. This can be done this way</p>
 <p>To register a closure type, we need to specify a list of arguments first so that we know what information the closure takes. Again, this data structure needs to be visible for both host and target TSL programs. There is a macro in TSL library for us to claim the data structure</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="c1">// This is the declaration of the data structure of Lambert closure.
-</span></span></span><span class="line"><span class="cl"><span class="c1">// This needs to appear in a header file.
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">DECLARE_CLOSURE_TYPE_BEGIN</span><span class="p">(</span><span class="n">ClosureTypeLambert</span><span class="p">,</span> <span class="s">&#34;lambert&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="n">DECLARE_CLOSURE_TYPE_VAR</span><span class="p">(</span><span class="n">ClosureTypeLambert</span><span class="p">,</span> <span class="n">Tsl_float3</span><span class="p">,</span> <span class="n">base_color</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="n">DECLARE_CLOSURE_TYPE_VAR</span><span class="p">(</span><span class="n">ClosureTypeLambert</span><span class="p">,</span> <span class="n">Tsl_float3</span><span class="p">,</span> <span class="n">normal</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="n">DECLARE_CLOSURE_TYPE_END</span><span class="p">(</span><span class="n">ClosureTypeLambert</span><span class="p">)</span>
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="c1">// This is the definition of the data structure of Lambert closure
-</span></span></span><span class="line"><span class="cl"><span class="c1">// It has to match what is shown above. This commonly appears in a cpp file.
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">IMPLEMENT_CLOSURE_TYPE_BEGIN</span><span class="p">(</span><span class="n">ClosureTypeLambert</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="n">IMPLEMENT_CLOSURE_TYPE_VAR</span><span class="p">(</span><span class="n">ClosureTypeLambert</span><span class="p">,</span> <span class="n">Tsl_float3</span><span class="p">,</span> <span class="n">base_color</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="n">IMPLEMENT_CLOSURE_TYPE_VAR</span><span class="p">(</span><span class="n">ClosureTypeLambert</span><span class="p">,</span> <span class="n">Tsl_float3</span><span class="p">,</span> <span class="n">normal</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="n">IMPLEMENT_CLOSURE_TYPE_END</span><span class="p">(</span><span class="n">ClosureTypeLambert</span><span class="p">)</span>
-</span></span></code></pre></div><p>Once we have the closure type, registering the type in TSL library could be easily done through this code.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="c1">// register lambert closure
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">ClosureTypeLambert</span><span class="o">::</span><span class="n">RegisterClosure</span><span class="p">();</span>
-</span></span></code></pre></div><p>Once it is registered in TSL&rsquo;s system. TSL shader will recognize the closure type and generate the correct data if it is seen.
+<figure class="code-figure"><div class="code-listing" data-codetype="cpp"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">// This is the declaration of the data structure of Lambert closure.
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="c1">// This needs to appear in a header file.
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="n">DECLARE_CLOSURE_TYPE_BEGIN</span><span class="p">(</span><span class="n">ClosureTypeLambert</span><span class="p">,</span> <span class="s">&#34;lambert&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="n">DECLARE_CLOSURE_TYPE_VAR</span><span class="p">(</span><span class="n">ClosureTypeLambert</span><span class="p">,</span> <span class="n">Tsl_float3</span><span class="p">,</span> <span class="n">base_color</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="n">DECLARE_CLOSURE_TYPE_VAR</span><span class="p">(</span><span class="n">ClosureTypeLambert</span><span class="p">,</span> <span class="n">Tsl_float3</span><span class="p">,</span> <span class="n">normal</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="n">DECLARE_CLOSURE_TYPE_END</span><span class="p">(</span><span class="n">ClosureTypeLambert</span><span class="p">)</span></span></span></code></pre></div></div><figcaption class="code-figure-caption"><strong>Listing 7</strong>: Declaring the Lambert closure data structure.</figcaption>
+</figure>
+
+<figure class="code-figure"><div class="code-listing" data-codetype="cpp"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">// This is the definition of the data structure of Lambert closure
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="c1">// It has to match what is shown above. This commonly appears in a cpp file.
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="n">IMPLEMENT_CLOSURE_TYPE_BEGIN</span><span class="p">(</span><span class="n">ClosureTypeLambert</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="n">IMPLEMENT_CLOSURE_TYPE_VAR</span><span class="p">(</span><span class="n">ClosureTypeLambert</span><span class="p">,</span> <span class="n">Tsl_float3</span><span class="p">,</span> <span class="n">base_color</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="n">IMPLEMENT_CLOSURE_TYPE_VAR</span><span class="p">(</span><span class="n">ClosureTypeLambert</span><span class="p">,</span> <span class="n">Tsl_float3</span><span class="p">,</span> <span class="n">normal</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="n">IMPLEMENT_CLOSURE_TYPE_END</span><span class="p">(</span><span class="n">ClosureTypeLambert</span><span class="p">)</span></span></span></code></pre></div></div><figcaption class="code-figure-caption"><strong>Listing 8</strong>: Defining the Lambert closure data structure.</figcaption>
+</figure>
+
+<p>Once we have the closure type, registering the type in TSL library could be easily done through this code.</p>
+<figure class="code-figure"><div class="code-listing" data-codetype="cpp"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">// register lambert closure
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="n">ClosureTypeLambert</span><span class="o">::</span><span class="n">RegisterClosure</span><span class="p">();</span></span></span></code></pre></div></div><figcaption class="code-figure-caption"><strong>Listing 9</strong>: Registering a closure type with TSL.</figcaption>
+</figure>
+
+<p>Once it is registered in TSL&rsquo;s system. TSL shader will recognize the closure type and generate the correct data if it is seen.
 It is already shown in the first piece of code in this blog</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">o0</span> <span class="o">=</span> <span class="n">make_closure</span><span class="o">&lt;</span><span class="n">lambert</span><span class="o">&gt;</span><span class="p">(</span> <span class="n">basecolor</span> <span class="p">,</span> <span class="n">normal</span> <span class="p">);</span>
-</span></span></code></pre></div><p>As we can see, there are two arguments in this closure type, they are all float3.
+<figure class="code-figure"><div class="code-listing" data-codetype="cpp"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="ln">1</span><span class="cl"><span class="n">o0</span> <span class="o">=</span> <span class="n">make_closure</span><span class="o">&lt;</span><span class="n">lambert</span><span class="o">&gt;</span><span class="p">(</span> <span class="n">basecolor</span> <span class="p">,</span> <span class="n">normal</span> <span class="p">);</span></span></span></code></pre></div></div><figcaption class="code-figure-caption"><strong>Listing 10</strong>: Creating a Lambert closure in a shader.</figcaption>
+</figure>
+
+<p>As we can see, there are two arguments in this closure type, they are all float3.
 And the name of the closure type has to match what is specified in the macro.</p>
 <h3 id="closure-operations-supported-in-tsl">Closure Operations Supported in TSL</h3>
 <p>Closure almost behaves a color in TSL, except that it only supports the following operations</p>
@@ -450,7 +491,10 @@ which will easily result in compilation errors.</p>
 <p>A closure tree is usually what is generated for renderers to parse so that the expected BSDF can be reconstructed through its information.
 It should have the type of closures with the specific values for each argument.</p>
 <p>For example, with the above example, a closure tree could be like this</p>
-<figure><img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/closure.jpg" width="700"/>
+<figure><img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/closure.jpg"
+    alt="An example closure tree." width="700"><figcaption class="custom-figure-caption"><strong>Figure 4</strong>: 
+      An example closure tree.
+    </figcaption>
 </figure>
 
 <p>We can clearly notice from the above data structure that non-closure nodes have been resolved in the final closure tree.
@@ -468,30 +512,35 @@ Renderers should have enough information to reconstruct the expected BSDF.</p>
 <p>One of the advanced closure usages is that a closure can be used as an input argument for another closure.
 This doesn&rsquo;t belong to the above two operations mentioned. This is pretty much the only exception.</p>
 <p>The following code is borrowed from my renderer SORT, it demonstrates the idea pretty well</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="c1">// functions defined by c library
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">float</span> <span class="nf">powf</span><span class="p">(</span> <span class="kt">float</span> <span class="n">base</span> <span class="p">,</span> <span class="kt">float</span> <span class="n">exp</span> <span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="kt">float</span> <span class="nf">logf</span><span class="p">(</span> <span class="kt">float</span> <span class="n">x</span> <span class="p">);</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">float</span> <span class="nf">helper</span><span class="p">(</span> <span class="kt">float</span> <span class="n">x</span> <span class="p">,</span> <span class="kt">float</span> <span class="n">inv</span> <span class="p">){</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">float</span> <span class="n">y</span> <span class="o">=</span> <span class="n">logf</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">inv</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">y</span> <span class="o">*</span> <span class="n">y</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="n">shader</span> <span class="nf">bxdf_coat</span><span class="p">(</span>   <span class="kt">float</span>     <span class="n">IndexofRefraction</span> <span class="p">,</span>
-</span></span><span class="line"><span class="cl">                    <span class="kt">float</span>     <span class="n">Roughness</span> <span class="p">,</span>
-</span></span><span class="line"><span class="cl">                    <span class="n">color</span>     <span class="n">ColorTint</span> <span class="p">,</span>
-</span></span><span class="line"><span class="cl">                    <span class="n">closure</span>   <span class="n">Surface</span> <span class="p">,</span>
-</span></span><span class="line"><span class="cl">                    <span class="n">vector</span>    <span class="n">Normal</span> <span class="p">,</span>
-</span></span><span class="line"><span class="cl">                    <span class="n">out</span> <span class="n">closure</span> <span class="n">Result</span> <span class="p">){</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">float</span> <span class="n">inv</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span> <span class="mf">5.969</span> <span class="o">-</span> <span class="mf">0.215</span> <span class="o">*</span> <span class="n">Roughness</span> <span class="o">+</span> <span class="mf">2.532</span> <span class="o">*</span> <span class="n">powf</span><span class="p">(</span><span class="n">Roughness</span><span class="p">,</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-</span> <span class="mf">10.73</span> <span class="o">*</span> <span class="n">powf</span><span class="p">(</span><span class="n">Roughness</span><span class="p">,</span><span class="mf">3.0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">5.574</span> <span class="o">*</span> <span class="n">powf</span><span class="p">(</span><span class="n">Roughness</span><span class="p">,</span><span class="mf">4.0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.245</span> <span class="o">*</span> <span class="n">powf</span><span class="p">(</span><span class="n">Roughness</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span> <span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">color</span> <span class="n">sigma</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">sigma</span><span class="p">.</span><span class="n">r</span> <span class="o">=</span> <span class="n">helper</span><span class="p">(</span><span class="n">ColorTint</span><span class="p">.</span><span class="n">r</span><span class="p">,</span><span class="n">inv</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">sigma</span><span class="p">.</span><span class="n">g</span> <span class="o">=</span> <span class="n">helper</span><span class="p">(</span><span class="n">ColorTint</span><span class="p">.</span><span class="n">g</span><span class="p">,</span><span class="n">inv</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">sigma</span><span class="p">.</span><span class="n">b</span> <span class="o">=</span> <span class="n">helper</span><span class="p">(</span><span class="n">ColorTint</span><span class="p">.</span><span class="n">b</span><span class="p">,</span><span class="n">inv</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Result</span> <span class="o">=</span> <span class="n">make_closure</span><span class="o">&lt;</span><span class="n">coat</span><span class="o">&gt;</span><span class="p">(</span> <span class="n">Surface</span> <span class="p">,</span> <span class="n">Roughness</span> <span class="p">,</span> <span class="n">IndexofRefraction</span> <span class="p">,</span> <span class="n">sigma</span> <span class="p">,</span> <span class="n">Normal</span> <span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>As we can notice from the above code, the first argument of Coat closure is a closure itself, which is passed in.
+<figure class="code-figure"><div class="code-listing" data-codetype="cpp"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1">// functions defined by c library
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kt">float</span> <span class="nf">powf</span><span class="p">(</span> <span class="kt">float</span> <span class="n">base</span> <span class="p">,</span> <span class="kt">float</span> <span class="n">exp</span> <span class="p">);</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="kt">float</span> <span class="nf">logf</span><span class="p">(</span> <span class="kt">float</span> <span class="n">x</span> <span class="p">);</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="kt">float</span> <span class="nf">helper</span><span class="p">(</span> <span class="kt">float</span> <span class="n">x</span> <span class="p">,</span> <span class="kt">float</span> <span class="n">inv</span> <span class="p">){</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    <span class="kt">float</span> <span class="n">y</span> <span class="o">=</span> <span class="n">logf</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">inv</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">    <span class="k">return</span> <span class="n">y</span> <span class="o">*</span> <span class="n">y</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="n">shader</span> <span class="nf">bxdf_coat</span><span class="p">(</span>   <span class="kt">float</span>     <span class="n">IndexofRefraction</span> <span class="p">,</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">                    <span class="kt">float</span>     <span class="n">Roughness</span> <span class="p">,</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">                    <span class="n">color</span>     <span class="n">ColorTint</span> <span class="p">,</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">                    <span class="n">closure</span>   <span class="n">Surface</span> <span class="p">,</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">                    <span class="n">vector</span>    <span class="n">Normal</span> <span class="p">,</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">                    <span class="n">out</span> <span class="n">closure</span> <span class="n">Result</span> <span class="p">){</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">    <span class="kt">float</span> <span class="n">inv</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span> <span class="mf">5.969</span> <span class="o">-</span> <span class="mf">0.215</span> <span class="o">*</span> <span class="n">Roughness</span> <span class="o">+</span> <span class="mf">2.532</span> <span class="o">*</span> <span class="n">powf</span><span class="p">(</span><span class="n">Roughness</span><span class="p">,</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-</span> <span class="mf">10.73</span> <span class="o">*</span> <span class="n">powf</span><span class="p">(</span><span class="n">Roughness</span><span class="p">,</span><span class="mf">3.0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">5.574</span> <span class="o">*</span> <span class="n">powf</span><span class="p">(</span><span class="n">Roughness</span><span class="p">,</span><span class="mf">4.0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.245</span> <span class="o">*</span> <span class="n">powf</span><span class="p">(</span><span class="n">Roughness</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span> <span class="p">);</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">    <span class="n">color</span> <span class="n">sigma</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">    <span class="n">sigma</span><span class="p">.</span><span class="n">r</span> <span class="o">=</span> <span class="n">helper</span><span class="p">(</span><span class="n">ColorTint</span><span class="p">.</span><span class="n">r</span><span class="p">,</span><span class="n">inv</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl">    <span class="n">sigma</span><span class="p">.</span><span class="n">g</span> <span class="o">=</span> <span class="n">helper</span><span class="p">(</span><span class="n">ColorTint</span><span class="p">.</span><span class="n">g</span><span class="p">,</span><span class="n">inv</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">    <span class="n">sigma</span><span class="p">.</span><span class="n">b</span> <span class="o">=</span> <span class="n">helper</span><span class="p">(</span><span class="n">ColorTint</span><span class="p">.</span><span class="n">b</span><span class="p">,</span><span class="n">inv</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">    <span class="n">Result</span> <span class="o">=</span> <span class="n">make_closure</span><span class="o">&lt;</span><span class="n">coat</span><span class="o">&gt;</span><span class="p">(</span> <span class="n">Surface</span> <span class="p">,</span> <span class="n">Roughness</span> <span class="p">,</span> <span class="n">IndexofRefraction</span> <span class="p">,</span> <span class="n">sigma</span> <span class="p">,</span> <span class="n">Normal</span> <span class="p">);</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><figcaption class="code-figure-caption"><strong>Listing 11</strong>: Registering external functions for shader execution.</figcaption>
+</figure>
+
+<p>As we can notice from the above code, the first argument of Coat closure is a closure itself, which is passed in.
 To give readers a better idea of its use case in my renderer, the following is a screenshot of a SORT material</p>
-<figure><a href="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/coat.png"><img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/coat.png" width="800"/></a>
+<figure><a href="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/coat.png"><img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/coat.png"
+    alt="A layered material in SORT." width="800"></a><figcaption class="custom-figure-caption"><strong>Figure 5</strong>: 
+      A layered material in SORT.
+    </figcaption>
 </figure>
 
 <p>The Coat material node does take one surface node, which essentially just matches to a closure tree, as its arguments.
@@ -499,7 +548,10 @@ This offers the flexibility of supporting coating any other materials in the ren
 In the above case, a Disney BRDF is coated with this type of material, this gives a nice coating later on top of Disney&rsquo;s BRDF.
 Disney BRDF has its own coat layer though, but their BRDF model&rsquo;s coat layer shares the same normal data, which means that we will lose the smooth coating. Of course, it won&rsquo;t be too hard to slighly modify Disney BRDF to support multiple layers of normal. But the point here is that recursive closure offers more flexibility.</p>
 <p>Following is a screenshot of the final rendered shot, the above material is for the top of the helmet</p>
-<figure><a href="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/helmet.png"><img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/helmet.png" width="700"/></a>
+<figure><a href="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/helmet.png"><img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/helmet.png"
+    alt="The rendered helmet with the layered material." width="700"></a><figcaption class="custom-figure-caption"><strong>Figure 6</strong>: 
+      The rendered helmet with the layered material.
+    </figcaption>
 </figure>
 
 <p>We can easily notice that the coating layer and the underlying layer have a different normal map, which is exactly what we expected as specified in the source material.</p>
@@ -514,7 +566,10 @@ A typical use case of this would be <a href="https://developer.nvidia.com/rtx/ra
 This idea applies exactly the same in shader group template. With shader group template being shader unit template, it means that we can add a shader group template in another shader group template. And as a matter of fact, there is no limitation on how many extra dimensions can be added. We can totally have a shader group template A with another shader group template B in it and B can have its own shader group template C in it.</p>
 <p>This might not sound like a big feature to expend rendering features. But it does offer lots of value during my asset authoring.
 Below is a real use case in my renderer</p>
-<figure><a href="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/blender.png"><img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/blender.png"/></a>
+<figure><a href="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/blender.png"><img src="/img/posts/making_a_shading_lagnauge_for_my_offline_renderer/blender.png"
+    alt="A Blender shader graph using TSL under the hood."></a><figcaption class="custom-figure-caption"><strong>Figure 7</strong>: 
+      A Blender shader graph using TSL under the hood.
+    </figcaption>
 </figure>
 
 <p>On the right side is the root material graph for a material. We can notice that all of the inputs of the Disney BRDF node comes from a group node, which is defined and shown on the left panel. The group node itself is another shader group template itself, which is embedded in the root shader group template used to represent the material.</p>
@@ -556,7 +611,7 @@ However, during my usage of this library in my own renderer, once the shaders ar
 [2] <a href="https://www.guru99.com/compiler-design-phases-of-compiler.html">Phases of Compiler with Example</a><br>
 [3] <a href="https://www.freecodecamp.org/news/the-programming-language-pipeline-91d3f449c919/">I wrote a programming language. Here’s how you can, too</a><br>
 [4] <a href="https://gnuu.org/2009/09/18/writing-your-own-toy-compiler/">Writing Your Own Toy Compiler Using Flex, Bison and LLVM</a><br>
-[5] <a href="http://www.jonathanbeard.io/tutorials/FlexBisonC++">FLEX AND BISON IN C++</a><br>
+[5] <a href="http://www.jonathanbeard.io/tutorials/FlexBisonC&#43;&#43;">FLEX AND BISON IN C++</a><br>
 [6] <a href="https://efxa.org/2014/05/25/how-to-create-an-abstract-syntax-tree-while-parsing-an-input-stream/">How to create an abstract syntax tree while parsing an input stream</a><br>
 [7] <a href="https://steemit.com/utopian-io/@drifter1/writing-a-simple-compiler-on-my-own-abstract-syntax-tree-principle-c-flex-bison">Writing a simple Compiler on my own - Abstract Syntax Tree Principle [C][Flex][Bison]</a><br>
 [8] <a href="https://steemit.com/utopian-io/@drifter1/writing-a-simple-compiler-on-my-own-combine-flex-and-bison">Writing a simple Compiler on my own - Combine Flex and Bison</a><br>
@@ -890,7 +945,7 @@ However, during my usage of this library in my own renderer, once the shaders ar
 
     
       
-      <script src="/js/dark-mode.min.f7a0c7c5d46ac9b8d5d7cd8641fe9a41deb129c48a488caf293c9eb5992bd1bd.js"></script>
+      <script src="/js/dark-mode.min.0b1e3ddf7d7cebe6389de0d30470fa17b9fdc860f16e31884b90bfdd2d69d40d.js"></script>
     
     
     <script src="/js/scroll-keys.js"></script>

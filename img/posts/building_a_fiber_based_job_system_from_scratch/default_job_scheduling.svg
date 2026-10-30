@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="sort-default-scheduling" width="1020" height="1400" viewBox="-80 50 1020 1400" role="img" aria-labelledby="sds-title sds-desc">
+  <title id="sds-title">SORT default job scheduling algorithm</title>
+  <desc id="sds-desc">Each background fiber first resumes jobs from the ready job context pool whose state is paused, checking the pool again whenever a job finishes or suspends. Once none can be resumed, it checks whether an incoming job exists, then tries to acquire an idle context or create one within the configured fiber limit. Only after acquiring a context does it dequeue and run one incoming job. If acquisition fails, the job stays in the incoming job pool and the scheduler moves on without scheduling it. The scheduler then checks for queued work. If work remains, it immediately restarts the loop. Otherwise, it exits if stopping is allowed, or waits for queued work for up to one millisecond before restarting. Job execution returns control to the background fiber on completion or suspension.</desc>
+  <style>
+    #sort-default-scheduling {
+      color-scheme: light dark;
+      --ink: light-dark(#222222, #dddddd);
+      --secondary: light-dark(#62676e, #b0b5bb);
+      --line: light-dark(#59636e, #a0a9b3);
+      --action-fill: light-dark(#ffddd0, #4b3028);
+      --action-line: light-dark(#a64b2c, #f4a083);
+      --decision-fill: light-dark(#fff6b5, #44401e);
+      --decision-line: light-dark(#85751a, #dbce6a);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 18px;
+      width: 100%;
+      height: auto;
+    }
+    #sort-default-scheduling text { fill: var(--ink); text-anchor: middle; }
+    #sort-default-scheduling .label { font-weight: 600; }
+    #sort-default-scheduling .note { font-size: 16px; fill: var(--secondary); }
+    #sort-default-scheduling .branch { font-size: 16px; }
+    #sort-default-scheduling .box { fill: var(--action-fill); stroke: var(--action-line); stroke-width: 1.6; }
+    #sort-default-scheduling path.box { fill: var(--decision-fill); stroke: var(--decision-line); }
+    #sort-default-scheduling .edge { fill: none; stroke: var(--line); stroke-width: 1.7; marker-end: url(#sds-arrow); }
+    #sort-default-scheduling .fiber-switch { stroke-width: 3; }
+    #sort-default-scheduling .join { fill: var(--line); }
+    #sort-default-scheduling .scheduler-boundary { fill: none; stroke: var(--line); stroke-width: 3; stroke-dasharray: 8 6; stroke-linejoin: miter; }
+    #sort-default-scheduling .boundary-label { font-size: 20px; font-weight: 600; }
+  </style>
+  <defs>
+    <marker id="sds-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M1 1 L9 5 L1 9" style="fill:none;stroke:var(--line);stroke-width:1.4"/>
+    </marker>
+  </defs>
+
+
+  <g transform="translate(0 20)">
+  <!-- The concave boundary encloses scheduler operations and excludes both worker fibers. -->
+  <path id="sds-background-fiber-boundary" d="M-58 40 H508 Q520 40 520 52 V846 Q520 858 532 858 H918 Q930 858 930 870 V1408 Q930 1420 918 1420 H-58 Q-70 1420 -70 1408 V52 Q-70 40 -58 40 Z" class="scheduler-boundary"/>
+  <text x="245" y="98" class="boundary-label">Background Fiber</text>
+
+  <!-- Outer while(true): remaining work retries immediately; otherwise wait or stop. -->
+  <path d="M-30 1320 V730" class="edge outer-loop"/>
+  <path d="M-30 730 V205 H245" class="edge outer-loop"/>
+
+  <rect x="80" y="115" width="330" height="72" class="box fiber"/>
+  <text x="245" y="144" class="label">Enter the scheduling loop</text>
+  <text x="245" y="168" class="note">Switched from the thread fiber.</text>
+  <path d="M245 187 V240" class="edge"/>
+
+  <g transform="translate(0 40)">
+  <!-- Ready tasks have priority. A returned task may have finished or suspended again. -->
+  <path d="M245 200 L435 263 L245 326 L55 263 Z" class="box context"/>
+  <text x="245" y="257" class="label">Ready job</text>
+  <text x="245" y="281" class="label">available?</text>
+  <path d="M435 263 H480 V105 H640" class="edge fiber-switch"/>
+  <text x="451" y="251" class="branch">Yes</text>
+  <g id="sds-resumed-worker-fiber" class="worker-fiber">
+    <rect x="600" y="0" width="330" height="349" rx="12" class="scheduler-boundary"/>
+    <text x="765" y="58" class="boundary-label">Worker Fiber</text>
+    <rect x="640" y="75" width="250" height="220" class="box"/>
+    <text x="765" y="142" class="label">Resume the</text>
+    <text x="765" y="165" class="label">suspended job</text>
+    <text x="765" y="192" class="note">Run until it finishes</text>
+    <text x="765" y="215" class="note">or yields again,</text>
+    <text x="765" y="238" class="note">then switch back to the</text>
+    <text x="765" y="261" class="note">background scheduler.</text>
+  </g>
+  <!-- Inner while: return directly to the ready-task check after each resumed task. -->
+  <path d="M765 295 V320 H350 V291" class="edge inner-loop fiber-switch"/>
+  <path d="M245 326 V357" class="edge"/>
+  <text x="263" y="347" class="branch">No</text>
+
+  <!-- pullTask acquires a context before removing a pending task from its pool. -->
+  <path d="M245 357 L435 420 L245 483 L55 420 Z" class="box context"/>
+  <text x="245" y="414" class="label">Incoming job</text>
+  <text x="245" y="438" class="label">available?</text>
+  <path d="M55 420 H25 V816 H245" class="edge"/>
+  <text x="38" y="405" class="branch">No</text>
+  <path d="M245 483 V530" class="edge"/>
+  <text x="267" y="511" class="branch">Yes</text>
+
+  <rect x="70" y="530" width="350" height="80" class="box context"/>
+  <text x="245" y="558" class="label">Try to acquire a job context</text>
+  <text x="245" y="580" class="note">Reuse an idle context, or create one</text>
+  <text x="245" y="600" class="note">within the configured fiber limit.</text>
+  <path d="M245 610 V650" class="edge"/>
+
+  <path d="M245 650 L435 710 L245 770 L55 710 Z" class="box context"/>
+  <text x="245" y="704" class="label">Context acquired</text>
+  <text x="245" y="728" class="label">successfully?</text>
+  <path d="M435 710 H480 V514 H640" class="edge fiber-switch"/>
+  <text x="440" y="698" class="branch">Yes</text>
+  <!-- Pool removal and assignment are implicit, as on the ready-task path. -->
+  <g id="sds-new-worker-fiber" class="worker-fiber">
+    <rect x="600" y="409" width="330" height="349" rx="12" class="scheduler-boundary"/>
+    <text x="765" y="467" class="boundary-label">Worker Fiber</text>
+    <rect x="640" y="484" width="250" height="220" class="box"/>
+    <text x="765" y="551" class="label">Execute the</text>
+    <text x="765" y="574" class="label">new job</text>
+    <text x="765" y="601" class="note">Run until it finishes</text>
+    <text x="765" y="624" class="note">or yields,</text>
+    <text x="765" y="647" class="note">then switch back to the</text>
+    <text x="765" y="670" class="note">background scheduler.</text>
+  </g>
+  <path d="M765 704 V846 H245" class="edge fiber-switch"/>
+  <path d="M245 770 V875" class="edge"/>
+  <text x="263" y="795" class="branch">No</text>
+  <circle cx="245" cy="816" r="3" class="join"/>
+  <circle cx="245" cy="846" r="3" class="join"/>
+
+  <g transform="translate(0 320)">
+  <path d="M245 555 L435 615 L245 675 L55 615 Z" class="box"/>
+  <text x="245" y="609" class="label">Queued work</text>
+  <text x="245" y="633" class="label">remaining?</text>
+  <text x="12" y="603" class="branch">Yes</text>
+  <path d="M55 615 H-30" class="edge outer-loop"/>
+  <path d="M245 675 V735" class="edge"/>
+  <text x="263" y="710" class="branch">No</text>
+
+  <path d="M245 735 L435 795 L245 855 L55 795 Z" class="box"/>
+  <text x="245" y="789" class="label">Stopping</text>
+  <text x="245" y="813" class="label">allowed?</text>
+  <path d="M435 795 H725 V924" class="edge"/>
+  <text x="461" y="783" class="branch">Yes</text>
+  <rect x="560" y="924" width="330" height="72" class="box"/>
+  <text x="725" y="953" class="label">Exit the scheduling loop</text>
+  <text x="725" y="977" class="note">Switched back to the thread fiber.</text>
+  <path d="M245 855 V920" class="edge"/>
+  <text x="263" y="892" class="branch">No</text>
+
+  <rect x="70" y="920" width="350" height="80" class="box thread"/>
+  <text x="245" y="950" class="label">Wait for work (up to 1 ms)</text>
+  <text x="245" y="978" class="note">Wake on queued work, then retry.</text>
+  <path d="M70 960 H-30" class="edge outer-loop" style="marker-end: none"/>
+
+  </g>
+  </g>
+  </g>
+</svg>

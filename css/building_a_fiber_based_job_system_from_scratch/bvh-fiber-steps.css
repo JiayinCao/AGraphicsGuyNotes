@@ -1,0 +1,50 @@
+.content .bvh-steps { margin: 2rem 0; }
+.bvh-steps { font-family: Arial, Helvetica, sans-serif; }
+.bvh-steps .bvh-controls { padding: 1rem 1rem 0; }
+.bvh-steps .bvh-controls label { display: block; font-weight: 600; margin-bottom: .6rem; }
+.bvh-steps .bvh-keyboard-hint { margin: 0 0 .5rem; font-size: 14px; }
+.bvh-steps .bvh-slider-row { display: flex; align-items: center; gap: 1rem; }
+.bvh-steps input[type="range"] { flex: 1; min-width: 0; cursor: pointer; accent-color: #c66b46; height: 32px; }
+.bvh-steps button { background: transparent; color: inherit; border: 1px solid currentColor; border-radius: 4px; width: 36px; height: 36px; cursor: pointer; font-size: 20px; }
+.bvh-steps button:disabled { opacity: .3; cursor: default; }
+.bvh-steps :focus-visible { outline: 3px solid #c66b46; outline-offset: 3px; }
+.bvh-steps .bvh-step-labels { display: flex; justify-content: space-between; margin: .3rem 52px 0; font-size: 12px; }
+.bvh-steps .bvh-status { padding: 1rem; min-height: 115px; box-sizing: border-box; }
+.bvh-steps .bvh-status p { margin: .4rem 0 0; font-size: 16px; line-height: 1.5; }
+.bvh-steps .bvh-status.bvh-sr-only { position: absolute; width: 1px; height: 1px; min-height: 0; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.bvh-steps svg { width: 100%; height: auto; display: block; font-size: 17px; }
+.bvh-steps svg text { fill: currentColor; text-anchor: middle; stroke: none; }
+.bvh-steps .heading { font-weight: 600; }
+.bvh-steps .detail { font-size: 15px; }
+.bvh-steps .counter { font-size: 25px; font-weight: 600; }
+.bvh-steps .bvh-region > rect { fill: none; stroke: currentColor; stroke-width: 2; stroke-dasharray: 7 5; }
+.bvh-steps .bvh-fiber-layer { fill: none; stroke: currentColor; stroke-width: 2; stroke-dasharray: 7 5; }
+.bvh-steps .bvh-region > .action, .bvh-steps .bvh-assignment > .action { fill: #d9845526; stroke: #bb7354; stroke-dasharray: none; stroke-width: 1.5; }
+.bvh-steps .bvh-region > .object { fill: #cfba4826; stroke: #aa9545; stroke-dasharray: none; }
+.bvh-steps .bvh-region.active > rect:not([rx]), .bvh-steps .bvh-region.active > .bvh-assignment > rect, .bvh-steps .bvh-region.running > rect[rx] { stroke: #d0784c; stroke-width: 3; }
+.bvh-steps .bvh-region.active > .object { stroke: #c6a72c; }
+.bvh-steps .bvh-job-step rect { fill: #d9845514; stroke: #bb7354; stroke-width: 1.5; }
+.bvh-steps .bvh-job-step.active rect { fill: #d984554d; stroke: #d0784c; stroke-width: 3; }
+.bvh-steps .bvh-region:not(.running) .action,
+.bvh-steps .bvh-region:not(.running) .bvh-job-step rect { fill: #88888826; stroke: #888888; }
+.bvh-steps .bvh-region:not(.running) .bvh-job-step.active rect { fill: #8888884d; }
+.bvh-steps .bvh-region.completed .bvh-assignment > .action,
+.bvh-steps .bvh-region.completed .bvh-job-step rect,
+.bvh-steps .bvh-region.completed .bvh-job-step.active rect { fill: #7d918440; stroke: #7d9184; stroke-width: 1.5; }
+.bvh-steps .bvh-job-flow { fill: none; stroke: currentColor; stroke-width: 1.5; }
+.bvh-steps .bvh-connections path { display: none; }
+.bvh-steps .bvh-connections path.active { display: block; }
+.bvh-steps .bvh-example-note { font-size: 14px; line-height: 1.5; margin: .6rem 1rem 1rem; }
+.bvh-steps figcaption { font-family: inherit; }
+.bvh-steps { --bvh-change-color: #0086b3; }
+body.colorscheme-dark .bvh-steps { --bvh-change-color: #55d9ff; }
+@media (prefers-color-scheme: dark) {
+  body.colorscheme-auto .bvh-steps { --bvh-change-color: #55d9ff; }
+}
+.bvh-steps svg text.changed { fill: var(--bvh-change-color); }
+.bvh-steps .bvh-region.changed > rect.object { stroke: var(--bvh-change-color); stroke-width: 4; }
+@media (max-width: 650px) {
+  .bvh-steps .bvh-diagram-scroll { overflow-x: auto; }
+  .bvh-steps svg { min-width: 720px; }
+  .bvh-steps .bvh-status { min-height: 150px; }
+}

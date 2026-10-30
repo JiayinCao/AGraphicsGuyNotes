@@ -4,7 +4,8 @@
     <title>Categories on A Graphics Guy&#39;s Note</title>
     <link>https://agraphicsguynotes.com/categories/</link>
     <description>Recent content in Categories on A Graphics Guy&#39;s Note</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en</language><atom:link href="https://agraphicsguynotes.com/categories/index.xml" rel="self" type="application/rss+xml" />
+    <generator>Hugo</generator>
+    <language>en</language>
+    <atom:link href="https://agraphicsguynotes.com/categories/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>

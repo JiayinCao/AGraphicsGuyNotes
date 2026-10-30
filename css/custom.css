@@ -3,10 +3,37 @@
   padding: 0;
 }
 
+.content .multi-images {
+  margin: 0 0 2rem;
+}
+
+.multi-images-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--images-per-row), minmax(0, 1fr));
+  gap: 8px;
+  padding: 0 8px;
+}
+
+.multi-images-item img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .theme-svg-figure {
   display: flex;
   justify-content: center;
   margin: 0 0 2rem;
+}
+
+.content .theme-svg-captioned {
+  display: block;
+  margin: 0 0 2rem;
+}
+
+.theme-svg-captioned .theme-svg-viewport {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .theme-svg-viewport {
@@ -20,6 +47,20 @@
 
 body.colorscheme-dark .theme-svg-viewport {
   background-color: #212121;
+}
+
+/* Let the job system diagrams fill the article width without extra padding. */
+#svg_job_system_architecture .theme-svg-viewport,
+#svg_background_fiber_stacks .theme-svg-viewport {
+  background-color: transparent;
+  padding: 0;
+}
+
+#svg_job_system_architecture .theme-svg-img,
+#svg_job_system_architecture svg,
+#svg_background_fiber_stacks .theme-svg-img,
+#svg_background_fiber_stacks svg {
+  width: 100%;
 }
 
 .theme-svg-img {
@@ -233,7 +274,6 @@ body.colorscheme-dark .image-switcher-btn.is-active {
 
 .image-switcher .custom-figure-caption {
   text-align: center;
-  margin-top: 0.35rem;
   line-height: 1.4;
 }
 
