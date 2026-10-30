@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-labelledby="title desc">
+<title id="title">Fiber-based job system architecture</title>
+<desc id="desc">Jobs enter incoming pools. Each worker thread switches through its thread fiber to a background fiber. The scheduler acquires idle or ready job contexts, runs worker fibers, and returns finished contexts to the idle pool. Waiting contexts are tracked by synchronization primitives and become ready when notified. I/O jobs run on a dedicated thread.</desc>
+<style>
+text{font-family:Arial,Helvetica,sans-serif;font-size:25px;font-weight:700;fill:#202630}
+.compact{font-size:22px}
+.label{font-size:21px;font-weight:400;paint-order:stroke;stroke:#fafafa;stroke-width:7;stroke-linejoin:round}
+.edge{fill:none;stroke:#505862;stroke-width:2;marker-end:url(#arrow);stroke-linejoin:round}
+.boundary{fill:none;stroke:#66717e;stroke-width:2;stroke-dasharray:10 7}
+rect{stroke-width:1.8}
+.pool{fill:#f1f3f5;stroke:#66717e}.thread{fill:#d5e1ee;stroke:#426da7}.fiber{fill:#d6e8e2;stroke:#367e73}.job{fill:#f3e7cb;stroke:#946523}.context{fill:#eae4f2;stroke:#7351a0}.sync{fill:#f1e4e8;stroke:#a44d63}
+</style>
+<defs><marker id="arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto"><path d="M2 2 L10 6 L2 10" fill="none" stroke="#505862" stroke-width="1.5"/></marker></defs>
+<rect width="1920" height="1080" fill="#fafafa"/>
+<rect x="35" y="145" width="1850" height="910" rx="18" fill="none" stroke="#66717e"/>
+
+<text x="65" y="185" text-anchor="start" class="">Job System</text>
+<rect x="110" y="35" width="320" height="75" rx="9" class="job"/>
+<text x="270" y="81.5" text-anchor="middle" class="">I/O Job</text>
+<rect x="1140" y="35" width="320" height="75" rx="9" class="job"/>
+<text x="1300" y="81.5" text-anchor="middle" class="">Job</text>
+<rect x="110" y="225" width="320" height="150" rx="9" class="pool"/>
+<text x="270" y="259" text-anchor="middle" class="">I/O Job Pool</text>
+<rect x="155" y="288" width="245" height="53" rx="9" class="job"/>
+<rect x="150" y="293" width="245" height="53" rx="9" class="job"/>
+<rect x="145" y="298" width="245" height="53" rx="9" class="job"/>
+<rect x="140" y="303" width="245" height="53" rx="9" class="job"/>
+<text x="262.5" y="338" text-anchor="middle" class="">I/O Job</text>
+<rect x="1140" y="225" width="320" height="150" rx="9" class="pool"/>
+<text x="1300" y="259" text-anchor="middle" class="">Incoming Job Pool</text>
+<rect x="1185" y="288" width="245" height="53" rx="9" class="job"/>
+<rect x="1180" y="293" width="245" height="53" rx="9" class="job"/>
+<rect x="1175" y="298" width="245" height="53" rx="9" class="job"/>
+<rect x="1170" y="303" width="245" height="53" rx="9" class="job"/>
+<text x="1292.5" y="338" text-anchor="middle" class="">Job</text>
+<rect x="650" y="255" width="270" height="90" rx="9" class="thread"/>
+<text x="785" y="309" text-anchor="middle" class="">I/O thread</text>
+<path d="M270 110 V225" class="edge"/>
+<text x="345" y="210" text-anchor="middle" class="label">queuing job</text>
+<path d="M1300 110 V225" class="edge"/>
+<text x="1378" y="210" text-anchor="middle" class="label">queuing job</text>
+<path d="M430 300 H650" class="edge"/>
+<text x="540" y="285" text-anchor="middle" class="label">dequeue</text>
+<rect x="96" y="409" width="1710" height="195" rx="10" class="boundary"/>
+<rect x="88" y="417" width="1710" height="195" rx="10" class="boundary"/>
+<rect x="80" y="425" width="1710" height="195" rx="10" class="boundary"/>
+<text x="105" y="460" text-anchor="start" class="">Per-worker resources</text>
+<rect x="130" y="490" width="280" height="90" rx="9" class="thread"/>
+<text x="270" y="544" text-anchor="middle" class="">Worker thread</text>
+<rect x="650" y="490" width="280" height="90" rx="9" class="fiber"/>
+<text x="790" y="544" text-anchor="middle" class="">Thread fiber</text>
+<rect x="1140" y="490" width="320" height="90" rx="9" class="fiber"/>
+<text x="1300" y="544" text-anchor="middle" class="">Background fiber</text>
+<path d="M410 535 H650" class="edge"/>
+<text x="530" y="518" text-anchor="middle" class="label">convert to fiber</text>
+<path d="M930 515 H1140" class="edge"/>
+<text x="1035" y="501" text-anchor="middle" class="label">start</text>
+<path d="M1140 555 H930" class="edge"/>
+<text x="1035" y="581" text-anchor="middle" class="label">stop</text>
+<path d="M1300 375 V490" class="edge"/>
+<text x="1410" y="398" text-anchor="middle" class="label">acquire a new job</text>
+<rect x="110" y="770" width="320" height="230" rx="9" class="pool"/>
+<text x="270" y="804" text-anchor="middle" class="">Ready Job Context Pool</text>
+<rect x="152" y="820" width="256" height="140" rx="9" class="context"/>
+<rect x="147" y="825" width="256" height="140" rx="9" class="context"/>
+<rect x="142" y="830" width="256" height="140" rx="9" class="context"/>
+<rect x="137" y="835" width="256" height="140" rx="9" class="context"/>
+<rect x="132" y="840" width="256" height="140" rx="9" class="context"/>
+<text x="260" y="870" text-anchor="middle" class="">JobContext</text>
+<rect x="150" y="882" width="220" height="40" rx="9" class="fiber"/>
+<text x="260" y="911" text-anchor="middle" class="">Worker Fiber</text>
+<rect x="150" y="930" width="220" height="40" rx="9" class="job"/>
+<text x="260" y="959" text-anchor="middle" class="">Paused Job</text>
+<rect x="580" y="770" width="320" height="230" rx="9" class="pool"/>
+<text x="740" y="804" text-anchor="middle" class="">Idle Job Context Pool</text>
+<rect x="622" y="820" width="256" height="140" rx="9" class="context"/>
+<rect x="617" y="825" width="256" height="140" rx="9" class="context"/>
+<rect x="612" y="830" width="256" height="140" rx="9" class="context"/>
+<rect x="607" y="835" width="256" height="140" rx="9" class="context"/>
+<rect x="602" y="840" width="256" height="140" rx="9" class="context"/>
+<text x="730" y="870" text-anchor="middle" class="">JobContext</text>
+<rect x="620" y="895" width="220" height="60" rx="9" class="fiber"/>
+<text x="730" y="934" text-anchor="middle" class="">Worker Fiber</text>
+<rect x="1100" y="750" width="320" height="230" rx="9" class="context"/>
+<rect x="1095" y="755" width="320" height="230" rx="9" class="context"/>
+<rect x="1090" y="760" width="320" height="230" rx="9" class="context"/>
+<rect x="1085" y="765" width="320" height="230" rx="9" class="context"/>
+<rect x="1080" y="770" width="320" height="230" rx="9" class="context"/>
+<text x="1240" y="804" text-anchor="middle" class="">JobContext</text>
+<rect x="1105" y="830" width="270" height="65" rx="9" class="fiber"/>
+<text x="1240" y="871.5" text-anchor="middle" class="">Worker Fiber</text>
+<rect x="1105" y="912" width="270" height="65" rx="9" class="job"/>
+<text x="1240" y="953.5" text-anchor="middle" class="">Running Job</text>
+<rect x="1550" y="750" width="320" height="230" rx="9" class="sync"/>
+<rect x="1545" y="755" width="320" height="230" rx="9" class="sync"/>
+<rect x="1540" y="760" width="320" height="230" rx="9" class="sync"/>
+<rect x="1535" y="765" width="320" height="230" rx="9" class="sync"/>
+<rect x="1530" y="770" width="320" height="230" rx="9" class="sync"/>
+<text x="1692.5" y="804" text-anchor="middle" class="compact">Synchronization primitive</text>
+<rect x="1567" y="826" width="251" height="157" rx="9" class="context"/>
+<text x="1692.5" y="855" text-anchor="middle" class="compact">Paused JobContext</text>
+<rect x="1582" y="867" width="221" height="46" rx="9" class="fiber"/>
+<text x="1692.5" y="899" text-anchor="middle" class="">Worker Fiber</text>
+<rect x="1582" y="925" width="221" height="46" rx="9" class="job"/>
+<text x="1692.5" y="957" text-anchor="middle" class="">Paused Job</text>
+<path d="M270 770 V660 H1160 V580" class="edge"/>
+<text x="650" y="649" text-anchor="middle" class="label">resume a paused job context</text>
+<path d="M740 770 V710 H1195 V580" class="edge"/>
+<text x="958" y="700" text-anchor="middle" class="label">acquire an idle job context</text>
+<path d="M1250 580 V750" class="edge"/>
+<text x="1317" y="741" text-anchor="middle" class="label">run / resume</text>
+<path d="M1375 750 V580" class="edge"/>
+<text x="1450" y="650" text-anchor="middle" class="label">wait / finish</text>
+<path d="M1080 885 H900" class="edge"/>
+<text x="990" y="871" text-anchor="middle" class="label">finish</text>
+<path d="M1420 885 H1530" class="edge"/>
+<text x="1475" y="871" text-anchor="middle" class="label">wait</text>
+<path d="M1692 1000 V1030 H270 V1000" class="edge"/>
+<text x="980" y="1022" text-anchor="middle" class="label">notify / wake</text>
+</svg>

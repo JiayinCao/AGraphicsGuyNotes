@@ -3,10 +3,13 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://agraphicsguynotes.com/</loc>
-    <lastmod>2026-06-07T00:00:00+00:00</lastmod>
+    <lastmod>2026-10-29T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://agraphicsguynotes.com/posts/building_a_fiber_based_job_system_from_scratch/</loc>
+    <lastmod>2026-10-29T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://agraphicsguynotes.com/posts/</loc>
-    <lastmod>2026-06-07T00:00:00+00:00</lastmod>
+    <lastmod>2026-10-29T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://agraphicsguynotes.com/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/</loc>
     <lastmod>2026-06-07T00:00:00+00:00</lastmod>

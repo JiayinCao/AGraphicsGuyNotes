@@ -6,8 +6,15 @@
     <description>Recent content on A Graphics Guy&#39;s Note</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 07 Jun 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 29 Oct 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://agraphicsguynotes.com/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Building a Fiber-Based Job System from Scratch</title>
+      <link>https://agraphicsguynotes.com/posts/building_a_fiber_based_job_system_from_scratch/</link>
+      <pubDate>Thu, 29 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://agraphicsguynotes.com/posts/building_a_fiber_based_job_system_from_scratch/</guid>
+      <description>&lt;p&gt;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&lt;/p&gt;&#xA;&lt;p&gt;About five years ago, I wrote a blog post explaining how fibers work at a low level&lt;sup class=&#34;ref-cite&#34; style=&#34;font-size: 0.7em; vertical-align: super; white-space: nowrap;&#34;&gt;&lt;a href=&#34;#ref-ref_tag__fiber&#34; style=&#34;text-decoration: none;&#34;&gt;[1]&lt;/a&gt;&lt;/sup&gt; and how they give programmers greater control over scheduling.&#xA;Since then, I have used fibers as the foundation for cooperative multithreading in both &lt;a href=&#34;https://sort-renderer.com/&#34;&gt;SORT&lt;/a&gt;, my offline renderer, and its asset build pipeline.&#xA;In this post, I want to share some of the design decisions behind this system and the flexibility it provides.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Procedural UV Derivatives Evaluation in SORT Renderer</title>
       <link>https://agraphicsguynotes.com/posts/procedural_uv_derivatives_evaluation_in_sort_renderer/</link>
