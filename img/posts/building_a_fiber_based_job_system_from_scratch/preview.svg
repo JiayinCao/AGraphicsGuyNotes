@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1008" viewBox="-100 -16.5 2120 1113" role="img" aria-labelledby="title desc">
 <title id="title">Fiber-based job system architecture</title>
 <desc id="desc">Jobs enter incoming pools. Each worker thread switches through its thread fiber to a background fiber. The scheduler acquires idle or ready job contexts, runs worker fibers, and returns finished contexts to the idle pool. Waiting contexts are tracked by synchronization primitives and become ready when notified. I/O jobs run on a dedicated thread.</desc>
 <style>
@@ -11,7 +11,7 @@ rect{stroke-width:1.8}
 .pool{fill:#f1f3f5;stroke:#66717e}.thread{fill:#d5e1ee;stroke:#426da7}.fiber{fill:#d6e8e2;stroke:#367e73}.job{fill:#f3e7cb;stroke:#946523}.context{fill:#eae4f2;stroke:#7351a0}.sync{fill:#f1e4e8;stroke:#a44d63}
 </style>
 <defs><marker id="arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto"><path d="M2 2 L10 6 L2 10" fill="none" stroke="#505862" stroke-width="1.5"/></marker></defs>
-<rect width="1920" height="1080" fill="#fafafa"/>
+<rect x="-100" y="-16.5" width="2120" height="1113" fill="#fafafa"/>
 <rect x="35" y="145" width="1850" height="910" rx="18" fill="none" stroke="#66717e"/>
 
 <text x="65" y="185" text-anchor="start" class="">Job System</text>
